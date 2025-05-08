@@ -1030,6 +1030,23 @@ WXD_EXPORTED int wxd_FileDialog_GetFilterIndex(wxd_FileDialog_t* self);
 // WXD_EXPORTED void wxd_FileDialog_SetWildcard(wxd_FileDialog_t* self, const char* wildCard);
 // WXD_EXPORTED void wxd_FileDialog_SetFilterIndex(wxd_FileDialog_t* self, int filterIndex);
 
+// --- wxTextEntryDialog ---
+typedef struct wxd_TextEntryDialog wxd_TextEntryDialog_t;
+
+WXD_EXPORTED wxd_TextEntryDialog_t* wxd_TextEntryDialog_Create(
+    wxd_Window_t* parent,
+    const char* message,
+    const char* caption,
+    const char* defaultValue,
+    wxd_Style_t style,
+    int x, int y,
+    int width, int height);
+
+WXD_EXPORTED int wxd_TextEntryDialog_GetValue(wxd_TextEntryDialog_t* self, char* buffer, int bufLen);
+
+// Setters (optional)
+// WXD_EXPORTED void wxd_TextEntryDialog_SetValue(wxd_TextEntryDialog_t* self, const char* value);
+
 #ifdef __cplusplus
 }
 

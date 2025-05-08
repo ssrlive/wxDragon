@@ -274,7 +274,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [x] `wxFileDialog`
     *   [ ] `wxColourDialog`
     *   [ ] `wxFontDialog`
-    *   [ ] `wxTextEntryDialog`
+    *   [x] `wxTextEntryDialog`
     *   [ ] `wxProgressDialog`
     *   [ ] `wxSplashScreen` (*Moved here, also related to Other*)
     *   [ ] `wxWizard` (*Moved here, also related to Other*)

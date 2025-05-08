@@ -15,21 +15,7 @@ pub mod sizers;
 pub mod widgets;
 pub mod window;
 
-// Use the sys crate aliased as ffi - REMOVED
-// use wxdragon_sys as ffi;
-
-// Basic type re-exports or wrappers
-// Remove direct ffi re-export for Point and Size, define in base.rs
-// pub use ffi::wxd_Point as Point;
-// pub use ffi::wxd_Size as Size;
-// Remove direct ffi re-export for Id, define type alias
-// pub use ffi::Id;
 pub type Id = i32; // Define Id as i32
-
-// Common Constant Definitions - REMOVED
-// Constants like ID_ANY are now generated in wx_constants.rs and included via ffi
-// pub const ID_ANY: Id = -1;
-// pub const ID_NONE: Id = -3;
 
 // Re-export the main entry point and handle
 pub use app::main;
@@ -342,6 +328,7 @@ pub mod prelude {
         ICON_INFORMATION, ICON_QUESTION, ICON_WARNING, NO, OK, YES, CENTRE
     };
     pub use crate::dialogs::Dialog;
+    pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
 }
 
 // REMOVED erroneous colour_picker_ctrl module declaration

@@ -23,6 +23,8 @@ const ID_CALENDAR_CTRL: Id = ID_HIGHEST + 15;
 const ID_SHOW_MESSAGE_DIALOG_BTN: Id = ID_HIGHEST + 16; // New ID for MessageDialog button
 const ID_OPEN_FILE_BTN: Id = ID_HIGHEST + 17; // New ID for Open File button
 const ID_SAVE_FILE_BTN: Id = ID_HIGHEST + 18; // New ID for Save File button
+const ID_GET_TEXT_BTN: Id = ID_HIGHEST + 19; // New ID for Get Text button
+const ID_GET_PASSWORD_BTN: Id = ID_HIGHEST + 20; // New ID for Get Password button
 
 #[derive(Debug, Default)]
 struct FrameData {
@@ -63,6 +65,10 @@ struct BasicTabControls {
     open_file_btn: Button,
     save_file_btn: Button,
     file_dialog_status_label: StaticText,
+    // Text Entry Dialog controls
+    get_text_btn: Button,
+    get_password_btn: Button,
+    text_entry_status_label: StaticText,
 }
 
 struct ListsTabControls {
@@ -366,10 +372,28 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .with_label("File Dialog Status: -")
         .build();
 
+    // ADDED: Buttons and Label for TextEntryDialog
+    let _text_entry_label = StaticText::builder(&basic_panel)
+        .with_label("Text Entry:")
+        .build();
+    let get_text_btn = Button::builder(&basic_panel)
+        .with_id(ID_GET_TEXT_BTN)
+        .with_label("Get Input...")
+        .build();
+    get_text_btn.set_tooltip("Click to show a text entry dialog.");
+    let get_password_btn = Button::builder(&basic_panel)
+        .with_id(ID_GET_PASSWORD_BTN)
+        .with_label("Get Password...")
+        .build();
+    get_password_btn.set_tooltip("Click to show a password entry dialog.");
+    let text_entry_status_label = StaticText::builder(&basic_panel)
+        .with_label("Text Entry Status: -")
+        .build();
+
     // --- Layout using Main Vertical BoxSizer and child FlexGridSizers ---
     let main_sizer = BoxSizer::builder(VERTICAL).build();
     let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
-    let control_flags = EXPAND | ALIGN_CENTER_VERTICAL;
+    let control_flags = EXPAND;
 
     // --- Group 1 in its own FlexGridSizer ---
     let grid_sizer_group1 = FlexGridSizer::builder(0, 2) // Use builder(rows, cols)
@@ -500,10 +524,18 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     let file_btns_sizer = BoxSizer::builder(HORIZONTAL).build();
     file_btns_sizer.add(&open_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
     file_btns_sizer.add(&save_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
-    grid_sizer_therest.add_sizer(&file_btns_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0); // Sizer for buttons
+    file_btns_sizer.add_spacer(10); // Add space before label
+    file_btns_sizer.add(&file_dialog_status_label, 1, EXPAND | ALL, 2); // Add label to this sizer and make it expand
+    grid_sizer_therest.add_sizer(&file_btns_sizer, 1, EXPAND, 0); // Add the horizontal sizer (buttons + label) to the grid, make it expand
 
-    grid_sizer_therest.add_spacer(0); // Empty cell in label column
-    grid_sizer_therest.add(&file_dialog_status_label, 1, EXPAND, 0); // Status label below buttons
+    // ADDED: TextEntryDialog buttons and status label to grid_sizer_therest
+    grid_sizer_therest.add(&_text_entry_label, 0, label_flags, 0);
+    let text_entry_btns_sizer = BoxSizer::builder(HORIZONTAL).build();
+    text_entry_btns_sizer.add(&get_text_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    text_entry_btns_sizer.add(&get_password_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    text_entry_btns_sizer.add_spacer(10); // Add space before label
+    text_entry_btns_sizer.add(&text_entry_status_label, 1, EXPAND | ALL, 2); // Add label to this sizer and make it expand
+    grid_sizer_therest.add_sizer(&text_entry_btns_sizer, 1, EXPAND, 0); // Add the horizontal sizer (buttons + label) to the grid, make it expand
 
     // --- Main Sizer for Basic Panel ---
     main_sizer.add_sizer(&grid_sizer_therest, 1, EXPAND | ALL, 10); // Add the rest of groups sizer to main
@@ -544,6 +576,10 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         open_file_btn: open_file_btn.clone(),
         save_file_btn: save_file_btn.clone(),
         file_dialog_status_label: file_dialog_status_label.clone(),
+        // Add text entry dialog controls
+        get_text_btn: get_text_btn.clone(),
+        get_password_btn: get_password_btn.clone(),
+        text_entry_status_label: text_entry_status_label.clone(),
     };
 
     // Event Handlers (Need to update clones if labels changed)
@@ -1827,6 +1863,70 @@ fn main() {
                     spin_ctrl_label_clone.set_label(&format!("Spin Value: {}", value));
                 }
             });
+
+        // --- ADDED: TextEntryDialog Button Handlers ---
+        let text_entry_status_label_clone = basic_controls.text_entry_status_label.clone(); // Clone for both handlers
+        let frame_clone_for_text_entry = frame.clone(); // Clone for both handlers
+
+        let status_label_text = text_entry_status_label_clone.clone(); // Clone again for this specific handler
+        let frame_parent_text = frame_clone_for_text_entry.clone(); // Clone again for this specific handler
+        basic_controls.get_text_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Get Text button clicked.");
+            use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+            use wxdragon::id;
+
+            let dialog = TextEntryDialog::builder(Some(&frame_parent_text), "Enter some text:", "Text Input")
+                .with_default_value("Hello there")
+                .build(); // Uses default style (OK | CANCEL | CENTRE)
+            
+            let result = dialog.show_modal();
+            if result == id::ID_OK {
+                if let Some(value) = dialog.get_value() {
+                    let status = format!("Entered: {}", value);
+                    println!("{}", status);
+                    status_label_text.set_label(&status);
+                } else {
+                    let status = "Text Entry Error: Could not get value".to_string();
+                    println!("{}", status);
+                    status_label_text.set_label(&status);
+                }
+            } else {
+                let status = "Text Entry Cancelled".to_string();
+                println!("{}", status);
+                status_label_text.set_label(&status);
+            }
+        });
+
+        let status_label_pass = text_entry_status_label_clone.clone(); // Clone again for this specific handler
+        let frame_parent_pass = frame_clone_for_text_entry.clone(); // Clone again for this specific handler
+        basic_controls.get_password_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Get Password button clicked.");
+            use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+            use wxdragon::id;
+
+            let dialog = TextEntryDialog::builder(Some(&frame_parent_pass), "Enter password:", "Password Input")
+                .password() // Add password style
+                .build(); 
+            
+            let result = dialog.show_modal();
+            if result == id::ID_OK {
+                if let Some(value) = dialog.get_value() {
+                    // Mask password for display
+                    let masked_value = "*".repeat(value.len());
+                    let status = format!("Password Entered (masked): {}", masked_value);
+                    println!("Entered password length: {}", value.len());
+                    status_label_pass.set_label(&status);
+                } else {
+                    let status = "Password Entry Error: Could not get value".to_string();
+                    println!("{}", status);
+                    status_label_pass.set_label(&status);
+                }
+            } else {
+                let status = "Password Entry Cancelled".to_string();
+                println!("{}", status);
+                status_label_pass.set_label(&status);
+            }
+        });
 
         // --- Final Steps ---
         // Show and center the frame
