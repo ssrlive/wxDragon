@@ -11,6 +11,6 @@ keywords = ["wxwidgets", "gui", "ui", "cross-platform", "bindings"]
 categories = ["gui", "api-bindings"] # Already good
 
 [dependencies]
-wxdragon-sys = "0.1.0"
+wxdragon-sys = { path = "../../rust/wxdragon-sys" } 
 # Add other dependencies as needed (e.g., for advanced event handling)
 lazy_static = "1.4.0" 

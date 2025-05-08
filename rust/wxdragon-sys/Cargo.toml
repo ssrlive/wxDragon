@@ -25,7 +25,4 @@ bzip2 = "0.4"         # For decompressing .bz2 archives (used by wxWidgets tarba
 # Removed: cc, walkdir, shlex, cargo-emit (can be re-added if a specific need arises)
 
 [features]
-default = [] 
-# Consider features if you need to support different wxWidgets versions or configurations,
-# e.g., vendored vs. system, different wx modules, etc.
-# Example: `wxwidgets_3_2_4 = []` 
+default = []
