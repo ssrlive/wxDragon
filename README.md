@@ -2,6 +2,56 @@
 
 This project creates a manually crafted C wrapper around the wxWidgets C++ GUI library. The primary goal is to expose a stable C API that can be consumed by `bindgen` to generate unsafe Rust bindings (`-sys` crate), which are then used to build safe, idiomatic Rust wrappers.
 
+## Screenshot
+
+![Screenshot](https://raw.githubusercontent.com/AllenDang/wxDragon/refs/heads/main/asset/screenshot.png)
+
+## Usage
+
+Add *wxdragon* to your Cargo.toml.
+
+```rust
+use wxdragon::prelude::*;
+
+fn main() {
+    wxdragon::main(|handle: &mut WxdAppHandle| {
+        let frame = Frame::builder()
+            .with_title("Hello, World!")
+            .with_size(Size::new(300, 200))
+            .build();
+
+        let sizer = BoxSizer::builder(VERTICAL).build();
+
+        let button = Button::builder(&frame)
+            .with_label("Click me")
+            .build();
+
+        button.bind(EventType::COMMAND_BUTTON_CLICKED, |_| {
+            println!("Button clicked");
+        });
+
+        sizer.add(&button, 1, ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL, 0);
+
+        frame.set_sizer(sizer, true);
+
+        frame.show(true);
+        frame.centre();
+
+        handle.preserve(frame.clone());
+
+        true
+    });
+}
+```
+
+## Supported Platforms
+
+| Platform | Support                                                      |
+| -------- | ------------------------------------------------------------ |
+| macOS    | Static Build + Cross build to Windows via gnu                |
+| Windows  | Not yet (I don't have a windows machine, need help to update the build.rs to support) |
+| Linux    | Not yet (I don't have a linux machine, need help to update the build.rs to support) |
+
 ## Approach
 
 1.  **C API:** Define a C API (`rust/wxdragon-sys/cpp/include/wxdragon.h`) using opaque pointers for wxWidgets objects and C functions to interact with them. Uses stable C types for flags/constants and `const char*` for strings.
