@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    # "rust/wxdragon-sys", # Temporarily commented out for publishing wxdragon
+    "rust/wxdragon-sys",
     "rust/wxdragon",
     "examples/rust/minimal_rust",
     "examples/rust/simple"
