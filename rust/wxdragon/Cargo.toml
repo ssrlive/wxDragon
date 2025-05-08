@@ -7,7 +7,7 @@ description = "Safe Rust bindings for wxWidgets via the wxDragon C wrapper"
 license.workspace = true
 repository.workspace = true
 readme = "README.md"
-keywords = ["wxwidgets", "gui", "ui", "cross-platform", "bindings", "wx"] # Added "wx"
+keywords = ["wxwidgets", "gui", "ui", "cross-platform", "bindings"]
 categories = ["gui", "api-bindings"] # Already good
 
 [dependencies]
