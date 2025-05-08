@@ -2,22 +2,23 @@
 members = [
     "rust/wxdragon-sys",
     "rust/wxdragon",
-    "examples/rust/minimal_rust"
+    "examples/rust/minimal_rust",
+    "examples/rust/simple"
     # Add other examples if they are separate crates
 ]
 
 resolver = "2" # Keep resolver = "2"
 
 [workspace.package]
-authors = ["Allen Dang <allengnr@gmail.com>"] # FIXME: Update with your actual authors
+authors = ["Allen Dang <allengnr@gmail.com>"] #
 version = "0.1.0" # This will be the default version for workspace members
 edition = "2021"
 license = "MIT OR Apache-2.0" # Or your chosen license (e.g., "MIT")
-repository = "https://github.com/your_username/wxdragon" # FIXME: Update with your repo URL
+repository = "https://github.com/AllenDang/wxDragon"
 description = "Cross-platform GUI development with wxWidgets and Rust."
 keywords = ["gui", "wxwidgets", "ui", "cross-platform"]
 categories = ["gui", "external-ffi-bindings"]
-# readme = "README.md" # Consider adding if you have a good workspace-level README
+readme = "README.md" # Consider adding if you have a good workspace-level README
 
 [workspace.dependencies]
 # Common dependencies for wxdragon and examples could go here if needed,

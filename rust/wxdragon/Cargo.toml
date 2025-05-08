@@ -1,12 +1,14 @@
 [package]
 name = "wxdragon"
-version = "0.1.0"
-edition = "2021"
-authors = ["Your Name <you@example.com>"] # TODO: Replace with actual author info
+version.workspace = true
+edition.workspace = true # Technically, edition is often set directly or defaults, but workspace can define it.
+authors.workspace = true
 description = "Safe Rust bindings for wxWidgets via the wxDragon C wrapper"
-license = "MIT OR Apache-2.0" # Choose appropriate license(s)
-repository = "https://github.com/your/repository" # TODO: Replace with actual repo URL
+license.workspace = true
+repository.workspace = true
 readme = "README.md"
+keywords = ["wxwidgets", "gui", "ui", "cross-platform", "bindings", "wx"] # Added "wx"
+categories = ["gui", "api-bindings"] # Already good
 
 [dependencies]
 wxdragon-sys = { path = "../wxdragon-sys" }

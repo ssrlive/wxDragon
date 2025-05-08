@@ -8,6 +8,8 @@ description = "Raw FFI bindings to libwxdragon (which statically links wxWidgets
 license.workspace = true
 repository.workspace = true
 readme = "README.md" # Ensure this file exists
+keywords = ["ffi", "wxwidgets", "gui", "native", "bindings"]
+categories = ["external-ffi-bindings", "gui", "development-tools::ffi"]
 build = "build.rs"
 links = "wxdragon" # Crucial: Signals to Cargo this crate builds/links libwxdragon
 
