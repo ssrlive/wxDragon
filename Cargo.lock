@@ -766,7 +766,6 @@ version = "0.1.0"
 dependencies = [
  "image",
  "wxdragon",
- "wxdragon-sys",
 ]
 
 [[package]]
@@ -1713,6 +1712,8 @@ dependencies = [
 [[package]]
 name = "wxdragon-sys"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78aad1cfc9c608ee5156bfa3ea595a9461ef128a9c0240993895a287cab4cfbf"
 dependencies = [
  "bindgen",
  "bzip2",

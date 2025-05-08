@@ -11,6 +11,6 @@ keywords = ["wxwidgets", "gui", "ui", "cross-platform", "bindings", "wx"] # Adde
 categories = ["gui", "api-bindings"] # Already good
 
 [dependencies]
-wxdragon-sys = { path = "../wxdragon-sys" }
+wxdragon-sys = "0.1.0"
 # Add other dependencies as needed (e.g., for advanced event handling)
 lazy_static = "1.4.0" 
