@@ -1,4 +1,4 @@
-# wxDragon - A C Wrapper for wxWidgets (for Rust Bindings)
+# wxDragon - A Rust Wrapper for wxWidgets
 
 This project creates a manually crafted C wrapper around the wxWidgets C++ GUI library. The primary goal is to expose a stable C API that can be consumed by `bindgen` to generate unsafe Rust bindings (`-sys` crate), which are then used to build safe, idiomatic Rust wrappers.
 
