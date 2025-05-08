@@ -2,7 +2,7 @@
 
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use wxdragon_sys as ffi;
@@ -102,7 +102,7 @@ impl<'a> RadioButtonBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             label: String::new(),
             pos: None,
             size: None,

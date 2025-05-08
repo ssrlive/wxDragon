@@ -337,3 +337,4 @@ pub const WXD_BK_TOP: i64 = 16;
 pub const WXD_BK_BOTTOM: i64 = 32;
 pub const WXD_BK_LEFT: i64 = 64;
 pub const WXD_BK_RIGHT: i64 = 128;
+pub const WXD_CENTRE: i64 = 1;

@@ -2,7 +2,7 @@
 
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -200,7 +200,7 @@ impl<'a> ListBoxBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             pos: None,
             size: None,
             style: 0, // Default style (i64)

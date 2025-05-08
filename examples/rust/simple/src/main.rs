@@ -9,15 +9,18 @@ fn main() {
 
         let sizer = BoxSizer::builder(VERTICAL).build();
 
-        let button = Button::builder(&frame)
-            .with_label("Click me")
-            .build();
+        let button = Button::builder(&frame).with_label("Click me").build();
 
         button.bind(EventType::COMMAND_BUTTON_CLICKED, |_| {
             println!("Button clicked");
         });
 
-        sizer.add(&button, 1, ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL, 0);
+        sizer.add(
+            &button,
+            1,
+            ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL,
+            0,
+        );
 
         frame.set_sizer(sizer, true);
 

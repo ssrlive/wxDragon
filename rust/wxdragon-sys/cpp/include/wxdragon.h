@@ -969,6 +969,21 @@ WXD_EXPORTED wxd_CommandLinkButton_t* wxd_CommandLinkButton_Create(
 WXD_EXPORTED void wxd_CommandLinkButton_SetNote(wxd_CommandLinkButton_t* self, const char* note);
 // No GetNote is explicitly exposed here, as it's less common. If needed, it can be added later.
 
+// Opaque struct for wxDialog
+typedef struct wxd_Dialog wxd_Dialog;
+
+// wxDialog
+WXD_EXPORTED int wxd_Dialog_ShowModal(wxd_Dialog* self);
+// Note: Creation and Destruction will be handled by derived dialog classes or generic wxd_Window_Destroy.
+
+// wxMessageDialog
+typedef struct wxd_MessageDialog wxd_MessageDialog; // Forward declaration
+
+// wxMessageDialog
+WXD_EXPORTED wxd_MessageDialog* wxd_MessageDialog_Create(wxd_Window_t* parent, const char* message, const char* caption, long style);
+// Note: ShowModal is via wxd_Dialog_ShowModal((wxd_Dialog*)dialog)
+// Note: Destruction handled by wxd_Window_Destroy((wxd_Window_t*)dialog)
+
 #ifdef __cplusplus
 }
 #endif

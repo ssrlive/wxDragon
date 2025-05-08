@@ -92,7 +92,7 @@ impl<'a> CalendarCtrlBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: crate::id::WXD_ID_ANY as Id, // Use WXD_ID_ANY (i64) cast to Id (i32)
+            id: crate::id::ID_ANY as Id, // Corrected usage
             initial_date: None,
             pos: Point { x: -1, y: -1 }, // Standard default
             size: Size {

@@ -479,6 +479,9 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxBK_BOTTOM", wxBK_BOTTOM});
     constants_to_extract.push_back({"wxBK_LEFT", wxBK_LEFT});
     constants_to_extract.push_back({"wxBK_RIGHT", wxBK_RIGHT});
+
+    // Dialogs
+    constants_to_extract.push_back({"wxCENTRE", wxCENTRE});
     
 
     // Add more constants as needed

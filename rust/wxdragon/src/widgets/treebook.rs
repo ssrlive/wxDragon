@@ -1,6 +1,6 @@
 use crate::base::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::WxWidget;
 use std::ffi::CString;
 use wxdragon_sys as ffi; // Ensure ffi is in scope for constants
@@ -172,7 +172,7 @@ impl<'a> TreebookBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             pos: None,
             size: None,
             style: BK_DEFAULT,

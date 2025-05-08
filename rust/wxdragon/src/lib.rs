@@ -7,8 +7,10 @@ pub mod base;
 pub mod bitmap;
 pub mod datetime;
 pub mod defs;
+pub mod dialogs;
 pub mod event;
 pub mod id;
+pub mod menus;
 pub mod sizers;
 pub mod widgets;
 pub mod window;
@@ -94,7 +96,6 @@ pub use crate::widgets::list_ctrl::{
 };
 
 // --- ADDED: Menus Module ---
-pub mod menus;
 pub use menus::{ItemKind, Menu, MenuBar, MenuItem};
 
 // ADDED: Re-export ArtProvider and its constants
@@ -110,6 +111,10 @@ pub use art_provider::{
     ART_QUESTION, ART_QUIT, ART_REDO, ART_REMOVABLE, ART_REPORT_VIEW, ART_TICK_MARK, ART_TIP,
     ART_TOOLBAR, ART_UNDO, ART_WARNING,
 };
+
+// --- ADDED: Dialogs ---
+pub use dialogs::message_dialog::{MessageDialog, MessageDialogBuilder};
+pub use dialogs::Dialog;
 
 // ADDED: Re-export Treebook
 pub use widgets::treebook::{Treebook, TreebookBuilder};
@@ -330,6 +335,13 @@ pub mod prelude {
 
     // ADDED: Re-export ScrollBar
     pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERTICAL};
+
+    // ADDED: Dialog and MessageDialog
+    pub use crate::dialogs::message_dialog::{
+        MessageDialog, MessageDialogBuilder, CANCEL, ICON_ERROR, ICON_EXCLAMATION, ICON_HAND,
+        ICON_INFORMATION, ICON_QUESTION, ICON_WARNING, NO, OK, YES, CENTRE
+    };
+    pub use crate::dialogs::Dialog;
 }
 
 // REMOVED erroneous colour_picker_ctrl module declaration

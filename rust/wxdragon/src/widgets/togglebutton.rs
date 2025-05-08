@@ -1,7 +1,7 @@
 // ! Safe wrapper for wxToggleButton.
 
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -125,7 +125,7 @@ impl<'a> ToggleButtonBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             label: String::new(),
             pos: None,
             size: None,

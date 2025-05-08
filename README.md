@@ -197,7 +197,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxHyperlinkCtrl`
         *   [x] `wxActivityIndicator`
         *   [ ] `wxAnimationCtrl`
-        *   [ ] `wxCommandLinkButton`
+        *   [x] `wxCommandLinkButton`
     *   **Choices/Lists:**
         *   [x] `wxChoice`
         *   [x] `wxComboBox`
@@ -297,7 +297,7 @@ When implementing any new feature (widget, sizer, event, etc.), prioritize safet
     . Add a corresponding constant to the Rust `EventType` enum in `rust/wxdragon/src/event.rs`.
 . **Other Constants (Styles, IDs, Flags) - For Maintainers:**
     . Identify needed `wxXXX` constants (e.g., `wxTAB_TRAVERSAL`, `wxLB_SORT`, `wxID_OK`).
-    . Add their C++ names (e.g., "wxTAB_TRAVERSAL", "wxLB_SORT") to the `constants_to_extract` vector in `tools/const_extractor/main.cpp`.
+    . Add their C++ names (e.g., "wxTAB_TRAVERSAL", "wxLB_SORT") to the `constants_to_extract` vector in `rust/wxdragon-sys/cpp/tools/const_extractor/main.cpp`.
     . **Generation Process (Maintainer Task):**
         1. For each target platform (e.g., Windows, Linux, macOS), build wxWidgets and the `const_extractor` tool for that platform.
         2. Run the compiled `const_extractor` against that platform's wxWidgets build.

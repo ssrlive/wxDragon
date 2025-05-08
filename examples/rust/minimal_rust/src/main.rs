@@ -1,38 +1,33 @@
-use wxdragon::prelude::*; // Use prelude for imports
+use wxdragon::id;
+use wxdragon::prelude::*; // Use prelude for imports // For ID_OK, ID_CANCEL etc.
 
-use std::cell::RefCell; // Keep specific std imports
-use std::fmt::Write; // For write! macro
-                     // use std::rc::Rc; // REMOVE Rc import
 use image::GenericImageView;
-use wxdragon::Bitmap; // Import Bitmap directly // For image crate
+use std::cell::RefCell;
+use std::fmt::Write;
+use wxdragon::Bitmap;
 
-// Define IDs for custom ToolBar tools (excluding Exit)
 const ID_TOOL_NEW: Id = ID_HIGHEST + 1;
 const ID_TOOL_OPEN: Id = ID_HIGHEST + 2;
 const ID_TOOL_SAVE: Id = ID_HIGHEST + 3;
-// const ID_TOOL_EXIT: Id = ID_HIGHEST + 4; // REMOVED: Use standard ID_EXIT
-
-// Define IDs for other controls
 const ID_BITMAP_BTN_RED: Id = ID_HIGHEST + 5;
 const ID_BITMAP_BTN_ART: Id = ID_HIGHEST + 6;
 const ID_LIST_CTRL: Id = ID_HIGHEST + 7;
-const ID_SEARCH_CTRL: Id = ID_HIGHEST + 8; // Corrected ID definition
-const ID_BITMAP_COMBO_BOX: Id = ID_HIGHEST + 9; // Keep or define appropriately elsewhere
-const ID_HYPERLINK_CTRL: Id = ID_HIGHEST + 10; // ADDED ID for HyperlinkCtrl
-const ID_ACTIVITY_INDICATOR: Id = ID_HIGHEST + 11; // ADDED ID
-const ID_ACTIVITY_START_BTN: Id = ID_HIGHEST + 12; // ADDED ID
-const ID_ACTIVITY_STOP_BTN: Id = ID_HIGHEST + 13; // ADDED ID
-const ID_SPINCTRLDOUBLE: Id = ID_HIGHEST + 14; // ADDED ID
-const ID_CALENDAR_CTRL: Id = ID_HIGHEST + 15; // ADDED ID for CalendarCtrl
+const ID_SEARCH_CTRL: Id = ID_HIGHEST + 8;
+const ID_BITMAP_COMBO_BOX: Id = ID_HIGHEST + 9;
+const ID_HYPERLINK_CTRL: Id = ID_HIGHEST + 10;
+const ID_ACTIVITY_INDICATOR: Id = ID_HIGHEST + 11;
+const ID_ACTIVITY_START_BTN: Id = ID_HIGHEST + 12;
+const ID_ACTIVITY_STOP_BTN: Id = ID_HIGHEST + 13;
+const ID_SPINCTRLDOUBLE: Id = ID_HIGHEST + 14;
+const ID_CALENDAR_CTRL: Id = ID_HIGHEST + 15;
+const ID_SHOW_MESSAGE_DIALOG_BTN: Id = ID_HIGHEST + 16; // New ID for MessageDialog button
 
-// Define a simple struct for user data
 #[derive(Debug, Default)]
 struct FrameData {
     click_count: u32,
     message: String,
 }
 
-// --- Structs to return controls from tab creation functions ---
 struct BasicTabControls {
     panel: Panel,
     text_ctrl: TextCtrl,
@@ -44,25 +39,25 @@ struct BasicTabControls {
     toggle_button: ToggleButton,
     toggle_status_label: StaticText,
     bitmap_button: BitmapButton,
-    art_button: BitmapButton,              // ADDED
-    radio_box: RadioBox,                   // ADDED RadioBox
-    bitmap_combo_box: BitmapComboBox,      // ADDED BitmapComboBox
-    colour_picker: ColourPickerCtrl,       // ADDED ColourPickerCtrl
-    colour_label: StaticText,              // ADDED Label for colour
-    date_picker: DatePickerCtrl,           // ADDED DatePickerCtrl
-    date_picker_label: StaticText,         // ADDED Label for date
-    search_ctrl: SearchCtrl,               // REVERTED: Store SearchCtrl directly
-    hyperlink_ctrl: HyperlinkCtrl,         // ADDED HyperlinkCtrl
-    activity_indicator: ActivityIndicator, // ADDED
-    activity_start_btn: Button,            // ADDED
-    activity_stop_btn: Button,             // ADDED
-    spinctrl_double: SpinCtrlDouble,       // ADDED
-    spinctrl_double_label: StaticText,     // ADDED
-    calendar_ctrl: CalendarCtrl,           // ADDED
-    calendar_label: StaticText,            // ADDED
-    scroll_bar: ScrollBar,                 // ADDED ScrollBar
-    scrollbar_status_label: StaticText,    // ADDED ScrollBar status label
-    cmd_link_button: CommandLinkButton,    // ADDED
+    art_button: BitmapButton,
+    radio_box: RadioBox,
+    bitmap_combo_box: BitmapComboBox,
+    colour_picker: ColourPickerCtrl,
+    colour_label: StaticText,
+    date_picker: DatePickerCtrl,
+    date_picker_label: StaticText,
+    search_ctrl: SearchCtrl,
+    hyperlink_ctrl: HyperlinkCtrl,
+    activity_indicator: ActivityIndicator,
+    activity_start_btn: Button,
+    activity_stop_btn: Button,
+    spinctrl_double: SpinCtrlDouble,
+    spinctrl_double_label: StaticText,
+    calendar_ctrl: CalendarCtrl,
+    calendar_label: StaticText,
+    scroll_bar: ScrollBar,
+    scrollbar_status_label: StaticText,
+    cmd_link_button: CommandLinkButton,
 }
 
 struct ListsTabControls {
@@ -75,8 +70,8 @@ struct ListsTabControls {
     choice_status_label: StaticText,
     combo_box: ComboBox,
     combo_status_label: StaticText,
-    list_ctrl: ListCtrl,                // ADDED
-    list_ctrl_status_label: StaticText, // ADDED
+    list_ctrl: ListCtrl,
+    list_ctrl_status_label: StaticText,
 }
 
 struct AdvancedTabControls {
@@ -98,31 +93,25 @@ struct DataTabControls {
     data_display_label: StaticText,
 }
 
-// ADDED: Struct for Treebook tab controls
 struct BookControlsTab {
-    tab_panel: Panel, // The main panel for this tab in the notebook
+    tab_panel: Panel,
     treebook: Treebook,
-    // We might hold onto the page panels if we need to interact with them later,
-    // but for a simple display, just the treebook might be enough.
 }
-
-// --- Tab Creation Functions ---
 
 fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     let basic_panel = Panel::builder(notebook).with_style(TAB_TRAVERSAL).build();
 
     // --- Create Controls ---
-    // Group 1: Text Input and Spinners
     let static_text = StaticText::builder(&basic_panel)
         .with_label("Text Input:")
         .build();
-    static_text.set_tooltip("This is a label for the text input field."); // Set tooltip for StaticText
+    static_text.set_tooltip("This is a label for the text input field.");
     let text_ctrl = TextCtrl::builder(&basic_panel)
         .with_value("0")
         .with_id(115)
         .with_style(TE_PROCESS_ENTER)
         .build();
-    text_ctrl.set_tooltip("Enter a numeric value here. Press Enter to update the SpinButton."); // Set tooltip for TextCtrl
+    text_ctrl.set_tooltip("Enter a numeric value here. Press Enter to update the SpinButton.");
     let spin_button_label = StaticText::builder(&basic_panel)
         .with_label("Spin Button:")
         .build();
@@ -132,7 +121,7 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .with_initial_value(0)
         .with_style(SP_VERTICAL | SP_ARROW_KEYS | SP_WRAP)
         .with_size(Size::new(-1, 28))
-        .build(); // Keep specific size for vertical
+        .build();
     let spinctrl_double_label_widget = StaticText::builder(&basic_panel)
         .with_label("Spin Double:")
         .build();
@@ -146,9 +135,8 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     spinctrl_double.set_digits(2);
     let spinctrl_double_status_label = StaticText::builder(&basic_panel)
         .with_label(&format!("{:.2}", spinctrl_double.get_value()))
-        .build(); // Separate status label
+        .build();
 
-    // Group 2: CheckBox and RadioButtons
     let checkbox_label_widget = StaticText::builder(&basic_panel)
         .with_label("Checkbox:")
         .build();
@@ -160,13 +148,12 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .build();
     let radio_box_choices = ["Choice X", "Choice Y", "Choice Z"];
     let radio_box = RadioBox::builder(Some(&basic_panel), &radio_box_choices)
-        .with_label("") // Label is provided by static text
+        .with_label("")
         .with_id(120)
         .with_major_dimension(1)
         .with_style(RA_SPECIFY_COLS)
         .build();
     radio_box.set_selection(0);
-    // RadioButtons (alternative to RadioBox)
     let radio_label = StaticText::builder(&basic_panel)
         .with_label("Radio Buttons:")
         .build();
@@ -191,9 +178,9 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .with_label("Toggle Status")
         .build();
     toggle_button.set_value(true);
-    let toggle_status_label = StaticText::builder(&basic_panel).with_label("ON").build(); // Simpler status
+    let toggle_status_label = StaticText::builder(&basic_panel).with_label("ON").build();
 
-    // ADDED: CommandLinkButton
+    // CommandLinkButton
     let cmd_link_button_label = StaticText::builder(&basic_panel)
         .with_label("Cmd Link Btn:")
         .build();
@@ -346,16 +333,23 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .with_label(&format!("{}", scroll_bar.thumb_position()))
         .build();
 
+    // ADDED: Button to show MessageDialog
+    let _show_msg_dialog_label = StaticText::builder(&basic_panel) // Prefixed with _
+        .with_label("Message Dialog:")
+        .build();
+    let show_msg_dialog_btn = Button::builder(&basic_panel)
+        .with_id(ID_SHOW_MESSAGE_DIALOG_BTN)
+        .with_label("Show Info")
+        .build();
+    show_msg_dialog_btn.set_tooltip("Click to show an informational message dialog.");
+
     // --- Layout using Main Vertical BoxSizer and child FlexGridSizers ---
     let main_sizer = BoxSizer::builder(VERTICAL).build();
-
-    // Common flags for FlexGridSizer items
-    let label_flags = ALIGN_LEFT | ALIGN_CENTER_VERTICAL;
-    let control_flags = EXPAND;
-    let control_flags_no_expand = ALIGN_LEFT | ALIGN_CENTER_VERTICAL;
+    let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
+    let control_flags = EXPAND | ALIGN_CENTER_VERTICAL;
 
     // --- Group 1 in its own FlexGridSizer ---
-    let grid_sizer_group1 = FlexGridSizer::builder(0, 2)
+    let grid_sizer_group1 = FlexGridSizer::builder(0, 2) // Use builder(rows, cols)
         .with_vgap(5)
         .with_hgap(5)
         .build();
@@ -366,7 +360,7 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     grid_sizer_group1.add(&text_ctrl, 1, control_flags, 0);
 
     grid_sizer_group1.add(&spin_button_label, 0, label_flags, 0);
-    grid_sizer_group1.add(&spin_button, 0, control_flags_no_expand, 0);
+    grid_sizer_group1.add(&spin_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_group1.add(&spinctrl_double_label_widget, 0, label_flags, 0);
     let spin_double_sizer = BoxSizer::builder(HORIZONTAL).build();
@@ -384,7 +378,7 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     main_sizer.add(&static_line_sep1, 0, EXPAND | ALL, 5); // Add line to main_sizer
 
     // --- Groups 2, 3, 4, 5 in another FlexGridSizer ---
-    let grid_sizer_therest = FlexGridSizer::builder(0, 2)
+    let grid_sizer_therest = FlexGridSizer::builder(0, 2) // Use builder(rows, cols)
         .with_vgap(5)
         .with_hgap(5)
         .build();
@@ -412,14 +406,14 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     let toggle_sizer = BoxSizer::builder(HORIZONTAL).build();
     toggle_sizer.add(&toggle_button, 0, ALIGN_CENTER_VERTICAL, 0);
     toggle_sizer.add_spacer(5);
-    toggle_sizer.add(&toggle_status_label, 1, EXPAND, 0); // Removed ALIGN_CENTER_VERTICAL
-    grid_sizer_therest.add_sizer(&toggle_sizer, 1, control_flags_no_expand, 0);
+    toggle_sizer.add(&toggle_status_label, 1, EXPAND, 0);
+    grid_sizer_therest.add_sizer(&toggle_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_therest.add(&bitmap_button_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&bitmap_button, 0, control_flags_no_expand, 0);
+    grid_sizer_therest.add(&bitmap_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_therest.add(&art_button_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&art_button, 0, control_flags_no_expand, 0);
+    grid_sizer_therest.add(&art_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_therest.add(&activity_label, 0, label_flags, 0);
     let activity_sizer = BoxSizer::builder(HORIZONTAL).build();
@@ -443,22 +437,22 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     let colour_sizer = BoxSizer::builder(HORIZONTAL).build();
     colour_sizer.add(&colour_picker, 0, ALIGN_CENTER_VERTICAL, 0);
     colour_sizer.add_spacer(5);
-    colour_sizer.add(&colour_status_label, 1, EXPAND, 0); // Removed ALIGN_CENTER_VERTICAL
-    grid_sizer_therest.add_sizer(&colour_sizer, 1, control_flags_no_expand, 0);
+    colour_sizer.add(&colour_status_label, 1, EXPAND, 0);
+    grid_sizer_therest.add_sizer(&colour_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_therest.add(&date_picker_label_widget, 0, label_flags, 0);
     let date_sizer = BoxSizer::builder(HORIZONTAL).build();
     date_sizer.add(&date_picker, 0, ALIGN_CENTER_VERTICAL, 0);
     date_sizer.add_spacer(5);
-    date_sizer.add(&date_picker_status_label, 1, EXPAND, 0); // Removed ALIGN_CENTER_VERTICAL
-    grid_sizer_therest.add_sizer(&date_sizer, 1, control_flags_no_expand, 0);
+    date_sizer.add(&date_picker_status_label, 1, EXPAND, 0);
+    grid_sizer_therest.add_sizer(&date_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     grid_sizer_therest.add(&calendar_label_widget, 0, label_flags, 0);
     let calendar_sizer = BoxSizer::builder(HORIZONTAL).build();
     calendar_sizer.add(&calendar_ctrl, 1, EXPAND, 0);
     calendar_sizer.add_spacer(5);
-    calendar_sizer.add(&calendar_status_label, 1, EXPAND, 0); // Removed ALIGN_CENTER_VERTICAL
-    grid_sizer_therest.add_sizer(&calendar_sizer, 1, control_flags_no_expand, 0);
+    calendar_sizer.add(&calendar_status_label, 1, EXPAND, 0);
+    grid_sizer_therest.add_sizer(&calendar_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     // Group 5: Other Controls
     grid_sizer_therest.add(&search_ctrl_label, 0, label_flags, 0);
@@ -468,11 +462,15 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     grid_sizer_therest.add(&bitmap_combo_box, 1, control_flags, 0);
 
     grid_sizer_therest.add(&hyperlink_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&hyperlink_ctrl, 1, control_flags_no_expand, 0);
+    grid_sizer_therest.add(&hyperlink_ctrl, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
 
     // ADDED: CommandLinkButton to grid_sizer_therest
     grid_sizer_therest.add(&cmd_link_button_label, 0, label_flags, 0);
     grid_sizer_therest.add(&cmd_link_button, 1, control_flags, 0); // Expands
+
+    // ADDED: MessageDialog button and label to grid_sizer_therest
+    grid_sizer_therest.add(&_show_msg_dialog_label, 0, label_flags, 0);
+    grid_sizer_therest.add(&show_msg_dialog_btn, 1, control_flags, 0); // Expands
 
     main_sizer.add_sizer(&grid_sizer_therest, 1, EXPAND | ALL, 10); // Add the rest of groups sizer to main, proportion 1 to take space
 
@@ -507,7 +505,7 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         calendar_label: calendar_status_label.clone(), // Use status label
         scroll_bar,                                    // ADDED
         scrollbar_status_label,                        // ADDED
-        cmd_link_button: cmd_link_button.clone(), // ADDED
+        cmd_link_button: cmd_link_button.clone(),      // ADDED
     };
 
     // Event Handlers (Need to update clones if labels changed)
@@ -696,6 +694,28 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
             println!("CommandLinkButton clicked. MainLabel: '{}', Note: (not directly gettable from API yet)", cmd_link_button_clone.get_label());
         },
     );
+
+    // Bind event for the message dialog button
+    let basic_panel_clone_for_dialog = basic_panel.clone(); // Clone for use in closure
+    show_msg_dialog_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+        println!("Show Message Dialog button clicked via dedicated button.");
+        let dialog = MessageDialog::builder(
+            Some(&basic_panel_clone_for_dialog),
+            "This is a wxMessageDialog shown from a dedicated button click.",
+            "wxDragon Message",
+        )
+        .with_style(OK | ICON_INFORMATION | CENTRE)
+        .build();
+        let result = dialog.show_modal();
+        println!("MessageDialog closed with result: {}", result);
+        match result {
+            id::ID_OK => println!("User pressed OK"),
+            id::ID_CANCEL => println!("User pressed Cancel"),
+            id::ID_YES => println!("User pressed Yes"),
+            id::ID_NO => println!("User pressed No"),
+            _ => println!("Dialog closed with other code: {}", result),
+        }
+    });
 
     basic_controls
 }
@@ -1144,7 +1164,7 @@ fn main() {
         // Use types re-exported in lib.rs or via prelude
         let frame = Frame::builder()
             .with_title("wxDragon Notebook Example")
-            .with_size(Size::new(800, 800)) // Adjusted size
+            .with_size(Size::new(800, 900)) // Adjusted size
             .build();
 
         // --- Menu Bar ---
@@ -1193,7 +1213,8 @@ fn main() {
         // --- ToolBar Setup ---
         let tb_style = TB_TEXT | TB_HORIZONTAL;
         // Use frame.create_tool_bar now
-        if let Some(toolbar) = frame.create_tool_bar(tb_style, wxdragon::id::WXD_ID_ANY as i32) {
+        if let Some(toolbar) = frame.create_tool_bar(tb_style, wxdragon::id::ID_ANY as i32) {
+            // Corrected to ID_ANY
             // Fetch Bitmaps (using ART_TOOLBAR client id)
             let new_bmp = ArtProvider::get_bitmap(ART_NEW, ART_TOOLBAR, None)
                 .expect("Failed to get ART_NEW icon");

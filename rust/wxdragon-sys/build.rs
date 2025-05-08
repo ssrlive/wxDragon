@@ -1,6 +1,6 @@
 use std::env;
 use std::fs::File;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
@@ -143,10 +143,10 @@ fn main() {
             "cargo:rustc-link-search=native={}",
             wxwidgets_build_dir.join("lib/gcc_x64_lib").display()
         );
-        
+
         // --- Dynamically find MinGW GCC library paths ---
         let gcc_path = "x86_64-w64-mingw32-gcc"; // Assume it's in PATH
-        
+
         // Find the path containing libgcc.a
         let output_libgcc = Command::new(gcc_path)
             .arg("-print-libgcc-file-name")
@@ -154,50 +154,66 @@ fn main() {
             .expect("Failed to execute x86_64-w64-mingw32-gcc -print-libgcc-file-name");
 
         if output_libgcc.status.success() {
-            let libgcc_path_str = String::from_utf8_lossy(&output_libgcc.stdout).trim().to_string();
+            let libgcc_path_str = String::from_utf8_lossy(&output_libgcc.stdout)
+                .trim()
+                .to_string();
             if !libgcc_path_str.is_empty() {
                 let libgcc_path = Path::new(&libgcc_path_str);
                 if let Some(libgcc_dir) = libgcc_path.parent() {
+                    println!("cargo:rustc-link-search=native={}", libgcc_dir.display());
                     println!(
-                        "cargo:rustc-link-search=native={}",
+                        "info: Added GCC library search path (from libgcc): {}",
                         libgcc_dir.display()
                     );
-                     println!("info: Added GCC library search path (from libgcc): {}", libgcc_dir.display());
 
                     // Attempt to find the path containing libstdc++.a (often one level up, in `../<target>/lib`)
-                    if let Some(gcc_dir) = libgcc_dir.parent() { // e.g., .../gcc/x86_64-w64-mingw32/15.1.0 -> .../gcc/x86_64-w64-mingw32
-                        if let Some(toolchain_lib_dir) = gcc_dir.parent() { // e.g., .../gcc/x86_64-w64-mingw32 -> .../gcc
-                           if let Some(base_lib_dir) = toolchain_lib_dir.parent() { // e.g., .../gcc -> .../lib
+                    if let Some(gcc_dir) = libgcc_dir.parent() {
+                        // e.g., .../gcc/x86_64-w64-mingw32/15.1.0 -> .../gcc/x86_64-w64-mingw32
+                        if let Some(toolchain_lib_dir) = gcc_dir.parent() {
+                            // e.g., .../gcc/x86_64-w64-mingw32 -> .../gcc
+                            if let Some(base_lib_dir) = toolchain_lib_dir.parent() {
+                                // e.g., .../gcc -> .../lib
                                 // Construct the expected path for libstdc++.a based on `find` result structure
-                                let libstdcpp_dir = base_lib_dir.parent().unwrap().join("x86_64-w64-mingw32/lib"); // ../../x86_64-w64-mingw32/lib
+                                let libstdcpp_dir = base_lib_dir
+                                    .parent()
+                                    .unwrap()
+                                    .join("x86_64-w64-mingw32/lib"); // ../../x86_64-w64-mingw32/lib
                                 if libstdcpp_dir.exists() && libstdcpp_dir != libgcc_dir {
                                     println!(
                                         "cargo:rustc-link-search=native={}",
                                         libstdcpp_dir.display()
                                     );
-                                    println!("info: Added GCC library search path (for libstdc++): {}", libstdcpp_dir.display());
+                                    println!(
+                                        "info: Added GCC library search path (for libstdc++): {}",
+                                        libstdcpp_dir.display()
+                                    );
                                 } else {
-                                     println!("info: Could not find or verify expected libstdc++ path relative to libgcc path: {}", libstdcpp_dir.display());
+                                    println!("info: Could not find or verify expected libstdc++ path relative to libgcc path: {}", libstdcpp_dir.display());
                                 }
-                           }
+                            }
                         }
                     }
-
                 } else {
-                    println!("cargo:warning=Could not get parent directory from libgcc path: {}", libgcc_path_str);
+                    println!(
+                        "cargo:warning=Could not get parent directory from libgcc path: {}",
+                        libgcc_path_str
+                    );
                 }
             } else {
-                 println!("cargo:warning=Command -print-libgcc-file-name returned empty output.");
+                println!("cargo:warning=Command -print-libgcc-file-name returned empty output.");
             }
         } else {
             let stderr = String::from_utf8_lossy(&output_libgcc.stderr);
-            println!("cargo:warning=Failed to run '{} -print-libgcc-file-name': {}", gcc_path, stderr);
+            println!(
+                "cargo:warning=Failed to run '{} -print-libgcc-file-name': {}",
+                gcc_path, stderr
+            );
             println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
         }
         // --- End dynamic path finding ---
 
         // REMOVED: Old hardcoded path
-        // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib"); 
+        // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib");
     }
 
     println!("cargo:rustc-link-lib=static=wxdragon");
@@ -301,7 +317,6 @@ fn main() {
         // Add flags for static linking of libstdc++ and libgcc
         println!("cargo:rustc-link-arg=-static-libstdc++");
         println!("cargo:rustc-link-arg=-static-libgcc");
-
     } else {
         println!("info: Manual linking flags are currently only implemented for macOS and Windows (GNU). Build may fail on other platforms.");
     }

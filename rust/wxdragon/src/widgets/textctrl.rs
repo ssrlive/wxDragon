@@ -101,7 +101,7 @@ impl<'a> TextCtrlBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: crate::id::WXD_ID_ANY as i32,
+            id: crate::id::ID_ANY as i32,
             value: String::new(),
             pos: Point { x: -1, y: -1 },
             size: Size {

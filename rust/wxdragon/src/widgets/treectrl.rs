@@ -2,7 +2,7 @@
 
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::WxWidget;
 use std::ffi::CString;
 use std::ptr;
@@ -177,7 +177,7 @@ impl<'a> TreeCtrlBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             pos: None,
             size: None,
             style: TR_DEFAULT_STYLE as i64, // Use the i64 constant

@@ -49,7 +49,7 @@ impl StaticBoxBuilder {
     pub(crate) fn new() -> Self {
         Self {
             parent: None,
-            id: crate::id::WXD_ID_ANY as Id,
+            id: crate::id::ID_ANY as Id,
             label: String::new(),
             pos: Point { x: -1, y: -1 },
             size: Size {

@@ -1,6 +1,6 @@
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, WXD_ID_ANY};
+use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
@@ -98,7 +98,7 @@ impl<'a> GaugeBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         Self {
             parent,
-            id: WXD_ID_ANY as Id,
+            id: ID_ANY as Id,
             range: 100, // Default range
             pos: None,
             size: None,

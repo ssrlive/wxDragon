@@ -34,7 +34,10 @@ impl Default for CommandLinkButtonBuilder {
             main_label: String::new(),
             note: String::new(),
             pos: Point { x: -1, y: -1 },
-            size: Size { width: -1, height: -1 },
+            size: Size {
+                width: -1,
+                height: -1,
+            },
             style: 0,
         }
     }
@@ -72,8 +75,12 @@ impl CommandLinkButtonBuilder {
     }
 
     pub fn build(self) -> CommandLinkButton {
-        assert!(!self.parent_ptr.is_null(), "CommandLinkButton requires a parent");
-        let c_main_label = CString::new(self.main_label).expect("CString::new for main_label failed");
+        assert!(
+            !self.parent_ptr.is_null(),
+            "CommandLinkButton requires a parent"
+        );
+        let c_main_label =
+            CString::new(self.main_label).expect("CString::new for main_label failed");
         let c_note = CString::new(self.note).expect("CString::new for note failed");
 
         let ptr = unsafe {
@@ -93,9 +100,7 @@ impl CommandLinkButtonBuilder {
         } else {
             let window = unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) }; // Cast to Window pointer and wrap
             let button = Button::new_from_composition(window, self.parent_ptr);
-            CommandLinkButton {
-                button,
-            }
+            CommandLinkButton { button }
         }
     }
 }
@@ -120,7 +125,7 @@ impl CommandLinkButton {
             );
         }
     }
-    
+
     // Getters for main label and note could be added if wxCommandLinkButton provides them
     // or if we decide to store them in the Rust struct. For now, main label uses Button::get_label().
 }
@@ -154,4 +159,4 @@ impl WxEvtHandler for CommandLinkButton {
 }
 
 // Drop behavior is handled by the composed Button's Drop implementation (which is a no-op for child widgets)
-// and ultimately by wxWidgets when the parent is destroyed. 
+// and ultimately by wxWidgets when the parent is destroyed.
