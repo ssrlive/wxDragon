@@ -1,0 +1,29 @@
+[package]
+name = "wxdragon-sys"
+# Inherit from workspace or specify explicitly
+version.workspace = true 
+edition.workspace = true
+authors.workspace = true
+description = "Raw FFI bindings to libwxdragon (which statically links wxWidgets)."
+license.workspace = true
+repository.workspace = true
+readme = "README.md" # Ensure this file exists
+build = "build.rs"
+links = "wxdragon" # Crucial: Signals to Cargo this crate builds/links libwxdragon
+
+[dependencies]
+# Sys crates typically have no runtime Rust dependencies
+
+[build-dependencies]
+cmake = "0.1"       # For building the C++ library
+bindgen = "0.69"    # For generating Rust bindings from C/C++ headers
+reqwest = { version = "0.11", features = ["blocking"] } # For downloading wxWidgets source tarball
+tar = "0.4"           # For extracting .tar archives
+bzip2 = "0.4"         # For decompressing .bz2 archives (used by wxWidgets tarball)
+# Removed: cc, walkdir, shlex, cargo-emit (can be re-added if a specific need arises)
+
+[features]
+default = [] 
+# Consider features if you need to support different wxWidgets versions or configurations,
+# e.g., vendored vs. system, different wx modules, etc.
+# Example: `wxwidgets_3_2_4 = []` 

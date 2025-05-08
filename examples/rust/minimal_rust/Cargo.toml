@@ -1,0 +1,11 @@
+[package]
+name = "minimal_rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Depend on the safe wrapper crate now
+wxdragon = { path = "../../../rust/wxdragon" }
+# Keep sys crate if direct access is still needed (e.g., for callbacks temporarily)
+wxdragon-sys = { path = "../../../rust/wxdragon-sys" } 
+image = { version = "0.25.1", default-features = false, features = ["png"] }

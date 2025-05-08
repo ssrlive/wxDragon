@@ -1,0 +1,179 @@
+//! Safe wrapper for wxSpinCtrl.
+
+use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::event::WxEvtHandler;
+use crate::id::Id;
+use crate::window::WxWidget;
+use std::ffi::CString;
+use std::os::raw::c_int;
+use wxdragon_sys as ffi;
+
+// Re-export constants from wxdragon-sys
+pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL;
+pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL;
+pub const SP_ARROW_KEYS: i64 = ffi::WXD_SP_ARROW_KEYS;
+pub const SP_WRAP: i64 = ffi::WXD_SP_WRAP;
+
+/// Represents a wxSpinCtrl widget.
+#[derive(Clone)]
+pub struct SpinCtrl(pub(crate) *mut ffi::wxd_SpinCtrl_t);
+
+impl SpinCtrl {
+    /// Creates a new SpinCtrl builder.
+    pub fn builder<W: WxWidget>(parent: &W) -> SpinCtrlBuilder {
+        SpinCtrlBuilder::new(parent)
+    }
+
+    // Internal constructor
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_SpinCtrl_t) -> Self {
+        SpinCtrl(ptr)
+    }
+
+    // --- Methods specific to SpinCtrl ---
+
+    /// Gets the current value.
+    pub fn value(&self) -> i32 {
+        unsafe { ffi::wxd_SpinCtrl_GetValue(self.0) }
+    }
+
+    /// Sets the value.
+    pub fn set_value(&self, value: i32) {
+        unsafe { ffi::wxd_SpinCtrl_SetValue(self.0, value as c_int) };
+    }
+
+    /// Sets the allowed range.
+    pub fn set_range(&self, min_val: i32, max_val: i32) {
+        unsafe { ffi::wxd_SpinCtrl_SetRange(self.0, min_val as c_int, max_val as c_int) };
+    }
+
+    /// Gets the minimum allowed value.
+    pub fn min(&self) -> i32 {
+        unsafe { ffi::wxd_SpinCtrl_GetMin(self.0) }
+    }
+
+    /// Gets the maximum allowed value.
+    pub fn max(&self) -> i32 {
+        unsafe { ffi::wxd_SpinCtrl_GetMax(self.0) }
+    }
+}
+
+// Implement the core WxWidget trait
+impl WxWidget for SpinCtrl {
+    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
+        self.0 as *mut ffi::wxd_Window_t
+    }
+}
+
+// Implement the event handling trait
+impl WxEvtHandler for SpinCtrl {
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.0 as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
+/// Builder for creating `SpinCtrl` widgets.
+pub struct SpinCtrlBuilder {
+    parent: *mut ffi::wxd_Window_t,
+    id: Id,
+    value: String, // Initial value is string in C API
+    pos: Point,
+    size: Size,
+    style: i64,
+    min_val: i32,
+    max_val: i32,
+    initial_val: i32,
+}
+
+impl SpinCtrlBuilder {
+    /// Creates a new SpinCtrl builder with default values.
+    pub fn new<W: WxWidget>(parent: &W) -> Self {
+        SpinCtrlBuilder {
+            parent: parent.handle_ptr(),
+            id: ID_ANY,
+            value: "0".to_string(), // Default initial string
+            pos: DEFAULT_POSITION,
+            size: DEFAULT_SIZE,
+            style: SP_ARROW_KEYS,
+            min_val: 0,
+            max_val: 100,
+            initial_val: 0, // Default initial numeric value
+        }
+    }
+
+    /// Sets the window ID.
+    pub fn with_id(mut self, id: Id) -> Self {
+        self.id = id;
+        self
+    }
+
+    /// Sets the initial numeric value (overrides initial string value).
+    pub fn with_initial_value(mut self, initial_val: i32) -> Self {
+        self.initial_val = initial_val;
+        // Update string value representation as well for consistency if needed
+        self.value = initial_val.to_string();
+        self
+    }
+
+    /// Sets the minimum allowed value.
+    pub fn with_min_value(mut self, min_val: i32) -> Self {
+        self.min_val = min_val;
+        self
+    }
+
+    /// Sets the maximum allowed value.
+    pub fn with_max_value(mut self, max_val: i32) -> Self {
+        self.max_val = max_val;
+        self
+    }
+
+    /// Sets the allowed range.
+    pub fn with_range(mut self, min_val: i32, max_val: i32) -> Self {
+        self.min_val = min_val;
+        self.max_val = max_val;
+        // Adjust initial value if it's outside the new range
+        self.initial_val = self.initial_val.clamp(min_val, max_val);
+        self.value = self.initial_val.to_string();
+        self
+    }
+
+    /// Sets the position.
+    pub fn with_pos(mut self, pos: Point) -> Self {
+        self.pos = pos;
+        self
+    }
+
+    /// Sets the size.
+    pub fn with_size(mut self, size: Size) -> Self {
+        self.size = size;
+        self
+    }
+
+    /// Sets the style flags.
+    pub fn with_style(mut self, style: i64) -> Self {
+        self.style = style;
+        self
+    }
+
+    /// Builds the SpinCtrl widget.
+    pub fn build(self) -> SpinCtrl {
+        let initial_c_string =
+            CString::new(self.value).expect("CString::new failed for SpinCtrl initial value");
+        let spin_ctrl_ptr = unsafe {
+            ffi::wxd_SpinCtrl_Create(
+                self.parent,
+                self.id as c_int,
+                initial_c_string.as_ptr(),
+                self.pos.into(),
+                self.size.into(),
+                self.style as ffi::wxd_Style_t,
+                self.min_val as c_int,
+                self.max_val as c_int,
+                self.initial_val as c_int,
+            )
+        };
+        if spin_ctrl_ptr.is_null() {
+            panic!("Failed to create SpinCtrl");
+        }
+        unsafe { SpinCtrl::from_ptr(spin_ctrl_ptr) }
+    }
+}

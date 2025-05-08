@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Guideline for wxDragon Development:
+
+When implementing any new feature (widget, sizer, event, etc.), prioritize safety and consistency across all layers, ensuring a clean separation of concerns and performing incremental build checks:
+
+## C API (include/wxdragon.h):
+. Define the minimal C interface required (opaque pointers, C types for constants/flags, const char* for strings, etc.).
+. Keep function signatures simple and C-idiomatic.
+. Build Check: After modifying the header, run cd rust && cargo build to ensure bindgen can still parse the header correctly and the FFI crate (wxdragon-sys) compiles. Fix any parsing or compilation errors before proceeding.
+
+## C++ Implementation (src/*.cpp):
+. Implement the C functions defined in wxdragon.h, creating a new .cpp file if necessary.
+. Translate C calls directly to the corresponding wxWidgets C++ calls, handling type conversions (wxString::FromUTF8, etc.).
+    *   **String Handling for FFI:** When converting `const char*` (typically from Rust's `CString`) to `wxString` for labels, page text, etc., prefer `wxString::FromUTF8(input_text ? input_text : "")`. This explicitly handles UTF-8 and guards against potential null pointers from the FFI boundary, improving robustness (e.g., as seen with `wxTreebook` page text).
+. Manage wxWidgets object creation (new) and initiate destruction (Destroy()).
+. Perform necessary null checks for FFI pointers (e.g., `self`, `page` parameters).
+. Build Check: Run cd rust && cargo build. This will trigger CMake to compile the C++ code and link the static library. Fix any C++ compilation or linking errors before proceeding.
+
+## Rust Safe Wrapper (rust/wxdragon/src):
+. Create/update the safe Rust abstractions (structs, methods, builders, enums).
+. Encapsulate all unsafe { ffi::... } calls within safe public methods.
+. Define required constants (pub const) locally within the appropriate Rust module.
+. Handle Rust string to C string conversions (CString).
+. Implement Drop where appropriate, considering ownership rules.
+. Use Result for fallible operations.
+. Apply established patterns consistently.
+. Build Check: Run cd rust && cargo build. Fix any Rust compilation errors.
+
+## Guideline for Widget Builder Pattern in wxDragon:
+
+When implementing a builder for a new widget `Foo`, follow this pattern for consistency:
+
+1.  **Builder Struct:** Define a public struct named `FooBuilder`.
+    *   It should hold fields for all configurable parameters, including the parent widget's raw pointer if applicable.
+    *   Avoid using `Option` for fields where a sensible default can be provided during initialization.
+
+2.  **Associated Function:** Implement an associated function on the main widget struct: `pub fn builder(parent: &impl WxWidget) -> FooBuilder`.
+    *   This function initializes the `FooBuilder` with default values and the provided parent.
+    *   For widgets that might not have a parent (like `Frame`), the `builder()` function takes no arguments. A separate `with_parent()` method should be added to the builder itself.
+
+3.  **Initialization (`new`):** The `FooBuilder::new(...)` method (called by `Widget::builder(...)`) should initialize all fields with sensible defaults (e.g., `ID_ANY`, empty strings, default positions/sizes like `-1`, zero style flags).
+
+4.  **Setter Methods:** Implement public methods on `FooBuilder` for setting parameters.
+    *   **Naming:** Use the `with_` prefix (e.g., `with_id`, `with_label`, `with_size`, `with_style`).
+    *   **Signature:** Methods should take `mut self` and return `Self` to enable chaining.
+    *   **Parameters:** Accept standard Rust types (`i32`, `&str`, `Point`, `Size`, `i64`, `bool`, etc.).
+
+5.  **`build()` Method:** Implement `pub fn build(self) -> Foo` (or potentially `Option<Foo>`/`Result<Foo, Error>` if creation failure needs to be handled gracefully without panicking).
+    *   This method consumes the builder (`self`).
+    *   Perform necessary conversions (e.g., `&str` to `CString`).
+    *   Call the appropriate `ffi::wxd_Foo_Create` function using the values stored in the builder.
+    *   **Error Handling:** Currently, the pattern is to `.expect()` or `panic!()` if the FFI call returns a null pointer. Consider changing this to return `Option<Foo>` in the future.
+    *   Wrap the resulting FFI pointer in the `Foo` struct using its private `Foo::new(...)` or `Foo::from_ptr(...)` constructor.
+    *   Handle any post-creation setup (like setting the initial checked state for `CheckBox`).
+
+## Example/Usage (examples/rust/minimal_rust or similar):
+. Update the example code to demonstrate the new feature using the safe Rust wrapper.
+
+Final Check: Run the example using cd rust && cargo run -p minimal_rust. Verify the new feature works as expected visually and functionally. Fix any runtime errors or logical issues.
+
+# Guideline for Locating CMake Artifacts in wxDragon Project:
+1. Base Path: The CMake build process executed via the build.rs script using the cmake crate places its output within the directory specified by Config::out_dir(). In this project, this is set to $OUT_DIR/build.
+2. Build Root: The actual root directory within which CMake operates and generates files is $OUT_DIR/build/build/.
+3. Artifact Location: All CMake-generated artifacts (libraries, executables, configuration files like setup.h, wx-config) will be located relative to this $OUT_DIR/build/build/ directory.
+    . Libraries (libwxdragon.a): Typically found in $OUT_DIR/build/build/lib/.
+    . Executables (const_extractor): Typically found in $OUT_DIR/build/build/bin/.
+    . Vendored wxWidgets Artifacts (wx-config, libraries, setup.h include dir): Found within $OUT_DIR/build/build/vendor/wxWidgets/. For example: 
+        - wx-config is at $OUT_DIR/build/build/vendor/wxWidgets/wx-config.
+        - wxWidgets libraries are in $OUT_DIR/build/build/vendor/wxWidgets/lib/.
+        - The directory containing the generated wx/setup.h needed by bindgen is typically found by searching within $OUT_DIR/build/build/vendor/wxWidgets/lib/wx/include/... or similar paths generated by the wxWidgets CMake build.
+4. Verification: Before modifying build.rs due to "file not found" errors related to CMake outputs, explicitly verify the expected path using $OUT_DIR/build/build/ as the base, referencing the specific example: /Users/allen/Documents/Projects/wxdragon/target/debug/build/wxdragon-sys-*/out/build/build/vendor/wxWidgets/wx-config.
