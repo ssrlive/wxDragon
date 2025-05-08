@@ -21,6 +21,8 @@ const ID_ACTIVITY_STOP_BTN: Id = ID_HIGHEST + 13;
 const ID_SPINCTRLDOUBLE: Id = ID_HIGHEST + 14;
 const ID_CALENDAR_CTRL: Id = ID_HIGHEST + 15;
 const ID_SHOW_MESSAGE_DIALOG_BTN: Id = ID_HIGHEST + 16; // New ID for MessageDialog button
+const ID_OPEN_FILE_BTN: Id = ID_HIGHEST + 17; // New ID for Open File button
+const ID_SAVE_FILE_BTN: Id = ID_HIGHEST + 18; // New ID for Save File button
 
 #[derive(Debug, Default)]
 struct FrameData {
@@ -58,6 +60,9 @@ struct BasicTabControls {
     scroll_bar: ScrollBar,
     scrollbar_status_label: StaticText,
     cmd_link_button: CommandLinkButton,
+    open_file_btn: Button,
+    save_file_btn: Button,
+    file_dialog_status_label: StaticText,
 }
 
 struct ListsTabControls {
@@ -343,6 +348,24 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         .build();
     show_msg_dialog_btn.set_tooltip("Click to show an informational message dialog.");
 
+    // ADDED: Buttons and Label for FileDialog
+    let _file_dialog_label = StaticText::builder(&basic_panel)
+        .with_label("File Dialog:")
+        .build();
+    let open_file_btn = Button::builder(&basic_panel)
+        .with_id(ID_OPEN_FILE_BTN)
+        .with_label("Open File...")
+        .build();
+    open_file_btn.set_tooltip("Click to show an open file dialog.");
+    let save_file_btn = Button::builder(&basic_panel)
+        .with_id(ID_SAVE_FILE_BTN)
+        .with_label("Save File...")
+        .build();
+    save_file_btn.set_tooltip("Click to show a save file dialog.");
+    let file_dialog_status_label = StaticText::builder(&basic_panel)
+        .with_label("File Dialog Status: -")
+        .build();
+
     // --- Layout using Main Vertical BoxSizer and child FlexGridSizers ---
     let main_sizer = BoxSizer::builder(VERTICAL).build();
     let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
@@ -472,7 +495,18 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
     grid_sizer_therest.add(&_show_msg_dialog_label, 0, label_flags, 0);
     grid_sizer_therest.add(&show_msg_dialog_btn, 1, control_flags, 0); // Expands
 
-    main_sizer.add_sizer(&grid_sizer_therest, 1, EXPAND | ALL, 10); // Add the rest of groups sizer to main, proportion 1 to take space
+    // ADDED: FileDialog buttons and status label to grid_sizer_therest
+    grid_sizer_therest.add(&_file_dialog_label, 0, label_flags, 0);
+    let file_btns_sizer = BoxSizer::builder(HORIZONTAL).build();
+    file_btns_sizer.add(&open_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    file_btns_sizer.add(&save_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    grid_sizer_therest.add_sizer(&file_btns_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0); // Sizer for buttons
+
+    grid_sizer_therest.add_spacer(0); // Empty cell in label column
+    grid_sizer_therest.add(&file_dialog_status_label, 1, EXPAND, 0); // Status label below buttons
+
+    // --- Main Sizer for Basic Panel ---
+    main_sizer.add_sizer(&grid_sizer_therest, 1, EXPAND | ALL, 10); // Add the rest of groups sizer to main
 
     basic_panel.set_sizer_and_fit(main_sizer, true);
 
@@ -491,21 +525,25 @@ fn create_basic_tab(notebook: &Notebook) -> BasicTabControls {
         radio_box: radio_box.clone(),
         bitmap_combo_box: bitmap_combo_box.clone(),
         colour_picker: colour_picker.clone(),
-        colour_label: colour_status_label.clone(), // Use status label
+        colour_label: colour_status_label.clone(),
         date_picker: date_picker.clone(),
-        date_picker_label: date_picker_status_label.clone(), // Use status label
+        date_picker_label: date_picker_status_label.clone(),
         search_ctrl: search_ctrl.clone(),
         hyperlink_ctrl: hyperlink_ctrl.clone(),
         activity_indicator: activity_indicator.clone(),
         activity_start_btn: activity_start_btn.clone(),
         activity_stop_btn: activity_stop_btn.clone(),
         spinctrl_double: spinctrl_double.clone(),
-        spinctrl_double_label: spinctrl_double_status_label.clone(), // Use status label
+        spinctrl_double_label: spinctrl_double_status_label.clone(),
         calendar_ctrl: calendar_ctrl.clone(),
-        calendar_label: calendar_status_label.clone(), // Use status label
-        scroll_bar,                                    // ADDED
-        scrollbar_status_label,                        // ADDED
-        cmd_link_button: cmd_link_button.clone(),      // ADDED
+        calendar_label: calendar_status_label.clone(),
+        scroll_bar,                                    
+        scrollbar_status_label,                        
+        cmd_link_button: cmd_link_button.clone(), 
+        // Add file dialog controls
+        open_file_btn: open_file_btn.clone(),
+        save_file_btn: save_file_btn.clone(),
+        file_dialog_status_label: file_dialog_status_label.clone(),
     };
 
     // Event Handlers (Need to update clones if labels changed)
@@ -1410,17 +1448,70 @@ fn main() {
             .radio2
             .bind(EventType::COMMAND_RADIOBUTTON_SELECTED, radio_status_update);
 
-        // ToggleButton click event (Basic Panel)
-        // This is an older, duplicated event handler section. The one above in create_basic_tab is active.
-        // I will remove this duplicated section to avoid confusion and potential bugs.
-        /*
-        let toggle_button_clone = basic_controls.toggle_button.clone();
-        let toggle_status_label_clone = basic_controls.toggle_status_label.clone(); // This was the source of the dead_code warning if it was this one
-        basic_controls.toggle_button.bind(EventType::COMMAND_TOGGLEBUTTON_CLICKED, move |event: Event| {
-            let is_on = event.is_checked().unwrap_or(false);
-            println!("ToggleButton clicked, is_on: {}, Event: {:?}", is_on, event);
+       // --- ADDED: FileDialog Button Handlers ---
+        let file_dialog_status_label_clone = basic_controls.file_dialog_status_label.clone();
+        let frame_clone_for_file_dialog = frame.clone(); // Parent for the dialog
+        let status_label_open = file_dialog_status_label_clone.clone();
+        let frame_parent_open = frame_clone_for_file_dialog.clone();
+        basic_controls.open_file_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Open File button clicked.");
+            // Need to import FileDialog and constants
+            use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
+            use wxdragon::id; // Already likely imported at top
+
+            let dialog = FileDialog::builder(Some(&frame_parent_open))
+                .with_message("Choose a file to open")
+                .with_style(fd_const::FD_OPEN | fd_const::FD_FILE_MUST_EXIST | fd_const::FD_MULTIPLE)
+                .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
+                .build();
+
+            let result = dialog.show_modal();
+            if result == id::ID_OK {
+                let paths = dialog.get_paths();
+                let status = format!("Opened: {:?}", paths);
+                println!("{}", status);
+                status_label_open.set_label(&status);
+            } else {
+                let status = "Open File Cancelled".to_string();
+                println!("{}", status);
+                status_label_open.set_label(&status);
+            }
+            // Dialog is dropped here, calling wxd_Window_Destroy
         });
-        */
+
+        let status_label_save = file_dialog_status_label_clone.clone();
+        let frame_parent_save = frame_clone_for_file_dialog.clone();
+        basic_controls.save_file_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Save File button clicked.");
+            // Need to import FileDialog and constants
+            use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
+            use wxdragon::id; // Already likely imported at top
+
+            let dialog = FileDialog::builder(Some(&frame_parent_save))
+                .with_message("Save file as...")
+                .with_style(fd_const::FD_SAVE | fd_const::FD_OVERWRITE_PROMPT)
+                .with_wildcard("PNG files (*.png)|*.png|All files (*.*)|*.*")
+                .with_default_file("Untitled.png")
+                .build();
+
+            let result = dialog.show_modal();
+            if result == id::ID_OK {
+                if let Some(path) = dialog.get_path() {
+                    let status = format!("Saved: {}", path);
+                    println!("{}", status);
+                    status_label_save.set_label(&status);
+                } else {
+                    let status = "Save File Error: Could not get path".to_string();
+                    println!("{}", status);
+                    status_label_save.set_label(&status);
+                }
+            } else {
+                let status = "Save File Cancelled".to_string();
+                println!("{}", status);
+                status_label_save.set_label(&status);
+            }
+            // Dialog is dropped here, calling wxd_Window_Destroy
+        }); 
 
         // SpinButton Event Bindings (Basic Panel)
         basic_controls.spin_button.bind(EventType::SPIN, {

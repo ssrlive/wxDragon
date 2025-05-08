@@ -269,9 +269,9 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [x] `wxMenuItem`
     *   [x] `wxToolBar` (*Use `Frame::create_tool_bar` and call `realize()` after adding tools*)
 *   **Dialogs:**
-    *   [ ] `wxDialog` (base class)
-    *   [ ] `wxMessageDialog`
-    *   [ ] `wxFileDialog`
+    *   [x] `wxDialog` (base class)
+    *   [x] `wxMessageDialog`
+    *   [x] `wxFileDialog`
     *   [ ] `wxColourDialog`
     *   [ ] `wxFontDialog`
     *   [ ] `wxTextEntryDialog`

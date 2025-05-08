@@ -20,6 +20,23 @@
 // #include <wx/event.h> // REMOVED - No longer needed for type definitions
 #include <stddef.h>
 
+// --- Utility Macros for String Handling (Moved Up) ---
+#ifdef __cplusplus
+    #include <wx/string.h> // Include wxString header for the macros below
+
+    // Helper macro to convert const char* to wxString, handling nulls and UTF-8
+    // wxString::FromUTF8(input ? input : "")
+    #define WXD_STR_TO_WX_STRING_UTF8_NULL_OK(input_text) wxString::FromUTF8(input_text ? input_text : "")
+
+    // Helper macro/function template for getting wxString result into C buffer
+    // Returns: length needed (excluding null), or -1 on error.
+    // On success and if buffer is sufficient, copies string and null-terminates.
+    // If buffer is null or bufLen is 0, returns length needed without copying.
+    // This is a MACRO that would wrap a call to a utility function like wxd_cpp_utils::copy_wxstring_to_buffer
+    #define GET_WX_STRING_RESULT(wx_str_expr, c_buffer, c_buf_len) wxd_cpp_utils::copy_wxstring_to_buffer(wx_str_expr, c_buffer, c_buf_len)
+#endif
+// --- End Utility Macros ---
+
 // Define export macro (empty for static linking by default)
 #ifndef WXD_EXPORTED
     #define WXD_EXPORTED WXDRAGON_API // WXD_EXPORTED will now use WXDRAGON_API logic
@@ -812,24 +829,15 @@ WXD_EXPORTED bool wxd_DatePickerCtrl_GetRange(wxd_DatePickerCtrl_t* self, wxd_Da
 WXD_EXPORTED void wxd_DatePickerCtrl_SetRange(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt1, const wxd_DateTime_t* dt2);
 
 // wxTreebook
-typedef struct wxd_Notebook_t wxd_Notebook_t; // Should be wxd_Notebook_t, not wxdNotebook
-typedef struct wxd_StaticBox_t wxd_StaticBox_t; // Should be wxd_StaticBox_t, not wxdStaticBox
-typedef struct wxd_Treebook_t wxd_Treebook_t; // Opaque pointer for wxTreebook, should be wxd_Treebook_t
-
-// ... existing code ...
-WXD_EXPORTED wxd_StaticBox_t *wxd_StaticBox_new(wxd_Window_t *parent, int id, const char *label, int x, int y, int width, int height, long style);
-
-// wxTreebook
-WXD_EXPORTED wxd_Treebook_t *wxd_Treebook_new(wxd_Window_t *parent, int id, int x, int y, int width, int height, long style);
-WXD_EXPORTED void wxd_Treebook_Destroy(wxd_Treebook_t *self);
-WXD_EXPORTED int wxd_Treebook_AddPage(wxd_Treebook_t *self, wxd_Window_t *page, const char *text, int bSelect, int imageId);
-WXD_EXPORTED int wxd_Treebook_AddSubPage(wxd_Treebook_t *self, wxd_Window_t *page, const char *text, int bSelect, int imageId);
-WXD_EXPORTED int wxd_Treebook_GetPageCount(wxd_Treebook_t *self);
-WXD_EXPORTED wxd_Window_t *wxd_Treebook_GetPage(wxd_Treebook_t *self, size_t n);
-WXD_EXPORTED int wxd_Treebook_GetSelection(wxd_Treebook_t *self);
-WXD_EXPORTED int wxd_Treebook_SetSelection(wxd_Treebook_t *self, size_t n);
-WXD_EXPORTED void wxd_Treebook_SetPageText(wxd_Treebook_t *self, size_t n, const char* strText);
-WXD_EXPORTED int wxd_Treebook_GetPageText(wxd_Treebook_t *self, size_t n, char* buffer, int buffer_len); // Updated signature
+typedef struct wxd_Treebook wxd_Treebook_t;
+WXD_EXPORTED wxd_Treebook_t* wxd_Treebook_new(wxd_Window_t* parent, int id, int x, int y, int width, int height, wxd_Style_t style);
+WXD_EXPORTED int wxd_Treebook_AddPage(wxd_Treebook_t* self, wxd_Window_t* page, const char* text, int select, int imageId);
+WXD_EXPORTED int wxd_Treebook_AddSubPage(wxd_Treebook_t* self, wxd_Window_t* page, const char* text, int select, int imageId);
+WXD_EXPORTED int wxd_Treebook_GetPageCount(wxd_Treebook_t* self);
+WXD_EXPORTED int wxd_Treebook_GetSelection(wxd_Treebook_t* self);
+WXD_EXPORTED int wxd_Treebook_SetSelection(wxd_Treebook_t* self, size_t n);
+WXD_EXPORTED void wxd_Treebook_SetPageText(wxd_Treebook_t* self, size_t n, const char* strText);
+WXD_EXPORTED int wxd_Treebook_GetPageText(wxd_Treebook_t* self, size_t n, char* buffer, int bufLen);
 
 // wxSearchCtrl
 typedef struct wxd_SearchCtrl wxd_SearchCtrl_t;
@@ -970,22 +978,68 @@ WXD_EXPORTED void wxd_CommandLinkButton_SetNote(wxd_CommandLinkButton_t* self, c
 // No GetNote is explicitly exposed here, as it's less common. If needed, it can be added later.
 
 // Opaque struct for wxDialog
-typedef struct wxd_Dialog wxd_Dialog;
+typedef struct wxd_Dialog wxd_Dialog_t;
 
 // wxDialog
-WXD_EXPORTED int wxd_Dialog_ShowModal(wxd_Dialog* self);
+WXD_EXPORTED int wxd_Dialog_ShowModal(wxd_Dialog_t* self);
 // Note: Creation and Destruction will be handled by derived dialog classes or generic wxd_Window_Destroy.
 
 // wxMessageDialog
-typedef struct wxd_MessageDialog wxd_MessageDialog; // Forward declaration
+typedef struct wxd_MessageDialog wxd_MessageDialog_t; // Forward declaration
 
 // wxMessageDialog
-WXD_EXPORTED wxd_MessageDialog* wxd_MessageDialog_Create(wxd_Window_t* parent, const char* message, const char* caption, long style);
+WXD_EXPORTED wxd_MessageDialog_t* wxd_MessageDialog_Create(wxd_Window_t* parent, const char* message, const char* caption, wxd_Style_t style);
 // Note: ShowModal is via wxd_Dialog_ShowModal((wxd_Dialog*)dialog)
 // Note: Destruction handled by wxd_Window_Destroy((wxd_Window_t*)dialog)
 
+// --- ArrayString for GetPaths/GetFilenames ---
+typedef struct wxd_ArrayString {
+    void* internal_data;
+} wxd_ArrayString_t;
+
+WXD_EXPORTED wxd_ArrayString_t* wxd_ArrayString_Create();
+WXD_EXPORTED void wxd_ArrayString_Free(wxd_ArrayString_t* self);
+WXD_EXPORTED int wxd_ArrayString_GetCount(wxd_ArrayString_t* self);
+WXD_EXPORTED int wxd_ArrayString_GetString(wxd_ArrayString_t* self, int index, char* buffer, int bufLen);
+
+// --- wxFileDialog ---
+typedef struct wxd_FileDialog wxd_FileDialog_t;
+
+WXD_EXPORTED wxd_FileDialog_t* wxd_FileDialog_Create(
+    wxd_Window_t* parent,
+    const char* message,
+    const char* defaultDir,
+    const char* defaultFile,
+    const char* wildcard,
+    wxd_Style_t style,
+    int x, int y,
+    int width, int height);
+
+WXD_EXPORTED int wxd_FileDialog_GetPath(wxd_FileDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED void wxd_FileDialog_GetPaths(wxd_FileDialog_t* self, wxd_ArrayString_t* paths);
+WXD_EXPORTED int wxd_FileDialog_GetFilename(wxd_FileDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED void wxd_FileDialog_GetFilenames(wxd_FileDialog_t* self, wxd_ArrayString_t* filenames);
+WXD_EXPORTED int wxd_FileDialog_GetDirectory(wxd_FileDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED int wxd_FileDialog_GetFilterIndex(wxd_FileDialog_t* self);
+
+// Setters (optional for now, can be added later if needed by Rust wrapper)
+// WXD_EXPORTED void wxd_FileDialog_SetMessage(wxd_FileDialog_t* self, const char* message);
+// WXD_EXPORTED void wxd_FileDialog_SetPath(wxd_FileDialog_t* self, const char* path);
+// WXD_EXPORTED void wxd_FileDialog_SetDirectory(wxd_FileDialog_t* self, const char* directory);
+// WXD_EXPORTED void wxd_FileDialog_SetFilename(wxd_FileDialog_t* self, const char* name);
+// WXD_EXPORTED void wxd_FileDialog_SetWildcard(wxd_FileDialog_t* self, const char* wildCard);
+// WXD_EXPORTED void wxd_FileDialog_SetFilterIndex(wxd_FileDialog_t* self, int filterIndex);
+
 #ifdef __cplusplus
 }
-#endif
+
+// C++ specific utility functions or class declarations can go here, outside extern "C"
+namespace wxd_cpp_utils {
+    // Declaration for the utility function used by GET_WX_STRING_RESULT macro
+    // Its definition is in wxd_utils.cpp (or will be if not already)
+    size_t copy_wxstring_to_buffer(const wxString& str, char* buffer, size_t buffer_len);
+}
+
+#endif // __cplusplus
 
 #endif // WXDRAGON_H
