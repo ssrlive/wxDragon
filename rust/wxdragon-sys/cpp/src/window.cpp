@@ -2,6 +2,12 @@
 #include <wx/window.h> // Needed for wxWindow
 #include <wx/sizer.h>  // Needed for wxSizer
 #include "wx/gdicmn.h" // For wxSize, wxPoint
+#include <cstring> // For strdup
+#include <cstdlib> // For free (though free typically comes from stdlib.h, cstdlib is C++ way)
+
+extern "C" {
+
+// --- General Window Functions ---
 
 // Implementation for wxd_Window_SetSizer
 WXD_EXPORTED void wxd_Window_SetSizer(wxd_Window_t* window, wxd_Sizer_t* sizer, bool deleteOldSizer) {
@@ -69,10 +75,6 @@ WXD_EXPORTED void wxd_Window_Refresh(wxd_Window_t* window, int eraseBackground, 
     }
 }
 
-extern "C" {
-
-// --- General Window Functions ---
-
 WXD_EXPORTED void wxd_Window_Fit(wxd_Window_t* window) {
     wxWindow* win = (wxWindow*)window;
     if (win) {
@@ -107,5 +109,49 @@ WXD_EXPORTED void wxd_Window_SetToolTip(wxd_Window_t* window, const char* tipStr
 // Checking existing code... It seems SetSizer and SetSizerAndFit are in sizer.cpp.
 
 // Attach/Detach/Notify cleanup functions are already implemented (likely in app.cpp or event.cpp).
+
+// --- Window Manipulation --- 
+
+WXD_EXPORTED void wxd_Window_Show(wxd_Window_t* self, bool show) {
+    if (self) {
+        reinterpret_cast<wxWindow*>(self)->Show(show);
+    }
+}
+
+WXD_EXPORTED bool wxd_Window_Close(wxd_Window_t* self, bool force) {
+    if (self) {
+        return reinterpret_cast<wxWindow*>(self)->Close(force);
+    }
+    return false;
+}
+
+WXD_EXPORTED void wxd_Window_SetId(wxd_Window_t* self, int id) {
+    if (self) {
+        reinterpret_cast<wxWindow*>(self)->SetId(id);
+    }
+}
+
+// Note: GetLabel for a generic wxWindow might not always be what's expected,
+// as not all windows have a visible label in the same way as controls.
+// However, wxWindow itself does have GetLabel/SetLabel.
+WXD_EXPORTED void wxd_Window_SetLabel(wxd_Window_t* self, const char* label) {
+    if (self) {
+        reinterpret_cast<wxWindow*>(self)->SetLabel(wxString::FromUTF8(label ? label : ""));
+    }
+}
+
+WXD_EXPORTED char* wxd_Window_GetLabel(wxd_Window_t* self) {
+    if (self) {
+        wxString label = reinterpret_cast<wxWindow*>(self)->GetLabel();
+        const wxScopedCharBuffer utf8_buf = label.ToUTF8();
+        if (utf8_buf.data()) { // Check if data is not null
+            return strdup(utf8_buf.data()); // Allocate and copy string
+        }
+    }
+    // Return a duplicated empty string if self is null or label is empty to avoid returning NULL
+    // which Rust CString::from_raw would panic on.
+    // Callers should check if the string is empty if that has meaning.
+    return strdup(""); 
+}
 
 } // extern "C"

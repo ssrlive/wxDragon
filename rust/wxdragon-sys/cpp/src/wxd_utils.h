@@ -3,8 +3,16 @@
 
 #include <wx/gdicmn.h> // For wxPoint, wxSize, wxDefaultPosition, wxDefaultSize
 #include <wx/string.h> // For wxString
-#include "../include/wxdragon.h" // For wxd_Point, wxd_Size
+#include "../include/wxdragon.h" // For wxd_Point, wxd_Size  // This includes wxdragon.h itself
 #include <wx/colour.h> // For wxColour type
+
+#ifdef __cplusplus
+// Helper macro to convert const char* to wxString, handling nulls and UTF-8
+#define WXD_STR_TO_WX_STRING_UTF8_NULL_OK(input_text) wxString::FromUTF8(input_text ? input_text : "")
+// Helper macro for getting wxString result into C buffer
+// Note: Relies on wxd_cpp_utils::copy_wxstring_to_buffer being declared below or already visible
+#define GET_WX_STRING_RESULT(wx_str_expr, c_buffer, c_buf_len) wxd_cpp_utils::copy_wxstring_to_buffer(wx_str_expr, c_buffer, c_buf_len)
+#endif
 
 namespace wxd_cpp_utils {
 

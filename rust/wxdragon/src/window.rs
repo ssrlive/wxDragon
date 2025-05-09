@@ -126,14 +126,7 @@ pub trait WxWidget {
     fn show(&self, show: bool) {
         let handle = self.handle_ptr();
         if !handle.is_null() {
-            unsafe {
-                // Assuming a generic wxd_Window_Show exists or will be added.
-                // Using Frame::Show as placeholder is wrong.
-                // TODO: Add wxd_Window_Show to C API
-                // For now, this might need to be specialized in concrete types.
-                // Example using Frame's show (potentially incorrect for other types):
-                ffi::wxd_Frame_Show(handle as *mut ffi::wxd_Frame_t, show);
-            }
+            unsafe { ffi::wxd_Window_Show(handle, show) };
         }
     }
 
@@ -197,6 +190,21 @@ pub trait WxWidget {
                     // For now, do nothing if the string can't be converted (e.g., contains null bytes)
                 }
             }
+        }
+    }
+
+    /// Explicitly destroys the underlying wxWidgets object.
+    /// After calling this, the widget wrapper should not be used further.
+    /// This is useful for dynamically creating and destroying widgets.
+    fn destroy(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            // It's important that the Rust wrapper doesn't try to access
+            // the object after this. The object will be scheduled for deletion.
+            unsafe { ffi::wxd_Window_Destroy(handle) };
+            // Note: We might want to nullify the internal pointer in the specific widget's struct
+            // if the struct allows mutable access to itself after destroy is called, though
+            // typically after destroy(), the Rust wrapper instance should be dropped or not used.
         }
     }
 

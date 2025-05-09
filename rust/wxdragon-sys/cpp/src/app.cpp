@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/app.h>
 #include <wx/image.h>
+#include <cstdlib>
 
 // --- Globals --- 
 // Store the C callback and user data provided to wxd_Main
@@ -120,3 +121,14 @@ void wxd_App_ExitMainLoop(wxd_App_t* app) {
          wxLogWarning("wxd_App_ExitMainLoop called but no top window is set.");
      }
 }
+
+// Implementation for wxd_free_string
+void wxd_free_string(char* str) {
+    if (str) {
+        free(str); // free is from <cstdlib> or <stdlib.h>
+    }
+}
+
+#ifdef __cplusplus
+// ... existing code ...
+#endif
