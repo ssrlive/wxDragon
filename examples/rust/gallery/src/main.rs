@@ -9,6 +9,7 @@ use tabs::advanced_tab::create_advanced_tab;
 use tabs::data_tab::{create_data_tab, FrameData};
 use tabs::book_controls_tab::create_book_controls_tab;
 use tabs::dialog_tab::create_dialog_tab;
+use tabs::media_tab::create_media_tab;
 
 // Tool IDs - used in main.rs
 const ID_TOOL_NEW: Id = ID_HIGHEST + 1;
@@ -67,6 +68,7 @@ fn main() {
         let data_controls = create_data_tab(&notebook);
         let book_controls = create_book_controls_tab(&notebook);
         let dialog_controls = create_dialog_tab(&notebook, &frame);
+        let media_controls = create_media_tab(&notebook);
 
         // --- ToolBar Setup ---
         let tb_style = TB_TEXT | TB_HORIZONTAL;
@@ -98,6 +100,7 @@ fn main() {
         notebook.add_page(&data_controls.panel, "Data", false);
         notebook.add_page(&book_controls.tab_panel, "Book Controls", false);
         notebook.add_page(&dialog_controls.panel, "Dialogs", false);
+        notebook.add_page(&media_controls.panel, "Media", false);
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(VERTICAL).build();
@@ -112,6 +115,7 @@ fn main() {
         data_controls.bind_events(&frame, &status_bar);
         book_controls.bind_events();
         dialog_controls.bind_events(&frame);
+        media_controls.bind_events();
 
         // Menu & Toolbar Event Handlers
         let frame_clone_for_menu = frame.clone();

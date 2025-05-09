@@ -20,6 +20,8 @@ pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
 pub use crate::sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
 
 // --- Widgets & Builders ---
+pub use crate::widgets::{ActivityIndicator, ActivityIndicatorBuilder};
+pub use crate::widgets::{AnimationCtrl, AnimationCtrlBuilder};
 pub use crate::widgets::{BitmapButton, BitmapButtonBuilder};
 pub use crate::widgets::{Button, ButtonBuilder};
 pub use crate::widgets::{CheckBox, CheckBoxBuilder};
@@ -165,9 +167,6 @@ pub use crate::widgets::search_ctrl::{SearchCtrl, SearchCtrlBuilder};
 
 // ADDED: Re-export HyperlinkCtrl
 pub use crate::widgets::hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};
-
-// ADDED: Re-export ActivityIndicator
-pub use crate::widgets::activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
 
 // ADDED: Re-export SpinCtrlDouble
 pub use crate::widgets::spinctrldouble::{SpinCtrlDouble, SpinCtrlDoubleBuilder};

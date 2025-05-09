@@ -1,4 +1,5 @@
 pub mod activity_indicator;
+pub mod animation_ctrl;
 pub mod bitmapbutton;
 pub mod bitmapcombobox;
 pub mod button;
@@ -40,6 +41,7 @@ pub mod treectrl;
 
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
+pub use animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder};
 pub use bitmapbutton::{BitmapButton, BitmapButtonBuilder};
 pub use bitmapcombobox::{BitmapComboBox, BitmapComboBoxBuilder};
 pub use button::{Button, ButtonBuilder};
