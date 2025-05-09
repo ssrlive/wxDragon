@@ -2,7 +2,7 @@
 members = [
     "rust/wxdragon-sys",
     "rust/wxdragon",
-    "examples/rust/minimal_rust",
+    "examples/rust/gallery",
     "examples/rust/simple"
     # Add other examples if they are separate crates
 ]

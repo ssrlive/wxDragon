@@ -91,7 +91,7 @@ wxdragon/
 │   └── Cargo.toml         # Workspace Cargo.toml (might be at root)
 ├── examples/
 │   └── rust/
-│       └── minimal_rust/
+│       └── gallery/
 ├── Cargo.toml           # Top-level Workspace Cargo.toml (if not in rust/)
 └── README.md            # This file
 ```
@@ -102,7 +102,7 @@ wxdragon/
 1.  Install a C++ compiler suitable for your platform (CMake is used by the build script but doesn't need separate installation if you have `cmake` in your PATH or use the `cmake` crate feature that bundles it).
 2.  **wxWidgets is downloaded and built automatically as part of the project.**
 3.  Navigate to the root of the repository (or the directory containing the main workspace `Cargo.toml`).
-4.  Run `cargo build` or `cargo run -p minimal_rust`.
+4.  Run `cargo build` or `cargo run -p gallery`.
     *   The `wxdragon-sys` build script (`build.rs`) will automatically:
         *   Download the wxWidgets source tarball (version 3.2.8 currently) if not already present.
         *   Extract wxWidgets.
@@ -165,7 +165,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [x] Safe application entry point (`wxdragon::main`).
     *   [x] Basic lifetime management (`Drop`, `preserve()`).
     *   [x] Basic layout management (`set_sizer`, `set_sizer_and_fit`).
-    *   [x] Minimal Rust example (`minimal_rust`) demonstrates core features and event handling.
+    *   [x] Gallery Rust example (`gallery`) demonstrates core features and event handling.
 
 ## TODO List - Implementation Tasks
 
@@ -316,12 +316,3 @@ When implementing any new feature (widget, sizer, event, etc.), prioritize safet
 . Implement the C functions defined in `rust/wxdragon-sys/cpp/include/wxdragon.h`.
 . Translate C calls directly to the corresponding wxWidgets C++ calls...
 . **Build Check:** `cd rust && cargo build` (or `cargo build -p wxdragon-sys`). This will trigger CMake via `wxdragon-sys/build.rs` to compile the C++ code. Fix any C++ compilation or linking errors.
-
-## Rust Safe Wrapper (`rust/wxdragon/src`):
-. (Unchanged)
-
-## Guideline for Widget Builder Pattern in wxDragon:
-. (Unchanged)
-
-## Guideline for Locating CMake Artifacts in wxDragon Project:
-. (This section might need review/update as `$OUT_DIR/build/build` is specific to the old structure. Now it's more like `$OUT_DIR/build/wxwidgets_build` for wx artifacts and `$OUT_DIR/build/lib` for `libwxdragon.a`.)
