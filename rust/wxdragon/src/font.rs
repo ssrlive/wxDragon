@@ -17,6 +17,47 @@ impl Font {
         Self { ptr, owned: true }
     }
 
+    /// Adds a private font from a file path to the application's font database.
+    /// Returns true on success, false on failure.
+    pub fn add_private_font(path: &str) -> bool {
+        if let Ok(c_path) = std::ffi::CString::new(path) {
+            unsafe { ffi::wxd_Font_AddPrivateFont(c_path.as_ptr()) }
+        } else {
+            false
+        }
+    }
+
+    /// Creates a new font with specified details.
+    /// Returns `None` if the font cannot be created (e.g., invalid parameters or face name not found).
+    pub fn new_with_details(
+        point_size: i32,
+        family: i32, // Use FONTFAMILY_* constants
+        style: i32,  // Use FONTSTYLE_* constants
+        weight: i32, // Use FONTWEIGHT_* constants
+        underlined: bool,
+        face_name: &str,
+    ) -> Option<Self> {
+        let c_face_name = match std::ffi::CString::new(face_name) {
+            Ok(s) => s,
+            Err(_) => return None, // Invalid face_name (e.g., contains null bytes)
+        };
+        let ptr = unsafe {
+            ffi::wxd_Font_CreateEx(
+                point_size,
+                family,
+                style,
+                weight,
+                underlined,
+                c_face_name.as_ptr(),
+            )
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(Self { ptr, owned: true })
+        }
+    }
+
     /// Create a Font wrapper from a raw pointer.
     /// # Safety
     /// The pointer must be a valid pointer to a wxFont.

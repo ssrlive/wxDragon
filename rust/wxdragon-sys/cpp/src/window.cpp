@@ -1,9 +1,11 @@
-#include "wxdragon.h" // Needed for WXD_EXPORTED, wxd_* types, WXD_ID_ANY
+#include "../include/wxdragon.h" // Needed for WXD_EXPORTED, wxd_* types, WXD_ID_ANY
 #include <wx/window.h> // Needed for wxWindow
 #include <wx/sizer.h>  // Needed for wxSizer
 #include "wx/gdicmn.h" // For wxSize, wxPoint
 #include <cstring> // For strdup
 #include <cstdlib> // For free (though free typically comes from stdlib.h, cstdlib is C++ way)
+#include <wx/font.h> // For wxFont in SetFont
+#include <wx/settings.h> // For wxSystemSettings and wxSYS_DEFAULT_GUI_FONT
 
 extern "C" {
 
@@ -152,6 +154,32 @@ WXD_EXPORTED char* wxd_Window_GetLabel(wxd_Window_t* self) {
     // which Rust CString::from_raw would panic on.
     // Callers should check if the string is empty if that has meaning.
     return strdup(""); 
+}
+
+WXD_EXPORTED void wxd_Window_SetFont(wxd_Window_t* self, const wxd_Font_t* font) {
+    if (!self) return;
+    // If font is NULL, wxWidgets SetFont will likely use a default or do nothing.
+    // If it requires a valid font, we might need to pass wxNullFont or wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT).
+    // For now, assume passing NULL (if wxd_Font_t* is NULL) is handled gracefully by wxFont constructor or SetFont.
+    // wxFont takes a wxFont*, so if font is NULL, it will be wxFont(*NULL) which might be an issue.
+    // Better to check for NULL font and pass wxNullFont explicitly.
+    if (font) {
+        ((wxWindow*)self)->SetFont(*((wxFont*)font));
+    } else {
+        // Attempt to set a default font or do nothing if wxNullFont isn't appropriate.
+        // For now, let's try setting the system default GUI font if null is passed.
+        // This behavior might need adjustment based on desired semantics for a null font.
+        ((wxWindow*)self)->SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
+    }
+}
+
+WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(self);
+    if (!wx_window) {
+        return { -1, -1 }; // Default invalid position
+    }
+    wxPoint wx_position = wx_window->GetPosition();
+    return { wx_position.x, wx_position.y };
 }
 
 } // extern "C"

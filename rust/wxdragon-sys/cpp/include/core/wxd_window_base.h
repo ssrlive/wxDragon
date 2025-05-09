@@ -26,4 +26,7 @@ WXD_EXPORTED char* wxd_Window_GetLabel(wxd_Window_t* self); // Caller must free 
 WXD_EXPORTED void wxd_Window_AttachCleanupNotifier(wxd_Window_t* win_ptr);
 WXD_EXPORTED void wxd_Window_DetachCleanupNotifier(wxd_Window_t* win_ptr);
 
+WXD_EXPORTED void wxd_Window_SetFont(wxd_Window_t* self, const wxd_Font_t* font);
+WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self);
+
 #endif // WXD_WINDOW_BASE_H 

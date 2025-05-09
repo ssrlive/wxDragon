@@ -489,18 +489,25 @@ impl DialogTabControls {
 
         // Event handler for FilePickerCtrl
         let fpc_status_label_clone = self.file_picker_status_label.clone();
-        let file_picker_ctrl_clone = self.file_picker_ctrl.clone(); // Clone for the closure
+        let file_picker_ctrl_clone = self.file_picker_ctrl.clone();
         self.file_picker_ctrl.bind(EventType::FILE_PICKER_CHANGED, move |_event: Event| {
-            let path_string: String = file_picker_ctrl_clone.get_path(); // get_path() returns String
+            let path_string: String = file_picker_ctrl_clone.get_path(); 
             
             if !path_string.is_empty() {
                 let status = format!("Selected Path: {}", path_string);
                 fpc_status_label_clone.set_label(&status);
                 println!("FilePickerCtrl Path Changed: {}", path_string);
+                
+                // Set a new font (currently default) to the status label
+                let new_font = Font::new(); 
+                fpc_status_label_clone.set_font(&new_font);
+                // Note: new_font is dropped here, but the label should have its font set.
             } else {
-                // This case means get_path() returned an empty string (e.g., no selection or cleared)
                 fpc_status_label_clone.set_label("FilePickerCtrl: No path selected or path is empty.");
                 println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
+                // Optionally reset to a default font here too if desired
+                let default_font = Font::new();
+                fpc_status_label_clone.set_font(&default_font);
             }
         });
 
@@ -526,8 +533,11 @@ impl DialogTabControls {
             if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
                 let status = format!("Selected Font: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
                 font_pc_status_label_clone.set_label(&status);
+                // Apply the selected font to the status label
+                font_pc_status_label_clone.set_font(&selected_font);
                 println!("FontPickerCtrl Font Changed: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
-                // The selected_font will be dropped here, freeing the C++ wxFont object
+                // The selected_font (which owns the C++ wxFont) will be dropped at the end of this scope,
+                // but the label should have had its font properties updated by wxWidgets.
             } else {
                 font_pc_status_label_clone.set_label("FontPickerCtrl: No font selected or font is invalid.");
                 println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");

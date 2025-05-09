@@ -39,7 +39,9 @@ WXD_EXPORTED bool wxd_FontData_GetEnableEffects(wxd_FontData_t* self);
 WXD_EXPORTED void wxd_FontData_SetInitialFont(wxd_FontData_t* self, const wxd_Font_t* font);
 
 WXD_EXPORTED wxd_Font_t* wxd_Font_Create(void);
-WXD_EXPORTED void wxd_Font_Destroy(wxd_Font_t* self);
+WXD_EXPORTED wxd_Font_t* wxd_Font_CreateEx(int point_size, int family, int style, int weight, bool underlined, const char* face_name);
+WXD_EXPORTED bool wxd_Font_AddPrivateFont(const char* font_file_path);
+WXD_EXPORTED void wxd_Font_Destroy(wxd_Font_t* font);
 WXD_EXPORTED int wxd_Font_GetPointSize(wxd_Font_t* self);
 WXD_EXPORTED int wxd_Font_GetFamily(wxd_Font_t* self);
 WXD_EXPORTED int wxd_Font_GetStyle(wxd_Font_t* self);

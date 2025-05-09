@@ -1,5 +1,6 @@
 use crate::event::WxEvtHandler;
 use crate::sizers::WxSizer;
+use crate::font::Font;
 use lazy_static::lazy_static;
 use std::any::Any;
 use std::cell::RefCell;
@@ -205,6 +206,12 @@ pub trait WxWidget {
             // Note: We might want to nullify the internal pointer in the specific widget's struct
             // if the struct allows mutable access to itself after destroy is called, though
             // typically after destroy(), the Rust wrapper instance should be dropped or not used.
+        }
+    }
+
+    fn set_font(&self, font: &Font) {
+        unsafe {
+            ffi::wxd_Window_SetFont(self.handle_ptr(), font.as_ptr());
         }
     }
 

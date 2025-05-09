@@ -93,6 +93,34 @@ bool wxd_Font_IsOk(wxd_Font_t* self) {
     return font->IsOk();
 }
 
+WXD_EXPORTED bool wxd_Font_AddPrivateFont(const char* font_file_path) {
+    if (!font_file_path) return false;
+    return wxFont::AddPrivateFont(WXD_STR_TO_WX_STRING_UTF8_NULL_OK(font_file_path));
+}
+
+WXD_EXPORTED wxd_Font_t* wxd_Font_CreateEx(int point_size, int family, int style, int weight, bool underlined, const char* face_name) {
+    wxString wx_face_name = WXD_STR_TO_WX_STRING_UTF8_NULL_OK(face_name);
+    // wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL are wxWidgets enums.
+    // The C API uses ints; they should correspond to these enum values.
+    // Example: family might be an int like 70 for wxFONTFAMILY_DEFAULT.
+    // Need to cast these ints to the respective wx enums if they are not directly compatible.
+    // For now, assuming direct cast is okay if the C-side constants match wx values.
+    wxFont* font = new wxFont(
+        point_size,
+        static_cast<wxFontFamily>(family),
+        static_cast<wxFontStyle>(style),
+        static_cast<wxFontWeight>(weight),
+        underlined,
+        wx_face_name
+    );
+    if (font && font->IsOk()) {
+        return (wxd_Font_t*)font;
+    } else {
+        delete font; // Delete if not Ok
+        return NULL;
+    }
+}
+
 // --- wxFontDialog Implementation ---
 
 wxd_FontDialog_t* wxd_FontDialog_Create(
