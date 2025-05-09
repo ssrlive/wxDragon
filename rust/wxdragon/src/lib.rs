@@ -13,10 +13,10 @@ pub mod font;
 pub mod font_data;
 pub mod id;
 pub mod menus;
+pub mod prelude;
 pub mod sizers;
 pub mod widgets;
 pub mod window;
-pub mod prelude;
 
 // Re-export the main entry point and handle
 pub use app::main;
@@ -131,10 +131,7 @@ pub use widgets::static_line::{StaticLine, StaticLineBuilder, LI_HORIZONTAL, LI_
 pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERTICAL};
 
 // Dialogs exports
-pub use dialogs::{
-    colour_dialog::ColourDialog,
-    font_dialog::FontDialog,
-};
+pub use dialogs::{colour_dialog::ColourDialog, font_dialog::FontDialog};
 
 // Font exports
 pub use font::Font;

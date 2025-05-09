@@ -1,0 +1,18 @@
+#ifndef WXD_PICKERS_H
+#define WXD_PICKERS_H
+
+#include "../wxd_types.h"
+
+// --- ColourPickerCtrl ---
+WXD_EXPORTED wxd_ColourPickerCtrl_t* wxd_ColourPickerCtrl_Create(wxd_Window_t* parent, wxd_Id id, wxd_Colour_t initial_colour, wxd_Point pos, wxd_Size size, wxd_Style_t style);
+WXD_EXPORTED wxd_Colour_t wxd_ColourPickerCtrl_GetColour(wxd_ColourPickerCtrl_t* self);
+WXD_EXPORTED void wxd_ColourPickerCtrl_SetColour(wxd_ColourPickerCtrl_t* self, wxd_Colour_t colour);
+
+// --- DatePickerCtrl ---
+WXD_EXPORTED wxd_DatePickerCtrl_t* wxd_DatePickerCtrl_Create(wxd_Window_t* parent, wxd_Id id, const wxd_DateTime_t* dt, wxd_Point pos, wxd_Size size, wxd_Style_t style);
+WXD_EXPORTED wxd_DateTime_t wxd_DatePickerCtrl_GetValue(wxd_DatePickerCtrl_t* self);
+WXD_EXPORTED void wxd_DatePickerCtrl_SetValue(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt);
+WXD_EXPORTED bool wxd_DatePickerCtrl_GetRange(wxd_DatePickerCtrl_t* self, wxd_DateTime_t* dt1, wxd_DateTime_t* dt2);
+WXD_EXPORTED void wxd_DatePickerCtrl_SetRange(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt1, const wxd_DateTime_t* dt2);
+
+#endif // WXD_PICKERS_H 

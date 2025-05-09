@@ -1,10 +1,6 @@
 use std::ffi::CString;
 
-use crate::{
-    widgets::colourpickerctrl::Colour,
-    dialogs::Dialog,
-    window::WxWidget,
-};
+use crate::{dialogs::Dialog, widgets::colourpickerctrl::Colour, window::WxWidget};
 use wxdragon_sys as ffi;
 
 /// Wrapper for wxColourDialog.
@@ -39,7 +35,7 @@ impl ColourDialog {
             dialog_base: Dialog::from_ptr(ptr as super::DialogPtr),
         }
     }
-    
+
     fn as_ptr(&self) -> *mut ffi::wxd_ColourDialog_t {
         self.dialog_base.as_ptr() as *mut ffi::wxd_ColourDialog_t
     }
@@ -82,12 +78,12 @@ impl<'a, W: WxWidget> ColourDialogBuilder<'a, W> {
     /// Build the ColourDialog
     pub fn build(self) -> ColourDialog {
         let c_title = CString::new(self.title).expect("CString::new failed for title");
-        
+
         // Create a temporary ColourData if we have an initial colour
         let colour_data_ptr = if let Some(colour) = self.initial_colour {
             let data_ptr = unsafe { ffi::wxd_ColourData_Create() };
             if !data_ptr.is_null() {
-                unsafe { 
+                unsafe {
                     ffi::wxd_ColourData_SetColour(data_ptr, colour.into());
                 }
             }
@@ -95,26 +91,21 @@ impl<'a, W: WxWidget> ColourDialogBuilder<'a, W> {
         } else {
             std::ptr::null_mut()
         };
-        
+
         let parent_ptr = self.parent.map_or(std::ptr::null_mut(), |p| p.handle_ptr());
 
-        let ptr = unsafe {
-            ffi::wxd_ColourDialog_Create(
-                parent_ptr,
-                c_title.as_ptr(),
-                colour_data_ptr,
-            )
-        };
-        
+        let ptr =
+            unsafe { ffi::wxd_ColourDialog_Create(parent_ptr, c_title.as_ptr(), colour_data_ptr) };
+
         // Clean up the temporary ColourData if we created one
         if !colour_data_ptr.is_null() {
             unsafe { ffi::wxd_ColourData_Destroy(colour_data_ptr) };
         }
-        
+
         if ptr.is_null() {
             panic!("Failed to create wxColourDialog");
         }
-        
+
         unsafe { ColourDialog::from_ptr(ptr) }
     }
 }
@@ -123,4 +114,4 @@ impl WxWidget for ColourDialog {
     fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
         self.dialog_base.handle_ptr()
     }
-} 
+}

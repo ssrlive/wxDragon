@@ -6,16 +6,16 @@ use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
 
-// --- Constants --- 
-// Style Flags 
+// --- Constants ---
+// Style Flags
 // Combine general dialog styles (like CENTRE) with text entry specific ones.
+pub use ffi::WXD_CANCEL as CANCEL;
 pub use ffi::WXD_CENTRE as CENTRE;
-pub use ffi::WXD_OK as OK; // Style flag for OK button
-pub use ffi::WXD_CANCEL as CANCEL; // Style flag for Cancel button
+pub use ffi::WXD_OK as OK; // Style flag for OK button // Style flag for Cancel button
 
 // Text Entry Specific Styles
-pub use ffi::WXD_TE_PROCESS_ENTER as TE_PROCESS_ENTER; // (Less common for dialogs, but possible)
 pub use ffi::WXD_TE_PASSWORD as TE_PASSWORD;
+pub use ffi::WXD_TE_PROCESS_ENTER as TE_PROCESS_ENTER; // (Less common for dialogs, but possible)
 
 // Default styles often include OK | CANCEL | CENTRE
 pub const TEXT_ENTRY_DIALOG_STYLE: i64 = OK | CANCEL | CENTRE;
@@ -23,7 +23,7 @@ pub const TEXT_ENTRY_DIALOG_STYLE: i64 = OK | CANCEL | CENTRE;
 // Opaque C pointer type
 pub type TextEntryDialogPtr = *mut ffi::wxd_TextEntryDialog_t;
 
-// --- TextEntryDialog --- 
+// --- TextEntryDialog ---
 #[derive(Clone)]
 pub struct TextEntryDialog {
     dialog_base: Dialog,
@@ -47,9 +47,9 @@ impl TextEntryDialog {
             dialog_base: Dialog::from_ptr(ptr as super::DialogPtr),
         }
     }
-    
+
     fn as_ptr(&self) -> TextEntryDialogPtr {
-         self.dialog_base.as_ptr() as TextEntryDialogPtr
+        self.dialog_base.as_ptr() as TextEntryDialogPtr
     }
 
     /// Shows the dialog modally.
@@ -62,7 +62,7 @@ impl TextEntryDialog {
     /// Gets the text entered by the user.
     /// Returns `None` if the dialog was cancelled or an error occurred retrieving the value.
     pub fn get_value(&self) -> Option<String> {
-         unsafe {
+        unsafe {
             let mut buffer: [c_char; 1024] = [0; 1024]; // Reasonable buffer size
             let len_needed = ffi::wxd_TextEntryDialog_GetValue(
                 self.as_ptr(),
@@ -87,7 +87,7 @@ impl TextEntryDialog {
                     vec_buffer.len() as i32,
                 );
                 if len_copied == len_needed {
-                    vec_buffer.pop(); 
+                    vec_buffer.pop();
                     String::from_utf8(vec_buffer).ok()
                 } else {
                     None // Error on second call
@@ -112,23 +112,19 @@ impl Drop for TextEntryDialog {
     }
 }
 
-// --- TextEntryDialogBuilder --- 
+// --- TextEntryDialogBuilder ---
 pub struct TextEntryDialogBuilder<'a> {
     parent: Option<&'a dyn WxWidget>,
     message: String,
     caption: String,
     default_value: String,
-    style: i64, 
+    style: i64,
     pos: Point,
     size: Size, // Often unused, but kept for consistency
 }
 
 impl<'a> TextEntryDialogBuilder<'a> {
-    pub fn new(
-        parent: Option<&'a dyn WxWidget>,
-        message: &str,
-        caption: &str,
-    ) -> Self {
+    pub fn new(parent: Option<&'a dyn WxWidget>, message: &str, caption: &str) -> Self {
         TextEntryDialogBuilder {
             parent,
             message: message.to_string(),
@@ -136,7 +132,7 @@ impl<'a> TextEntryDialogBuilder<'a> {
             default_value: String::new(),
             style: TEXT_ENTRY_DIALOG_STYLE, // Default includes OK/Cancel/Centre
             pos: DEFAULT_POSITION,
-            size: DEFAULT_SIZE, 
+            size: DEFAULT_SIZE,
         }
     }
 
@@ -169,7 +165,8 @@ impl<'a> TextEntryDialogBuilder<'a> {
     pub fn build(self) -> TextEntryDialog {
         let c_message = CString::new(self.message).expect("CString::new failed for message");
         let c_caption = CString::new(self.caption).expect("CString::new failed for caption");
-        let c_default_value = CString::new(self.default_value).expect("CString::new failed for default_value");
+        let c_default_value =
+            CString::new(self.default_value).expect("CString::new failed for default_value");
         let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
 
         let ptr = unsafe {
@@ -179,8 +176,10 @@ impl<'a> TextEntryDialogBuilder<'a> {
                 c_caption.as_ptr(),
                 c_default_value.as_ptr(),
                 self.style as ffi::wxd_Style_t,
-                self.pos.x, self.pos.y, 
-                self.size.width, self.size.height 
+                self.pos.x,
+                self.pos.y,
+                self.size.width,
+                self.size.height,
             )
         };
         if ptr.is_null() {
@@ -188,4 +187,4 @@ impl<'a> TextEntryDialogBuilder<'a> {
         }
         unsafe { TextEntryDialog::from_ptr(ptr) }
     }
-} 
+}

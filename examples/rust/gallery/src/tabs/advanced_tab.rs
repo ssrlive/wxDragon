@@ -129,32 +129,39 @@ impl AdvancedTabControls {
     pub fn bind_events(&self) {
         // TreeCtrl Selection Changed event
         let tree_status_label_clone = self.tree_status_label.clone();
-        self.tree_ctrl.bind(EventType::TREE_SEL_CHANGED, move |event: Event| {
-            if let Some(selected_item) = event.get_item() {
-                let mut status = String::new();
-                std::fmt::Write::write_fmt(&mut status, format_args!("Tree Selection: Item {:?}", selected_item)).unwrap();
-                tree_status_label_clone.set_label(&status);
-            } else {
-                tree_status_label_clone.set_label("Tree Selection: None");
-            }
-        });
+        self.tree_ctrl
+            .bind(EventType::TREE_SEL_CHANGED, move |event: Event| {
+                if let Some(selected_item) = event.get_item() {
+                    let mut status = String::new();
+                    std::fmt::Write::write_fmt(
+                        &mut status,
+                        format_args!("Tree Selection: Item {:?}", selected_item),
+                    )
+                    .unwrap();
+                    tree_status_label_clone.set_label(&status);
+                } else {
+                    tree_status_label_clone.set_label("Tree Selection: None");
+                }
+            });
 
         // Gauge button events
         let gauge_clone_for_inc = self.gauge.clone();
         let gauge_status_label_clone_for_inc = self.gauge_status_label.clone();
-        self.gauge_increase_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_: Event| {
-            let current_value = gauge_clone_for_inc.get_value();
-            let new_value = std::cmp::min(current_value + 10, 100);
-            gauge_clone_for_inc.set_value(new_value);
-            gauge_status_label_clone_for_inc.set_label(&format!("Gauge Value: {}%", new_value));
-        });
+        self.gauge_increase_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_: Event| {
+                let current_value = gauge_clone_for_inc.get_value();
+                let new_value = std::cmp::min(current_value + 10, 100);
+                gauge_clone_for_inc.set_value(new_value);
+                gauge_status_label_clone_for_inc.set_label(&format!("Gauge Value: {}%", new_value));
+            });
 
         let gauge_clone_for_reset = self.gauge.clone();
         let gauge_status_label_clone_for_reset = self.gauge_status_label.clone();
-        self.gauge_reset_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_: Event| {
-            gauge_clone_for_reset.set_value(0);
-            gauge_status_label_clone_for_reset.set_label("Gauge Value: 0%");
-        });
+        self.gauge_reset_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_: Event| {
+                gauge_clone_for_reset.set_value(0);
+                gauge_status_label_clone_for_reset.set_label("Gauge Value: 0%");
+            });
 
         // Slider Event Binding
         let slider_label_clone = self.slider_label.clone();
@@ -177,4 +184,4 @@ impl AdvancedTabControls {
             }
         });
     }
-} 
+}

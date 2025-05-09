@@ -1,7 +1,7 @@
 //! wxMenu wrapper
 
-use crate::menus::menuitem::{ItemKind, MenuItem};
 use crate::id::Id;
+use crate::menus::menuitem::{ItemKind, MenuItem};
 use std::ffi::CString;
 use std::marker::PhantomData;
 use wxdragon_sys as ffi;

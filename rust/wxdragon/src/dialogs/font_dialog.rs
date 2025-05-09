@@ -1,11 +1,6 @@
 use std::ffi::CString;
 
-use crate::{
-    font::Font,
-    font_data::FontData,
-    dialogs::Dialog,
-    window::WxWidget,
-};
+use crate::{dialogs::Dialog, font::Font, font_data::FontData, window::WxWidget};
 use wxdragon_sys as ffi;
 
 /// Wrapper for wxFontDialog.
@@ -40,7 +35,7 @@ impl FontDialog {
             dialog_base: Dialog::from_ptr(ptr as super::DialogPtr),
         }
     }
-    
+
     fn as_ptr(&self) -> *mut ffi::wxd_FontDialog_t {
         self.dialog_base.as_ptr() as *mut ffi::wxd_FontDialog_t
     }
@@ -65,7 +60,7 @@ impl FontDialog {
             Some(unsafe { Font::from_ptr(font_ptr, true) })
         }
     }
-    
+
     /// Get the font data from the dialog.
     /// Note: This returns a reference to the internal font data, which is only
     /// valid as long as the dialog exists.
@@ -99,18 +94,13 @@ impl<'a, W: WxWidget> FontDialogBuilder<'a, W> {
         let font_data_ptr = self.font_data.map_or(std::ptr::null_mut(), |d| d.as_ptr());
         let parent_ptr = self.parent.map_or(std::ptr::null_mut(), |p| p.handle_ptr());
 
-        let ptr = unsafe {
-            ffi::wxd_FontDialog_Create(
-                parent_ptr,
-                c_title.as_ptr(),
-                font_data_ptr,
-            )
-        };
-        
+        let ptr =
+            unsafe { ffi::wxd_FontDialog_Create(parent_ptr, c_title.as_ptr(), font_data_ptr) };
+
         if ptr.is_null() {
             panic!("Failed to create wxFontDialog");
         }
-        
+
         unsafe { FontDialog::from_ptr(ptr) }
     }
 }
@@ -119,4 +109,4 @@ impl WxWidget for FontDialog {
     fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
         self.dialog_base.handle_ptr()
     }
-} 
+}

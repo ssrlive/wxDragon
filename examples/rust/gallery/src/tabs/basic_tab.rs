@@ -163,15 +163,10 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let activity_label = StaticText::builder(&basic_panel)
         .with_label("Activity:")
         .build();
-    let activity_indicator = ActivityIndicator::builder(&basic_panel)
-        .build();
-    let activity_start_btn = Button::builder(&basic_panel)
-        .with_label("Start")
-        .build();
+    let activity_indicator = ActivityIndicator::builder(&basic_panel).build();
+    let activity_start_btn = Button::builder(&basic_panel).with_label("Start").build();
     activity_start_btn.set_tooltip("Start the activity indicator.");
-    let activity_stop_btn = Button::builder(&basic_panel)
-        .with_label("Stop")
-        .build();
+    let activity_stop_btn = Button::builder(&basic_panel).with_label("Stop").build();
     activity_stop_btn.set_tooltip("Stop the activity indicator.");
 
     let colour_picker_label = StaticText::builder(&basic_panel)
@@ -201,8 +196,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let calendar_label_widget = StaticText::builder(&basic_panel)
         .with_label("Calendar:")
         .build();
-    let calendar_ctrl = CalendarCtrl::builder(&basic_panel)
-        .build();
+    let calendar_ctrl = CalendarCtrl::builder(&basic_panel).build();
     calendar_ctrl.set_tooltip("Select a date from the calendar.");
     let initial_calendar_date = calendar_ctrl.get_date();
     let calendar_status_label = StaticText::builder(&basic_panel)
@@ -389,36 +383,33 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     });
 
     let bitmap_combo_box_clone = bitmap_combo_box.clone();
-    bitmap_combo_box.bind(
-        EventType::COMMAND_COMBOBOX_SELECTED,
-        move |event: Event| {
-            let selection_idx = event.get_selection().unwrap_or(-1);
-            let mut log_output = String::new();
-            if selection_idx != -1 {
-                let item_str = bitmap_combo_box_clone.get_string(selection_idx as u32);
+    bitmap_combo_box.bind(EventType::COMMAND_COMBOBOX_SELECTED, move |event: Event| {
+        let selection_idx = event.get_selection().unwrap_or(-1);
+        let mut log_output = String::new();
+        if selection_idx != -1 {
+            let item_str = bitmap_combo_box_clone.get_string(selection_idx as u32);
+            log_output.push_str(&format!(
+                "BitmapComboBox Selected Item [{}]: '{}'",
+                selection_idx, item_str
+            ));
+            if let Some(bitmap_obj) = bitmap_combo_box_clone.get_item_bitmap(selection_idx as u32) {
                 log_output.push_str(&format!(
-                    "BitmapComboBox Selected Item [{}]: '{}'",
-                    selection_idx, item_str
+                    ", has bitmap (w:{}, h:{})",
+                    bitmap_obj.get_width(),
+                    bitmap_obj.get_height()
                 ));
-                if let Some(bitmap_obj) = bitmap_combo_box_clone.get_item_bitmap(selection_idx as u32) {
-                    log_output.push_str(&format!(
-                        ", has bitmap (w:{}, h:{})",
-                        bitmap_obj.get_width(),
-                        bitmap_obj.get_height()
-                    ));
-                } else {
-                    log_output.push_str(", Item has no bitmap");
-                }
             } else {
-                let current_text_value = bitmap_combo_box_clone.get_value();
-                log_output.push_str(&format!(
-                    "BitmapComboBox Text Entered: '{}'",
-                    current_text_value
-                ));
+                log_output.push_str(", Item has no bitmap");
             }
-            println!("{}", log_output);
-        },
-    );
+        } else {
+            let current_text_value = bitmap_combo_box_clone.get_value();
+            log_output.push_str(&format!(
+                "BitmapComboBox Text Entered: '{}'",
+                current_text_value
+            ));
+        }
+        println!("{}", log_output);
+    });
 
     let colour_label_clone = colour_status_label.clone();
     colour_picker.bind(EventType::COLOURPICKER_CHANGED, move |event: Event| {
@@ -460,22 +451,16 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     });
 
     let indicator_clone_start = activity_indicator.clone();
-    activity_start_btn.bind(
-        EventType::COMMAND_BUTTON_CLICKED,
-        move |_event: Event| {
-            indicator_clone_start.start();
-            println!("ActivityIndicator started.");
-        },
-    );
+    activity_start_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event: Event| {
+        indicator_clone_start.start();
+        println!("ActivityIndicator started.");
+    });
 
     let indicator_clone_stop = activity_indicator.clone();
-    activity_stop_btn.bind(
-        EventType::COMMAND_BUTTON_CLICKED,
-        move |_event: Event| {
-            indicator_clone_stop.stop();
-            println!("ActivityIndicator stopped.");
-        },
-    );
+    activity_stop_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event: Event| {
+        indicator_clone_stop.stop();
+        println!("ActivityIndicator stopped.");
+    });
 
     let spinctrld_label_clone = spinctrl_double_status_label.clone();
     let spinctrld_clone_for_handler = spinctrl_double.clone();
@@ -509,13 +494,13 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     });
 
     let cmd_link_button_clone = cmd_link_button.clone();
-    cmd_link_button.bind(
-        EventType::COMMAND_BUTTON_CLICKED,
-        move |_event: Event| {
-            println!("CommandLinkButton clicked. MainLabel: '{}'", cmd_link_button_clone.get_label());
-        },
-    );
-    
+    cmd_link_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event: Event| {
+        println!(
+            "CommandLinkButton clicked. MainLabel: '{}'",
+            cmd_link_button_clone.get_label()
+        );
+    });
+
     bitmap_button.bind(EventType::COMMAND_BUTTON_CLICKED, |_event: Event| {
         println!("Bitmap Button (Red) clicked.");
     });
@@ -563,7 +548,10 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         EventType::COMMAND_RADIOBUTTON_SELECTED,
         radio_status_update_handler.clone(),
     );
-    radio2.bind(EventType::COMMAND_RADIOBUTTON_SELECTED, radio_status_update_handler);
+    radio2.bind(
+        EventType::COMMAND_RADIOBUTTON_SELECTED,
+        radio_status_update_handler,
+    );
 
     let tc_clone_for_spin_event = text_ctrl.clone();
     spin_button.bind(EventType::SPIN, move |event: Event| {
@@ -577,7 +565,10 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     search_ctrl.bind(
         EventType::COMMAND_SEARCHCTRL_SEARCH_BTN,
         move |_event: Event| {
-            println!("SEARCH_CTRL Event: Search Button Clicked! Value: \"{}\"", sc_search_clone.get_value());
+            println!(
+                "SEARCH_CTRL Event: Search Button Clicked! Value: \"{}\"",
+                sc_search_clone.get_value()
+            );
         },
     );
 
@@ -586,14 +577,20 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         EventType::COMMAND_SEARCHCTRL_CANCEL_BTN,
         move |_event: Event| {
             let value_before_clear = sc_cancel_clone.get_value();
-            sc_cancel_clone.set_value(""); 
-            println!("SEARCH_CTRL Event: Cancel Button Clicked! Value was: \"{}\"", value_before_clear);
+            sc_cancel_clone.set_value("");
+            println!(
+                "SEARCH_CTRL Event: Cancel Button Clicked! Value was: \"{}\"",
+                value_before_clear
+            );
         },
     );
-    
+
     let sc_enter_clone = search_ctrl.clone();
     search_ctrl.bind(EventType::TEXT_ENTER, move |_event: Event| {
-        println!("SEARCH_CTRL Event: Text Entered! Value: \"{}\"", sc_enter_clone.get_value());
+        println!(
+            "SEARCH_CTRL Event: Text Entered! Value: \"{}\"",
+            sc_enter_clone.get_value()
+        );
     });
 
     BasicTabControls {
@@ -633,17 +630,19 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
 impl BasicTabControls {
     pub fn bind_events(&self) {
         // BitmapButton click event
-        self.bitmap_button.bind(EventType::COMMAND_BUTTON_CLICKED, |event: Event| {
-            println!("Bitmap Button clicked: {}", event.get_id());
-        });
+        self.bitmap_button
+            .bind(EventType::COMMAND_BUTTON_CLICKED, |event: Event| {
+                println!("Bitmap Button clicked: {}", event.get_id());
+            });
 
         // ArtProvider BitmapButton click event
-        self.art_button.bind(EventType::COMMAND_BUTTON_CLICKED, |event: Event| {
-            println!(
-                "ArtProvider Button (ID: {}) clicked! Icon from ArtProvider works.",
-                event.get_id()
-            );
-        });
+        self.art_button
+            .bind(EventType::COMMAND_BUTTON_CLICKED, |event: Event| {
+                println!(
+                    "ArtProvider Button (ID: {}) clicked! Icon from ArtProvider works.",
+                    event.get_id()
+                );
+            });
 
         // Checkbox toggle event
         self.checkbox.bind(EventType::CHECKBOX, |event: Event| {
@@ -658,18 +657,19 @@ impl BasicTabControls {
         // TextCtrl Enter key event
         let spin_button_clone = self.spin_button.clone();
         let text_ctrl_clone = self.text_ctrl.clone();
-        self.text_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
-            if let Some(text) = event.get_string() {
-                if let Ok(num) = text.parse::<i32>() {
-                    let min = spin_button_clone.min();
-                    let max = spin_button_clone.max();
-                    spin_button_clone.set_value(num.clamp(min, max));
-                } else {
-                    text_ctrl_clone.set_value(&spin_button_clone.value().to_string());
+        self.text_ctrl
+            .bind(EventType::TEXT_ENTER, move |event: Event| {
+                if let Some(text) = event.get_string() {
+                    if let Ok(num) = text.parse::<i32>() {
+                        let min = spin_button_clone.min();
+                        let max = spin_button_clone.max();
+                        spin_button_clone.set_value(num.clamp(min, max));
+                    } else {
+                        text_ctrl_clone.set_value(&spin_button_clone.value().to_string());
+                    }
                 }
-            }
-            event.skip(false);
-        });
+                event.skip(false);
+            });
 
         // Radio button selected event (bind to both)
         let radio_status_label_clone = self.radio_status_label.clone();
@@ -686,10 +686,8 @@ impl BasicTabControls {
             EventType::COMMAND_RADIOBUTTON_SELECTED,
             radio_status_update.clone(),
         );
-        self.radio2.bind(
-            EventType::COMMAND_RADIOBUTTON_SELECTED, 
-            radio_status_update
-        );
+        self.radio2
+            .bind(EventType::COMMAND_RADIOBUTTON_SELECTED, radio_status_update);
 
         // SpinButton Event Bindings
         let text_ctrl_clone = self.text_ctrl.clone();
@@ -701,24 +699,24 @@ impl BasicTabControls {
 
         // Event binding for RadioBox
         let radio_box_clone = self.radio_box.clone();
-        self.radio_box.bind(EventType::COMMAND_RADIOBOX_SELECTED, move |event: Event| {
-            let selection = event.get_selection().unwrap_or(-1);
-            let selection_string = if selection != -1 {
-                radio_box_clone.get_string(selection)
-            } else {
-                "N/A".to_string()
-            };
-            println!(
-                "RadioBox selected: {} ({}), Event: {:?}",
-                selection_string, selection, event
-            );
-        });
+        self.radio_box
+            .bind(EventType::COMMAND_RADIOBOX_SELECTED, move |event: Event| {
+                let selection = event.get_selection().unwrap_or(-1);
+                let selection_string = if selection != -1 {
+                    radio_box_clone.get_string(selection)
+                } else {
+                    "N/A".to_string()
+                };
+                println!(
+                    "RadioBox selected: {} ({}), Event: {:?}",
+                    selection_string, selection, event
+                );
+            });
 
         // BitmapComboBox Event
         let bitmap_combo_box_clone = self.bitmap_combo_box.clone();
-        self.bitmap_combo_box.bind(
-            EventType::COMMAND_COMBOBOX_SELECTED,
-            move |event: Event| {
+        self.bitmap_combo_box
+            .bind(EventType::COMMAND_COMBOBOX_SELECTED, move |event: Event| {
                 let selection_idx = event.get_selection().unwrap_or(-1);
                 let mut log_output = format!("BitmapComboBox Event: {:?}", event);
 
@@ -749,8 +747,7 @@ impl BasicTabControls {
                 }
 
                 println!("{}", log_output);
-            },
-        );
+            });
 
         // SearchCtrl Event Handlers
         let search_ctrl_clone_search = self.search_ctrl.clone();
@@ -779,12 +776,13 @@ impl BasicTabControls {
         );
 
         let search_ctrl_clone_enter = self.search_ctrl.clone();
-        self.search_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
-            println!(
-                "SEARCH_CTRL Event: Text Entered! ID: {}, Value: \"{}\"",
-                event.get_id(),
-                search_ctrl_clone_enter.get_value()
-            );
-        });
+        self.search_ctrl
+            .bind(EventType::TEXT_ENTER, move |event: Event| {
+                println!(
+                    "SEARCH_CTRL Event: Text Entered! ID: {}, Value: \"{}\"",
+                    event.get_id(),
+                    search_ctrl_clone_enter.get_value()
+                );
+            });
     }
-} 
+}

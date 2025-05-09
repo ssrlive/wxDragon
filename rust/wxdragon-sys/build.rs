@@ -6,6 +6,17 @@ use std::process::Command;
 fn main() {
     println!("cargo:rerun-if-changed=cpp/CMakeLists.txt");
     println!("cargo:rerun-if-changed=cpp/include/wxdragon.h");
+    println!("cargo:rerun-if-changed=cpp/include/wxd_types.h");
+    println!("cargo:rerun-if-changed=cpp/include/core/wxd_app.h");
+    println!("cargo:rerun-if-changed=cpp/include/core/wxd_window_base.h");
+    println!("cargo:rerun-if-changed=cpp/include/dialogs/wxd_dialogs.h");
+    println!("cargo:rerun-if-changed=cpp/include/events/wxd_event_api.h");
+    println!("cargo:rerun-if-changed=cpp/include/sizers/wxd_sizers.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_choices.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_containers.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_controls.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_misc_widgets.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_pickers.h");
     println!("cargo:rerun-if-changed=cpp/src");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());

@@ -20,4 +20,4 @@ pub mod book_controls_tab;
 pub mod dialog_tab;
 
 /// Media tab demonstrates media-related widgets and functionality.
-pub mod media_tab; 
+pub mod media_tab;

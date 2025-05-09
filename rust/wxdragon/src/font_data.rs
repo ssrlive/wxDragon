@@ -67,4 +67,4 @@ impl Drop for FontData {
 }
 
 // Don't implement Send/Sync as this contains a raw pointer
-// that should not be shared between threads 
+// that should not be shared between threads

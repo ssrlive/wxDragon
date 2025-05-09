@@ -1,77 +1,94 @@
-#include "wx/wxprec.h"
+#include "../include/wxdragon.h" // Main header
+#include <wx/wx.h>
+#include <wx/statbmp.h> // For wxStaticBitmap
+#include <wx/bitmap.h>  // For wxBitmap
 
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
+// Note: No top-level extern "C" here; wxdragon.h handles it.
 
-#include <wx/control.h>
-#include "wx/statbmp.h"
-#include "../include/wxdragon.h"
-
-extern "C" {
-
-WXDRAGON_API wxd_StaticBitmap* wxd_StaticBitmap_Create(wxd_Window_t* parent_wxd, int id, const char* bitmap_path, int x, int y, int width, int height, long style) {
-    wxWindow* parent = (wxWindow*)parent_wxd;
-    if (!parent) return nullptr;
-
-    wxBitmap bitmap;
-    if (bitmap_path && strlen(bitmap_path) > 0) {
-        // wxBITMAP_TYPE_ANY allows loading various formats
-        if (!bitmap.LoadFile(wxString::FromUTF8(bitmap_path), wxBITMAP_TYPE_ANY)) {
-            wxLogError("Failed to load bitmap: %s", bitmap_path);
-            // Decide on error handling: return nullptr or create with an invalid bitmap?
-            // For now, let's return nullptr if bitmap loading fails, as a StaticBitmap without a bitmap is often not useful.
-            return nullptr; 
-        }
-    } else {
-        // If no path, create with an empty/invalid bitmap or return nullptr.
-        // wxStaticBitmap can be created with wxNullBitmap.
-        // Let's proceed with wxNullBitmap if no path is provided, or if loading fails and we decide to not return nullptr above.
-        // For now, the above returns nullptr on load failure. If path is empty, we use wxNullBitmap.
-        bitmap = wxNullBitmap;
-    }
-    
-    wxStaticBitmap* ctrl = new wxStaticBitmap(parent, id, bitmap, wxPoint(x, y), wxSize(width, height), style);
-    return (wxd_StaticBitmap*)ctrl;
+// Helper to convert wxd_Point to wxPoint
+static inline wxPoint wxd_to_wx_point_sb(const wxd_Point& p) {
+    if (p.x == -1 && p.y == -1) return wxDefaultPosition;
+    return wxPoint(p.x, p.y);
 }
 
-WXDRAGON_API wxd_StaticBitmap* wxd_StaticBitmap_CreateWithBitmap(
-    wxd_Window_t* parent_wxd, int id, 
-    wxd_Bitmap_t* bitmap_handle,
-    int x, int y, int width, int height, long style,
-    int scale_mode
+// Helper to convert wxd_Size to wxSize
+static inline wxSize wxd_to_wx_size_sb(const wxd_Size& s) {
+    if (s.width == -1 && s.height == -1) return wxDefaultSize;
+    return wxSize(s.width, s.height);
+}
+
+/**
+ * @brief Creates a static bitmap control displaying a wxBitmap.
+ *
+ * If the provided bitmap is invalid or null, the control will be created with wxNullBitmap.
+ * The wxStaticBitmap makes its own copy of the bitmap, so the caller retains ownership
+ * of the passed wxd_Bitmap_t, unless it's intended to be consumed.
+ */
+WXD_EXPORTED wxd_StaticBitmap_t* wxd_StaticBitmap_CreateWithBitmap(
+    wxd_Window_t* parent, 
+    wxd_Id id, 
+    wxd_Bitmap_t* bitmap, 
+    wxd_Point pos, 
+    wxd_Size size, 
+    wxd_Style_t style, 
+    const char* name
 ) {
-    wxWindow* parent = (wxWindow*)parent_wxd;
-    if (!parent) return nullptr;
+    wxWindow* parentWin = reinterpret_cast<wxWindow*>(parent);
+    wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
 
-    wxBitmap* bmp_ptr = (wxBitmap*)bitmap_handle;
-
-    // wxStaticBitmap constructor handles null or invalid bitmaps gracefully.
-    // It will use the provided bitmap (wxBitmap is ref-counted) or wxNullBitmap if bmp_ptr is null.
-    wxStaticBitmap* ctrl = new wxStaticBitmap(parent, id, bmp_ptr ? *bmp_ptr : wxNullBitmap, wxPoint(x, y), wxSize(width, height), style);
-    
-    if (ctrl) {
-        ctrl->SetScaleMode(static_cast<decltype(wxStaticBitmapBase::Scale_None)>(scale_mode));
+    if (!parentWin) {
+        wxLogError("wxd_StaticBitmap_CreateWithBitmap: Parent window is null.");
+        return nullptr;
     }
 
-    return (wxd_StaticBitmap*)ctrl;
+    // wxStaticBitmap constructor requires a const wxBitmap&.
+    // If bmp is null or not OK, we use wxNullBitmap.
+    // wxStaticBitmap makes a copy of the bitmap data.
+    const wxBitmap& bitmap_ref = (bmp && bmp->IsOk()) ? *bmp : wxNullBitmap;
+    if (!(bmp && bmp->IsOk())) {
+         wxLogWarning("wxd_StaticBitmap_CreateWithBitmap: Bitmap is null or not OK. Creating StaticBitmap with wxNullBitmap.");
+    }
+
+    wxStaticBitmap* statBmp = new wxStaticBitmap(
+        parentWin,
+        id,
+        bitmap_ref, 
+        wxd_to_wx_point_sb(pos),
+        wxd_to_wx_size_sb(size),
+        style,
+        WXD_STR_TO_WX_STRING_UTF8_NULL_OK(name)
+    );
+
+    return reinterpret_cast<wxd_StaticBitmap_t*>(statBmp);
 }
 
-// Add wxd_StaticBitmap_SetBitmap if needed in future
-// WXDRAGON_API void wxd_StaticBitmap_SetBitmap(wxd_StaticBitmap* self, const char* bitmap_path) {
-//     if (!self) return;
-//     wxStaticBitmap* ctrl = (wxStaticBitmap*)self;
-//     wxBitmap bitmap;
-//     if (bitmap_path && strlen(bitmap_path) > 0) {
-//         if (bitmap.LoadFile(wxString::FromUTF8(bitmap_path), wxBITMAP_TYPE_ANY)) {
-//             ctrl->SetBitmap(bitmap);
-//         } else {
-//             wxLogError("Failed to load bitmap for SetBitmap: %s", bitmap_path);
-//             ctrl->SetBitmap(wxNullBitmap); // or some other error indication
-//         }
-//     } else {
-//         ctrl->SetBitmap(wxNullBitmap);
-//     }
-// }
+/**
+ * @brief Sets the bitmap for the static bitmap control.
+ *
+ * The wxStaticBitmap makes its own copy of the bitmap.
+ */
+WXD_EXPORTED void wxd_StaticBitmap_SetBitmap(wxd_StaticBitmap_t* self, wxd_Bitmap_t* bitmap) {
+    wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+    wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
 
-} // extern "C" 
+    if (!statBmp) return;
+
+    if (!bmp || !bmp->IsOk()) {
+        statBmp->SetBitmap(wxNullBitmap);
+    } else {
+        statBmp->SetBitmap(*bmp);
+    }
+}
+
+// Optional: GetBitmap (returns a new wxBitmap object, caller owns it)
+// WXD_EXPORTED wxd_Bitmap_t* wxd_StaticBitmap_GetBitmap(wxd_StaticBitmap_t* self) {
+//     wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+//     if (!statBmp) return nullptr;
+// 
+//     const wxBitmap& currentBmp = statBmp->GetBitmap();
+//     if (!currentBmp.IsOk()) return nullptr;
+// 
+//     // Return a copy, as the internal one might be changed or deleted
+//     wxBitmap* newBmp = new wxBitmap(currentBmp);
+//     return reinterpret_cast<wxd_Bitmap_t*>(newBmp);
+// } 

@@ -1,14 +1,14 @@
-use wxdragon::prelude::*; 
+use wxdragon::prelude::*;
 
 use std::cell::RefCell;
 
-mod tabs; 
-use tabs::lists_tab::create_lists_tab;
-use tabs::basic_tab::create_basic_tab;
+mod tabs;
 use tabs::advanced_tab::create_advanced_tab;
-use tabs::data_tab::{create_data_tab, FrameData};
+use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
+use tabs::data_tab::{create_data_tab, FrameData};
 use tabs::dialog_tab::create_dialog_tab;
+use tabs::lists_tab::create_lists_tab;
 use tabs::media_tab::create_media_tab;
 
 // Tool IDs - used in main.rs
@@ -57,9 +57,7 @@ fn main() {
         frame.set_user_data(Box::new(frame_user_data));
 
         // --- Create the Notebook ---
-        let notebook = Notebook::builder(&frame)
-            .with_id(120)
-            .build();
+        let notebook = Notebook::builder(&frame).with_id(120).build();
 
         // --- Create Tabs ---
         let basic_controls = create_basic_tab(&notebook, &frame);
@@ -108,7 +106,7 @@ fn main() {
         frame.set_sizer(main_sizer, true);
 
         // --- Bind Event Handlers ---
-        
+
         // Bind tab-specific events
         basic_controls.bind_events();
         advanced_controls.bind_events();
@@ -119,28 +117,26 @@ fn main() {
 
         // Menu & Toolbar Event Handlers
         let frame_clone_for_menu = frame.clone();
-        frame.bind(EventType::MENU, move |event: Event| {
-            match event.get_id() {
-                id if id == ID_EXIT => {
-                    println!("Menu/Toolbar: Exit clicked!");
-                    frame_clone_for_menu.close();
-                }
-                id if id == ID_ABOUT => {
-                    println!("Menu: About clicked!");
-                }
-                id if id == ID_TOOL_NEW => {
-                    println!("Toolbar: New clicked!");
-                }
-                id if id == ID_TOOL_OPEN => {
-                    println!("Toolbar: Open clicked!");
-                }
-                id if id == ID_TOOL_SAVE => {
-                    println!("Toolbar: Save clicked!");
-                }
-                _ => {
-                    println!("Unhandled Menu/Tool ID: {}", event.get_id());
-                    event.skip(true);
-                }
+        frame.bind(EventType::MENU, move |event: Event| match event.get_id() {
+            id if id == ID_EXIT => {
+                println!("Menu/Toolbar: Exit clicked!");
+                frame_clone_for_menu.close();
+            }
+            id if id == ID_ABOUT => {
+                println!("Menu: About clicked!");
+            }
+            id if id == ID_TOOL_NEW => {
+                println!("Toolbar: New clicked!");
+            }
+            id if id == ID_TOOL_OPEN => {
+                println!("Toolbar: Open clicked!");
+            }
+            id if id == ID_TOOL_SAVE => {
+                println!("Toolbar: Save clicked!");
+            }
+            _ => {
+                println!("Unhandled Menu/Tool ID: {}", event.get_id());
+                event.skip(true);
             }
         });
 

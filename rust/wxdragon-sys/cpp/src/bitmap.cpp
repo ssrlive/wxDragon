@@ -75,13 +75,13 @@ WXD_EXPORTED void wxd_Bitmap_Destroy(wxd_Bitmap_t* bitmap) {
 // ADDED: Get bitmap dimensions and validity
 WXD_EXPORTED int wxd_Bitmap_GetWidth(wxd_Bitmap_t* bitmap) {
     wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
-    if (!bmp) return 0;
+    if (!bmp || !bmp->IsOk()) return 0;
     return bmp->GetWidth();
 }
 
 WXD_EXPORTED int wxd_Bitmap_GetHeight(wxd_Bitmap_t* bitmap) {
     wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
-    if (!bmp) return 0;
+    if (!bmp || !bmp->IsOk()) return 0;
     return bmp->GetHeight();
 }
 
@@ -89,4 +89,29 @@ WXD_EXPORTED bool wxd_Bitmap_IsOk(wxd_Bitmap_t* bitmap) {
     wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
     if (!bmp) return false;
     return bmp->IsOk();
+}
+
+WXD_EXPORTED wxd_Bitmap_t* wxd_Bitmap_Clone(wxd_Bitmap_t* bitmap) {
+    if (!bitmap) {
+        return nullptr;
+    }
+    wxBitmap* original_bmp = reinterpret_cast<wxBitmap*>(bitmap);
+    if (!original_bmp->IsOk()) {
+        return nullptr; // Don't clone an invalid bitmap
+    }
+
+    wxBitmap* cloned_bmp = nullptr;
+    try {
+        cloned_bmp = new wxBitmap(*original_bmp); // Use copy constructor
+    } catch (const std::exception& e) {
+        // cloned_bmp will remain nullptr
+    } catch (...) {
+        // cloned_bmp will remain nullptr
+    }
+
+    if (!cloned_bmp || !cloned_bmp->IsOk()) {
+        delete cloned_bmp; // Safe to call delete on nullptr
+        return nullptr;
+    }
+    return reinterpret_cast<wxd_Bitmap_t*>(cloned_bmp);
 } 

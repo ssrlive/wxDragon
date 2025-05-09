@@ -58,15 +58,17 @@ impl Font {
     pub fn get_face_name(&self) -> String {
         let mut buffer = vec![0u8; 256]; // Reasonable initial buffer size
         let len = unsafe {
-            ffi::wxd_Font_GetFaceName(self.ptr, buffer.as_mut_ptr() as *mut i8, buffer.len() as i32)
+            ffi::wxd_Font_GetFaceName(
+                self.ptr,
+                buffer.as_mut_ptr() as *mut i8,
+                buffer.len() as i32,
+            )
         };
 
         if len > 0 {
             // Resize buffer to actual length + 1 for null terminator
             buffer.resize((len + 1) as usize, 0);
-            let c_str = unsafe {
-                CStr::from_ptr(buffer.as_ptr() as *const i8)
-            };
+            let c_str = unsafe { CStr::from_ptr(buffer.as_ptr() as *const i8) };
             c_str.to_string_lossy().into_owned()
         } else {
             String::new()
@@ -112,4 +114,4 @@ pub const FONTSTYLE_SLANT: i32 = 2;
 // Font weight constants
 pub const FONTWEIGHT_NORMAL: i32 = 0;
 pub const FONTWEIGHT_LIGHT: i32 = 1;
-pub const FONTWEIGHT_BOLD: i32 = 2; 
+pub const FONTWEIGHT_BOLD: i32 = 2;

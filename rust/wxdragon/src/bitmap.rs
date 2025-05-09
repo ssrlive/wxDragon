@@ -5,7 +5,7 @@ use std::os::raw::{c_int, c_uchar};
 use wxdragon_sys as ffi;
 
 /// Represents a platform-dependent bitmap image.
-#[derive(Clone)] // Clone might be shallow (pointer copy) unless specific handling added
+#[derive(Debug)] // Keep Debug if useful, or remove if pointer isn't meaningful for debug
 pub struct Bitmap(pub(crate) *mut ffi::wxd_Bitmap_t);
 
 impl Bitmap {
@@ -75,6 +75,21 @@ impl Bitmap {
     }
 }
 
+impl Clone for Bitmap {
+    fn clone(&self) -> Self {
+        unsafe {
+            let cloned_ptr = ffi::wxd_Bitmap_Clone(self.0);
+            if cloned_ptr.is_null() {
+                panic!(
+                    "Failed to clone wxBitmap: wxd_Bitmap_Clone returned null. Original: {:?}",
+                    self.0
+                );
+            }
+            Bitmap(cloned_ptr)
+        }
+    }
+}
+
 impl Drop for Bitmap {
     /// Destroys the associated C++ wxBitmap object.
     /// Note: This should only be called if Rust has unique ownership.
@@ -85,9 +100,9 @@ impl Drop for Bitmap {
         // TODO: Implement proper ownership tracking. For now, assume Rust owns
         //       bitmaps created via `from_rgba` unless explicitly given away.
         if !self.0.is_null() {
-            // println!("Dropping Bitmap {:?}", self.0);
-            unsafe { ffi::wxd_Bitmap_Destroy(self.0) };
-            // self.0 = std::ptr::null_mut(); // Not strictly necessary due to drop
+            unsafe {
+                ffi::wxd_Bitmap_Destroy(self.0);
+            }
         }
     }
 }

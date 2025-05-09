@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/bmpbuttn.h>
 #include <wx/bitmap.h>
+#include <cstdio> // For printf
 
 // Helper function (already defined elsewhere, ensure linkage or redefine locally if needed)
 // For simplicity here, assume they are accessible or redefine:
@@ -18,33 +19,67 @@ inline wxSize wxd_to_wx_size(const wxd_Size& s) {
 WXD_EXPORTED wxd_BitmapButton_t* wxd_BitmapButton_Create(
     wxd_Window_t* parent,
     wxd_Id id,
-    wxd_Bitmap_t* bitmap, // Assuming this is the normal state bitmap
+    wxd_Bitmap_t* bitmap, // Main bitmap (normal state)
     wxd_Point pos,
     wxd_Size size,
-    wxd_Style_t style
+    wxd_Style_t style,
+    const char* name_str,
+    wxd_Bitmap_t* bitmap_disabled_wxd, // Disabled state bitmap (can be NULL)
+    wxd_Bitmap_t* bitmap_focus_wxd,    // Focus state bitmap (can be NULL)
+    wxd_Bitmap_t* bitmap_hover_wxd     // Hover state bitmap (can be NULL)
 ) {
     wxWindow* parentWin = reinterpret_cast<wxWindow*>(parent);
-    if (!parentWin) return nullptr;
+    wxBitmap* bmp_main = reinterpret_cast<wxBitmap*>(bitmap);
 
-    wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
-    if (!bmp || !bmp->IsOk()) {
-        // Cannot create without a valid bitmap
-        wxLogError("wxd_BitmapButton_Create: Invalid bitmap provided.");
+    if (!parentWin) {
+        return nullptr;
+    }
+    // Main bitmap validity is handled by wxBitmapButton constructor if bmp_main is null or not Ok
+
+    wxBitmapButton* btn = nullptr;
+    try {
+        btn = new wxBitmapButton(
+            parentWin,
+            id,
+            bmp_main ? *bmp_main : wxNullBitmap, // Main bitmap
+            wxd_to_wx_point(pos),
+            wxd_to_wx_size(size),
+            style,
+            wxDefaultValidator,
+            WXD_STR_TO_WX_STRING_UTF8_NULL_OK(name_str)
+        );
+    } catch (const std::exception& e) {
+        wxLogError("Exception creating wxBitmapButton: %s", e.what());
+        return nullptr; 
+    } catch (...) {
+        wxLogError("Unknown exception creating wxBitmapButton");
+        return nullptr; 
+    }
+
+    if (!btn) { 
+        wxLogError("wxBitmapButton creation returned null pointer unexpectedly.");
         return nullptr;
     }
 
-    // Create the wxBitmapButton
-    // Note: wxBitmapButton constructor takes bitmap by value (makes copy)
-    wxBitmapButton* btn = new wxBitmapButton(
-        parentWin,
-        id,
-        *bmp, // Pass bitmap by value/copy
-        wxd_to_wx_point(pos),
-        wxd_to_wx_size(size),
-        style
-        // TODO: Add validators later if needed
-    );
+    // Set other state bitmaps if provided
+    if (bitmap_disabled_wxd) {
+        wxBitmap* bmp_disabled = reinterpret_cast<wxBitmap*>(bitmap_disabled_wxd);
+        if (bmp_disabled && bmp_disabled->IsOk()) {
+            btn->SetBitmapDisabled(*bmp_disabled);
+        }
+    }
+    if (bitmap_focus_wxd) {
+        wxBitmap* bmp_focus = reinterpret_cast<wxBitmap*>(bitmap_focus_wxd);
+        if (bmp_focus && bmp_focus->IsOk()) {
+            btn->SetBitmapFocus(*bmp_focus);
+        }
+    }
+    if (bitmap_hover_wxd) {
+        wxBitmap* bmp_hover = reinterpret_cast<wxBitmap*>(bitmap_hover_wxd);
+        if (bmp_hover && bmp_hover->IsOk()) {
+            btn->SetBitmapHover(*bmp_hover);
+        }
+    }
 
-    // wxBitmapButton is a wxWindow, cleanup handled by parent.
     return reinterpret_cast<wxd_BitmapButton_t*>(btn);
 } 

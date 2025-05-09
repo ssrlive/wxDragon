@@ -1,87 +1,86 @@
-use wxdragon_sys as wx_bindings; // Alias for the sys crate
-                                 // REMOVED: use wx_bindings::wxd_Size; // Unused
-                                 // REMOVED: use wx_bindings::wxd_Point; // Unused
-                                 // wxID_ANY will be used as wx_bindings::WXD_ID_ANY directly in builder
-                                 // wxBitmapType_wxBITMAP_TYPE_ANY is not needed for current C API
-use crate::base::{Point, Size}; // Local Point, Size structs
-use crate::window::WxWidget; // Correct path for WxWidget trait
-                             // Removed Window and WxWindow import as StaticBitmap doesn't seem to need them directly in its impl block
-                             // Removed Control import as its existence/location is unclear and might not be needed
-use crate::bitmap::Bitmap; // Added import for Bitmap
-use std::ffi::CString; // Keep CString import
+//!
+//! Safe wrapper for wxStaticBitmap
+
+use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::bitmap::Bitmap;
+use crate::event::WxEvtHandler; // Corrected: Though StaticBitmap rarely has specific events to bind
+use crate::window::{Window, WxWidget};
+use std::ffi::CString;
+use std::ops::{Deref, DerefMut};
 use std::os::raw::c_int;
-// use std::marker::PhantomData; // Removed unused import
-use wxdragon_sys as ffi; // Use standard ffi alias
+use wxdragon_sys as ffi;
 
-// Opaque pointer type from FFI
-pub type RawStaticBitmap = ffi::wxd_StaticBitmap;
+// Constants for wxStaticBitmap if any (e.g., specific styles)
+// pub const SB_SOME_STYLE: i64 = ffi::WXD_SB_SOME_STYLE; // Example
 
-#[derive(Clone)]
+/// Represents a wxStaticBitmap widget, used to display a bitmap.
 pub struct StaticBitmap {
-    ptr: *mut RawStaticBitmap,
+    window: Window,
 }
 
 impl StaticBitmap {
-    pub fn new(ptr: *mut RawStaticBitmap) -> Self {
-        StaticBitmap { ptr }
-    }
-
-    pub fn builder(parent: &impl WxWidget) -> StaticBitmapBuilder {
-        StaticBitmapBuilder::new(parent)
-    }
-}
-
-impl WxWidget for StaticBitmap {
-    fn handle_ptr(&self) -> *mut wx_bindings::wxd_Window_t {
-        self.ptr as *mut wx_bindings::wxd_Window_t
-    }
-}
-// REMOVED: impl WxWindow for StaticBitmap {}
-// REMOVED: impl Control for StaticBitmap {}
-
-unsafe impl Send for StaticBitmap {}
-unsafe impl Sync for StaticBitmap {}
-
-// Builder
-pub struct StaticBitmapBuilder {
-    parent: *mut ffi::wxd_Window_t,
-    id: i32,
-    bitmap_path: Option<String>,
-    bitmap_object: Option<Bitmap>,
-    pos: Point,
-    size: Size,
-    scale_mode: i32,
-    style: i64,
-}
-
-impl StaticBitmapBuilder {
-    pub fn new(parent: &impl WxWidget) -> Self {
+    /// Creates a new StaticBitmap builder.
+    pub fn builder<W: WxWidget>(parent: &W) -> StaticBitmapBuilder {
         StaticBitmapBuilder {
-            parent: parent.handle_ptr(),
-            id: ffi::WXD_ID_ANY as i32,
-            bitmap_path: None,
-            bitmap_object: None,
-            pos: Point::new(-1, -1),
-            size: Size::new(-1, -1),
-            scale_mode: SCALE_NONE,
-            style: 0,
+            parent_ptr: parent.handle_ptr(),
+            id: ID_ANY,
+            bitmap: None, // Must be set via with_bitmap
+            pos: DEFAULT_POSITION,
+            size: DEFAULT_SIZE,
+            style: 0, // Default style, e.g., wxBORDER_NONE if defined and desired
+            name: CString::new("StaticBitmap").unwrap(),
         }
     }
 
+    /// Creates a StaticBitmap from a raw wxStaticBitmap pointer.
+    /// # Safety
+    /// The pointer must be a valid `wxd_StaticBitmap_t` pointer.
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_StaticBitmap_t) -> Self {
+        StaticBitmap {
+            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+
+    /// Sets or replaces the bitmap shown in the control.
+    pub fn set_bitmap(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_StaticBitmap_SetBitmap(
+                self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t,
+                bitmap.as_ptr(),
+            );
+        }
+    }
+
+    // // Optional: GetBitmap - would require wxd_StaticBitmap_GetBitmap FFI
+    // pub fn get_bitmap(&self) -> Option<Bitmap> {
+    //     unsafe {
+    //         let bmp_ptr = ffi::wxd_StaticBitmap_GetBitmap(self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t);
+    //         if bmp_ptr.is_null() { None } else { Some(Bitmap::from_ptr(bmp_ptr)) }
+    //     }
+    // }
+}
+
+/// Builder for `StaticBitmap` widgets.
+#[derive(Clone)] // Bitmap field is Option<Bitmap>, which is Clone if Bitmap is Clone
+pub struct StaticBitmapBuilder {
+    parent_ptr: *mut ffi::wxd_Window_t,
+    id: i32,
+    bitmap: Option<Bitmap>, // Bitmap is now owned by the builder, then passed to C++
+    pos: Point,
+    size: Size,
+    style: i64,
+    name: CString,
+}
+
+impl StaticBitmapBuilder {
     pub fn with_id(mut self, id: i32) -> Self {
         self.id = id;
         self
     }
 
-    pub fn with_bitmap_path(mut self, path: &str) -> Self {
-        self.bitmap_path = Some(path.to_string());
-        self.bitmap_object = None; // Clear bitmap object if path is set
-        self
-    }
-
-    pub fn with_bitmap(mut self, bitmap: Bitmap) -> Self {
-        self.bitmap_object = Some(bitmap);
-        self.bitmap_path = None; // Clear path if bitmap object is set
+    /// Sets the bitmap to be displayed. This is mandatory.
+    pub fn with_bitmap(mut self, bitmap: &Bitmap) -> Self {
+        self.bitmap = Some(bitmap.clone()); // Clone the bitmap for ownership
         self
     }
 
@@ -90,6 +89,7 @@ impl StaticBitmapBuilder {
         self
     }
 
+    /// Sets the size. If not set, it might be derived from the bitmap size by wxWidgets.
     pub fn with_size(mut self, size: Size) -> Self {
         self.size = size;
         self
@@ -100,86 +100,67 @@ impl StaticBitmapBuilder {
         self
     }
 
-    /// Sets the scaling mode for the bitmap.
-    pub fn with_scale_mode(mut self, mode: i32) -> Self {
-        self.scale_mode = mode;
+    pub fn with_name(mut self, name: &str) -> Self {
+        self.name = CString::new(name).unwrap_or_default();
         self
     }
 
-    pub fn build(self) -> Option<StaticBitmap> {
-        let raw_ptr = unsafe {
-            if let Some(bitmap) = self.bitmap_object {
-                // Use the Bitmap object
-                ffi::wxd_StaticBitmap_CreateWithBitmap(
-                    self.parent,
-                    self.id,
-                    bitmap.as_ptr(),
-                    self.pos.x,
-                    self.pos.y,
-                    self.size.width,
-                    self.size.height,
-                    self.style as ffi::wxd_Style_t,
-                    self.scale_mode as c_int,
-                )
-            } else if let Some(path_str) = self.bitmap_path {
-                // Use the bitmap path
-                let c_bitmap_path =
-                    CString::new(path_str).expect("CString::new failed for bitmap_path");
-                ffi::wxd_StaticBitmap_Create(
-                    self.parent,
-                    self.id,
-                    c_bitmap_path.as_ptr(),
-                    self.pos.x,
-                    self.pos.y,
-                    self.size.width,
-                    self.size.height,
-                    self.style as ffi::wxd_Style_t,
-                )
-            } else {
-                // Neither path nor object provided, create with null bitmap (or handle as error)
-                // wxStaticBitmap handles wxNullBitmap if path is empty, let's replicate by calling Create with empty path
-                let c_empty_path = CString::new("").unwrap();
-                ffi::wxd_StaticBitmap_Create(
-                    self.parent,
-                    self.id,
-                    c_empty_path.as_ptr(),
-                    self.pos.x,
-                    self.pos.y,
-                    self.size.width,
-                    self.size.height,
-                    self.style as ffi::wxd_Style_t,
-                )
-            }
-        };
+    /// Creates the `StaticBitmap`.
+    /// Panics if `with_bitmap` was not called.
+    pub fn build(self) -> StaticBitmap {
+        let bmp_to_use = self
+            .bitmap
+            .as_ref()
+            .expect("Bitmap must be set for StaticBitmap using with_bitmap.");
 
-        if raw_ptr.is_null() {
-            // This can happen if C++ side returns nullptr due to load failure or other issues
-            None
-        } else {
-            Some(StaticBitmap::new(raw_ptr))
+        unsafe {
+            let ptr = ffi::wxd_StaticBitmap_CreateWithBitmap(
+                self.parent_ptr,
+                self.id as c_int,
+                bmp_to_use.as_ptr(),
+                self.pos.into(),
+                self.size.into(),
+                self.style as ffi::wxd_Style_t,
+                self.name.as_ptr(),
+            );
+
+            if ptr.is_null() {
+                panic!("Failed to create StaticBitmap widget");
+            }
+            StaticBitmap::from_ptr(ptr)
         }
     }
 }
 
-// Constants for wxStaticBitmap styles and scale modes
-// These should align with what's added to const_extractor
-pub const BORDER_NONE: i64 = ffi::WXD_BORDER_NONE as i64;
-pub const BORDER_SIMPLE: i64 = ffi::WXD_BORDER_SIMPLE as i64;
-// Add other border styles (WXD_BORDER_STATIC, etc.) if they were added to const_extractor and are distinct
+// --- Trait Implementations ---
 
-pub const ALIGN_CENTRE_HORIZONTAL: i64 = ffi::WXD_ALIGN_CENTRE_HORIZONTAL as i64;
-pub const ALIGN_CENTER_HORIZONTAL: i64 = ffi::WXD_ALIGN_CENTRE_HORIZONTAL as i64; // Alias for WXD_ALIGN_CENTRE_HORIZONTAL
-pub const ALIGN_CENTRE_VERTICAL: i64 = ffi::WXD_ALIGN_CENTRE_VERTICAL as i64;
-pub const ALIGN_CENTER_VERTICAL: i64 = ffi::WXD_ALIGN_CENTRE_VERTICAL as i64; // Alias for WXD_ALIGN_CENTRE_VERTICAL
-pub const ALIGN_LEFT: i64 = ffi::WXD_ALIGN_LEFT as i64;
-pub const ALIGN_RIGHT: i64 = ffi::WXD_ALIGN_RIGHT as i64;
+impl WxWidget for StaticBitmap {
+    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
+        self.window.handle_ptr()
+    }
+}
 
-// Scale modes (map directly from enum values)
-pub const SCALE_NONE: i32 = ffi::WXD_StaticBitmap_Scale_None as i32;
-pub const SCALE_FILL: i32 = ffi::WXD_StaticBitmap_Scale_Fill as i32;
-pub const SCALE_ASPECT_FIT: i32 = ffi::WXD_StaticBitmap_Scale_AspectFit as i32;
-pub const SCALE_ASPECT_FILL: i32 = ffi::WXD_StaticBitmap_Scale_AspectFill as i32;
+impl Deref for StaticBitmap {
+    type Target = Window;
+    fn deref(&self) -> &Self::Target {
+        &self.window
+    }
+}
 
-// TODO: Add methods to StaticBitmap to SetBitmap, GetBitmap, SetIcon, SetScaleMode, GetScaleMode etc.
-// For SetScaleMode, we'd need a C API function: wxd_StaticBitmap_SetScaleMode(wxd_StaticBitmap* self, int mode);
-// And the corresponding C++ implementation.
+impl DerefMut for StaticBitmap {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.window
+    }
+}
+
+// StaticBitmap typically doesn't emit specific events that need custom handling,
+// but it can still be a WxEvtHandler for common events like mouse clicks if needed.
+impl WxEvtHandler for StaticBitmap {
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.window.handle_ptr() as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
+// No Drop needed typically, as wxStaticBitmap is a wxWindow and managed by its parent.
+// The wxBitmap it holds is also copied by wxStaticBitmap, so the original Bitmap passed to
+// the builder or SetBitmap can be dropped by Rust without affecting the control.

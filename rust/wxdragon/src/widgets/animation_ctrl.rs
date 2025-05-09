@@ -1,8 +1,8 @@
-use wxdragon_sys as ffi;
-use crate::window::WxWidget;
 use crate::base::{Point, Size, ID_ANY};
 use crate::event::WxEvtHandler;
+use crate::window::WxWidget;
 use std::ffi::CString;
+use wxdragon_sys as ffi;
 
 // Opaque pointer for wxAnimationCtrl
 #[derive(Debug, Clone)]
@@ -54,7 +54,8 @@ impl AnimationCtrl {
     }
 
     pub fn load_file(&self, animation_file: &str) -> bool {
-        let c_animation_file = CString::new(animation_file).expect("CString::new failed for animation_file");
+        let c_animation_file =
+            CString::new(animation_file).expect("CString::new failed for animation_file");
         unsafe { ffi::wxd_AnimationCtrl_LoadFile(self.ptr, c_animation_file.as_ptr()) }
     }
 
@@ -111,7 +112,8 @@ impl AnimationCtrlBuilder {
     }
 
     pub fn build(self) -> AnimationCtrl {
-        let c_animation_file = CString::new(self.animation_file.as_str()).expect("CString::new failed for animation_file");
+        let c_animation_file = CString::new(self.animation_file.as_str())
+            .expect("CString::new failed for animation_file");
         let c_name = CString::new(self.name.as_str()).expect("CString::new failed for name");
 
         let ptr = unsafe {
@@ -142,4 +144,4 @@ impl Drop for AnimationCtrl {
         // For now, assuming it's a child widget and wxWidgets handles cleanup.
         // unsafe { ffi::wxd_Window_Destroy(self.ptr as *mut ffi::wxd_Window_t); }
     }
-} 
+}

@@ -4,9 +4,8 @@
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
-use crate::id::Id;
 use crate::window::{Window, WxWidget};
-use std::default::Default;
+use std::ffi::CString;
 use std::ops::{Deref, DerefMut};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
@@ -30,9 +29,19 @@ impl BitmapButton {
     /// Creates a new BitmapButton builder.
     /// Requires a bitmap to be set using `with_bitmap`.
     pub fn builder<W: WxWidget>(parent: &W) -> BitmapButtonBuilder {
-        let mut builder = BitmapButtonBuilder::default();
-        builder.parent_ptr = parent.handle_ptr();
-        builder
+        BitmapButtonBuilder {
+            parent_ptr: parent.handle_ptr(),
+            label: CString::new("").unwrap(), // Default empty label
+            id: ID_ANY,
+            pos: DEFAULT_POSITION, // Use constant
+            size: DEFAULT_SIZE,    // Use constant
+            style: 0i64,           // Use 0 as default style
+            bitmap: None,
+            bitmap_disabled: None,
+            bitmap_focus: None,
+            bitmap_hover: None,
+            name: CString::new("BitmapButton").unwrap(), // Default name
+        }
     }
 
     /// Creates a new BitmapButton wrapper from a raw pointer.
@@ -50,39 +59,49 @@ impl BitmapButton {
 // --- Builder Pattern ---
 
 /// Builder for creating `BitmapButton` widgets.
+#[derive(Clone)]
 pub struct BitmapButtonBuilder {
     parent_ptr: *mut ffi::wxd_Window_t,
-    id: Id,
-    bitmap: Option<*mut ffi::wxd_Bitmap_t>, // Bitmap is required, Option used to enforce setting via with_bitmap
+    label: CString, // Retained for consistency, though wxBitmapButton doesn't directly use text label
+    id: i32,
     pos: Point,
-    size: Size, // Default size is calculated in build() if not set
+    size: Size,
     style: i64,
-}
-
-// Manual Default implementation
-impl Default for BitmapButtonBuilder {
-    fn default() -> Self {
-        Self {
-            parent_ptr: std::ptr::null_mut(),
-            id: ID_ANY,            // Use ID_ANY from base (i32)
-            bitmap: None,          // Must be set via with_bitmap
-            pos: DEFAULT_POSITION, // Use base constant
-            size: DEFAULT_SIZE,    // Use base constant
-            style: 0,
-        }
-    }
+    bitmap: Option<Bitmap>,          // To hold the main bitmap
+    bitmap_disabled: Option<Bitmap>, // Optional: disabled bitmap
+    bitmap_focus: Option<Bitmap>,    // Optional: focus bitmap
+    bitmap_hover: Option<Bitmap>,    // Optional: hover bitmap
+    name: CString,
 }
 
 impl BitmapButtonBuilder {
     /// Sets the window ID.
-    pub fn with_id(mut self, id: Id) -> Self {
+    pub fn with_id(mut self, id: i32) -> Self {
         self.id = id;
         self
     }
 
-    /// Sets the bitmap label for the button. This is mandatory.
+    /// Sets the bitmap for the normal (default) state. This is mandatory.
     pub fn with_bitmap(mut self, bitmap: &Bitmap) -> Self {
-        self.bitmap = Some(bitmap.as_ptr()); // Use the (currently crate-public) as_ptr method
+        self.bitmap = Some(bitmap.clone());
+        self
+    }
+
+    /// Sets the bitmap for the disabled state.
+    pub fn with_bitmap_disabled(mut self, bitmap: &Bitmap) -> Self {
+        self.bitmap_disabled = Some(bitmap.clone());
+        self
+    }
+
+    /// Sets the bitmap for when the button has keyboard focus.
+    pub fn with_bitmap_focus(mut self, bitmap: &Bitmap) -> Self {
+        self.bitmap_focus = Some(bitmap.clone());
+        self
+    }
+
+    /// Sets the bitmap for when the mouse is hovering over the button.
+    pub fn with_bitmap_hover(mut self, bitmap: &Bitmap) -> Self {
+        self.bitmap_hover = Some(bitmap.clone());
         self
     }
 
@@ -105,45 +124,63 @@ impl BitmapButtonBuilder {
         self
     }
 
+    /// Sets the label for the button.
+    pub fn with_label(mut self, label: &str) -> Self {
+        self.label = CString::new(label).unwrap_or_default();
+        self
+    }
+
+    /// Sets the name for the button.
+    pub fn with_name(mut self, name: &str) -> Self {
+        self.name = CString::new(name).unwrap_or_default();
+        self
+    }
+
     /// Creates the `BitmapButton`.
     /// Panics if `with_bitmap` was not called or parent not set.
     pub fn build(self) -> BitmapButton {
-        assert!(!self.parent_ptr.is_null(), "BitmapButton requires a parent");
-        let bitmap_ptr = self
-            .bitmap
-            .expect("Bitmap must be set for BitmapButton using with_bitmap");
+        let main_bitmap = self.bitmap.expect("BitmapButton requires a main bitmap.");
+        let bitmap_ptr = main_bitmap.as_ptr();
 
-        // Default Size Calculation
-        let mut final_size = self.size;
-        // Check against DEFAULT_SIZE constant from base
-        if final_size == DEFAULT_SIZE {
-            // ... (size calculation logic as before) ...
-            let bmp_width = unsafe { ffi::wxd_Bitmap_GetWidth(bitmap_ptr) };
-            let bmp_height = unsafe { ffi::wxd_Bitmap_GetHeight(bitmap_ptr) };
-            if bmp_width > 0 && bmp_height > 0 {
-                const PADDING_X: i32 = 10;
-                const PADDING_Y: i32 = 6;
-                final_size = Size::new(bmp_width + PADDING_X, bmp_height + PADDING_Y);
-            } else {
-                final_size = Size::new(30, 30);
-            }
-        }
+        let bmp_disabled_ptr = self
+            .bitmap_disabled
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
+        let bmp_focus_ptr = self
+            .bitmap_focus
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
+        let bmp_hover_ptr = self
+            .bitmap_hover
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
 
-        let button_ptr = unsafe {
-            ffi::wxd_BitmapButton_Create(
-                self.parent_ptr,                // Use raw pointer
-                self.id as c_int,               // Use id
-                bitmap_ptr,                     // Use unwrapped bitmap pointer
-                self.pos.into(),                // Use pos
-                final_size.into(),              // Use calculated or user-provided size
-                self.style as ffi::wxd_Style_t, // Use style
-            )
+        // For BitmapButton, size is often best derived from the bitmap if not explicitly set.
+        let final_size = if self.size.width == -1 && self.size.height == -1 {
+            Size::new(main_bitmap.get_width(), main_bitmap.get_height())
+        } else {
+            self.size
         };
 
-        if button_ptr.is_null() {
-            panic!("Failed to create BitmapButton");
+        unsafe {
+            let ptr = ffi::wxd_BitmapButton_Create(
+                self.parent_ptr,
+                self.id as c_int,
+                bitmap_ptr,
+                self.pos.into(),
+                final_size.into(),
+                self.style as ffi::wxd_Style_t,
+                self.name.as_ptr(),
+                bmp_disabled_ptr,
+                bmp_focus_ptr,
+                bmp_hover_ptr,
+            );
+            if ptr.is_null() {
+                panic!("Failed to create BitmapButton widget");
+            } else {
+                BitmapButton::from_ptr(ptr)
+            }
         }
-        unsafe { BitmapButton::from_ptr(button_ptr) }
     }
 }
 

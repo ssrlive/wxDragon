@@ -196,7 +196,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [ ] `wxRichTextCtrl`
         *   [x] `wxHyperlinkCtrl`
         *   [x] `wxActivityIndicator`
-        *   [ ] `wxAnimationCtrl`
+        *   [x] `wxAnimationCtrl`
         *   [x] `wxCommandLinkButton`
     *   **Choices/Lists:**
         *   [x] `wxChoice`

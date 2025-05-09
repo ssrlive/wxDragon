@@ -1,5 +1,5 @@
-use wxdragon::prelude::*;
 use wxdragon::id;
+use wxdragon::prelude::*;
 
 #[allow(dead_code)]
 pub struct ListsTabControls {
@@ -172,7 +172,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     );
 
     // --- Bind events for list controls ---
-    
+
     // ListCtrl events
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
@@ -193,12 +193,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             list_ctrl_status_label_clone.set_label("ListCtrl Status: No item selected");
         }
     });
-    
+
     // Add column click event for ListCtrl
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
     list_ctrl.bind(EventType::LIST_COL_CLICK, move |event| {
         if let Some(col_index) = event.get_column() {
-            list_ctrl_status_label_clone.set_label(&format!("ListCtrl Column Clicked: {}", col_index));
+            list_ctrl_status_label_clone
+                .set_label(&format!("ListCtrl Column Clicked: {}", col_index));
         }
     });
 
@@ -229,21 +230,24 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // ComboBox events
     let combo_box_clone = combo_box.clone();
     let combo_status_label_clone = combo_status_label.clone();
-    combo_box.bind(EventType::COMMAND_COMBOBOX_SELECTED, move |_event: Event| {
-        if let Some(selected_string) = combo_box_clone.get_string_selection() {
-            combo_status_label_clone.set_label(&format!("Combo Selected: {}", selected_string));
-        } else {
-            combo_status_label_clone.set_label("Combo Selected: None");
-        }
-    });
-    
+    combo_box.bind(
+        EventType::COMMAND_COMBOBOX_SELECTED,
+        move |_event: Event| {
+            if let Some(selected_string) = combo_box_clone.get_string_selection() {
+                combo_status_label_clone.set_label(&format!("Combo Selected: {}", selected_string));
+            } else {
+                combo_status_label_clone.set_label("Combo Selected: None");
+            }
+        },
+    );
+
     let combo_box_clone = combo_box.clone();
     let combo_status_label_clone = combo_status_label.clone();
     combo_box.bind(EventType::TEXT, move |_event: Event| {
         let current_text = combo_box_clone.get_value();
         combo_status_label_clone.set_label(&format!("Combo Text: {}", current_text));
     });
-    
+
     let combo_box_clone = combo_box.clone();
     combo_box.bind(EventType::TEXT_ENTER, move |event: Event| {
         let current_text = combo_box_clone.get_value();
@@ -254,23 +258,26 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // CheckListBox selection/check event
     let checklistbox_clone = checklistbox.clone();
     let checklistbox_status_label_clone = checklistbox_status_label.clone();
-    checklistbox.bind(EventType::COMMAND_CHECKLISTBOX_SELECTED, move |_event: Event| {
-        if let Some(index) = checklistbox_clone.get_selection() {
-            // TODO: Needs GetInt
-            let is_checked = checklistbox_clone.is_checked(index);
-            let item_text = checklistbox_clone
-                .get_string(index)
-                .unwrap_or_else(|| "?".to_string());
-            checklistbox_status_label_clone.set_label(&format!(
-                "CheckList Sel: {} ('{}' {})",
-                index,
-                item_text,
-                if is_checked { "Checked" } else { "Unchecked" }
-            ));
-        } else {
-            checklistbox_status_label_clone.set_label("CheckList Sel: None");
-        }
-    });
+    checklistbox.bind(
+        EventType::COMMAND_CHECKLISTBOX_SELECTED,
+        move |_event: Event| {
+            if let Some(index) = checklistbox_clone.get_selection() {
+                // TODO: Needs GetInt
+                let is_checked = checklistbox_clone.is_checked(index);
+                let item_text = checklistbox_clone
+                    .get_string(index)
+                    .unwrap_or_else(|| "?".to_string());
+                checklistbox_status_label_clone.set_label(&format!(
+                    "CheckList Sel: {} ('{}' {})",
+                    index,
+                    item_text,
+                    if is_checked { "Checked" } else { "Unchecked" }
+                ));
+            } else {
+                checklistbox_status_label_clone.set_label("CheckList Sel: None");
+            }
+        },
+    );
 
     // Return the controls struct
     ListsTabControls {
@@ -286,4 +293,4 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         list_ctrl,
         list_ctrl_status_label,
     }
-} 
+}

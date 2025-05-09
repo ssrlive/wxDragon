@@ -1,13 +1,13 @@
-use wxdragon::prelude::*;
 use wxdragon::id;
+use wxdragon::prelude::*;
 
-use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
-use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
-use wxdragon::dialogs::colour_dialog::ColourDialog;
-use wxdragon::dialogs::font_dialog::FontDialog;
-use wxdragon::dialogs::progress_dialog::ProgressDialog;
 use std::thread;
 use std::time::Duration;
+use wxdragon::dialogs::colour_dialog::ColourDialog;
+use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
+use wxdragon::dialogs::font_dialog::FontDialog;
+use wxdragon::dialogs::progress_dialog::ProgressDialog;
+use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {
@@ -69,7 +69,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let text_entry_status_label = StaticText::builder(&dialog_panel)
         .with_label("Text Entry Status: -")
         .build();
-    
+
     // Colour Dialog section
     let colour_dialog_label = StaticText::builder(&dialog_panel)
         .with_label("Colour Dialog:")
@@ -137,7 +137,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     text_entry_btns_sizer.add_spacer(10);
     text_entry_btns_sizer.add(&text_entry_status_label, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&text_entry_btns_sizer, 1, EXPAND, 0);
-    
+
     // Add Colour Dialog controls
     grid_sizer.add(&colour_dialog_label, 0, label_flags, 0);
     let colour_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
@@ -186,69 +186,76 @@ impl DialogTabControls {
     pub fn bind_events(&self, frame: &Frame) {
         // Event handlers for Message Dialog
         let dialog_panel_clone = self.panel.clone();
-        self.show_msg_dialog_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Show Message Dialog button clicked.");
-            let dialog = MessageDialog::builder(
-                Some(&dialog_panel_clone),
-                "This is an informational message from wxDragon!",
-                "Info",
-            )
-            .with_style(OK | ICON_INFORMATION)
-            .build();
-            dialog.show_modal();
-            println!("Message Dialog Closed.");
-        });
+        self.show_msg_dialog_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Show Message Dialog button clicked.");
+                let dialog = MessageDialog::builder(
+                    Some(&dialog_panel_clone),
+                    "This is an informational message from wxDragon!",
+                    "Info",
+                )
+                .with_style(OK | ICON_INFORMATION)
+                .build();
+                dialog.show_modal();
+                println!("Message Dialog Closed.");
+            });
 
         // Event handlers for File Dialog
         let fd_status_label_clone = self.file_dialog_status_label.clone();
         let frame_for_fd_clone = frame.clone();
-        
+
         let status_label_open_clone = fd_status_label_clone.clone();
         let frame_parent_open_ctx = frame_for_fd_clone.clone();
-        self.open_file_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Open File button clicked.");
-            let dialog = FileDialog::builder(Some(&frame_parent_open_ctx))
-                .with_message("Choose a file")
-                .with_style(fd_const::FD_OPEN | fd_const::FD_FILE_MUST_EXIST | fd_const::FD_MULTIPLE)
-                .with_wildcard("Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*")
-                .build();
-            if dialog.show_modal() == id::ID_OK {
-                let paths = dialog.get_paths();
-                let status = format!("Opened: {:?}", paths);
-                status_label_open_clone.set_label(&status);
-                println!("{}", status);
-            } else {
-                status_label_open_clone.set_label("Open File Cancelled.");
-                println!("Open File Cancelled.");
-            }
-            println!("Open File Dialog Closed.");
-        });
+        self.open_file_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Open File button clicked.");
+                let dialog = FileDialog::builder(Some(&frame_parent_open_ctx))
+                    .with_message("Choose a file")
+                    .with_style(
+                        fd_const::FD_OPEN | fd_const::FD_FILE_MUST_EXIST | fd_const::FD_MULTIPLE,
+                    )
+                    .with_wildcard(
+                        "Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                    )
+                    .build();
+                if dialog.show_modal() == id::ID_OK {
+                    let paths = dialog.get_paths();
+                    let status = format!("Opened: {:?}", paths);
+                    status_label_open_clone.set_label(&status);
+                    println!("{}", status);
+                } else {
+                    status_label_open_clone.set_label("Open File Cancelled.");
+                    println!("Open File Cancelled.");
+                }
+                println!("Open File Dialog Closed.");
+            });
 
         let status_label_save_clone = fd_status_label_clone.clone();
         let frame_parent_save_ctx = frame_for_fd_clone.clone();
-        self.save_file_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Save File button clicked.");
-            let dialog = FileDialog::builder(Some(&frame_parent_save_ctx))
-                .with_message("Save file as")
-                .with_style(fd_const::FD_SAVE | fd_const::FD_OVERWRITE_PROMPT)
-                .with_default_file("my_document.txt")
-                .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
-                .build();
-            if dialog.show_modal() == id::ID_OK {
-                if let Some(path) = dialog.get_path() {
-                    let status = format!("Saved: {}", path);
-                    status_label_save_clone.set_label(&status);
-                    println!("{}", status);
+        self.save_file_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Save File button clicked.");
+                let dialog = FileDialog::builder(Some(&frame_parent_save_ctx))
+                    .with_message("Save file as")
+                    .with_style(fd_const::FD_SAVE | fd_const::FD_OVERWRITE_PROMPT)
+                    .with_default_file("my_document.txt")
+                    .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
+                    .build();
+                if dialog.show_modal() == id::ID_OK {
+                    if let Some(path) = dialog.get_path() {
+                        let status = format!("Saved: {}", path);
+                        status_label_save_clone.set_label(&status);
+                        println!("{}", status);
+                    } else {
+                        status_label_save_clone.set_label("Save File Error: No path returned.");
+                        println!("Save File Error: No path returned.");
+                    }
                 } else {
-                    status_label_save_clone.set_label("Save File Error: No path returned.");
-                    println!("Save File Error: No path returned.");
+                    status_label_save_clone.set_label("Save File Cancelled.");
+                    println!("Save File Cancelled.");
                 }
-            } else {
-                status_label_save_clone.set_label("Save File Cancelled.");
-                println!("Save File Cancelled.");
-            }
-            println!("Save File Dialog Closed.");
-        });
+                println!("Save File Dialog Closed.");
+            });
 
         // Event handlers for Text Entry Dialog
         let te_status_label_clone = self.text_entry_status_label.clone();
@@ -256,156 +263,171 @@ impl DialogTabControls {
 
         let te_status_text_clone = te_status_label_clone.clone();
         let frame_parent_text_ctx = frame_for_te_clone.clone();
-        self.get_text_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Get Text button clicked.");
-            let dialog = TextEntryDialog::builder(
-                Some(&frame_parent_text_ctx),
-                "Enter some text:",
-                "Text Input",
-            )
-            .with_default_value("Default text")
-            .build();
-            if dialog.show_modal() == id::ID_OK {
-                let entered_value = dialog.get_value().unwrap_or_else(|| "<empty>".to_string());
-                te_status_text_clone.set_label(&format!("Text Entered: {}", entered_value));
-            } else {
-                te_status_text_clone.set_label("Text Entry Cancelled.");
-            }
-            println!("Text Entry Dialog Closed.");
-        });
+        self.get_text_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Get Text button clicked.");
+                let dialog = TextEntryDialog::builder(
+                    Some(&frame_parent_text_ctx),
+                    "Enter some text:",
+                    "Text Input",
+                )
+                .with_default_value("Default text")
+                .build();
+                if dialog.show_modal() == id::ID_OK {
+                    let entered_value = dialog.get_value().unwrap_or_else(|| "<empty>".to_string());
+                    te_status_text_clone.set_label(&format!("Text Entered: {}", entered_value));
+                } else {
+                    te_status_text_clone.set_label("Text Entry Cancelled.");
+                }
+                println!("Text Entry Dialog Closed.");
+            });
 
         let te_status_pass_clone = te_status_label_clone.clone();
         let frame_parent_pass_ctx = frame_for_te_clone.clone();
-        self.get_password_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Get Password button clicked.");
-            let dialog = TextEntryDialog::builder(
-                Some(&frame_parent_pass_ctx),
-                "Enter your password:",
-                "Password Input",
-            )
-            .password()
-            .build();
-            if dialog.show_modal() == id::ID_OK {
-                te_status_pass_clone.set_label("Password Entered (value not shown for security)");
-            } else {
-                te_status_pass_clone.set_label("Password Entry Cancelled.");
-            }
-            println!("Password Entry Dialog Closed.");
-        });
-        
+        self.get_password_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Get Password button clicked.");
+                let dialog = TextEntryDialog::builder(
+                    Some(&frame_parent_pass_ctx),
+                    "Enter your password:",
+                    "Password Input",
+                )
+                .password()
+                .build();
+                if dialog.show_modal() == id::ID_OK {
+                    te_status_pass_clone
+                        .set_label("Password Entered (value not shown for security)");
+                } else {
+                    te_status_pass_clone.set_label("Password Entry Cancelled.");
+                }
+                println!("Password Entry Dialog Closed.");
+            });
+
         // Event handler for Colour Dialog
         let colour_status_label_clone = self.colour_dialog_status_label.clone();
         let frame_parent_colour_ctx = frame.clone();
-        self.choose_colour_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Choose Colour button clicked.");
-            
-            // Create the dialog without custom initial data
-            let dialog = ColourDialog::builder(Some(&frame_parent_colour_ctx))
-                .with_title("Choose a colour")
-                .build();
-                
-            if dialog.show_modal() == id::ID_OK {
-                // Get the chosen colour
-                if let Some(colour) = dialog.get_colour() {
-                    let status = format!("Selected colour: RGB({}, {}, {})", 
-                        colour.r, colour.g, colour.b);
-                    colour_status_label_clone.set_label(&status);
-                    println!("{}", status);
+        self.choose_colour_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Choose Colour button clicked.");
+
+                // Create the dialog without custom initial data
+                let dialog = ColourDialog::builder(Some(&frame_parent_colour_ctx))
+                    .with_title("Choose a colour")
+                    .build();
+
+                if dialog.show_modal() == id::ID_OK {
+                    // Get the chosen colour
+                    if let Some(colour) = dialog.get_colour() {
+                        let status = format!(
+                            "Selected colour: RGB({}, {}, {})",
+                            colour.r, colour.g, colour.b
+                        );
+                        colour_status_label_clone.set_label(&status);
+                        println!("{}", status);
+                    } else {
+                        colour_status_label_clone.set_label("Colour Dialog: No colour returned.");
+                        println!("Colour Dialog: No colour returned.");
+                    }
                 } else {
-                    colour_status_label_clone.set_label("Colour Dialog: No colour returned.");
-                    println!("Colour Dialog: No colour returned.");
+                    colour_status_label_clone.set_label("Colour Selection Cancelled.");
+                    println!("Colour Selection Cancelled.");
                 }
-            } else {
-                colour_status_label_clone.set_label("Colour Selection Cancelled.");
-                println!("Colour Selection Cancelled.");
-            }
-            println!("Colour Dialog Closed.");
-        });
-        
+                println!("Colour Dialog Closed.");
+            });
+
         // Add a handler for the font button
         let frame_parent_font_ctx = frame.clone();
         let font_sample_text_clone = self.font_sample_text.clone();
-        self.font_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Choose Font button clicked.");
-            
-            // Create the dialog without a specific FontData
-            let dialog = FontDialog::builder(Some(&frame_parent_font_ctx))
-                .with_title("Choose a font")
-                .build();
-            
-            // Show the dialog
-            if dialog.show_modal() == id::ID_OK {
-                // Get the selected font
-                if let Some(font) = dialog.get_font() {
-                    let font_info = format!("Font: {} ({} pt, {})",
-                        font.get_face_name(),
-                        font.get_point_size(),
-                        if font.is_underlined() { "underlined" } else { "not underlined" }
-                    );
-                    font_sample_text_clone.set_label(&font_info);
-                    println!("Selected {}", font_info);
-                    // Ideally, we would also set the font on the sample text,
-                    // but that would require more bindings not yet implemented
+        self.font_button
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Choose Font button clicked.");
+
+                // Create the dialog without a specific FontData
+                let dialog = FontDialog::builder(Some(&frame_parent_font_ctx))
+                    .with_title("Choose a font")
+                    .build();
+
+                // Show the dialog
+                if dialog.show_modal() == id::ID_OK {
+                    // Get the selected font
+                    if let Some(font) = dialog.get_font() {
+                        let font_info = format!(
+                            "Font: {} ({} pt, {})",
+                            font.get_face_name(),
+                            font.get_point_size(),
+                            if font.is_underlined() {
+                                "underlined"
+                            } else {
+                                "not underlined"
+                            }
+                        );
+                        font_sample_text_clone.set_label(&font_info);
+                        println!("Selected {}", font_info);
+                        // Ideally, we would also set the font on the sample text,
+                        // but that would require more bindings not yet implemented
+                    } else {
+                        font_sample_text_clone.set_label("No font selected");
+                        println!("No font was returned by the dialog");
+                    }
                 } else {
-                    font_sample_text_clone.set_label("No font selected");
-                    println!("No font was returned by the dialog");
+                    println!("Font Dialog Cancelled.");
                 }
-            } else {
-                println!("Font Dialog Cancelled.");
-            }
-        });
-        
+            });
+
         // Add a handler for the progress dialog button
         let frame_parent_progress_ctx = frame.clone();
-        self.progress_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            println!("Show Progress Dialog button clicked.");
-            
-            // Create a progress dialog with a range of 0-100
-            let dialog = ProgressDialog::builder(
+        self.progress_button
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                println!("Show Progress Dialog button clicked.");
+
+                // Create a progress dialog with a range of 0-100
+                let dialog = ProgressDialog::builder(
                     Some(&frame_parent_progress_ctx),
                     "Progress Demonstration",
                     "Processing items...",
-                    100)
+                    100,
+                )
                 .can_abort() // Add Cancel button
-                .can_skip()  // Add Skip button
+                .can_skip() // Add Skip button
                 .show_elapsed_time() // Show elapsed time
                 .show_remaining_time() // Show estimated remaining time
                 .build();
-            
-            // Process 100 items with a small delay between each
-            let mut continue_progress = true;
-            for i in 0..=100 {
-                if !continue_progress {
-                    break;
+
+                // Process 100 items with a small delay between each
+                let mut continue_progress = true;
+                for i in 0..=100 {
+                    if !continue_progress {
+                        break;
+                    }
+
+                    // Artificial delay to simulate processing
+                    thread::sleep(Duration::from_millis(50));
+
+                    // Update progress dialog with new value and custom message
+                    let message = if i % 10 == 0 && i > 0 {
+                        Some(format!("Processed {} items...", i))
+                    } else {
+                        None
+                    };
+
+                    // Use update_with_skip instead of update to get skip status
+                    let (should_continue, was_skipped) =
+                        dialog.update_with_skip(i, message.as_deref());
+                    continue_progress = should_continue;
+
+                    // Log when the skip button is clicked
+                    if was_skipped {
+                        println!("Progress operation was skipped at step {}.", i);
+                    }
+
+                    // Check if user clicked Cancel
+                    if dialog.was_cancelled() {
+                        println!("Progress operation was cancelled by user.");
+                        break;
+                    }
                 }
-                
-                // Artificial delay to simulate processing
-                thread::sleep(Duration::from_millis(50));
-                
-                // Update progress dialog with new value and custom message
-                let message = if i % 10 == 0 && i > 0 {
-                    Some(format!("Processed {} items...", i))
-                } else {
-                    None
-                };
-                
-                // Use update_with_skip instead of update to get skip status
-                let (should_continue, was_skipped) = dialog.update_with_skip(i, message.as_deref());
-                continue_progress = should_continue;
-                
-                // Log when the skip button is clicked
-                if was_skipped {
-                    println!("Progress operation was skipped at step {}.", i);
-                }
-                
-                // Check if user clicked Cancel
-                if dialog.was_cancelled() {
-                    println!("Progress operation was cancelled by user.");
-                    break;
-                }
-            }
-            
-            println!("Progress Dialog Closed.");
-        });
+
+                println!("Progress Dialog Closed.");
+            });
     }
-} 
+}

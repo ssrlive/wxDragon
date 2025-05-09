@@ -10,9 +10,8 @@ pub use crate::window::{WindowUserData, WxWidget};
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder, Orientation, SizerFlags};
 // Sizer Flags/Constants
 pub use crate::sizers::box_sizer::{
-    ALIGN_CENTER_HORIZONTAL, ALIGN_CENTER_VERTICAL, ALIGN_LEFT, ALIGN_RIGHT, ALL,
-    BORDER_DEFAULT, BORDER_SIMPLE, BOTTOM, EXPAND, FIXED_MINSIZE, HORIZONTAL, LEFT, RIGHT,
-    SHAPED, TOP, VERTICAL,
+    ALIGN_CENTER_HORIZONTAL, ALIGN_CENTER_VERTICAL, ALIGN_LEFT, ALIGN_RIGHT, ALL, BORDER_DEFAULT,
+    BORDER_SIMPLE, BOTTOM, EXPAND, FIXED_MINSIZE, HORIZONTAL, LEFT, RIGHT, SHAPED, TOP, VERTICAL,
 };
 // ADDED: StaticBoxSizer
 pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
@@ -140,13 +139,11 @@ pub use crate::id::ID_HIGHEST; // ADDED ID_HIGHEST
 // So, in prelude, we can just re-export them: `pub use crate::{LC_LIST, LC_REPORT, ...};`
 pub use crate::{
     LC_ALIGN_LEFT, LC_ALIGN_TOP, LC_AUTOARRANGE, LC_EDIT_LABELS, LC_HRULES, LC_ICON, LC_LIST,
-    LC_NO_HEADER, LC_REPORT, LC_SINGLE_SEL, LC_SMALL_ICON, LC_SORT_ASCENDING,
-    LC_SORT_DESCENDING, LC_VRULES,
+    LC_NO_HEADER, LC_REPORT, LC_SINGLE_SEL, LC_SMALL_ICON, LC_SORT_ASCENDING, LC_SORT_DESCENDING,
+    LC_VRULES,
 };
 pub use crate::{LIST_FORMAT_CENTRE, LIST_FORMAT_LEFT, LIST_FORMAT_RIGHT};
-pub use crate::{
-    LIST_NEXT_ABOVE, LIST_NEXT_ALL, LIST_NEXT_BELOW, LIST_NEXT_LEFT, LIST_NEXT_RIGHT,
-};
+pub use crate::{LIST_NEXT_ABOVE, LIST_NEXT_ALL, LIST_NEXT_BELOW, LIST_NEXT_LEFT, LIST_NEXT_RIGHT};
 pub use crate::{
     LIST_STATE_DISABLED, LIST_STATE_DROPHILITED, LIST_STATE_FOCUSED, LIST_STATE_SELECTED,
 };
@@ -178,30 +175,28 @@ pub use crate::widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};
 pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder};
 
 // ADDED: Re-export StaticLine
-pub use crate::widgets::static_line::{
-    StaticLine, StaticLineBuilder, LI_HORIZONTAL, LI_VERTICAL,
-};
+pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, LI_HORIZONTAL, LI_VERTICAL};
 
 // ADDED: Re-export ScrollBar
 pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERTICAL};
 
 // ADDED: Dialog and MessageDialog
-pub use crate::dialogs::message_dialog::{
-    MessageDialog, MessageDialogBuilder, CANCEL, ICON_ERROR, ICON_EXCLAMATION, ICON_HAND,
-    ICON_INFORMATION, ICON_QUESTION, ICON_WARNING, NO, OK, YES, CENTRE
-};
-pub use crate::dialogs::Dialog;
-pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
 pub use crate::dialogs::colour_dialog::ColourDialog;
 pub use crate::dialogs::font_dialog::FontDialog;
+pub use crate::dialogs::message_dialog::{
+    MessageDialog, MessageDialogBuilder, CANCEL, CENTRE, ICON_ERROR, ICON_EXCLAMATION, ICON_HAND,
+    ICON_INFORMATION, ICON_QUESTION, ICON_WARNING, NO, OK, YES,
+};
+pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
+pub use crate::dialogs::Dialog;
 
 // ADDED: Font
 pub use crate::font::{
-    Font, FONTFAMILY_DEFAULT, FONTFAMILY_DECORATIVE, FONTFAMILY_ROMAN, FONTFAMILY_SCRIPT,
-    FONTFAMILY_SWISS, FONTFAMILY_MODERN, FONTFAMILY_TELETYPE, FONTSTYLE_NORMAL,
-    FONTSTYLE_ITALIC, FONTSTYLE_SLANT, FONTWEIGHT_NORMAL, FONTWEIGHT_LIGHT, FONTWEIGHT_BOLD
+    Font, FONTFAMILY_DECORATIVE, FONTFAMILY_DEFAULT, FONTFAMILY_MODERN, FONTFAMILY_ROMAN,
+    FONTFAMILY_SCRIPT, FONTFAMILY_SWISS, FONTFAMILY_TELETYPE, FONTSTYLE_ITALIC, FONTSTYLE_NORMAL,
+    FONTSTYLE_SLANT, FONTWEIGHT_BOLD, FONTWEIGHT_LIGHT, FONTWEIGHT_NORMAL,
 };
 pub use crate::font_data::FontData;
 
 // ADDED: ProgressDialog
-pub use crate::dialogs::progress_dialog::ProgressDialog; 
+pub use crate::dialogs::progress_dialog::ProgressDialog;
