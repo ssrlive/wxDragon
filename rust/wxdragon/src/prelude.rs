@@ -202,4 +202,6 @@ pub use crate::font_data::FontData;
 pub use crate::dialogs::progress_dialog::ProgressDialog;
 
 // ADDED: FilePickerCtrl, its builder, and style constants
-pub use crate::widgets::{FilePickerCtrl, FilePickerCtrlBuilder, FLP_DEFAULT_STYLE, FLP_OPEN, FLP_SAVE, FLP_OVERWRITE_PROMPT, FLP_FILE_MUST_EXIST, FLP_CHANGE_DIR};
+pub use crate::widgets::{FilePickerCtrl, FilePickerCtrlBuilder, FLP_DEFAULT_STYLE, FLP_OPEN, FLP_SAVE, FLP_OVERWRITE_PROMPT, FLP_FILE_MUST_EXIST, FLP_CHANGE_DIR, FLP_USE_TEXTCTRL};
+pub use crate::widgets::{DirPickerCtrl, DirPickerCtrlBuilder, DIRP_DEFAULT_STYLE, DIRP_DIR_MUST_EXIST, DIRP_CHANGE_DIR, DIRP_USE_TEXTCTRL};
+pub use crate::widgets::{FontPickerCtrl, FontPickerCtrlBuilder, FNTP_DEFAULT_STYLE, FNTP_USE_TEXTCTRL, FNTP_FONTDESC_AS_LABEL, FNTP_USEFONT_FOR_LABEL};

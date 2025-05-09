@@ -28,6 +28,14 @@ pub struct DialogTabControls {
     pub file_picker_ctrl_label: StaticText,
     pub file_picker_ctrl: FilePickerCtrl,
     pub file_picker_status_label: StaticText,
+    // Added for DirPickerCtrl
+    pub dir_picker_ctrl_label: StaticText,
+    pub dir_picker_ctrl: DirPickerCtrl,
+    pub dir_picker_status_label: StaticText,
+    // Added for FontPickerCtrl
+    pub font_picker_ctrl_label: StaticText,
+    pub font_picker_ctrl: FontPickerCtrl,
+    pub font_picker_status_label: StaticText,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -186,6 +194,45 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     fpc_sizer.add(&file_picker_status_label, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&fpc_sizer, 1, EXPAND, 0);
 
+    // --- DirPickerCtrl ---
+    let dir_picker_ctrl_label = StaticText::builder(&dialog_panel)
+        .with_label("Dir Picker Ctrl:")
+        .build();
+    let dir_picker_ctrl = DirPickerCtrl::builder(&dialog_panel)
+        .with_style(DIRP_DEFAULT_STYLE | DIRP_DIR_MUST_EXIST)
+        .with_message("Choose a directory")
+        .build();
+    let dir_picker_status_label = StaticText::builder(&dialog_panel)
+        .with_label("DirPicker: No directory selected yet.")
+        .build();
+
+    grid_sizer.add(&dir_picker_ctrl_label, 0, label_flags, 0);
+    let dpc_sizer = BoxSizer::builder(HORIZONTAL).build();
+    dpc_sizer.add(&dir_picker_ctrl, 1, EXPAND | ALL, 2);
+    dpc_sizer.add_spacer(5);
+    dpc_sizer.add(&dir_picker_status_label, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&dpc_sizer, 1, EXPAND, 0);
+
+    // --- FontPickerCtrl ---
+    let font_picker_ctrl_label = StaticText::builder(&dialog_panel)
+        .with_label("Font Picker Ctrl:")
+        .build();
+    let initial_font_for_picker = Font::new(); // Use default font for now
+    let font_picker_ctrl = FontPickerCtrl::builder(&dialog_panel)
+        .with_initial_font(initial_font_for_picker)
+        .with_style(FNTP_DEFAULT_STYLE | FNTP_USEFONT_FOR_LABEL)
+        .build();
+    let font_picker_status_label = StaticText::builder(&dialog_panel)
+        .with_label("FontPicker: Initial font set.")
+        .build();
+
+    grid_sizer.add(&font_picker_ctrl_label, 0, label_flags, 0);
+    let font_pc_sizer = BoxSizer::builder(HORIZONTAL).build();
+    font_pc_sizer.add(&font_picker_ctrl, 1, EXPAND | ALL, 2);
+    font_pc_sizer.add_spacer(5);
+    font_pc_sizer.add(&font_picker_status_label, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&font_pc_sizer, 1, EXPAND, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
 
@@ -207,6 +254,14 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         file_picker_ctrl_label,
         file_picker_ctrl,
         file_picker_status_label,
+        // Added for DirPickerCtrl
+        dir_picker_ctrl_label,
+        dir_picker_ctrl,
+        dir_picker_status_label,
+        // Added for FontPickerCtrl
+        font_picker_ctrl_label,
+        font_picker_ctrl,
+        font_picker_status_label,
     }
 }
 
@@ -446,6 +501,36 @@ impl DialogTabControls {
                 // This case means get_path() returned an empty string (e.g., no selection or cleared)
                 fpc_status_label_clone.set_label("FilePickerCtrl: No path selected or path is empty.");
                 println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
+            }
+        });
+
+        // Event handler for DirPickerCtrl
+        let dpc_status_label_clone = self.dir_picker_status_label.clone();
+        let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone(); // Clone for the closure
+        self.dir_picker_ctrl.bind(EventType::DIR_PICKER_CHANGED, move |_event: Event| {
+            let path_string: String = dir_picker_ctrl_clone.get_path();
+            if !path_string.is_empty() {
+                let status = format!("Selected Dir: {}", path_string);
+                dpc_status_label_clone.set_label(&status);
+                println!("DirPickerCtrl Path Changed: {}", path_string);
+            } else {
+                dpc_status_label_clone.set_label("DirPickerCtrl: No directory selected or path is empty.");
+                println!("DirPickerCtrl Path Changed: No directory selected or path is empty.");
+            }
+        });
+
+        // Event handler for FontPickerCtrl
+        let font_pc_status_label_clone = self.font_picker_status_label.clone();
+        let font_picker_ctrl_clone = self.font_picker_ctrl.clone();
+        self.font_picker_ctrl.bind(EventType::FONT_PICKER_CHANGED, move |_event: Event| {
+            if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
+                let status = format!("Selected Font: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
+                font_pc_status_label_clone.set_label(&status);
+                println!("FontPickerCtrl Font Changed: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
+                // The selected_font will be dropped here, freeing the C++ wxFont object
+            } else {
+                font_pc_status_label_clone.set_label("FontPickerCtrl: No font selected or font is invalid.");
+                println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");
             }
         });
     }

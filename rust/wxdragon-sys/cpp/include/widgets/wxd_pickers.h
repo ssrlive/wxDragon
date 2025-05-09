@@ -29,4 +29,29 @@ WXD_EXPORTED wxd_FilePickerCtrl_t* wxd_FilePickerCtrl_Create(
 WXD_EXPORTED const char* wxd_FilePickerCtrl_GetPath(wxd_FilePickerCtrl_t* self);
 WXD_EXPORTED void wxd_FilePickerCtrl_SetPath(wxd_FilePickerCtrl_t* self, const char* path);
 
+// --- DirPickerCtrl ---
+WXD_EXPORTED wxd_DirPickerCtrl_t* wxd_DirPickerCtrl_Create(
+    wxd_Window_t* parent, 
+    wxd_Id id, 
+    const char* message, // wxWidgets calls this 'message' but it's the label for the dialog
+    const char* path,    // Initial path
+    wxd_Point pos, 
+    wxd_Size size, 
+    wxd_Style_t style
+);
+WXD_EXPORTED const char* wxd_DirPickerCtrl_GetPath(wxd_DirPickerCtrl_t* self);
+WXD_EXPORTED void wxd_DirPickerCtrl_SetPath(wxd_DirPickerCtrl_t* self, const char* path);
+
+// --- FontPickerCtrl ---
+WXD_EXPORTED wxd_FontPickerCtrl_t* wxd_FontPickerCtrl_Create(
+    wxd_Window_t* parent,
+    wxd_Id id,
+    const wxd_Font_t* initial_font, // Can be NULL for default
+    wxd_Point pos,
+    wxd_Size size,
+    wxd_Style_t style
+);
+WXD_EXPORTED wxd_Font_t* wxd_FontPickerCtrl_GetSelectedFont(wxd_FontPickerCtrl_t* self);
+WXD_EXPORTED void wxd_FontPickerCtrl_SetSelectedFont(wxd_FontPickerCtrl_t* self, const wxd_Font_t* font);
+
 #endif // WXD_PICKERS_H 

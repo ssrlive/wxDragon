@@ -65,6 +65,13 @@ if(NOT WXDRAGON_SOURCES)
 endif()
 message(STATUS "wxDragon Sources (found via GLOB): ${WXDRAGON_SOURCES}")
 
+# Add vendored wxWidgets as a subdirectory
+set(WXDRAGON_SOURCES ${WXDRAGON_SOURCES}
+    src/filepickerctrl.cpp
+    src/dirpickerctrl.cpp
+    src/fontpickerctrl.cpp
+)
+
 # Define the library using the discovered sources
 add_library(wxdragon STATIC ${WXDRAGON_SOURCES})
 
