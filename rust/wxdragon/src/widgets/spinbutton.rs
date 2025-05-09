@@ -6,14 +6,10 @@ use crate::id::Id;
 use crate::window::WxWidget;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // Re-export constants (same as SpinCtrl, potentially defined there or in prelude)
 // For clarity, let's redefine them here or ensure they are accessible.
-pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL;
-pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL;
-pub const SP_ARROW_KEYS: i64 = ffi::WXD_SP_ARROW_KEYS;
-pub const SP_WRAP: i64 = ffi::WXD_SP_WRAP;
-// No specific default style for SpinButton, usually just vertical/horizontal
 
 /// Represents a wxSpinButton widget.
 #[derive(Clone)]
@@ -78,7 +74,7 @@ pub struct SpinButtonBuilder {
     id: Id,
     pos: Point,
     size: Size,
-    style: i64,
+    style: SpinButtonStyle,
     // Range is set after creation, but we can add builder methods
     min_val: Option<i32>,
     max_val: Option<i32>,
@@ -93,7 +89,7 @@ impl SpinButtonBuilder {
             id: ID_ANY,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
-            style: SP_VERTICAL as i64,
+            style: SpinButtonStyle::Default,
             min_val: None,
             max_val: None,
             initial_val: None,
@@ -119,7 +115,7 @@ impl SpinButtonBuilder {
     }
 
     /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: SpinButtonStyle) -> Self {
         self.style = style;
         self
     }
@@ -157,7 +153,7 @@ impl SpinButtonBuilder {
                 self.id as c_int,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if spin_button_ptr.is_null() {
@@ -177,5 +173,42 @@ impl SpinButtonBuilder {
         }
 
         spin_button
+    }
+}
+
+// --- SpinButtonStyle Enum ---
+
+/// Style flags for `SpinButton`.
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum SpinButtonStyle {
+    /// Default style (vertical spin button).
+    Default = ffi::WXD_SP_VERTICAL,
+    /// Horizontal spin button.
+    Horizontal = ffi::WXD_SP_HORIZONTAL,
+    /// Allow using arrow keys to change the value.
+    ArrowKeys = ffi::WXD_SP_ARROW_KEYS,
+    /// The value wraps around when incrementing/decrementing past max/min.
+    Wrap = ffi::WXD_SP_WRAP,
+}
+
+impl SpinButtonStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for SpinButtonStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for SpinButtonStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

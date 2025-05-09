@@ -60,39 +60,31 @@ fn main() {
         let notebook = Notebook::builder(&frame).with_id(120).build();
 
         // --- Create Tabs ---
+        let (advanced_splitter, advanced_controls) = create_advanced_tab(&notebook);
         let basic_controls = create_basic_tab(&notebook, &frame);
         let list_controls = create_lists_tab(&notebook, &frame);
-        let (advanced_splitter, advanced_controls) = create_advanced_tab(&notebook);
-        let data_controls = create_data_tab(&notebook);
+        let data_controls = create_data_tab(&notebook, &frame);
         let book_controls = create_book_controls_tab(&notebook);
         let dialog_controls = create_dialog_tab(&notebook, &frame);
         let media_controls = create_media_tab(&notebook);
 
         // --- ToolBar Setup ---
-        let tb_style = TB_TEXT | TB_HORIZONTAL;
-        if let Some(toolbar) = frame.create_tool_bar(tb_style, wxdragon::id::ID_ANY as i32) {
-            // Fetch Bitmaps for toolbar
-            let new_bmp = ArtProvider::get_bitmap(ART_NEW, ART_TOOLBAR, None)
-                .expect("Failed to get ART_NEW icon");
-            let open_bmp = ArtProvider::get_bitmap(ART_FILE_OPEN, ART_TOOLBAR, None)
-                .expect("Failed to get ART_FILE_OPEN icon");
-            let save_bmp = ArtProvider::get_bitmap(ART_FILE_SAVE, ART_TOOLBAR, None)
-                .expect("Failed to get ART_FILE_SAVE icon");
-            let exit_bmp = ArtProvider::get_bitmap(ART_QUIT, ART_TOOLBAR, None)
-                .expect("Failed to get ART_QUIT icon");
-
-            // Add tools
-            toolbar.add_tool(ID_TOOL_NEW, "New", &new_bmp, "Create a new file");
-            toolbar.add_tool(ID_TOOL_OPEN, "Open", &open_bmp, "Open an existing file");
-            toolbar.add_tool(ID_TOOL_SAVE, "Save", &save_bmp, "Save the current file");
-            toolbar.add_separator();
-            toolbar.add_tool(ID_EXIT, "Exit", &exit_bmp, "Exit the application");
-
-            toolbar.realize();
-        }
+        // let tb_style = TB_TEXT | TB_HORIZONTAL; // Old - Commenting out for now as Toolbar not refactored
+        // if let Some(toolbar) = frame.create_tool_bar(Some(tb_style), ID_ANY) {
+        //     let open_icon = ArtProvider::get_bitmap(ART_FILE_OPEN, ART_TOOLBAR, None)
+        //         .expect("Failed to get ART_FILE_OPEN for toolbar");
+        //     toolbar.add_tool(
+        //         1, // Tool ID
+        //         "Open",
+        //         &open_icon,
+        //         "Open a file",
+        //         ItemKind::Normal, // wxITEM_NORMAL
+        //     );
+        //     toolbar.realize();
+        // }
 
         // --- Add Pages to Notebook ---
-        notebook.add_page(&basic_controls.panel, "Basic", true);
+        notebook.add_page(&basic_controls.panel, "Basic Controls", true);
         notebook.add_page(&list_controls.panel, "Lists", false);
         notebook.add_page(&advanced_splitter, "Advanced", false);
         notebook.add_page(&data_controls.panel, "Data", false);

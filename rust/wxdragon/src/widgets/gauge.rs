@@ -4,14 +4,10 @@ use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // Opaque pointer type from FFI
 pub type RawGauge = ffi::wxd_Gauge_t;
-
-// Gauge specific styles
-pub const GA_HORIZONTAL: i64 = ffi::WXD_GA_HORIZONTAL as i64;
-pub const GA_VERTICAL: i64 = ffi::WXD_GA_VERTICAL as i64;
-pub const GA_SMOOTH: i64 = ffi::WXD_GA_SMOOTH as i64;
 
 #[derive(Clone)]
 pub struct Gauge {
@@ -91,7 +87,7 @@ pub struct GaugeBuilder<'a> {
     range: i32,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64, // Keep as i64
+    style: GaugeStyle,
 }
 
 impl<'a> GaugeBuilder<'a> {
@@ -102,7 +98,7 @@ impl<'a> GaugeBuilder<'a> {
             range: 100, // Default range
             pos: None,
             size: None,
-            style: GA_HORIZONTAL as i64, // Default style (i64)
+            style: GaugeStyle::Default,
         }
     }
 
@@ -126,8 +122,7 @@ impl<'a> GaugeBuilder<'a> {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
-        // Keep param as i64
+    pub fn with_style(mut self, style: GaugeStyle) -> Self {
         self.style = style;
         self
     }
@@ -136,6 +131,44 @@ impl<'a> GaugeBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        Gauge::new_impl(parent_ptr, self.id, self.range, pos, size, self.style)
+        Gauge::new_impl(parent_ptr, self.id, self.range, pos, size, self.style.bits())
+    }
+}
+
+// --- GaugeStyle Enum ---
+
+/// Style flags for `Gauge`.
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum GaugeStyle {
+    /// Default style (horizontal bar).
+    Default = ffi::WXD_GA_HORIZONTAL,
+    /// Vertical gauge.
+    Vertical = ffi::WXD_GA_VERTICAL,
+    /// Use smooth progress indication (typically native look and feel determines this).
+    Smooth = ffi::WXD_GA_SMOOTH,
+    /// Show textual progress (e.g., "50%").
+    /// On some platforms, this might be the default or combined with non-smooth.
+    ShowProgress = ffi::WXD_GA_PROGRESS,
+}
+
+impl GaugeStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for GaugeStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for GaugeStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

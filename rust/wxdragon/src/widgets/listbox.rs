@@ -7,15 +7,16 @@ use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // --- Constants ---
 // Style flags
-pub const LB_SINGLE: i64 = ffi::WXD_LB_SINGLE;
-pub const LB_MULTIPLE: i64 = ffi::WXD_LB_MULTIPLE;
-pub const LB_EXTENDED: i64 = ffi::WXD_LB_EXTENDED;
-pub const LB_SORT: i64 = ffi::WXD_LB_SORT;
-pub const LB_ALWAYS_SB: i64 = ffi::WXD_LB_ALWAYS_SB;
-pub const LB_HSCROLL: i64 = ffi::WXD_LB_HSCROLL;
+// REMOVED: pub const LB_SINGLE: i64 = ffi::WXD_LB_SINGLE;
+// REMOVED: pub const LB_MULTIPLE: i64 = ffi::WXD_LB_MULTIPLE;
+// REMOVED: pub const LB_EXTENDED: i64 = ffi::WXD_LB_EXTENDED;
+// REMOVED: pub const LB_SORT: i64 = ffi::WXD_LB_SORT;
+// REMOVED: pub const LB_ALWAYS_SB: i64 = ffi::WXD_LB_ALWAYS_SB;
+// REMOVED: pub const LB_HSCROLL: i64 = ffi::WXD_LB_HSCROLL;
 // Special value returned by GetSelection when nothing is selected
 pub const NOT_FOUND: i32 = -1; // wxNOT_FOUND is typically -1
 
@@ -191,7 +192,7 @@ pub struct ListBoxBuilder<'a> {
     id: Id,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64,
+    style: ListBoxStyle,
     choices: Vec<String>,
 }
 
@@ -203,7 +204,7 @@ impl<'a> ListBoxBuilder<'a> {
             id: ID_ANY as Id,
             pos: None,
             size: None,
-            style: 0, // Default style (i64)
+            style: ListBoxStyle::Default,
             choices: Vec::new(),
         }
     }
@@ -227,7 +228,7 @@ impl<'a> ListBoxBuilder<'a> {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ListBoxStyle) -> Self {
         self.style = style;
         self
     }
@@ -244,7 +245,7 @@ impl<'a> ListBoxBuilder<'a> {
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
         // Call new_impl which now matches the 5-arg FFI
-        let list_box = ListBox::new_impl(parent_ptr, self.id, pos, size, self.style);
+        let list_box = ListBox::new_impl(parent_ptr, self.id, pos, size, self.style.bits());
 
         // Append initial choices if any
         for choice_str in &self.choices {
@@ -279,5 +280,47 @@ impl std::ops::Deref for ListBox {
 impl WxEvtHandler for ListBox {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
         self.window.get_event_handler_ptr()
+    }
+}
+
+// --- ListBoxStyle Enum ---
+
+/// Style flags for `ListBox`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ListBoxStyle {
+    /// Default style (single selection).
+    Default = ffi::WXD_LB_SINGLE,
+    /// Multiple selection list: any number of items can be selected.
+    Multiple = ffi::WXD_LB_MULTIPLE,
+    /// Extended selection list: allows using Shift and Ctrl keys for selection.
+    Extended = ffi::WXD_LB_EXTENDED,
+    /// The items in the listbox are kept sorted in alphabetical order.
+    Sort = ffi::WXD_LB_SORT,
+    /// Always show a vertical scrollbar.
+    AlwaysScrollbar = ffi::WXD_LB_ALWAYS_SB,
+    /// Create a horizontal scrollbar if contents are too wide (requires explicit sizing).
+    HorizontalScrollbar = ffi::WXD_LB_HSCROLL,
+}
+
+impl ListBoxStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for ListBoxStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ListBoxStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

@@ -6,14 +6,7 @@ use crate::id::Id;
 use crate::window::WxWidget;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-
-// Re-export constants from wxdragon-sys
-pub const SL_HORIZONTAL: i64 = ffi::WXD_SL_HORIZONTAL;
-pub const SL_VERTICAL: i64 = ffi::WXD_SL_VERTICAL;
-pub const SL_LABELS: i64 = ffi::WXD_SL_LABELS;
-pub const SL_MIN_MAX_LABELS: i64 = ffi::WXD_SL_MIN_MAX_LABELS;
-pub const SL_VALUE_LABEL: i64 = ffi::WXD_SL_VALUE_LABEL;
-pub const SL_BOTH: i64 = ffi::WXD_SL_BOTH;
+use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxSlider widget.
 #[derive(Clone)] // Keep Clone, as it just copies the pointer
@@ -85,7 +78,7 @@ pub struct SliderBuilder {
     max_value: i32,
     pos: Point,
     size: Size,
-    style: i64,
+    style: SliderStyle,
 }
 
 impl SliderBuilder {
@@ -99,7 +92,7 @@ impl SliderBuilder {
             max_value: 100,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
-            style: SL_HORIZONTAL as i64,
+            style: SliderStyle::Default,
         }
     }
 
@@ -140,7 +133,7 @@ impl SliderBuilder {
     }
 
     /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: SliderStyle) -> Self {
         self.style = style;
         self
     }
@@ -156,12 +149,55 @@ impl SliderBuilder {
                 self.max_value as c_int,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if slider_ptr.is_null() {
             panic!("Failed to create Slider");
         }
         unsafe { Slider::from_ptr(slider_ptr) }
+    }
+}
+
+// --- SliderStyle Enum ---
+
+/// Style flags for `Slider`.
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum SliderStyle {
+    /// Default style (horizontal slider with no labels or ticks).
+    Default = ffi::WXD_SL_HORIZONTAL,
+    /// Vertical slider.
+    Vertical = ffi::WXD_SL_VERTICAL,
+    /// Display tick marks.
+    AutoTicks = ffi::WXD_SL_AUTOTICKS,
+    /// Display labels (min, max, and current value).
+    Labels = ffi::WXD_SL_LABELS,
+    /// Display min and max labels only.
+    MinMaxLabels = ffi::WXD_SL_MIN_MAX_LABELS,
+    /// Display the current value as a label.
+    ValueLabel = ffi::WXD_SL_VALUE_LABEL,
+    /// Show ticks on both sides of the slider (not always supported or visually distinct).
+    BothSides = ffi::WXD_SL_BOTH,
+}
+
+impl SliderStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for SliderStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for SliderStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

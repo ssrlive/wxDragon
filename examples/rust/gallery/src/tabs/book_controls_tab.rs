@@ -1,4 +1,5 @@
 use wxdragon::prelude::*;
+use wxdragon::widgets::panel::PanelStyle;
 
 pub struct BookControlsTab {
     pub tab_panel: Panel,
@@ -6,7 +7,9 @@ pub struct BookControlsTab {
 }
 
 pub fn create_book_controls_tab(notebook: &Notebook) -> BookControlsTab {
-    let tab_panel = Panel::builder(notebook).with_style(TAB_TRAVERSAL).build();
+    let tab_panel = Panel::builder(notebook)
+        .with_style(PanelStyle::TabTraversal)
+        .build();
 
     let treebook = Treebook::builder(&tab_panel)
         .with_id(ID_HIGHEST + 20) // Example ID

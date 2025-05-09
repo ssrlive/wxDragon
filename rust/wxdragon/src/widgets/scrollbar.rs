@@ -10,10 +10,7 @@ use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-
-// Styles (from const_extractor)
-pub const SB_HORIZONTAL: i64 = ffi::WXD_SB_HORIZONTAL;
-pub const SB_VERTICAL: i64 = ffi::WXD_SB_VERTICAL;
+use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxScrollBar widget.
 #[derive(Clone)]
@@ -102,7 +99,7 @@ pub struct ScrollBarBuilder<'a, P: WxWidget + 'a> {
     id: i32,
     pos: Point,
     size: Size,
-    style: i64,
+    style: ScrollBarStyle,
     name: String,
     parent_type: PhantomData<&'a P>,
 }
@@ -114,7 +111,7 @@ impl<'a, P: WxWidget> Default for ScrollBarBuilder<'a, P> {
             id: ID_ANY,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
-            style: SB_HORIZONTAL as i64,
+            style: ScrollBarStyle::Default,
             name: String::from("scrollBar"),
             parent_type: PhantomData,
         }
@@ -137,7 +134,7 @@ impl<'a, P: WxWidget> ScrollBarBuilder<'a, P> {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ScrollBarStyle) -> Self {
         self.style = style;
         self
     }
@@ -157,7 +154,7 @@ impl<'a, P: WxWidget> ScrollBarBuilder<'a, P> {
                 self.id,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
                 c_name.as_ptr(),
             );
             if ptr.is_null() {
@@ -165,5 +162,44 @@ impl<'a, P: WxWidget> ScrollBarBuilder<'a, P> {
             }
             ScrollBar::from_ptr(ptr)
         }
+    }
+}
+
+// --- ScrollBarStyle Enum ---
+
+/// Style flags for `ScrollBar`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+/// Note: ScrollBar styles are typically exclusive (either Horizontal or Vertical).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ScrollBarStyle {
+    /// Default style (horizontal).
+    Default = ffi::WXD_SB_HORIZONTAL,
+    /// Vertical scrollbar.
+    Vertical = ffi::WXD_SB_VERTICAL,
+}
+
+impl ScrollBarStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+// BitOr and BitOrAssign might not be strictly necessary if styles are exclusive,
+// but added for consistency with other style enums.
+impl BitOr for ScrollBarStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        // While typically exclusive, allow bitwise combination for potential future use
+        // or if a combination makes sense in some wxWidgets port/version.
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ScrollBarStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

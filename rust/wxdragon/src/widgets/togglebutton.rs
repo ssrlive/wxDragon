@@ -6,6 +6,7 @@ use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxToggleButton control.
 #[derive(Clone)]
@@ -117,7 +118,7 @@ pub struct ToggleButtonBuilder<'a> {
     label: String,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64,
+    style: ToggleButtonStyle,
 }
 
 impl<'a> ToggleButtonBuilder<'a> {
@@ -129,7 +130,7 @@ impl<'a> ToggleButtonBuilder<'a> {
             label: String::new(),
             pos: None,
             size: None,
-            style: 0,
+            style: ToggleButtonStyle::Default,
         }
     }
 
@@ -158,7 +159,7 @@ impl<'a> ToggleButtonBuilder<'a> {
     }
 
     /// Sets the window style flags (use constants from `togglebutton` module).
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ToggleButtonStyle) -> Self {
         self.style = style;
         self
     }
@@ -167,7 +168,7 @@ impl<'a> ToggleButtonBuilder<'a> {
     pub fn build(self) -> ToggleButton {
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        ToggleButton::new(self.parent, self.id, &self.label, pos, size, self.style)
+        ToggleButton::new(self.parent, self.id, &self.label, pos, size, self.style.bits())
             .expect("Failed to create ToggleButton")
     }
 }
@@ -190,5 +191,52 @@ impl std::ops::Deref for ToggleButton {
     type Target = Window;
     fn deref(&self) -> &Self::Target {
         &self.window
+    }
+}
+
+// --- ToggleButtonStyle Enum ---
+
+/// Style flags for `ToggleButton`.
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ToggleButtonStyle {
+    /// Default style (no specific alignment, standard border).
+    Default = 0,
+    /// Align label to the left.
+    Left = ffi::WXD_BU_LEFT,
+    /// Align label to the top.
+    Top = ffi::WXD_BU_TOP,
+    /// Align label to the right.
+    Right = ffi::WXD_BU_RIGHT,
+    /// Align label to the bottom.
+    Bottom = ffi::WXD_BU_BOTTOM,
+    /// Button size will be adjusted to exactly fit the label.
+    ExactFit = ffi::WXD_BU_EXACTFIT,
+    /// Do not display the label string (useful for buttons with only an image).
+    NoText = ffi::WXD_BU_NOTEXT,
+    /// No border.
+    BorderNone = ffi::WXD_BORDER_NONE,
+    // /// A simple border (rarely used for buttons, which have a default look).
+    // BorderSimple = ffi::WXD_BORDER_SIMPLE, // Typically not used for ToggleButton
+}
+
+impl ToggleButtonStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for ToggleButtonStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ToggleButtonStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

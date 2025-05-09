@@ -2,17 +2,14 @@
 
 use crate::base::{Point, Size};
 use crate::bitmap::Bitmap;
-use crate::defs::Style;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
+use crate::widgets::combobox::ComboBoxStyle;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
-
-// Constants from wxComboBox (re-exported here for convenience or rely on prelude)
-pub use crate::widgets::combobox::{CB_DROPDOWN, CB_READONLY, CB_SIMPLE, CB_SORT};
 
 /// Represents a wxBitmapComboBox widget.
 #[derive(Clone)]
@@ -150,7 +147,7 @@ pub struct BitmapComboBoxBuilder<'a> {
     value: &'a str,
     pos: Point,
     size: Size,
-    style: Style,
+    style: ComboBoxStyle,
 }
 
 impl<'a> BitmapComboBoxBuilder<'a> {
@@ -161,7 +158,7 @@ impl<'a> BitmapComboBoxBuilder<'a> {
             value: "",
             pos: Point::default(),
             size: Size::default(),
-            style: CB_DROPDOWN, // Default style
+            style: ComboBoxStyle::Default,
         }
     }
 
@@ -185,7 +182,7 @@ impl<'a> BitmapComboBoxBuilder<'a> {
         self
     }
 
-    pub fn with_style(mut self, style: Style) -> Self {
+    pub fn with_style(mut self, style: ComboBoxStyle) -> Self {
         self.style = style;
         self
     }
@@ -201,7 +198,7 @@ impl<'a> BitmapComboBoxBuilder<'a> {
                 c_value.as_ptr(),
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if ptr.is_null() {

@@ -125,10 +125,10 @@ pub use widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};
 pub use widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder};
 
 // ADDED: Re-export StaticLine
-pub use widgets::static_line::{StaticLine, StaticLineBuilder, LI_HORIZONTAL, LI_VERTICAL};
+pub use widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 
 // ADDED: Re-export ScrollBar
-pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERTICAL};
+pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 
 // Dialogs exports
 pub use dialogs::{colour_dialog::ColourDialog, font_dialog::FontDialog};
@@ -136,3 +136,5 @@ pub use dialogs::{colour_dialog::ColourDialog, font_dialog::FontDialog};
 // Font exports
 pub use font::Font;
 pub use font_data::FontData;
+
+pub use sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};

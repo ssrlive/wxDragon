@@ -6,15 +6,16 @@ use wxdragon_sys as ffi;
 // use ffi::Style;
 use std::ops::Drop;
 use std::os::raw::c_char;
+use std::ops::{BitOr, BitOrAssign};
 
 // Comment out unresolved constant import
 // pub use ffi::TE_PROCESS_ENTER;
 // pub const wxTE_PASSWORD: i64 = ffi::wxTE_PASSWORD; // Re-export if needed
 
 // --- TextCtrl Style Flags ---
-pub type Style = i64; // Based on ffi::wxd_Style_t which is long
+// REMOVED: pub type Style = i64; // Based on ffi::wxd_Style_t which is long
                       // Add more styles as needed
-pub const TE_PROCESS_ENTER: Style = ffi::WXD_TE_PROCESS_ENTER;
+// REMOVED: pub const TE_PROCESS_ENTER: Style = ffi::WXD_TE_PROCESS_ENTER;
 
 #[derive(Clone)]
 pub struct TextCtrl {
@@ -94,7 +95,7 @@ pub struct TextCtrlBuilder<'a> {
     value: String,
     pos: Point,
     size: Size,
-    style: i64,
+    style: TextCtrlStyle,
 }
 
 impl<'a> TextCtrlBuilder<'a> {
@@ -108,7 +109,7 @@ impl<'a> TextCtrlBuilder<'a> {
                 width: -1,
                 height: -1,
             },
-            style: 0,
+            style: TextCtrlStyle::Default,
         }
     }
 
@@ -137,7 +138,7 @@ impl<'a> TextCtrlBuilder<'a> {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: TextCtrlStyle) -> Self {
         self.style = style;
         self
     }
@@ -149,7 +150,7 @@ impl<'a> TextCtrlBuilder<'a> {
             &self.value,
             self.pos,
             self.size,
-            self.style,
+            self.style.bits(),
         )
         .expect("Failed to create TextCtrl widget")
     }
@@ -174,5 +175,61 @@ impl std::ops::Deref for TextCtrl {
     type Target = Window;
     fn deref(&self) -> &Self::Target {
         &self.window
+    }
+}
+
+// --- TextCtrlStyle Enum ---
+
+/// Style flags for `TextCtrl`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum TextCtrlStyle {
+    /// Default style (single line, editable, left-aligned).
+    Default = 0,
+    /// Multi-line text control.
+    MultiLine = ffi::WXD_TE_MULTILINE,
+    /// Password entry control (displays characters as asterisks).
+    Password = ffi::WXD_TE_PASSWORD,
+    /// Read-only text control.
+    ReadOnly = ffi::WXD_TE_READONLY,
+    /// For rich text content (implies multiline). Use with care, may require specific handling.
+    Rich = ffi::WXD_TE_RICH,
+    /// For more advanced rich text content (implies multiline). Use with care.
+    Rich2 = ffi::WXD_TE_RICH2,
+    /// Automatically detect and make URLs clickable.
+    AutoUrl = ffi::WXD_TE_AUTO_URL,
+    /// Generate an event when Enter key is pressed.
+    ProcessEnter = ffi::WXD_TE_PROCESS_ENTER,
+    // /// Align text to the left (default).
+    // AlignLeft = ffi::WXD_TE_LEFT, // Not yet available
+    // /// Align text to the center.
+    // AlignCenter = ffi::WXD_TE_CENTER, // Not yet available
+    // /// Align text to the right.
+    // AlignRight = ffi::WXD_TE_RIGHT, // Not yet available
+    // /// Don't hide selection when focus is lost.
+    // NoHideSelection = ffi::WXD_TE_NOHIDESEL, // Not yet available
+    // /// Generate an event when Tab key is pressed (usually for single line controls).
+    // ProcessTab = ffi::WXD_TE_PROCESS_TAB, // Not yet available
+}
+
+impl TextCtrlStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for TextCtrlStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for TextCtrlStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

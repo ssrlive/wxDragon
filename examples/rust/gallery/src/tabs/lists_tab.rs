@@ -1,5 +1,9 @@
 use wxdragon::id;
 use wxdragon::prelude::*;
+use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::listbox::ListBoxStyle;
+use wxdragon::widgets::combobox::ComboBoxStyle;
+// use wxdragon::widgets::choice; // For CB_SORT if it were available directly
 
 #[allow(dead_code)]
 pub struct ListsTabControls {
@@ -19,81 +23,63 @@ pub struct ListsTabControls {
 pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls {
     // Create the ScrolledWindow as the main container for this tab
     let scrolled_list_window = ScrolledWindow::builder(notebook)
-        .with_style(TAB_TRAVERSAL) // Styles like TAB_TRAVERSAL apply here
+        // .with_style(PanelStyle::TabTraversal) // Removed - ScrolledWindow doesn't take PanelStyle
         .build();
 
-    // Create an inner Panel *inside* the ScrolledWindow to hold the content
-    let inner_list_panel = Panel::builder(&scrolled_list_window)
-        // No specific style needed here unless desired
+    // Main panel inside the scrolled window, this is where TAB_TRAVERSAL should apply if needed for its children
+    let panel = Panel::builder(&scrolled_list_window)
+        .with_style(PanelStyle::TabTraversal) // Panel takes PanelStyle
         .build();
+    let _sizer = BoxSizer::builder(VERTICAL).build();
 
     // --- Create controls, parenting them to the *inner_list_panel* ---
-    let list_box_items = [
-        "Apple",
-        "Banana",
-        "Cherry",
-        "Date",
-        "Fig",
-        "Grape",
-        "Honeydew",
-        "Kiwi",
-        "Lemon",
-        "Lime",
-        "Mango",
-        "Nectarine",
-        "Orange",
-        "Papaya",
-        "Peach",
-        "Pear",
-        "Plum",
-        "Raspberry",
-        "Strawberry",
-        "Watermelon",
-        "A very long item name indeed to test horizontal scrolling",
-    ]; // More items
-    let list_box = ListBox::builder(&inner_list_panel)
+    let list_box_items = ["Apple", "Banana", "Cherry", "Date", "Elderberry"];
+    let list_box = ListBox::builder(&panel)
         .with_choices(&list_box_items)
-        .with_style(LB_SINGLE | LB_SORT | LB_ALWAYS_SB | LB_HSCROLL)
+        // .with_style(ListBoxStyle::Default | ListBoxStyle::Sort | ListBoxStyle::AlwaysScrollbar | ListBoxStyle::HorizontalScrollbar) // Old complex
+        .with_style(ListBoxStyle::Sort) // Simplified to test
         .build();
-    let listbox_status_label = StaticText::builder(&inner_list_panel)
+    let listbox_status_label = StaticText::builder(&panel)
         .with_label("List Selection: None")
         .build();
-    let checklistbox = CheckListBox::builder(&inner_list_panel)
+    let checklistbox = CheckListBox::builder(&panel)
         .with_id(109)
         .with_choices(&[
             "Option A", "Option B", "Option C", "Option D", "Option E", "Option F", "Option G",
         ])
-        .with_style(LB_SORT)
+        // .with_style(LB_SORT) // Old
+        .with_style(ListBoxStyle::Sort) // New
         .build();
     checklistbox.check(1, true);
-    let checklistbox_status_label = StaticText::builder(&inner_list_panel)
+    let checklistbox_status_label = StaticText::builder(&panel)
         .with_label("CheckList Status: B (Checked)")
         .build();
     let choice_items = [
         "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Cyan", "Magenta",
     ];
-    let choice_ctrl = Choice::builder(&inner_list_panel)
+    let choice_ctrl = Choice::builder(&panel)
         .with_choices(&choice_items)
-        .with_style(CB_SORT)
+        // .with_style(CB_SORT) // Old - CB_SORT may not be applicable or available for Choice directly yet
+        // Commenting out style for Choice as it's not refactored with an enum
         .build();
     choice_ctrl.set_selection(0);
-    let choice_status_label = StaticText::builder(&inner_list_panel)
+    let choice_status_label = StaticText::builder(&panel)
         .with_label("Choice Selection: Red")
         .build();
     let combo_items = [
         "Cabbage", "Carrot", "Cucumber", "Celery", "Broccoli", "Spinach", "Kale", "Lettuce",
     ];
-    let combo_box = ComboBox::builder(&inner_list_panel)
+    let combo_box = ComboBox::builder(&panel)
         .with_choices(&combo_items)
-        .with_value("Initial Combo")
-        .with_style(CB_SORT)
+        // .with_style(CB_SORT) // Old
+        .with_style(ComboBoxStyle::Sort | ComboBoxStyle::ProcessEnter) // Ensure ProcessEnter for TEXT_ENTER event
         .build();
-    let combo_status_label = StaticText::builder(&inner_list_panel)
+    let combo_status_label = StaticText::builder(&panel)
         .with_label("Combo Status: Initial Combo")
         .build();
 
     // --- ADDED: ListCtrl Example ---
-    let list_ctrl = ListCtrl::builder(&inner_list_panel)
+    let list_ctrl = ListCtrl::builder(&panel)
         .with_id(id::ID_HIGHEST + 7) // ID_LIST_CTRL
         .with_style(LC_REPORT | LC_SINGLE_SEL | LC_HRULES | LC_VRULES) // Report style, single selection, rules
         .build();
@@ -109,7 +95,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let _item2_idx = list_ctrl.insert_item(1, "P002");
     let _item3_idx = list_ctrl.insert_item(2, "P003");
 
-    let list_ctrl_status_label = StaticText::builder(&inner_list_panel)
+    let list_ctrl_status_label = StaticText::builder(&panel)
         .with_label("ListCtrl Status: None")
         .build();
 
@@ -151,13 +137,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
     list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, EXPAND | ALL, 5); // Add ListCtrl sizer to main, taking space
 
-    inner_list_panel.set_sizer(list_sizer_main, true);
+    panel.set_sizer(list_sizer_main, true);
     // Fit the inner panel to its contents initially
-    inner_list_panel.fit();
+    panel.fit();
 
     // --- Configure the ScrolledWindow ---
     // Calculate virtual size needed based on the inner panel's best size
-    let inner_size = inner_list_panel.get_best_size();
+    let inner_size = panel.get_best_size();
     // Set scroll rate (pixels per scroll unit)
     scrolled_list_window.set_scroll_rate(10, 10);
     // Set scrollbars based on inner panel size (make virtual size a bit larger to ensure scrolling)

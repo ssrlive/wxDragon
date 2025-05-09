@@ -8,6 +8,7 @@ use wxdragon_sys as ffi; // ADDED for Id type alias
 use std::ffi::CString;
 use std::os::raw::{c_char, c_long};
 use std::ptr;
+use std::ops::{BitOr, BitOrAssign}; // Added for style enum
 
 // --- SearchCtrl --- //
 
@@ -111,29 +112,62 @@ impl Drop for SearchCtrl {
     }
 }
 
+// --- SearchCtrlStyle Enum ---
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum SearchCtrlStyle {
+    Default = 0,
+    ProcessEnter = ffi::WXD_TE_PROCESS_ENTER, // Assuming WXD_TE_PROCESS_ENTER is the correct FFI const
+}
+
+impl SearchCtrlStyle {
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl Default for SearchCtrlStyle {
+    fn default() -> Self {
+        SearchCtrlStyle::Default
+    }
+}
+
+impl BitOr for SearchCtrlStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for SearchCtrlStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}
+
 // --- SearchCtrlBuilder --- //
 
 pub struct SearchCtrlBuilder {
     parent_ptr: *mut ffi::wxd_Window_t,
-    id: Id, // CHANGED to Id
+    id: Id,
     value: String,
     pos: Point,
     size: Size,
-    style: i64,
+    style: SearchCtrlStyle,
 }
 
 impl SearchCtrlBuilder {
     fn new(parent: &impl WxWidget) -> Self {
         SearchCtrlBuilder {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY, // Use ID_ANY from crate::base (already i32)
+            id: ID_ANY,
             value: String::new(),
             pos: Point { x: -1, y: -1 },
             size: Size {
                 width: -1,
                 height: -1,
             },
-            style: 0,
+            style: SearchCtrlStyle::default(),
         }
     }
 
@@ -170,7 +204,7 @@ impl SearchCtrlBuilder {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: SearchCtrlStyle) -> Self {
         self.style = style;
         self
     }
@@ -186,7 +220,7 @@ impl SearchCtrlBuilder {
                 self.pos.y,
                 self.size.width,
                 self.size.height,
-                self.style as c_long,
+                self.style.bits() as c_long,
             )
         };
         if raw_ptr.is_null() {

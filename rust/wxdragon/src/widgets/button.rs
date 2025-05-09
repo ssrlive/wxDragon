@@ -7,6 +7,7 @@ use std::default::Default;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi; // Import Default
+use std::ops::{BitOr, BitOrAssign}; // ADDED for enum bitwise operations
 
 /// Represents a wxButton.
 #[derive(Clone)]
@@ -29,7 +30,7 @@ pub struct ButtonBuilder {
     label: String,
     pos: Point,
     size: Size,
-    style: i64,
+    style: ButtonStyle, // MODIFIED: Use ButtonStyle enum
 }
 
 // Manual Default implementation
@@ -44,7 +45,7 @@ impl Default for ButtonBuilder {
                 width: -1,
                 height: -1,
             }, // Explicit default size
-            style: 0,
+            style: ButtonStyle::Default, // MODIFIED: Default style
         }
     }
 }
@@ -75,7 +76,7 @@ impl ButtonBuilder {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ButtonStyle) -> Self { // MODIFIED: Parameter is ButtonStyle
         self.style = style;
         self
     }
@@ -95,7 +96,7 @@ impl ButtonBuilder {
                 c_label.as_ptr(),
                 self.pos.into(),                // Use directly
                 self.size.into(),               // Use directly
-                self.style.try_into().unwrap(), // Use directly
+                self.style.bits().try_into().unwrap(), // MODIFIED: Use .bits() to get i64 value
             )
         };
 
@@ -126,17 +127,6 @@ impl Button {
     /// This is intended for internal use by other widget wrappers that compose Button.
     pub(crate) fn new_from_composition(window: Window, parent_ptr: *mut ffi::wxd_Window_t) -> Self {
         Self { window, parent_ptr }
-    }
-
-    /// Sets the button's label.
-    pub fn set_label(&self, label: &str) {
-        let c_label = CString::new(label).expect("CString::new failed");
-        unsafe {
-            ffi::wxd_Button_SetLabel(
-                self.window.as_ptr() as *mut ffi::wxd_Button_t,
-                c_label.as_ptr(),
-            );
-        }
     }
 
     /// Gets the button's label.
@@ -183,18 +173,34 @@ impl Button {
     }
 }
 
-// Implement WxWidget for Button.
+// Implement WxWidget for Button by delegating to the composed Window.
 impl WxWidget for Button {
     fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
+        self.window.handle_ptr() // Delegate to Window's WxWidget impl
     }
+}
 
-    // Inherit default `show` from trait for now, assuming a generic Window Show
-    // might be added to C API later. Or, implement wxd_Window_Show.
-    // For Button, Show is usually handled by the parent layout,
-    // but an explicit wxd_Button_Show could be added if needed.
+// Implement Deref to allow Button to be used where a Window is expected.
+impl std::ops::Deref for Button {
+    type Target = Window;
+    fn deref(&self) -> &Self::Target {
+        &self.window
+    }
+}
 
-    // No need to implement `destroy` here, Drop handles it.
+impl std::ops::DerefMut for Button {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.window
+    }
+}
+
+// Implement WxEvtHandler for Button by delegating to the composed Window's WxEvtHandler implementation.
+impl WxEvtHandler for Button {
+    /// # Safety
+    /// Inherits safety requirements from `Window::get_event_handler_ptr`.
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.window.get_event_handler_ptr()
+    }
 }
 
 /// Implement Drop for Button.
@@ -207,23 +213,58 @@ impl WxWidget for Button {
 /// for top-level windows.
 impl Drop for Button {
     fn drop(&mut self) {
-        // println!("Button wrapper drop (noop for children): {:?}", self.window.as_ptr());
-        // No-op: Parent wxWindow is responsible for destroying the C++ object.
-        // Calling ffi::wxd_Button_Destroy here would be incorrect for non-top-level widgets.
+        // Child widgets like Button are typically managed by their parent in wxWidgets.
+        // The `Window` wrapper's Drop logic (via WxdCleaner) handles unbinding events.
+        // No explicit call to ffi::wxd_Window_Destroy is needed here for child widgets.
+        // If this button were somehow a top-level, unparented button (unlikely for wxButton),
+        // then specific destruction logic might be needed. For now, assume it's a child.
     }
 }
 
-// Allow Button to be used where a Window is expected
-impl std::ops::Deref for Button {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
+// --- ButtonStyle Enum ---
+
+/// Style flags for `Button`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ButtonStyle {
+    /// Default style (no specific alignment, standard border).
+    Default = 0,
+    /// Align label to the left.
+    Left = ffi::WXD_BU_LEFT,
+    /// Align label to the top.
+    Top = ffi::WXD_BU_TOP,
+    /// Align label to the right.
+    Right = ffi::WXD_BU_RIGHT,
+    /// Align label to the bottom.
+    Bottom = ffi::WXD_BU_BOTTOM,
+    /// Button size will be adjusted to exactly fit the label.
+    ExactFit = ffi::WXD_BU_EXACTFIT,
+    /// Do not display the label string (useful for buttons with only an image).
+    NoText = ffi::WXD_BU_NOTEXT,
+    /// No border.
+    BorderNone = ffi::WXD_BORDER_NONE,
+    /// A simple border (rarely used for buttons, which have a default look).
+    BorderSimple = ffi::WXD_BORDER_SIMPLE,
+}
+
+impl ButtonStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
     }
 }
 
-// Restore correct WxEvtHandler implementation
-impl WxEvtHandler for Button {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
+impl BitOr for ButtonStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ButtonStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

@@ -19,48 +19,48 @@ pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
 pub use crate::sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
 
 // --- Widgets & Builders ---
-pub use crate::widgets::{ActivityIndicator, ActivityIndicatorBuilder};
-pub use crate::widgets::{AnimationCtrl, AnimationCtrlBuilder};
-pub use crate::widgets::{BitmapButton, BitmapButtonBuilder};
-pub use crate::widgets::{Button, ButtonBuilder};
-pub use crate::widgets::{CheckBox, CheckBoxBuilder};
-pub use crate::widgets::{CheckListBox, CheckListBoxBuilder};
-pub use crate::widgets::{Choice, ChoiceBuilder};
-pub use crate::widgets::{ComboBox, ComboBoxBuilder};
-pub use crate::widgets::{Frame, FrameBuilder};
-pub use crate::widgets::{Gauge, GaugeBuilder};
-pub use crate::widgets::{ListBox, ListBoxBuilder};
-pub use crate::widgets::{Panel, PanelBuilder};
-pub use crate::widgets::{RadioButton, RadioButtonBuilder};
-pub use crate::widgets::{StaticBox, StaticBoxBuilder};
-pub use crate::widgets::{StaticText, StaticTextBuilder};
-pub use crate::widgets::{TextCtrl, TextCtrlBuilder};
-pub use crate::widgets::{ToggleButton, ToggleButtonBuilder};
-pub use crate::widgets::{TreeCtrl, TreeCtrlBuilder};
+pub use crate::widgets::activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
+pub use crate::widgets::animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder};
+pub use crate::widgets::bitmapbutton::{BitmapButton, BitmapButtonBuilder};
+pub use crate::widgets::button::{Button, ButtonBuilder, ButtonStyle};
+pub use crate::widgets::checkbox::{CheckBox, CheckBoxBuilder, CheckBoxStyle};
+pub use crate::widgets::checklistbox::{CheckListBox, CheckListBoxBuilder};
+pub use crate::widgets::choice::{Choice, ChoiceBuilder};
+pub use crate::widgets::combobox::{ComboBox, ComboBoxBuilder, ComboBoxStyle};
+pub use crate::widgets::frame::{Frame, FrameBuilder, FrameStyle};
+pub use crate::widgets::gauge::{Gauge, GaugeBuilder};
+pub use crate::widgets::listbox::{ListBox, ListBoxBuilder, ListBoxStyle};
+pub use crate::widgets::panel::{Panel, PanelBuilder, PanelStyle};
+pub use crate::widgets::radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
+pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder};
+pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
+pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
+pub use crate::widgets::togglebutton::{ToggleButton, ToggleButtonBuilder};
+pub use crate::widgets::treectrl::{TreeCtrl, TreeCtrlBuilder};
 // ADDED: Slider
-pub use crate::widgets::{Slider, SliderBuilder};
+pub use crate::widgets::slider::{Slider, SliderBuilder};
 // ADDED: SpinCtrl
-pub use crate::widgets::{SpinCtrl, SpinCtrlBuilder};
+pub use crate::widgets::spinctrl::{SpinCtrl, SpinCtrlBuilder};
 // ADDED: SpinButton
-pub use crate::widgets::{SpinButton, SpinButtonBuilder};
+pub use crate::widgets::spinbutton::{SpinButton, SpinButtonBuilder};
 // ADDED: Notebook
-pub use crate::widgets::{Notebook, NotebookBuilder};
+pub use crate::widgets::notebook::{Notebook, NotebookBuilder};
 // ADDED: SplitterWindow
-pub use crate::widgets::{SplitterWindow, SplitterWindowBuilder};
+pub use crate::widgets::splitterwindow::{SplitterWindow, SplitterWindowBuilder};
 // ADDED: ScrolledWindow
-pub use crate::widgets::{ScrolledWindow, ScrolledWindowBuilder};
+pub use crate::widgets::scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};
 // ADDED: StatusBar
-pub use crate::widgets::{StatusBar, StatusBarBuilder};
+pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
 // ADDED: ToolBar
-pub use crate::widgets::ToolBar;
+pub use crate::widgets::toolbar::ToolBar;
 // ADDED: ListCtrl
 pub use crate::widgets::list_ctrl::{ListCtrl, ListCtrlBuilder};
 // ADDED: RadioBox
-pub use crate::widgets::RadioBox;
+pub use crate::widgets::radiobox::RadioBox;
 // ADDED: BitmapComboBox
 pub use crate::widgets::bitmapcombobox::{BitmapComboBox, BitmapComboBoxBuilder};
 // ADDED: CommandLinkButton
-pub use crate::widgets::{CommandLinkButton, CommandLinkButtonBuilder};
+pub use crate::widgets::command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
 
 // --- ADDED: Menus ---
 pub use crate::menus::{ItemKind, Menu, MenuBar, MenuItem};
@@ -87,66 +87,35 @@ pub use crate::art_provider::{
 
 // --- Widget Style Constants ---
 // Panel
-pub use crate::widgets::panel::TAB_TRAVERSAL;
+// pub use crate::widgets::panel::TAB_TRAVERSAL;
 // TextCtrl
-pub use crate::widgets::textctrl::TE_PROCESS_ENTER;
+// pub use crate::widgets::textctrl::TE_PROCESS_ENTER;
+
 // ListBox / CheckListBox
-pub use crate::widgets::listbox::{LB_ALWAYS_SB, LB_HSCROLL, LB_SINGLE, LB_SORT};
+// pub use crate::widgets::listbox::{LB_ALWAYS_SB, LB_HSCROLL, LB_SINGLE, LB_SORT};
+
 // Choice / ComboBox
-pub use crate::widgets::choice::CB_SORT;
+// pub use crate::widgets::choice::CB_SORT;
+
 // TreeCtrl
 pub use crate::widgets::treectrl::{
     TR_DEFAULT_STYLE, TR_EDIT_LABELS, TR_HAS_BUTTONS, TR_HIDE_ROOT, TR_LINES_AT_ROOT, TR_SINGLE,
 };
 // Gauge
-pub use crate::widgets::gauge::{GA_HORIZONTAL, GA_SMOOTH, GA_VERTICAL};
+// pub use crate::widgets::gauge::{GA_HORIZONTAL, GA_SMOOTH, GA_VERTICAL};
+
 // ADDED: Slider
-pub use crate::widgets::slider::{
-    SL_BOTH, SL_HORIZONTAL, SL_LABELS, SL_MIN_MAX_LABELS, SL_VALUE_LABEL, SL_VERTICAL,
-};
+// pub use crate::widgets::slider::{
+// SL_BOTH, SL_HORIZONTAL, SL_LABELS, SL_MIN_MAX_LABELS, SL_VALUE_LABEL, SL_VERTICAL,
+// };
+
 // ADDED: SpinCtrl
-pub use crate::widgets::spinctrl::{SP_ARROW_KEYS, SP_HORIZONTAL, SP_VERTICAL, SP_WRAP};
-// SpinButton uses the same SP_* constants, no need to re-export again unless named differently
-// ADDED: Notebook
-pub use crate::widgets::notebook::{NB_BOTTOM, NB_DEFAULT, NB_LEFT, NB_RIGHT, NB_TOP};
-// ADDED: SplitterWindow (Remove duplicate SP_* exports)
-pub use crate::widgets::splitterwindow::{
-    /* SP_HORIZONTAL, SP_VERTICAL, */ SP_3D, SP_BORDER, SP_LIVE_UPDATE,
-    SP_NOBORDER, /*, SP_DEFAULT_STYLE */
-    SP_PERMIT_UNSPLIT,
-};
-// ADDED: BitmapButton / Button styles
-pub use crate::widgets::bitmapbutton::BU_NOTEXT;
-pub use crate::widgets::bitmapbutton::{
-    BORDER_NONE, BU_BOTTOM, BU_EXACTFIT, BU_LEFT, BU_RIGHT, BU_TOP,
-};
-// ADDED: ToolBar styles
-pub use crate::widgets::toolbar::{
-    TB_DOCKABLE, TB_FLAT, TB_HORIZONTAL, TB_NODIVIDER, TB_NOICONS, TB_TEXT, TB_VERTICAL,
-};
-// ADDED: RadioBox Styles
-pub use crate::widgets::radiobox::RA_SPECIFY_COLS; // Add RA_SPECIFY_ROWS later if needed
+// pub use crate::widgets::spinctrl::{SP_ARROW_KEYS, SP_HORIZONTAL, SP_VERTICAL, SP_WRAP};
 
-// Re-export other common constants or types if needed
-// pub use crate::base::ID_ANY; // Example if needed directly
-pub use crate::id::ID_HIGHEST; // ADDED ID_HIGHEST
-
-// --- ADDED: ListCtrl Styles and Constants (already exported at widgets::list_ctrl level, re-exporting from prelude for ease of use)
-// These are already exported individually above from `crate::widgets::list_ctrl::*`
-// No, they are exported from `crate::widgets::*` which then get them from `crate::widgets::list_ctrl::*`
-// The constants from list_ctrl are directly available via `crate::widgets::list_ctrl::LC_LIST` etc.
-// The `pub use widgets::list_ctrl::{...}` lines earlier make them available as `crate::LC_LIST` etc.
-// So, in prelude, we can just re-export them: `pub use crate::{LC_LIST, LC_REPORT, ...};`
-pub use crate::{
-    LC_ALIGN_LEFT, LC_ALIGN_TOP, LC_AUTOARRANGE, LC_EDIT_LABELS, LC_HRULES, LC_ICON, LC_LIST,
-    LC_NO_HEADER, LC_REPORT, LC_SINGLE_SEL, LC_SMALL_ICON, LC_SORT_ASCENDING, LC_SORT_DESCENDING,
-    LC_VRULES,
-};
-pub use crate::{LIST_FORMAT_CENTRE, LIST_FORMAT_LEFT, LIST_FORMAT_RIGHT};
-pub use crate::{LIST_NEXT_ABOVE, LIST_NEXT_ALL, LIST_NEXT_BELOW, LIST_NEXT_LEFT, LIST_NEXT_RIGHT};
-pub use crate::{
-    LIST_STATE_DISABLED, LIST_STATE_DROPHILITED, LIST_STATE_FOCUSED, LIST_STATE_SELECTED,
-};
+// Re-export StaticLine - remove old consts
+pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder};
+// Re-export ScrollBar - remove old consts
+pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder};
 
 // ADDED: Re-export ColourPickerCtrl and related items
 pub use crate::widgets::colourpickerctrl::{
@@ -173,12 +142,6 @@ pub use crate::widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};
 
 // ADDED: Re-export StaticBitmap
 pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder};
-
-// ADDED: Re-export StaticLine
-pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, LI_HORIZONTAL, LI_VERTICAL};
-
-// ADDED: Re-export ScrollBar
-pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERTICAL};
 
 // ADDED: Dialog and MessageDialog
 pub use crate::dialogs::colour_dialog::ColourDialog;
@@ -211,4 +174,25 @@ pub use crate::widgets::notification_message::{
     NotificationMessage, NotificationMessageBuilder,
     // ICON_INFORMATION, ICON_WARNING, ICON_ERROR, ICON_QUESTION, // Removed to avoid conflict with message_dialog exports
     TIMEOUT_AUTO, TIMEOUT_NEVER,
+};
+
+// Re-export other common constants or types if needed
+// pub use crate::base::ID_ANY; // Example if needed directly
+pub use crate::id::ID_HIGHEST; // ADDED ID_HIGHEST
+
+// --- ADDED: ListCtrl Styles and Constants (already exported at widgets::list_ctrl level, re-exporting from prelude for ease of use)
+// These are already exported individually above from `crate::widgets::list_ctrl::*`
+// No, they are exported from `crate::widgets::*` which then get them from `crate::widgets::list_ctrl::*`
+// The constants from list_ctrl are directly available via `crate::widgets::list_ctrl::LC_LIST` etc.
+// The `pub use widgets::list_ctrl::{...}` lines earlier make them available as `crate::LC_LIST` etc.
+// So, in prelude, we can just re-export them: `pub use crate::{LC_LIST, LC_REPORT, ...};`
+pub use crate::{
+    LC_ALIGN_LEFT, LC_ALIGN_TOP, LC_AUTOARRANGE, LC_EDIT_LABELS, LC_HRULES, LC_ICON, LC_LIST,
+    LC_NO_HEADER, LC_REPORT, LC_SINGLE_SEL, LC_SMALL_ICON, LC_SORT_ASCENDING, LC_SORT_DESCENDING,
+    LC_VRULES,
+};
+pub use crate::{LIST_FORMAT_CENTRE, LIST_FORMAT_LEFT, LIST_FORMAT_RIGHT};
+pub use crate::{LIST_NEXT_ABOVE, LIST_NEXT_ALL, LIST_NEXT_BELOW, LIST_NEXT_LEFT, LIST_NEXT_RIGHT};
+pub use crate::{
+    LIST_STATE_DISABLED, LIST_STATE_DROPHILITED, LIST_STATE_FOCUSED, LIST_STATE_SELECTED,
 };

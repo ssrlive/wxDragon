@@ -6,12 +6,10 @@ use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use wxdragon_sys as ffi;
+// use std::ops::{BitOr, BitOrAssign}; // Commented out as BitOr/BitOrAssign not implemented for RadioButtonStyle
 
 // Opaque pointer type from FFI
 pub type RawRadioButton = ffi::wxd_RadioButton_t;
-
-// RadioButton specific styles (example)
-pub const RB_GROUP: i64 = ffi::WXD_RB_GROUP as i64;
 
 /// Represents a wxRadioButton control.
 #[derive(Clone)]
@@ -94,7 +92,7 @@ pub struct RadioButtonBuilder<'a> {
     label: String,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64,
+    style: RadioButtonStyle,
 }
 
 impl<'a> RadioButtonBuilder<'a> {
@@ -106,7 +104,7 @@ impl<'a> RadioButtonBuilder<'a> {
             label: String::new(),
             pos: None,
             size: None,
-            style: 0,
+            style: RadioButtonStyle::Default,
         }
     }
 
@@ -135,7 +133,7 @@ impl<'a> RadioButtonBuilder<'a> {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: RadioButtonStyle) -> Self {
         self.style = style;
         self
     }
@@ -144,7 +142,7 @@ impl<'a> RadioButtonBuilder<'a> {
     /// This typically means subsequent radio buttons (until the next `RB_GROUP` or end of dialog)
     /// belong to the same group.
     pub fn first_in_group(mut self) -> Self {
-        self.style |= RB_GROUP;
+        self.style = RadioButtonStyle::GroupStart;
         self
     }
 
@@ -153,7 +151,7 @@ impl<'a> RadioButtonBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        RadioButton::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style)
+        RadioButton::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style.bits())
     }
 }
 
@@ -169,3 +167,35 @@ impl std::ops::Deref for RadioButton {
         &self.window
     }
 }
+
+// --- RadioButtonStyle Enum ---
+
+/// Style flags for `RadioButton`.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum RadioButtonStyle {
+    /// Default style. Represents a standalone radio button or a subsequent button in a group.
+    Default = 0,
+    /// Marks this radio button as the first in a new group.
+    /// Subsequent radio buttons (until the next `GroupStart` or end of dialog)
+    /// belong to the same group, where only one can be selected.
+    GroupStart = ffi::WXD_RB_GROUP,
+    // WXD_RB_SINGLE is usually implied for subsequent buttons in a group
+    // or for standalone buttons if not using GroupStart.
+    // Explicitly: Single = ffi::WXD_RB_SINGLE, // Not typically set directly by user
+}
+
+impl RadioButtonStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+// RadioButton styles are not typically combined with bitwise OR by users.
+// RB_GROUP is a distinct state. If other combinable flags existed,
+// BitOr/BitOrAssign would be more relevant. For now, they are omitted
+// to keep the API simple and reflect typical wxRadioButton usage.
+// If needed, they can be added:
+// impl BitOr for RadioButtonStyle { ... }
+// impl BitOrAssign for RadioButtonStyle { ... }

@@ -7,10 +7,11 @@ use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // --- Constants ---
 // Style flags (uses ComboBox flags)
-pub const CB_SORT: i64 = ffi::WXD_CB_SORT as i64;
+// REMOVED: pub const CB_SORT: i64 = ffi::WXD_CB_SORT as i64;
 // Special value returned by GetSelection when nothing is selected
 pub const NOT_FOUND: i32 = -1; // wxNOT_FOUND is typically -1
 
@@ -179,7 +180,7 @@ pub struct ChoiceBuilder<'a> {
     id: Id,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64,
+    style: ChoiceStyle,
     choices: Vec<String>,
 }
 
@@ -191,7 +192,7 @@ impl<'a> ChoiceBuilder<'a> {
             id: ID_ANY as Id,
             pos: None,
             size: None,
-            style: 0,
+            style: ChoiceStyle::Default,
             choices: Vec::new(),
         }
     }
@@ -215,7 +216,7 @@ impl<'a> ChoiceBuilder<'a> {
     }
 
     /// Sets the window style flags (e.g., `CB_SORT`).
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ChoiceStyle) -> Self {
         self.style = style;
         self
     }
@@ -231,7 +232,7 @@ impl<'a> ChoiceBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        let choice_ctrl = Choice::new_impl(parent_ptr, self.id, pos, size, self.style);
+        let choice_ctrl = Choice::new_impl(parent_ptr, self.id, pos, size, self.style.bits());
 
         // Append initial choices if any
         for choice_str in &self.choices {
@@ -266,5 +267,40 @@ impl std::ops::Deref for Choice {
 impl WxEvtHandler for Choice {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
         self.window.get_event_handler_ptr()
+    }
+}
+
+// --- ChoiceStyle Enum ---
+
+/// Style flags for `Choice`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ChoiceStyle {
+    /// Default style (items are not sorted).
+    Default = 0,
+    /// The items in the choice control are kept sorted alphabetically.
+    Sort = ffi::WXD_CB_SORT,
+}
+
+impl ChoiceStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for ChoiceStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        // For Choice, styles are typically not combined, but allow for future flexibility.
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ChoiceStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

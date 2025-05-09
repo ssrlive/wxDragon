@@ -8,6 +8,7 @@ use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
 use wxdragon::dialogs::font_dialog::FontDialog;
 use wxdragon::dialogs::progress_dialog::ProgressDialog;
 use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+use wxdragon::widgets::panel::PanelStyle;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {
@@ -42,7 +43,9 @@ pub struct DialogTabControls {
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
-    let dialog_panel = Panel::builder(notebook).with_style(TAB_TRAVERSAL).build();
+    let dialog_panel = Panel::builder(notebook)
+        .with_style(PanelStyle::TabTraversal)
+        .build();
 
     // Message Dialog section
     let show_msg_dialog_label = StaticText::builder(&dialog_panel)

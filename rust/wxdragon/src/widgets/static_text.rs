@@ -5,6 +5,7 @@ use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign}; // ADDED for enum bitwise operations
 
 /// Represents a wxStaticText control.
 #[derive(Clone)] // Allow cloning the wrapper
@@ -21,7 +22,7 @@ pub struct StaticTextBuilder<'a> {
     label: String,
     pos: Point,
     size: Size,
-    style: i64,
+    style: StaticTextStyle, // MODIFIED: Use StaticTextStyle enum
 }
 
 impl<'a> StaticTextBuilder<'a> {
@@ -36,7 +37,7 @@ impl<'a> StaticTextBuilder<'a> {
                 width: -1,
                 height: -1,
             }, // Explicit default
-            style: 0,                    // Default style
+            style: StaticTextStyle::Default, // MODIFIED: Default style
         }
     }
 
@@ -65,7 +66,7 @@ impl<'a> StaticTextBuilder<'a> {
     }
 
     /// Sets the window style flags (e.g., alignment flags like `wxALIGN_CENTER_HORIZONTAL`).
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: StaticTextStyle) -> Self { // MODIFIED: Parameter is StaticTextStyle
         self.style = style;
         self
     }
@@ -81,7 +82,7 @@ impl<'a> StaticTextBuilder<'a> {
             self.label,
             self.pos,
             self.size,
-            self.style,
+            self.style.bits(), // MODIFIED: Use .bits() to get i64 value
         )
         .expect("Failed to create StaticText widget")
     }
@@ -102,7 +103,7 @@ impl StaticText {
         label: String,
         pos: Point,
         size: Size,
-        style: i64,
+        style: i64, // Keep i64 here as it's the raw value passed to FFI
     ) -> Option<Self> {
         let c_label = CString::new(label).ok()?;
         unsafe {
@@ -200,5 +201,45 @@ impl std::ops::Deref for StaticText {
     type Target = Window;
     fn deref(&self) -> &Self::Target {
         &self.window
+    }
+}
+
+// --- StaticTextStyle Enum ---
+
+/// Style flags for `StaticText`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum StaticTextStyle {
+    /// Default style (left-aligned, auto-resizing).
+    Default = ffi::WXD_ALIGN_LEFT, // WXD_ALIGN_LEFT is typically 0
+    /// Align text to the right.
+    AlignRight = ffi::WXD_ALIGN_RIGHT,
+    /// Align text to the center horizontally.
+    AlignCenterHorizontal = ffi::WXD_ALIGN_CENTRE_HORIZONTAL, // Using WXD_ALIGN_CENTRE_HORIZONTAL for clarity
+    // /// Align text to the center (combines horizontal and vertical, though vertical might not apply well here).
+    // AlignCenter = ffi::WXD_ALIGN_CENTRE, // WXD_ALIGN_CENTRE usually means both horizontal and vertical
+    // /// Do not automatically resize the control to fit its contents.
+    // NoAutoResize = ffi::WXD_ST_NO_AUTORESIZE, // Not yet available
+}
+
+impl StaticTextStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for StaticTextStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for StaticTextStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

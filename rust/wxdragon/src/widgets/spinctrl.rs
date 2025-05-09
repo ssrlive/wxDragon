@@ -7,12 +7,9 @@ use crate::window::WxWidget;
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // Re-export constants from wxdragon-sys
-pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL;
-pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL;
-pub const SP_ARROW_KEYS: i64 = ffi::WXD_SP_ARROW_KEYS;
-pub const SP_WRAP: i64 = ffi::WXD_SP_WRAP;
 
 /// Represents a wxSpinCtrl widget.
 #[derive(Clone)]
@@ -78,7 +75,7 @@ pub struct SpinCtrlBuilder {
     value: String, // Initial value is string in C API
     pos: Point,
     size: Size,
-    style: i64,
+    style: SpinCtrlStyle,
     min_val: i32,
     max_val: i32,
     initial_val: i32,
@@ -93,7 +90,7 @@ impl SpinCtrlBuilder {
             value: "0".to_string(), // Default initial string
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
-            style: SP_ARROW_KEYS,
+            style: SpinCtrlStyle::Default,
             min_val: 0,
             max_val: 100,
             initial_val: 0, // Default initial numeric value
@@ -149,7 +146,7 @@ impl SpinCtrlBuilder {
     }
 
     /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: SpinCtrlStyle) -> Self {
         self.style = style;
         self
     }
@@ -165,7 +162,7 @@ impl SpinCtrlBuilder {
                 initial_c_string.as_ptr(),
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
                 self.min_val as c_int,
                 self.max_val as c_int,
                 self.initial_val as c_int,
@@ -175,5 +172,46 @@ impl SpinCtrlBuilder {
             panic!("Failed to create SpinCtrl");
         }
         unsafe { SpinCtrl::from_ptr(spin_ctrl_ptr) }
+    }
+}
+
+// --- SpinCtrlStyle Enum ---
+
+/// Style flags for `SpinCtrl`.
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum SpinCtrlStyle {
+    /// Default style (vertical, arrow keys enabled).
+    Default = ffi::WXD_SP_VERTICAL | ffi::WXD_SP_ARROW_KEYS,
+    /// Horizontal spin control.
+    Horizontal = ffi::WXD_SP_HORIZONTAL,
+    /// Vertical spin control.
+    Vertical = ffi::WXD_SP_VERTICAL,
+    /// Allow using arrow keys to change the value.
+    ArrowKeys = ffi::WXD_SP_ARROW_KEYS,
+    /// The value wraps around when incrementing/decrementing past max/min.
+    Wrap = ffi::WXD_SP_WRAP,
+    /// Process the Enter key press event (generates a command event).
+    ProcessEnter = ffi::WXD_TE_PROCESS_ENTER,
+}
+
+impl SpinCtrlStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for SpinCtrlStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for SpinCtrlStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

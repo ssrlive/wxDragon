@@ -9,12 +9,11 @@ use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // wxStaticLine styles
 // wxLI_HORIZONTAL is an alias for wxHORIZONTAL, wxLI_VERTICAL for wxVERTICAL.
 // wxStaticLine defaults to wxLI_HORIZONTAL if no style is specified or style is 0.
-pub const LI_HORIZONTAL: i64 = ffi::WXD_HORIZONTAL; // Use WXD_HORIZONTAL
-pub const LI_VERTICAL: i64 = ffi::WXD_VERTICAL; // Use WXD_VERTICAL
 
 /// Represents a wxStaticLine widget.
 pub struct StaticLine {
@@ -62,9 +61,9 @@ pub struct StaticLineBuilder<'a, P: WxWidget + 'a> {
     id: i32,
     pos: Point,
     size: Size,
-    style: i64,
+    style: StaticLineStyle,
     name: String,
-    parent_type: PhantomData<&'a P>, // To hold the lifetime and type of the parent
+    parent_type: PhantomData<&'a P>,
 }
 
 impl<'a, P: WxWidget> Default for StaticLineBuilder<'a, P> {
@@ -74,7 +73,7 @@ impl<'a, P: WxWidget> Default for StaticLineBuilder<'a, P> {
             id: ID_ANY,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE, // wxStaticLine will size itself by default
-            style: 0,           // Defaults to LI_HORIZONTAL in wxWidgets if 0
+            style: StaticLineStyle::Default,           // Defaults to LI_HORIZONTAL in wxWidgets if 0
             name: String::from("staticLine"), // Default name if not provided
             parent_type: PhantomData,
         }
@@ -97,7 +96,7 @@ impl<'a, P: WxWidget> StaticLineBuilder<'a, P> {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: StaticLineStyle) -> Self {
         self.style = style;
         self
     }
@@ -115,7 +114,7 @@ impl<'a, P: WxWidget> StaticLineBuilder<'a, P> {
                 self.id,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
                 c_name.as_ptr(),
             );
             if ptr.is_null() {
@@ -123,5 +122,42 @@ impl<'a, P: WxWidget> StaticLineBuilder<'a, P> {
             }
             StaticLine::from_ptr(ptr)
         }
+    }
+}
+
+// --- StaticLineStyle Enum ---
+
+/// Style flags for `StaticLine`.
+///
+/// These flags are typically exclusive.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum StaticLineStyle {
+    /// Default style (horizontal line).
+    Default = ffi::WXD_HORIZONTAL,
+    /// Vertical line.
+    Vertical = ffi::WXD_VERTICAL,
+}
+
+impl StaticLineStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+// BitOr and BitOrAssign are less relevant here as styles are exclusive,
+// but included for consistency.
+impl BitOr for StaticLineStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        // This combination might not make sense for StaticLine but allowed by type system.
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for StaticLineStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

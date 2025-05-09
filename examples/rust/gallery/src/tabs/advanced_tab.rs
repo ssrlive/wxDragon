@@ -1,4 +1,8 @@
 use wxdragon::prelude::*;
+// use wxdragon::widgets::splitterwindow; // For SP_XXX constants if available
+// use wxdragon::widgets::gauge; // For GA_XXX constants if available
+// use wxdragon::widgets::slider; // For SL_XXX constants if available
+// use wxdragon::widgets::spinctrl; // For SP_XXX constants if available
 
 pub struct AdvancedTabControls {
     pub tree_ctrl: TreeCtrl,
@@ -16,8 +20,8 @@ pub struct AdvancedTabControls {
 pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabControls) {
     // Create a SplitterWindow instead of a Panel for this tab's main container
     let splitter = SplitterWindow::builder(notebook)
+        // .with_style(SP_LIVE_UPDATE | SP_BORDER | SP_3D) // Old - Commenting out for now
         .with_id(200) // Give splitter an ID
-        .with_style(SP_LIVE_UPDATE | SP_BORDER | SP_3D) // Added SP_3D style
         .build();
 
     // Create Panel 1 (Left: Tree)
@@ -48,8 +52,8 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     let gauge = Gauge::builder(&controls_panel)
         .with_id(112)
         .with_range(100)
+        // .with_style(GA_HORIZONTAL | GA_SMOOTH) // Old - Commenting out for now
         .with_size(200, 25) // Pass width and height directly
-        .with_style(GA_HORIZONTAL | GA_SMOOTH)
         .build();
     gauge.set_value(25);
     let gauge_increase_btn = Button::builder(&controls_panel)
@@ -67,7 +71,7 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_value(50)
         .with_min_value(0)
         .with_max_value(200)
-        .with_style(SL_HORIZONTAL | SL_LABELS)
+        // .with_style(SL_HORIZONTAL | SL_LABELS) // Old - Commenting out for now
         .with_size(Size::new(-1, -1))
         .build(); // Let slider expand
     let spin_ctrl_label = StaticText::builder(&controls_panel)
@@ -77,7 +81,7 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_id(114)
         .with_range(0, 50)
         .with_initial_value(10)
-        .with_style(SP_ARROW_KEYS | SP_WRAP)
+        // .with_style(SP_ARROW_KEYS | SP_WRAP) // Old - Commenting out for now
         .with_size(Size::new(80, -1))
         .build();
 

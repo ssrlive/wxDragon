@@ -4,6 +4,7 @@ use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // Re-export specific CheckBox constants if needed later
 
@@ -74,7 +75,7 @@ pub struct CheckBoxBuilder<'a> {
     label: String,
     pos: Option<Point>,
     size: Option<Size>,
-    style: i64,
+    style: CheckBoxStyle,
 }
 
 impl<'a> CheckBoxBuilder<'a> {
@@ -85,7 +86,7 @@ impl<'a> CheckBoxBuilder<'a> {
             label: String::new(),
             pos: None,
             size: None,
-            style: 0,
+            style: CheckBoxStyle::Default,
         }
     }
 
@@ -114,7 +115,7 @@ impl<'a> CheckBoxBuilder<'a> {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: CheckBoxStyle) -> Self {
         self.style = style;
         self
     }
@@ -124,7 +125,7 @@ impl<'a> CheckBoxBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or_default();
         let size = self.size.unwrap_or_default();
-        CheckBox::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style)
+        CheckBox::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style.bits())
     }
 }
 
@@ -147,5 +148,47 @@ impl std::ops::Deref for CheckBox {
 impl WxEvtHandler for CheckBox {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
         self.window.get_event_handler_ptr()
+    }
+}
+
+// --- CheckBoxStyle Enum ---
+
+/// Style flags for `CheckBox`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum CheckBoxStyle {
+    /// Default style (2-state, label on the right).
+    Default = ffi::WXD_CHK_2STATE,
+    /// Three-state checkbox. The third state is "undetermined".
+    ThreeState = ffi::WXD_CHK_3STATE,
+    /// Allows the user to set the checkbox to the third state (undetermined).
+    /// Only applicable if `ThreeState` is also used.
+    AllowUserThirdState = ffi::WXD_CHK_ALLOW_3RD_STATE_FOR_USER,
+    /// Align label to the right of the checkbox (checkbox on the left).
+    /// This is usually the default layout.
+    AlignLeft = 0, // Standard behavior, no specific flag needed to achieve this if others aren't set.
+    /// Align label to the left of the checkbox (checkbox on the right).
+    AlignRight = ffi::WXD_ALIGN_RIGHT,
+}
+
+impl CheckBoxStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for CheckBoxStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for CheckBoxStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }

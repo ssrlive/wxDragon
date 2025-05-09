@@ -8,13 +8,14 @@ use std::default::Default;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+use std::ops::{BitOr, BitOrAssign};
 
 // --- Constants ---
 // Style flags
-pub const CB_SIMPLE: i64 = ffi::WXD_CB_SIMPLE;
-pub const CB_SORT: i64 = ffi::WXD_CB_SORT;
-pub const CB_READONLY: i64 = ffi::WXD_CB_READONLY;
-pub const CB_DROPDOWN: i64 = ffi::WXD_CB_DROPDOWN;
+// REMOVED: pub const CB_SIMPLE: i64 = ffi::WXD_CB_SIMPLE;
+// REMOVED: pub const CB_SORT: i64 = ffi::WXD_CB_SORT;
+// REMOVED: pub const CB_READONLY: i64 = ffi::WXD_CB_READONLY;
+// REMOVED: pub const CB_DROPDOWN: i64 = ffi::WXD_CB_DROPDOWN;
 // Value for GetSelection when nothing selected
 pub const NOT_FOUND: i32 = -1;
 
@@ -155,7 +156,7 @@ pub struct ComboBoxBuilder {
     value: String,
     pos: Point,
     size: Size,
-    style: i64,
+    style: ComboBoxStyle,
     choices: Vec<String>,
 }
 
@@ -171,7 +172,7 @@ impl Default for ComboBoxBuilder {
                 width: -1,
                 height: -1,
             }, // Explicit default
-            style: CB_DROPDOWN.into(),   // Default style
+            style: ComboBoxStyle::Default,
             choices: Vec::new(),
         }
     }
@@ -203,7 +204,7 @@ impl ComboBoxBuilder {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ComboBoxStyle) -> Self {
         self.style = style;
         self
     }
@@ -224,7 +225,7 @@ impl ComboBoxBuilder {
             &self.value,
             self.pos,
             self.size,
-            self.style,
+            self.style.bits(),
             &choice_slices,
         )
         .expect("Failed to create ComboBox widget")
@@ -255,6 +256,46 @@ impl std::ops::Deref for ComboBox {
 impl WxEvtHandler for ComboBox {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
         self.window.handle_ptr() as *mut _
+    }
+}
+
+// --- ComboBoxStyle Enum ---
+
+/// Style flags for `ComboBox`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ComboBoxStyle {
+    /// Default style: a regular dropdown combo box.
+    Default = ffi::WXD_CB_DROPDOWN,
+    /// A simple combo box with a permanently displayed list.
+    Simple = ffi::WXD_CB_SIMPLE,
+    /// The list of items is kept sorted alphabetically.
+    Sort = ffi::WXD_CB_SORT,
+    /// The text field is read-only (user can only select from the list).
+    ReadOnly = ffi::WXD_CB_READONLY,
+    /// Process the Enter key, generating a TEXT_ENTER event.
+    ProcessEnter = ffi::WXD_TE_PROCESS_ENTER,
+}
+
+impl ComboBoxStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for ComboBoxStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ComboBoxStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
 }
 

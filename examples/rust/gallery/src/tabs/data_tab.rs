@@ -1,4 +1,5 @@
 use wxdragon::prelude::*;
+use wxdragon::widgets::panel::PanelStyle;
 
 pub struct DataTabControls {
     pub panel: Panel,
@@ -6,8 +7,10 @@ pub struct DataTabControls {
     pub data_display_label: StaticText,
 }
 
-pub fn create_data_tab(notebook: &Notebook) -> DataTabControls {
-    let data_panel = Panel::builder(notebook).with_style(TAB_TRAVERSAL).build();
+pub fn create_data_tab(notebook: &Notebook, _frame: &Frame) -> DataTabControls {
+    let data_panel = Panel::builder(notebook)
+        .with_style(PanelStyle::TabTraversal)
+        .build();
     let button = Button::builder(&data_panel)
         .with_label("Click Me & Update Data!")
         .build();

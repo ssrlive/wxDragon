@@ -1,4 +1,11 @@
 use wxdragon::prelude::*;
+use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::textctrl::TextCtrlStyle;
+use wxdragon::widgets::search_ctrl::SearchCtrlStyle;
+// use wxdragon::widgets::spinctrl; // Will comment out spinctrl styles for now
+// use wxdragon::widgets::radiobox; // Will comment out radiobox styles for now
+use wxdragon::widgets::scrollbar::ScrollBarStyle;
+use wxdragon::widgets::static_line::StaticLineStyle;
 
 use wxdragon::art_provider::ArtProvider;
 use wxdragon::bitmap::Bitmap;
@@ -37,15 +44,17 @@ pub struct BasicTabControls {
 }
 
 pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls {
-    let basic_panel = Panel::builder(notebook).with_style(TAB_TRAVERSAL).build();
+    let basic_panel = Panel::builder(notebook)
+        .with_style(PanelStyle::TabTraversal)
+        .build();
 
     let static_text_label = StaticText::builder(&basic_panel)
         .with_label("Text Input:")
         .build();
     static_text_label.set_tooltip("This is a label for the text input field.");
     let text_ctrl = TextCtrl::builder(&basic_panel)
-        .with_value("0")
-        .with_style(TE_PROCESS_ENTER)
+        .with_value("Edit me!")
+        .with_style(TextCtrlStyle::ProcessEnter)
         .build();
     text_ctrl.set_tooltip("Enter text here.");
     let spin_button_label = StaticText::builder(&basic_panel)
@@ -54,7 +63,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let spin_button = SpinButton::builder(&basic_panel)
         .with_range(0, 100)
         .with_initial_value(0)
-        .with_style(SP_VERTICAL | SP_ARROW_KEYS | SP_WRAP)
+        // .with_style(spinctrl::SP_VERTICAL | spinctrl::SP_ARROW_KEYS | spinctrl::SP_WRAP) // Commenting out for now
         .build();
     spin_button.set_tooltip("Click arrows or use keys to change the value (wraps around).");
     let spinctrl_double_label_widget = StaticText::builder(&basic_panel)
@@ -81,11 +90,11 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let radio_box_label = StaticText::builder(&basic_panel)
         .with_label("Radio Box:")
         .build();
-    let radio_box_choices = ["Choice X", "Choice Y", "Choice Z"];
+    let radio_box_choices = ["Option 1", "Option 2", "Option 3"];
     let radio_box = RadioBox::builder(Some(&basic_panel), &radio_box_choices)
-        .with_label("")
-        .with_major_dimension(1)
-        .with_style(RA_SPECIFY_COLS)
+        .with_label("RadioBox Title")
+        .with_major_dimension(1) // 1 column
+        // .with_style(radiobox::RA_SPECIFY_COLS) // Commenting out for now
         .build();
     radio_box.set_selection(0);
     radio_box.set_tooltip("Select one option from the radio box.");
@@ -213,7 +222,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .build();
     let search_ctrl = SearchCtrl::builder(&basic_panel)
         .with_value("Search...")
-        .with_style(TE_PROCESS_ENTER)
+        .with_style(SearchCtrlStyle::ProcessEnter)
         .build();
     search_ctrl.show_search_button(true);
     search_ctrl.show_cancel_button(true);
@@ -248,10 +257,9 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Scroll Bar:")
         .build();
     let scroll_bar = ScrollBar::builder(&basic_panel)
-        .with_style(SB_HORIZONTAL)
+        .with_style(ScrollBarStyle::Default) // Use Default for Horizontal
         .build();
-    scroll_bar.set_scrollbar(0, 10, 100, 10, true);
-    scroll_bar.set_tooltip("Use the scrollbar.");
+    scroll_bar.set_scrollbar(0, 10, 100, 10, true); // position, thumb_size, range, page_size, refresh
     let scrollbar_status_label = StaticText::builder(&basic_panel)
         .with_label(&format!("{}", scroll_bar.thumb_position()))
         .build();
@@ -280,7 +288,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     main_sizer.add_sizer(&grid_sizer_group1, 0, EXPAND | ALL, 10);
 
     let static_line_sep1 = StaticLine::builder(&basic_panel)
-        .with_style(LI_HORIZONTAL)
+        .with_style(StaticLineStyle::Default) // Use Default for Horizontal
         .build();
     main_sizer.add(&static_line_sep1, 0, EXPAND | ALL, 5);
 
@@ -564,9 +572,10 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let sc_search_clone = search_ctrl.clone();
     search_ctrl.bind(
         EventType::COMMAND_SEARCHCTRL_SEARCH_BTN,
-        move |_event: Event| {
+        move |event: Event| {
             println!(
-                "SEARCH_CTRL Event: Search Button Clicked! Value: \"{}\"",
+                "SEARCH_CTRL Event: Search Button Clicked! ID: {}, Value: \"{}\"",
+                event.get_id(),
                 sc_search_clone.get_value()
             );
         },
@@ -575,21 +584,22 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let sc_cancel_clone = search_ctrl.clone();
     search_ctrl.bind(
         EventType::COMMAND_SEARCHCTRL_CANCEL_BTN,
-        move |_event: Event| {
+        move |event: Event| {
             let value_before_clear = sc_cancel_clone.get_value();
             sc_cancel_clone.set_value("");
             println!(
-                "SEARCH_CTRL Event: Cancel Button Clicked! Value was: \"{}\"",
+                "SEARCH_CTRL Event: Cancel Button Clicked! ID: {}, Value was: \"{}\"",
+                event.get_id(),
                 value_before_clear
             );
         },
     );
 
-    let sc_enter_clone = search_ctrl.clone();
-    search_ctrl.bind(EventType::TEXT_ENTER, move |_event: Event| {
+    // TEXT_ENTER for SearchCtrl
+    search_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
         println!(
             "SEARCH_CTRL Event: Text Entered! Value: \"{}\"",
-            sc_enter_clone.get_value()
+            event.get_string().unwrap_or_default()
         );
     });
 
@@ -766,23 +776,22 @@ impl BasicTabControls {
         self.search_ctrl.bind(
             EventType::COMMAND_SEARCHCTRL_CANCEL_BTN,
             move |event: Event| {
+                let value_before_clear = search_ctrl_clone_cancel.get_value();
+                search_ctrl_clone_cancel.set_value("");
                 println!(
                     "SEARCH_CTRL Event: Cancel Button Clicked! ID: {}, Value was: \"{}\"",
                     event.get_id(),
-                    search_ctrl_clone_cancel.get_value()
+                    value_before_clear
                 );
-                search_ctrl_clone_cancel.set_value("");
             },
         );
 
-        let search_ctrl_clone_enter = self.search_ctrl.clone();
-        self.search_ctrl
-            .bind(EventType::TEXT_ENTER, move |event: Event| {
-                println!(
-                    "SEARCH_CTRL Event: Text Entered! ID: {}, Value: \"{}\"",
-                    event.get_id(),
-                    search_ctrl_clone_enter.get_value()
-                );
-            });
+        // TEXT_ENTER for SearchCtrl
+        self.search_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
+            println!(
+                "SEARCH_CTRL Event: Text Entered! Value: \"{}\"",
+                event.get_string().unwrap_or_default()
+            );
+        });
     }
 }
