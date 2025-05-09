@@ -4,7 +4,7 @@ use crate::id::Id;
 // REMOVED: use crate::event::{EventType, WxEvtHandler, Event}; // Keep needed event imports
 use crate::menus::MenuBar; // ADDED: Import MenuBar
 use crate::widgets::statusbar::StatusBar; // ADDED Import
-use crate::widgets::toolbar::ToolBar; // ADDED Import
+use crate::widgets::toolbar::{ToolBar, ToolBarStyle}; // Added ToolBarStyle
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::ptr;
@@ -12,8 +12,8 @@ use wxdragon_sys as ffi;
 // REMOVED: use std::ops::Deref;
 use std::default::Default;
 use std::marker::PhantomData;
-use std::os::raw::c_int; // Import c_long and c_int
-use std::ops::{BitOr, BitOrAssign}; // ADDED for enum bitwise operations
+use std::ops::{BitOr, BitOrAssign};
+use std::os::raw::c_int; // Import c_long and c_int // ADDED for enum bitwise operations
 
 /// Represents a wxFrame.
 #[derive(Clone)]
@@ -191,20 +191,24 @@ impl Frame {
         }
     }
 
-    /// Creates a toolbar and assigns it to the frame.
-    /// Returns `None` if the toolbar could not be created.
-    pub fn create_tool_bar(&self, style: i64, id: Id) -> Option<ToolBar> {
-        unsafe {
-            let toolbar_ptr = ffi::wxd_Frame_CreateToolBar(
-                self.window.as_ptr() as *mut ffi::wxd_Frame_t,
-                style as ffi::wxd_Style_t,
+    /// Creates and assigns a toolbar to the frame.
+    /// Returns `Some(ToolBar)` if successful, `None` otherwise.
+    pub fn create_tool_bar(&self, style: Option<ToolBarStyle>, id: Id) -> Option<ToolBar> {
+        let style_bits = style
+            .map(|s| s.bits())
+            .unwrap_or(ToolBarStyle::default().bits()); // Use ToolBarStyle default bits if None
+
+        let tb_ptr = unsafe {
+            ffi::wxd_Frame_CreateToolBar(
+                self.window.as_ptr() as *mut _,
+                style_bits as ffi::wxd_Style_t, // Use bits()
                 id,
-            );
-            if toolbar_ptr.is_null() {
-                None
-            } else {
-                Some(ToolBar::from_ptr(toolbar_ptr))
-            }
+            )
+        };
+        if tb_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { ToolBar::from_ptr(tb_ptr) })
         }
     }
 

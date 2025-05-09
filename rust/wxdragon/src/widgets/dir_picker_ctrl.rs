@@ -16,9 +16,9 @@ use wxdragon_sys as ffi;
 // Manually defining placeholder values or assuming ffi module will have them.
 pub const DIRP_DEFAULT_STYLE: i64 = 0x0100; // wxDIRP_DEFAULT_STYLE (usually wxDIRP_USE_TEXTCTRL)
 pub const DIRP_DIR_MUST_EXIST: i64 = 0x0001; // wxDIRP_DIR_MUST_EXIST
-pub const DIRP_CHANGE_DIR: i64 = 0x0002;     // wxDIRP_CHANGE_DIR
-pub const DIRP_USE_TEXTCTRL: i64 = 0x0100;   // wxDIRP_USE_TEXTCTRL
-// pub const DIRP_SMALL: i64 = 0x0200; // wxDIRP_SMALL - if needed
+pub const DIRP_CHANGE_DIR: i64 = 0x0002; // wxDIRP_CHANGE_DIR
+pub const DIRP_USE_TEXTCTRL: i64 = 0x0100; // wxDIRP_USE_TEXTCTRL
+                                           // pub const DIRP_SMALL: i64 = 0x0200; // wxDIRP_SMALL - if needed
 
 // --- DirPickerCtrl ---
 
@@ -38,12 +38,16 @@ impl DirPickerCtrl {
     /// Gets the currently selected path.
     pub fn get_path(&self) -> String {
         unsafe {
-            let c_str = ffi::wxd_DirPickerCtrl_GetPath(self.window.as_ptr() as *mut ffi::wxd_DirPickerCtrl_t);
+            let c_str = ffi::wxd_DirPickerCtrl_GetPath(
+                self.window.as_ptr() as *mut ffi::wxd_DirPickerCtrl_t
+            );
             if c_str.is_null() {
                 String::new()
             } else {
                 // CString::from_raw takes ownership and will free the memory when dropped.
-                let rust_str = CString::from_raw(c_str as *mut _).to_string_lossy().into_owned();
+                let rust_str = CString::from_raw(c_str as *mut _)
+                    .to_string_lossy()
+                    .into_owned();
                 rust_str
             }
         }
@@ -53,7 +57,10 @@ impl DirPickerCtrl {
     pub fn set_path(&self, path: &str) {
         let c_path = CString::new(path).expect("CString::new failed for path");
         unsafe {
-            ffi::wxd_DirPickerCtrl_SetPath(self.window.as_ptr() as *mut ffi::wxd_DirPickerCtrl_t, c_path.as_ptr());
+            ffi::wxd_DirPickerCtrl_SetPath(
+                self.window.as_ptr() as *mut ffi::wxd_DirPickerCtrl_t,
+                c_path.as_ptr(),
+            );
         }
     }
 
@@ -115,7 +122,7 @@ impl<'a> Default for DirPickerCtrlBuilder<'a> {
 
 impl<'a> DirPickerCtrlBuilder<'a> {
     // parent_ptr is set by DirPickerCtrl::builder
-    
+
     pub fn with_id(mut self, id: i32) -> Self {
         self.id = id;
         self
@@ -177,4 +184,4 @@ impl<'a> DirPickerCtrlBuilder<'a> {
             unsafe { DirPickerCtrl::from_ptr(ptr) }
         }
     }
-} 
+}

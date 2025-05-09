@@ -5,9 +5,9 @@ use crate::window::{Window, WxWidget}; // Make sure WxEvtHandler is imported
                                        // use crate::{Id, Point, Size};
 use std::default::Default;
 use std::ffi::{CStr, CString};
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
-use wxdragon_sys as ffi; // Import Default
-use std::ops::{BitOr, BitOrAssign}; // ADDED for enum bitwise operations
+use wxdragon_sys as ffi; // Import Default // ADDED for enum bitwise operations
 
 /// Represents a wxButton.
 #[derive(Clone)]
@@ -76,7 +76,8 @@ impl ButtonBuilder {
     }
 
     /// Sets the window style flags.
-    pub fn with_style(mut self, style: ButtonStyle) -> Self { // MODIFIED: Parameter is ButtonStyle
+    pub fn with_style(mut self, style: ButtonStyle) -> Self {
+        // MODIFIED: Parameter is ButtonStyle
         self.style = style;
         self
     }
@@ -94,8 +95,8 @@ impl ButtonBuilder {
                 self.parent_ptr,
                 self.id, // Use directly from builder
                 c_label.as_ptr(),
-                self.pos.into(),                // Use directly
-                self.size.into(),               // Use directly
+                self.pos.into(),                       // Use directly
+                self.size.into(),                      // Use directly
                 self.style.bits().try_into().unwrap(), // MODIFIED: Use .bits() to get i64 value
             )
         };
@@ -265,6 +266,8 @@ impl BitOr for ButtonStyle {
 
 impl BitOrAssign for ButtonStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

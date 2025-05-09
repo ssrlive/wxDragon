@@ -6,9 +6,9 @@ use wxdragon_sys as ffi; // ADDED for Id type alias
                          // ConvertResult path still TBD, will add if compiler needs it.
 
 use std::ffi::CString;
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::{c_char, c_long};
-use std::ptr;
-use std::ops::{BitOr, BitOrAssign}; // Added for style enum
+use std::ptr; // Added for style enum
 
 // --- SearchCtrl --- //
 

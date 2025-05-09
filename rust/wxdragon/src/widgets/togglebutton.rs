@@ -4,9 +4,9 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxToggleButton control.
 #[derive(Clone)]
@@ -168,8 +168,15 @@ impl<'a> ToggleButtonBuilder<'a> {
     pub fn build(self) -> ToggleButton {
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        ToggleButton::new(self.parent, self.id, &self.label, pos, size, self.style.bits())
-            .expect("Failed to create ToggleButton")
+        ToggleButton::new(
+            self.parent,
+            self.id,
+            &self.label,
+            pos,
+            size,
+            self.style.bits(),
+        )
+        .expect("Failed to create ToggleButton")
     }
 }
 
@@ -237,6 +244,8 @@ impl BitOr for ToggleButtonStyle {
 
 impl BitOrAssign for ToggleButtonStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

@@ -1,6 +1,6 @@
 use crate::event::WxEvtHandler;
-use crate::sizers::WxSizer;
 use crate::font::Font;
+use crate::sizers::WxSizer;
 use lazy_static::lazy_static;
 use std::any::Any;
 use std::cell::RefCell;

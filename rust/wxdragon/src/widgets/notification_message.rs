@@ -3,11 +3,11 @@
 
 // use crate::window::Window; // For parent type, though it's just a handle - Unused, removing
 // use crate::base::WxResult; // Will define locally for now
+use crate::window::WxWidget;
 use std::ffi::{CString, NulError};
 use std::os::raw::c_int;
-use wxdragon_sys as ffi;
-use crate::window::WxWidget; // Import WxWidget trait
-// use log; // REMOVED: Using println! instead
+use wxdragon_sys as ffi; // Import WxWidget trait
+                         // use log; // REMOVED: Using println! instead
 
 // --- Temporary Error Handling --- TODO: Refactor to use a crate-wide error type
 #[derive(Debug)]
@@ -28,7 +28,7 @@ pub type WxResult<T> = Result<T, Error>;
 // wxNotificationMessage specific constants that might be useful
 // These values are from wxWidgets documentation for wxNotificationMessage::Show
 pub const TIMEOUT_AUTO: i32 = -1; // Automatically determine the timeout
-pub const TIMEOUT_NEVER: i32 = 0;  // Never hide the notification automatically (manual Close() needed)
+pub const TIMEOUT_NEVER: i32 = 0; // Never hide the notification automatically (manual Close() needed)
 
 // Flags for wxNotificationMessage (usually correspond to wxICON_... values)
 // These are common wxWidgets flags, ensure they are available via ffi or define them if not.
@@ -129,7 +129,7 @@ impl NotificationMessage {
         }
         Ok(())
     }
-    
+
     /// Adds an action button to the notification.
     ///
     /// This method should be called after the `NotificationMessage` has been created
@@ -144,13 +144,15 @@ impl NotificationMessage {
     /// Returns `true` if the action was added successfully, `false` otherwise (e.g., too many actions).
     pub fn add_action(&self, action_id: i32, label: &str) -> WxResult<bool> {
         if self.ptr.is_null() {
-            return Err(Error::FfiCreation("NotificationMessage pointer is null".to_string()));
+            return Err(Error::FfiCreation(
+                "NotificationMessage pointer is null".to_string(),
+            ));
         }
         if action_id <= 0 {
             // wxWidgets requires action IDs to be > 0
             // Consider returning a specific error type here
             println!("Warning: NotificationMessage action_id must be > 0.");
-            return Ok(false); 
+            return Ok(false);
         }
         let c_label = CString::new(label)?; // This can return NulError, which converts to Error::NulError
         let result = unsafe {
@@ -235,7 +237,9 @@ impl NotificationMessageBuilder {
         };
 
         if ptr.is_null() {
-            Err(Error::FfiCreation("wxd_NotificationMessage_Create returned null".to_string()))
+            Err(Error::FfiCreation(
+                "wxd_NotificationMessage_Create returned null".to_string(),
+            ))
         } else {
             Ok(NotificationMessage { ptr })
         }
@@ -245,4 +249,4 @@ impl NotificationMessageBuilder {
 // Ensure `Window` has `handle_ptr` and `AsRef<Window>` can be used.
 // This implies that `crate::window::Window` struct is accessible and has `handle_ptr()` method.
 // And that `WxWidget` trait (which provides `handle_ptr`) is implemented by `Window` if `Window` itself is a trait.
-// Given `Window` is likely a struct wrapper, `AsRef<Window>` would work if `W` is `Window` or `&Window`. 
+// Given `Window` is likely a struct wrapper, `AsRef<Window>` would work if `W` is `Window` or `&Window`.

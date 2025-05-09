@@ -4,9 +4,9 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 // Re-export constants (same as SpinCtrl, potentially defined there or in prelude)
 // For clarity, let's redefine them here or ensure they are accessible.
@@ -209,6 +209,8 @@ impl BitOr for SpinButtonStyle {
 
 impl BitOrAssign for SpinButtonStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

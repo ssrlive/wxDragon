@@ -5,20 +5,20 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
 
 // wxSplitterWindow styles (Combine with SP_ from SpinCtrl/Button if appropriate)
-pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL; // Re-export for clarity
-pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL; // Re-export for clarity
-pub const SP_3D: i64 = ffi::WXD_SP_3D;
-pub const SP_BORDER: i64 = ffi::WXD_SP_BORDER;
-pub const SP_PERMIT_UNSPLIT: i64 = ffi::WXD_SP_PERMIT_UNSPLIT;
-pub const SP_LIVE_UPDATE: i64 = ffi::WXD_SP_LIVE_UPDATE;
-pub const SP_NOBORDER: i64 = ffi::WXD_SP_NOBORDER;
-pub const SP_THIN_SASH: i64 = ffi::WXD_SP_THIN_SASH;
-// Default is usually SP_BORDER
-pub const SP_DEFAULT_STYLE: i64 = ffi::WXD_SP_BORDER;
+// pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL;
+// pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL;
+// pub const SP_3D: i64 = ffi::WXD_SP_3D;
+// pub const SP_BORDER: i64 = ffi::WXD_SP_BORDER;
+// pub const SP_PERMIT_UNSPLIT: i64 = ffi::WXD_SP_PERMIT_UNSPLIT;
+// pub const SP_LIVE_UPDATE: i64 = ffi::WXD_SP_LIVE_UPDATE;
+// pub const SP_NOBORDER: i64 = ffi::WXD_SP_NOBORDER;
+// pub const SP_THIN_SASH: i64 = ffi::WXD_SP_THIN_SASH;
+// pub const SP_DEFAULT_STYLE: i64 = ffi::WXD_SP_BORDER;
 
 /// Represents a wxSplitterWindow widget.
 #[derive(Clone)]
@@ -131,13 +131,50 @@ impl WxEvtHandler for SplitterWindow {
     }
 }
 
+// --- SplitterWindowStyle Enum ---
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum SplitterWindowStyle {
+    Default = ffi::WXD_SP_BORDER, // Default to having a border (e.g. 512)
+    Horizontal = ffi::WXD_SP_HORIZONTAL,
+    Vertical = ffi::WXD_SP_VERTICAL,
+    PermitUnsplit = ffi::WXD_SP_PERMIT_UNSPLIT,
+    LiveUpdate = ffi::WXD_SP_LIVE_UPDATE,
+    ThinSash = ffi::WXD_SP_THIN_SASH,
+}
+
+impl SplitterWindowStyle {
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl Default for SplitterWindowStyle {
+    fn default() -> Self {
+        SplitterWindowStyle::Default
+    }
+}
+
+impl BitOr for SplitterWindowStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for SplitterWindowStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}
+
 /// Builder for creating `SplitterWindow` widgets.
 pub struct SplitterWindowBuilder {
     parent: *mut ffi::wxd_Window_t,
     id: Id,
     pos: Point,
     size: Size,
-    style: i64,
+    style: SplitterWindowStyle,
 }
 
 impl SplitterWindowBuilder {
@@ -148,7 +185,7 @@ impl SplitterWindowBuilder {
             id: ID_ANY,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
-            style: SP_DEFAULT_STYLE,
+            style: SplitterWindowStyle::default(),
         }
     }
 
@@ -171,7 +208,7 @@ impl SplitterWindowBuilder {
     }
 
     /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: SplitterWindowStyle) -> Self {
         self.style = style;
         self
     }
@@ -185,7 +222,7 @@ impl SplitterWindowBuilder {
                 self.id as c_int,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if splitter_ptr.is_null() {

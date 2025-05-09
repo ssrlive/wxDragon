@@ -4,9 +4,9 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
+use std::ops::{BitOr, BitOrAssign};
 use std::ops::{Deref, DerefMut};
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 // --- Constants ---
 

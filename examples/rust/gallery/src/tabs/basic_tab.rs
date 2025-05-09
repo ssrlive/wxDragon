@@ -1,11 +1,10 @@
 use wxdragon::prelude::*;
 use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::textctrl::TextCtrlStyle;
-use wxdragon::widgets::search_ctrl::SearchCtrlStyle;
-// use wxdragon::widgets::spinctrl; // Will comment out spinctrl styles for now
-// use wxdragon::widgets::radiobox; // Will comment out radiobox styles for now
+use wxdragon::widgets::radiobox::RadioBoxStyle;
 use wxdragon::widgets::scrollbar::ScrollBarStyle;
+use wxdragon::widgets::search_ctrl::SearchCtrlStyle;
 use wxdragon::widgets::static_line::StaticLineStyle;
+use wxdragon::widgets::textctrl::TextCtrlStyle;
 
 use wxdragon::art_provider::ArtProvider;
 use wxdragon::bitmap::Bitmap;
@@ -63,7 +62,6 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let spin_button = SpinButton::builder(&basic_panel)
         .with_range(0, 100)
         .with_initial_value(0)
-        // .with_style(spinctrl::SP_VERTICAL | spinctrl::SP_ARROW_KEYS | spinctrl::SP_WRAP) // Commenting out for now
         .build();
     spin_button.set_tooltip("Click arrows or use keys to change the value (wraps around).");
     let spinctrl_double_label_widget = StaticText::builder(&basic_panel)
@@ -94,7 +92,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let radio_box = RadioBox::builder(Some(&basic_panel), &radio_box_choices)
         .with_label("RadioBox Title")
         .with_major_dimension(1) // 1 column
-        // .with_style(radiobox::RA_SPECIFY_COLS) // Commenting out for now
+        .with_style(RadioBoxStyle::SpecifyCols)
         .build();
     radio_box.set_selection(0);
     radio_box.set_tooltip("Select one option from the radio box.");
@@ -158,8 +156,8 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .build();
     bitmap_button.set_tooltip("A button with a custom red square bitmap.");
 
-    let open_icon_bitmap = ArtProvider::get_bitmap(ART_FILE_OPEN, ART_BUTTON, None)
-        .or_else(|| ArtProvider::get_bitmap(ART_ERROR, ART_BUTTON, None))
+    let open_icon_bitmap = ArtProvider::get_bitmap(ArtId::FileOpen, ArtClient::Button, None)
+        .or_else(|| ArtProvider::get_bitmap(ArtId::Error, ArtClient::Button, None))
         .expect("Failed to get ART_FILE_OPEN or ART_ERROR icon");
     let art_button_label = StaticText::builder(&basic_panel)
         .with_label("Art Button:")
@@ -230,9 +228,11 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let bitmap_combo_box_label = StaticText::builder(&basic_panel)
         .with_label("Bitmap Combo:")
         .build();
-    let open_bmp = ArtProvider::get_bitmap(ART_FILE_OPEN, ART_MENU, None).expect("Failed art");
-    let save_bmp = ArtProvider::get_bitmap(ART_FILE_SAVE, ART_MENU, None).expect("Failed art");
-    let new_bmp = ArtProvider::get_bitmap(ART_NEW, ART_MENU, None).expect("Failed art");
+    let open_bmp =
+        ArtProvider::get_bitmap(ArtId::FileOpen, ArtClient::Menu, None).expect("Failed art");
+    let save_bmp =
+        ArtProvider::get_bitmap(ArtId::FileSave, ArtClient::Menu, None).expect("Failed art");
+    let new_bmp = ArtProvider::get_bitmap(ArtId::New, ArtClient::Menu, None).expect("Failed art");
     let bitmap_combo_box = BitmapComboBox::builder(Some(&basic_panel))
         .with_size(Size::new(200, -1))
         .with_value("Default Value")
@@ -787,11 +787,12 @@ impl BasicTabControls {
         );
 
         // TEXT_ENTER for SearchCtrl
-        self.search_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
-            println!(
-                "SEARCH_CTRL Event: Text Entered! Value: \"{}\"",
-                event.get_string().unwrap_or_default()
-            );
-        });
+        self.search_ctrl
+            .bind(EventType::TEXT_ENTER, move |event: Event| {
+                println!(
+                    "SEARCH_CTRL Event: Text Entered! Value: \"{}\"",
+                    event.get_string().unwrap_or_default()
+                );
+            });
     }
 }

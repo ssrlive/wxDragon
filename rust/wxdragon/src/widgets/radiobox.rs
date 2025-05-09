@@ -1,17 +1,18 @@
 use crate::base::{Point, Size, ID_ANY};
-use crate::defs::Style;
+// use crate::defs::Style; // Removed unused import
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
 
 // Constants from wxWidgets for RadioBox
 // Values populated by const_extractor via ffi
-pub const RA_SPECIFY_COLS: i64 = ffi::WXD_RA_SPECIFY_COLS;
-pub const RA_SPECIFY_ROWS: i64 = ffi::WXD_RA_SPECIFY_ROWS;
+// pub const RA_SPECIFY_COLS: i64 = ffi::WXD_RA_SPECIFY_COLS;
+// pub const RA_SPECIFY_ROWS: i64 = ffi::WXD_RA_SPECIFY_ROWS;
 // wxRB_GROUP, wxRB_SINGLE seem less relevant for RadioBox itself, more for RadioButton
 // Default style includes wxRA_SPECIFY_COLS
 
@@ -108,7 +109,7 @@ pub struct RadioBoxBuilder<'a> {
     pos: Point,
     size: Size,
     major_dimension: i32,
-    style: Style,
+    style: RadioBoxStyle,
 }
 
 impl<'a> RadioBoxBuilder<'a> {
@@ -124,7 +125,7 @@ impl<'a> RadioBoxBuilder<'a> {
                 height: -1,
             },
             major_dimension: 0,
-            style: ffi::WXD_RA_SPECIFY_COLS,
+            style: RadioBoxStyle::default(),
         }
     }
 
@@ -153,7 +154,7 @@ impl<'a> RadioBoxBuilder<'a> {
         self
     }
 
-    pub fn with_style(mut self, style: Style) -> Self {
+    pub fn with_style(mut self, style: RadioBoxStyle) -> Self {
         self.style = style;
         self
     }
@@ -179,7 +180,7 @@ impl<'a> RadioBoxBuilder<'a> {
                 self.choices.len() as i32,
                 c_choices_ptrs.as_ptr(),
                 self.major_dimension,
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if ptr.is_null() {
@@ -212,3 +213,41 @@ impl WxEvtHandler for RadioBox {
 }
 
 // No explicit Drop needed.
+
+// --- RadioBoxStyle Enum ---
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum RadioBoxStyle {
+    /// Default layout (wxWidgets decides based on major dimension).
+    Default = 0,
+    /// Arrange items in columns primarily.
+    SpecifyCols = ffi::WXD_RA_SPECIFY_COLS,
+    /// Arrange items in rows primarily.
+    SpecifyRows = ffi::WXD_RA_SPECIFY_ROWS,
+}
+
+impl RadioBoxStyle {
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl Default for RadioBoxStyle {
+    fn default() -> Self {
+        RadioBoxStyle::Default
+    }
+}
+
+// RadioBox styles are typically not combined, but BitOr/Assign might be useful if other flags emerge.
+impl BitOr for RadioBoxStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for RadioBoxStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}

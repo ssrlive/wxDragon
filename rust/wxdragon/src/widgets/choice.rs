@@ -5,9 +5,9 @@ use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 // --- Constants ---
 // Style flags (uses ComboBox flags)
@@ -301,6 +301,8 @@ impl BitOr for ChoiceStyle {
 
 impl BitOrAssign for ChoiceStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

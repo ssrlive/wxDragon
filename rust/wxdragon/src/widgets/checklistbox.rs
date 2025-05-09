@@ -3,11 +3,11 @@
 use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
+use crate::widgets::listbox::ListBoxStyle;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
-use crate::widgets::listbox::ListBoxStyle;
 
 // Remove re-export of ListBox constants as they are now in ListBoxStyle enum
 // pub use crate::widgets::listbox::{
@@ -264,10 +264,7 @@ impl<'a> CheckListBoxBuilder<'a> {
                 self.style.bits(),
             )
         };
-        assert!(
-            !ctrl_ptr.is_null(),
-            "Failed to create CheckListBox widget"
-        );
+        assert!(!ctrl_ptr.is_null(), "Failed to create CheckListBox widget");
         let clbox = unsafe {
             let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
             CheckListBox { window }

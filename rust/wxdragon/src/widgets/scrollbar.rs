@@ -7,10 +7,10 @@ use crate::event::WxEvtHandler;
 use crate::window::{Window, WxWidget};
 use std::default::Default;
 use std::marker::PhantomData;
+use std::ops::{BitOr, BitOrAssign};
 use std::ops::{Deref, DerefMut};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxScrollBar widget.
 #[derive(Clone)]
@@ -200,6 +200,8 @@ impl BitOr for ScrollBarStyle {
 
 impl BitOrAssign for ScrollBarStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

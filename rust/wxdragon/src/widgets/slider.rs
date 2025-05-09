@@ -4,9 +4,9 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 /// Represents a wxSlider widget.
 #[derive(Clone)] // Keep Clone, as it just copies the pointer
@@ -198,6 +198,8 @@ impl BitOr for SliderStyle {
 
 impl BitOrAssign for SliderStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

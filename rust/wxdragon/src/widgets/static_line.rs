@@ -7,9 +7,9 @@ use crate::window::{Window, WxWidget};
 use std::default::Default;
 use std::ffi::CString;
 use std::marker::PhantomData;
+use std::ops::{BitOr, BitOrAssign};
 use std::ops::{Deref, DerefMut};
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 // wxStaticLine styles
 // wxLI_HORIZONTAL is an alias for wxHORIZONTAL, wxLI_VERTICAL for wxVERTICAL.
@@ -73,7 +73,7 @@ impl<'a, P: WxWidget> Default for StaticLineBuilder<'a, P> {
             id: ID_ANY,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE, // wxStaticLine will size itself by default
-            style: StaticLineStyle::Default,           // Defaults to LI_HORIZONTAL in wxWidgets if 0
+            style: StaticLineStyle::Default, // Defaults to LI_HORIZONTAL in wxWidgets if 0
             name: String::from("staticLine"), // Default name if not provided
             parent_type: PhantomData,
         }
@@ -158,6 +158,8 @@ impl BitOr for StaticLineStyle {
 
 impl BitOrAssign for StaticLineStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

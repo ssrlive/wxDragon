@@ -32,8 +32,8 @@ pub use crate::widgets::gauge::{Gauge, GaugeBuilder};
 pub use crate::widgets::listbox::{ListBox, ListBoxBuilder, ListBoxStyle};
 pub use crate::widgets::panel::{Panel, PanelBuilder, PanelStyle};
 pub use crate::widgets::radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
-pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder};
 pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
+pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder};
 pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
 pub use crate::widgets::togglebutton::{ToggleButton, ToggleButtonBuilder};
 pub use crate::widgets::treectrl::{TreeCtrl, TreeCtrlBuilder};
@@ -71,19 +71,11 @@ pub use crate::menus::menuitem::{ID_ABOUT, ID_EXIT, ID_SEPARATOR};
 // ADDED: Bitmap
 pub use crate::bitmap::Bitmap;
 
-// ADDED: ArtProvider and its constants
-pub use crate::art_provider::{
-    ArtProvider, ART_ADD_BOOKMARK, ART_BUTTON, ART_CDROM, ART_COPY, ART_CROSS_MARK, ART_CUT,
-    ART_DELETE, ART_DEL_BOOKMARK, ART_DIALOG, ART_EDIT, ART_ERROR, ART_EXECUTABLE_FILE,
-    ART_FILE_OPEN, ART_FILE_SAVE, ART_FILE_SAVE_AS, ART_FIND, ART_FIND_AND_REPLACE, ART_FLOPPY,
-    ART_FOLDER, ART_FOLDER_OPEN, ART_FRAME_ICON, ART_GOTO_FIRST, ART_GOTO_LAST, ART_GO_BACK,
-    ART_GO_DIR_UP, ART_GO_DOWN, ART_GO_FORWARD, ART_GO_HOME, ART_GO_TO_PARENT, ART_GO_UP,
-    ART_HARDDISK, ART_HELP, ART_HELP_BOOK, ART_HELP_FOLDER, ART_HELP_PAGE, ART_HELP_SETTINGS,
-    ART_HELP_SIDE_PANEL, ART_INFORMATION, ART_LIST_VIEW, ART_MENU, ART_MESSAGE_BOX,
-    ART_MISSING_IMAGE, ART_NEW, ART_NEW_DIR, ART_NORMAL_FILE, ART_OTHER, ART_PASTE, ART_PRINT,
-    ART_QUESTION, ART_QUIT, ART_REDO, ART_REMOVABLE, ART_REPORT_VIEW, ART_TICK_MARK, ART_TIP,
-    ART_TOOLBAR, ART_UNDO, ART_WARNING,
-};
+// Replace old ArtProvider const exports with new Enum exports
+// pub use crate::art_provider::{
+//     ArtProvider, ART_ADD_BOOKMARK, ART_BUTTON, ... (all old consts listed here) ...
+// };
+pub use crate::art_provider::{ArtClient, ArtId, ArtProvider};
 
 // --- Widget Style Constants ---
 // Panel
@@ -165,15 +157,26 @@ pub use crate::font_data::FontData;
 pub use crate::dialogs::progress_dialog::ProgressDialog;
 
 // ADDED: FilePickerCtrl, its builder, and style constants
-pub use crate::widgets::{FilePickerCtrl, FilePickerCtrlBuilder, FLP_DEFAULT_STYLE, FLP_OPEN, FLP_SAVE, FLP_OVERWRITE_PROMPT, FLP_FILE_MUST_EXIST, FLP_CHANGE_DIR, FLP_USE_TEXTCTRL};
-pub use crate::widgets::{DirPickerCtrl, DirPickerCtrlBuilder, DIRP_DEFAULT_STYLE, DIRP_DIR_MUST_EXIST, DIRP_CHANGE_DIR, DIRP_USE_TEXTCTRL};
-pub use crate::widgets::{FontPickerCtrl, FontPickerCtrlBuilder, FNTP_DEFAULT_STYLE, FNTP_USE_TEXTCTRL, FNTP_FONTDESC_AS_LABEL, FNTP_USEFONT_FOR_LABEL};
+pub use crate::widgets::{
+    DirPickerCtrl, DirPickerCtrlBuilder, DIRP_CHANGE_DIR, DIRP_DEFAULT_STYLE, DIRP_DIR_MUST_EXIST,
+    DIRP_USE_TEXTCTRL,
+};
+pub use crate::widgets::{
+    FilePickerCtrl, FilePickerCtrlBuilder, FLP_CHANGE_DIR, FLP_DEFAULT_STYLE, FLP_FILE_MUST_EXIST,
+    FLP_OPEN, FLP_OVERWRITE_PROMPT, FLP_SAVE, FLP_USE_TEXTCTRL,
+};
+pub use crate::widgets::{
+    FontPickerCtrl, FontPickerCtrlBuilder, FNTP_DEFAULT_STYLE, FNTP_FONTDESC_AS_LABEL,
+    FNTP_USEFONT_FOR_LABEL, FNTP_USE_TEXTCTRL,
+};
 
 // NotificationMessage
 pub use crate::widgets::notification_message::{
-    NotificationMessage, NotificationMessageBuilder,
+    NotificationMessage,
+    NotificationMessageBuilder,
     // ICON_INFORMATION, ICON_WARNING, ICON_ERROR, ICON_QUESTION, // Removed to avoid conflict with message_dialog exports
-    TIMEOUT_AUTO, TIMEOUT_NEVER,
+    TIMEOUT_AUTO,
+    TIMEOUT_NEVER,
 };
 
 // Re-export other common constants or types if needed

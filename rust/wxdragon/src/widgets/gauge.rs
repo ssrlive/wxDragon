@@ -2,9 +2,9 @@ use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
 // Opaque pointer type from FFI
 pub type RawGauge = ffi::wxd_Gauge_t;
@@ -131,7 +131,14 @@ impl<'a> GaugeBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        Gauge::new_impl(parent_ptr, self.id, self.range, pos, size, self.style.bits())
+        Gauge::new_impl(
+            parent_ptr,
+            self.id,
+            self.range,
+            pos,
+            size,
+            self.style.bits(),
+        )
     }
 }
 
@@ -169,6 +176,8 @@ impl BitOr for GaugeStyle {
 
 impl BitOrAssign for GaugeStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

@@ -5,8 +5,8 @@ use wxdragon_sys as ffi;
 // Remove unresolved Style import
 // use ffi::Style;
 use std::ops::Drop;
-use std::os::raw::c_char;
 use std::ops::{BitOr, BitOrAssign};
+use std::os::raw::c_char;
 
 // Comment out unresolved constant import
 // pub use ffi::TE_PROCESS_ENTER;
@@ -14,7 +14,7 @@ use std::ops::{BitOr, BitOrAssign};
 
 // --- TextCtrl Style Flags ---
 // REMOVED: pub type Style = i64; // Based on ffi::wxd_Style_t which is long
-                      // Add more styles as needed
+// Add more styles as needed
 // REMOVED: pub const TE_PROCESS_ENTER: Style = ffi::WXD_TE_PROCESS_ENTER;
 
 #[derive(Clone)]
@@ -230,6 +230,8 @@ impl BitOr for TextCtrlStyle {
 
 impl BitOrAssign for TextCtrlStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

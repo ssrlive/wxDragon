@@ -479,7 +479,8 @@ impl DialogTabControls {
         self.progress_button
             .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
                 println!("Show Progress Dialog button clicked.");
-                let dialog = ProgressDialog::builder( // Assuming original signature
+                let dialog = ProgressDialog::builder(
+                    // Assuming original signature
                     Some(&frame_parent_progress_ctx),
                     "Progress Demonstration",
                     "Processing items...",
@@ -518,97 +519,116 @@ impl DialogTabControls {
         // Event handler for FilePickerCtrl
         let fpc_status_label_clone = self.file_picker_status_label.clone();
         let file_picker_ctrl_clone = self.file_picker_ctrl.clone();
-        self.file_picker_ctrl.bind(EventType::FILE_PICKER_CHANGED, move |_event: Event| {
-            let path_string: String = file_picker_ctrl_clone.get_path(); 
-            
-            if !path_string.is_empty() {
-                let status = format!("Selected Path: {}", path_string);
-                fpc_status_label_clone.set_label(&status);
-                println!("FilePickerCtrl Path Changed: {}", path_string);
-                
-                // Set a new font (currently default) to the status label
-                let new_font = Font::new(); 
-                fpc_status_label_clone.set_font(&new_font);
-                // Note: new_font is dropped here, but the label should have its font set.
-            } else {
-                fpc_status_label_clone.set_label("FilePickerCtrl: No path selected or path is empty.");
-                println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
-                // Optionally reset to a default font here too if desired
-                let default_font = Font::new();
-                fpc_status_label_clone.set_font(&default_font);
-            }
-        });
+        self.file_picker_ctrl
+            .bind(EventType::FILE_PICKER_CHANGED, move |_event: Event| {
+                let path_string: String = file_picker_ctrl_clone.get_path();
+
+                if !path_string.is_empty() {
+                    let status = format!("Selected Path: {}", path_string);
+                    fpc_status_label_clone.set_label(&status);
+                    println!("FilePickerCtrl Path Changed: {}", path_string);
+
+                    // Set a new font (currently default) to the status label
+                    let new_font = Font::new();
+                    fpc_status_label_clone.set_font(&new_font);
+                    // Note: new_font is dropped here, but the label should have its font set.
+                } else {
+                    fpc_status_label_clone
+                        .set_label("FilePickerCtrl: No path selected or path is empty.");
+                    println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
+                    // Optionally reset to a default font here too if desired
+                    let default_font = Font::new();
+                    fpc_status_label_clone.set_font(&default_font);
+                }
+            });
 
         // Event handler for DirPickerCtrl
         let dpc_status_label_clone = self.dir_picker_status_label.clone();
         let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone(); // Clone for the closure
-        self.dir_picker_ctrl.bind(EventType::DIR_PICKER_CHANGED, move |_event: Event| {
-            let path_string: String = dir_picker_ctrl_clone.get_path();
-            if !path_string.is_empty() {
-                let status = format!("Selected Dir: {}", path_string);
-                dpc_status_label_clone.set_label(&status);
-                println!("DirPickerCtrl Path Changed: {}", path_string);
-            } else {
-                dpc_status_label_clone.set_label("DirPickerCtrl: No directory selected or path is empty.");
-                println!("DirPickerCtrl Path Changed: No directory selected or path is empty.");
-            }
-        });
+        self.dir_picker_ctrl
+            .bind(EventType::DIR_PICKER_CHANGED, move |_event: Event| {
+                let path_string: String = dir_picker_ctrl_clone.get_path();
+                if !path_string.is_empty() {
+                    let status = format!("Selected Dir: {}", path_string);
+                    dpc_status_label_clone.set_label(&status);
+                    println!("DirPickerCtrl Path Changed: {}", path_string);
+                } else {
+                    dpc_status_label_clone
+                        .set_label("DirPickerCtrl: No directory selected or path is empty.");
+                    println!("DirPickerCtrl Path Changed: No directory selected or path is empty.");
+                }
+            });
 
         // Event handler for FontPickerCtrl
         let font_pc_status_label_clone = self.font_picker_status_label.clone();
         let font_picker_ctrl_clone = self.font_picker_ctrl.clone(); // Clone for the closure
-        self.font_picker_ctrl.bind(EventType::FONT_PICKER_CHANGED, move |_event: Event| {
-            if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
-                let status = format!("Selected Font: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
-                font_pc_status_label_clone.set_label(&status);
-                // Apply the selected font to the status label
-                font_pc_status_label_clone.set_font(&selected_font);
-                println!("FontPickerCtrl Font Changed: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
-            } else {
-                font_pc_status_label_clone.set_label("FontPickerCtrl: No font selected or font is invalid.");
-                println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");
-            }
-        });
+        self.font_picker_ctrl
+            .bind(EventType::FONT_PICKER_CHANGED, move |_event: Event| {
+                if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
+                    let status = format!(
+                        "Selected Font: {} pt {}",
+                        selected_font.get_point_size(),
+                        selected_font.get_face_name()
+                    );
+                    font_pc_status_label_clone.set_label(&status);
+                    // Apply the selected font to the status label
+                    font_pc_status_label_clone.set_font(&selected_font);
+                    println!(
+                        "FontPickerCtrl Font Changed: {} pt {}",
+                        selected_font.get_point_size(),
+                        selected_font.get_face_name()
+                    );
+                } else {
+                    font_pc_status_label_clone
+                        .set_label("FontPickerCtrl: No font selected or font is invalid.");
+                    println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");
+                }
+            });
 
         // --- NotificationMessage Events ---
         let notification_status_label_clone = self.notification_status_label.clone();
         let panel_for_notif_handler = self.panel.clone(); // Clone for notification related event handlers
         let frame_for_notif_parent = frame.clone(); // Clone the frame for the notification parent
 
-        self.show_notification_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-            let notif_builder = NotificationMessage::builder()
-                .with_title("Hello from wxDragon!")
-                .with_message("This is a notification with actions.")
-                .with_flags(ICON_INFORMATION); // Use one of the imported constants
+        self.show_notification_btn
+            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+                let notif_builder = NotificationMessage::builder()
+                    .with_title("Hello from wxDragon!")
+                    .with_message("This is a notification with actions.")
+                    .with_flags(ICON_INFORMATION); // Use one of the imported constants
 
-            match notif_builder.build() {
-                Ok(notif_msg) => { // Make notif_msg mutable to call set_parent
-                    // Set the main frame as the parent
-                    if let Err(e) = notif_msg.set_parent(Some(&frame_for_notif_parent)) {
-                        println!("Error: Failed to set notification parent: {:?}", e);
-                    }
+                match notif_builder.build() {
+                    Ok(notif_msg) => {
+                        // Make notif_msg mutable to call set_parent
+                        // Set the main frame as the parent
+                        if let Err(e) = notif_msg.set_parent(Some(&frame_for_notif_parent)) {
+                            println!("Error: Failed to set notification parent: {:?}", e);
+                        }
 
-                    if let Err(e) = notif_msg.add_action(101, "Action 1") {
-                        println!("Error: Failed to add action 1: {:?}", e);
-                    }
-                    if let Err(e) = notif_msg.add_action(102, "Action 2") {
-                        println!("Error: Failed to add action 2: {:?}", e);
-                    }
+                        if let Err(e) = notif_msg.add_action(101, "Action 1") {
+                            println!("Error: Failed to add action 1: {:?}", e);
+                        }
+                        if let Err(e) = notif_msg.add_action(102, "Action 2") {
+                            println!("Error: Failed to add action 2: {:?}", e);
+                        }
 
-                    if notif_msg.show(TIMEOUT_NEVER) { // Changed to TIMEOUT_NEVER
-                        notification_status_label_clone.set_label("Notification shown (TIMEOUT_NEVER).");
-                        println!("Info: Notification shown (TIMEOUT_NEVER).");
-                    } else {
-                        notification_status_label_clone.set_label("Failed to show notification.");
-                        println!("Error: Failed to show notification.");
+                        if notif_msg.show(TIMEOUT_NEVER) {
+                            // Changed to TIMEOUT_NEVER
+                            notification_status_label_clone
+                                .set_label("Notification shown (TIMEOUT_NEVER).");
+                            println!("Info: Notification shown (TIMEOUT_NEVER).");
+                        } else {
+                            notification_status_label_clone
+                                .set_label("Failed to show notification.");
+                            println!("Error: Failed to show notification.");
+                        }
+                    }
+                    Err(e) => {
+                        notification_status_label_clone.set_label("Failed to build notification.");
+                        println!("Error: Failed to build notification: {:?}", e);
                     }
                 }
-                Err(e) => {
-                    notification_status_label_clone.set_label("Failed to build notification.");
-                    println!("Error: Failed to build notification: {:?}", e);
-                }
-            }
-        });
+            });
 
         // Bind notification events to the panel
         let notif_status_click_clone = self.notification_status_label.clone();
@@ -626,7 +646,8 @@ impl DialogTabControls {
         let notif_status_action_clone = self.notification_status_label.clone();
         panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_ACTION, move |event| {
             let action_id = event.get_id(); // wxCommandEvent::GetId()
-            notif_status_action_clone.set_label(&format!("Notification: Action {} clicked!", action_id));
+            notif_status_action_clone
+                .set_label(&format!("Notification: Action {} clicked!", action_id));
             println!("Info: Notification Action {} clicked", action_id);
         });
     }

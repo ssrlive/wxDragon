@@ -31,7 +31,10 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
             Size::new(w as i32, h as i32)
         }
         Err(e) => {
-            println!("Failed to load animation metadata to get size: {}. Falling back to default.", e);
+            println!(
+                "Failed to load animation metadata to get size: {}. Falling back to default.",
+                e
+            );
             Size::new(100, 100) // Fallback size
         }
     };

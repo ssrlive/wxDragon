@@ -6,18 +6,48 @@ use crate::id::Id;
 use crate::menus::ItemKind; // Reuse ItemKind for tool types
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
+use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
 
-// wxToolBar styles
-pub const TB_HORIZONTAL: i64 = ffi::WXD_TB_HORIZONTAL;
-pub const TB_VERTICAL: i64 = ffi::WXD_TB_VERTICAL;
-pub const TB_FLAT: i64 = ffi::WXD_TB_FLAT;
-pub const TB_DOCKABLE: i64 = ffi::WXD_TB_DOCKABLE;
-pub const TB_TEXT: i64 = ffi::WXD_TB_TEXT;
-pub const TB_NOICONS: i64 = ffi::WXD_TB_NOICONS;
-pub const TB_NODIVIDER: i64 = ffi::WXD_TB_NODIVIDER;
-pub const TB_DEFAULT_STYLE: i64 = TB_HORIZONTAL; // Default is usually horizontal
+// --- ToolBarStyle Enum ---
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum ToolBarStyle {
+    Default = ffi::WXD_TB_HORIZONTAL, // Default to Horizontal (e.g., value 4)
+    Vertical = ffi::WXD_TB_VERTICAL,
+    Text = ffi::WXD_TB_TEXT,           // Show text labels
+    NoIcons = ffi::WXD_TB_NOICONS,     // Show text only, no icons
+    NoDivider = ffi::WXD_TB_NODIVIDER, // No divider between groups
+    Flat = ffi::WXD_TB_FLAT,           // Flat toolbar look
+    Dockable = ffi::WXD_TB_DOCKABLE,   // Can be dragged and docked
+                                       // Add other styles like TB_RIGHT, TB_BOTTOM if FFI constants exist
+}
+
+impl ToolBarStyle {
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl Default for ToolBarStyle {
+    fn default() -> Self {
+        ToolBarStyle::Default
+    }
+}
+
+impl BitOr for ToolBarStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for ToolBarStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}
 
 /// Represents a wxToolBar control.
 /// Toolbars generate `EventType::MENU` events on their parent window when a tool is clicked.

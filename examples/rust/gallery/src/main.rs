@@ -1,4 +1,6 @@
+use wxdragon::id::ID_ANY;
 use wxdragon::prelude::*;
+use wxdragon::widgets::toolbar::ToolBarStyle;
 
 use std::cell::RefCell;
 
@@ -69,19 +71,35 @@ fn main() {
         let media_controls = create_media_tab(&notebook);
 
         // --- ToolBar Setup ---
-        // let tb_style = TB_TEXT | TB_HORIZONTAL; // Old - Commenting out for now as Toolbar not refactored
-        // if let Some(toolbar) = frame.create_tool_bar(Some(tb_style), ID_ANY) {
-        //     let open_icon = ArtProvider::get_bitmap(ART_FILE_OPEN, ART_TOOLBAR, None)
-        //         .expect("Failed to get ART_FILE_OPEN for toolbar");
-        //     toolbar.add_tool(
-        //         1, // Tool ID
-        //         "Open",
-        //         &open_icon,
-        //         "Open a file",
-        //         ItemKind::Normal, // wxITEM_NORMAL
-        //     );
-        //     toolbar.realize();
-        // }
+        let tb_style = ToolBarStyle::Text | ToolBarStyle::Default;
+        if let Some(toolbar) = frame.create_tool_bar(Some(tb_style), ID_ANY as i32) {
+            // New Tool
+            if let Some(new_icon) = ArtProvider::get_bitmap(ArtId::New, ArtClient::Toolbar, None) {
+                toolbar.add_tool(ID_TOOL_NEW, "New", &new_icon, "Create a new file");
+            } else {
+                eprintln!("Failed to get ArtId::New for toolbar");
+            }
+
+            // Open Tool
+            if let Some(open_icon) =
+                ArtProvider::get_bitmap(ArtId::FileOpen, ArtClient::Toolbar, None)
+            {
+                toolbar.add_tool(ID_TOOL_OPEN, "Open", &open_icon, "Open an existing file");
+            } else {
+                eprintln!("Failed to get ArtId::FileOpen for toolbar");
+            }
+
+            // Save Tool
+            if let Some(save_icon) =
+                ArtProvider::get_bitmap(ArtId::FileSave, ArtClient::Toolbar, None)
+            {
+                toolbar.add_tool(ID_TOOL_SAVE, "Save", &save_icon, "Save the current file");
+            } else {
+                eprintln!("Failed to get ArtId::FileSave for toolbar");
+            }
+
+            toolbar.realize();
+        }
 
         // --- Add Pages to Notebook ---
         notebook.add_page(&basic_controls.panel, "Basic Controls", true);

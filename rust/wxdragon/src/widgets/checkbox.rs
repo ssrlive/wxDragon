@@ -3,8 +3,8 @@ use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
-use wxdragon_sys as ffi;
 use std::ops::{BitOr, BitOrAssign};
+use wxdragon_sys as ffi;
 
 // Re-export specific CheckBox constants if needed later
 
@@ -125,7 +125,14 @@ impl<'a> CheckBoxBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or_default();
         let size = self.size.unwrap_or_default();
-        CheckBox::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style.bits())
+        CheckBox::new_impl(
+            parent_ptr,
+            self.id,
+            &self.label,
+            pos,
+            size,
+            self.style.bits(),
+        )
     }
 }
 
@@ -189,6 +196,8 @@ impl BitOr for CheckBoxStyle {
 
 impl BitOrAssign for CheckBoxStyle {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }

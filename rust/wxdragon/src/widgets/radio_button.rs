@@ -151,7 +151,14 @@ impl<'a> RadioButtonBuilder<'a> {
         let parent_ptr = self.parent.handle_ptr();
         let pos = self.pos.unwrap_or(DEFAULT_POSITION);
         let size = self.size.unwrap_or(DEFAULT_SIZE);
-        RadioButton::new_impl(parent_ptr, self.id, &self.label, pos, size, self.style.bits())
+        RadioButton::new_impl(
+            parent_ptr,
+            self.id,
+            &self.label,
+            pos,
+            size,
+            self.style.bits(),
+        )
     }
 }
 

@@ -1,8 +1,8 @@
 use wxdragon::id;
 use wxdragon::prelude::*;
-use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::listbox::ListBoxStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
+use wxdragon::widgets::listbox::ListBoxStyle;
+use wxdragon::widgets::panel::PanelStyle;
 // use wxdragon::widgets::choice; // For CB_SORT if it were available directly
 
 #[allow(dead_code)]
