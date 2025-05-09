@@ -273,7 +273,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [x] `wxMessageDialog`
     *   [x] `wxFileDialog`
     *   [x] `wxColourDialog`
-    *   [ ] `wxFontDialog`
+    *   [x] `wxFontDialog`
     *   [x] `wxTextEntryDialog`
     *   [ ] `wxProgressDialog`
     *   [ ] `wxSplashScreen` (*Moved here, also related to Other*)

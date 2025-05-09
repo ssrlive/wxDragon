@@ -9,6 +9,8 @@ pub mod datetime;
 pub mod defs;
 pub mod dialogs;
 pub mod event;
+pub mod font;
+pub mod font_data;
 pub mod id;
 pub mod menus;
 pub mod sizers;
@@ -131,4 +133,9 @@ pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, SB_HORIZONTAL, SB_VERT
 // Dialogs exports
 pub use dialogs::{
     colour_dialog::ColourDialog,
+    font_dialog::FontDialog,
 };
+
+// Font exports
+pub use font::Font;
+pub use font_data::FontData;

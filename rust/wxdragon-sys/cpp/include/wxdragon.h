@@ -1040,9 +1040,37 @@ WXD_EXPORTED wxd_ColourDialog_t* wxd_ColourDialog_Create(
 
 WXD_EXPORTED wxd_ColourData_t* wxd_ColourDialog_GetColourData(wxd_ColourDialog_t* self);
 
-// Setters (optional for now, can be added later if needed by Rust wrapper)
-// WXD_EXPORTED void wxd_FileDialog_SetMessage(wxd_FileDialog_t* self, const char* message);
-// WXD_EXPORTED void wxd_FileDialog_SetPath(wxd_FileDialog_t* self, const char* path);
+// --- wxFontData ---
+typedef struct wxd_FontData wxd_FontData_t;
+typedef struct wxd_Font wxd_Font_t;
+
+WXD_EXPORTED wxd_FontData_t* wxd_FontData_Create(void);
+WXD_EXPORTED void wxd_FontData_Destroy(wxd_FontData_t* self);
+WXD_EXPORTED void wxd_FontData_EnableEffects(wxd_FontData_t* self, bool enable);
+WXD_EXPORTED bool wxd_FontData_GetEnableEffects(wxd_FontData_t* self);
+WXD_EXPORTED void wxd_FontData_SetInitialFont(wxd_FontData_t* self, const wxd_Font_t* font);
+
+// --- wxFontDialog ---
+typedef struct wxd_FontDialog wxd_FontDialog_t;
+
+WXD_EXPORTED wxd_FontDialog_t* wxd_FontDialog_Create(
+    wxd_Window_t* parent,
+    const char* title,
+    wxd_FontData_t* data);
+
+WXD_EXPORTED wxd_FontData_t* wxd_FontDialog_GetFontData(wxd_FontDialog_t* self);
+WXD_EXPORTED wxd_Font_t* wxd_FontDialog_GetFont(wxd_FontDialog_t* self);
+
+// --- wxFont ---
+WXD_EXPORTED wxd_Font_t* wxd_Font_Create(void);
+WXD_EXPORTED void wxd_Font_Destroy(wxd_Font_t* self);
+WXD_EXPORTED int wxd_Font_GetPointSize(wxd_Font_t* self);
+WXD_EXPORTED int wxd_Font_GetFamily(wxd_Font_t* self);
+WXD_EXPORTED int wxd_Font_GetStyle(wxd_Font_t* self);
+WXD_EXPORTED int wxd_Font_GetWeight(wxd_Font_t* self);
+WXD_EXPORTED bool wxd_Font_GetUnderlined(wxd_Font_t* self);
+WXD_EXPORTED int wxd_Font_GetFaceName(wxd_Font_t* self, char* buffer, int buffer_len);
+WXD_EXPORTED bool wxd_Font_IsOk(wxd_Font_t* self);
 
 // --- wxTextEntryDialog ---
 typedef struct wxd_TextEntryDialog wxd_TextEntryDialog_t;
@@ -1057,9 +1085,6 @@ WXD_EXPORTED wxd_TextEntryDialog_t* wxd_TextEntryDialog_Create(
     int width, int height);
 
 WXD_EXPORTED int wxd_TextEntryDialog_GetValue(wxd_TextEntryDialog_t* self, char* buffer, int bufLen);
-
-// Setters (optional)
-// WXD_EXPORTED void wxd_TextEntryDialog_SetValue(wxd_TextEntryDialog_t* self, const char* value);
 
 #ifdef __cplusplus
 }

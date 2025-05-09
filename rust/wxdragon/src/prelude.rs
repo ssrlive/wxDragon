@@ -193,4 +193,13 @@ pub use crate::dialogs::message_dialog::{
 };
 pub use crate::dialogs::Dialog;
 pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
-pub use crate::dialogs::colour_dialog::ColourDialog; 
+pub use crate::dialogs::colour_dialog::ColourDialog;
+pub use crate::dialogs::font_dialog::FontDialog;
+
+// ADDED: Font
+pub use crate::font::{
+    Font, FONTFAMILY_DEFAULT, FONTFAMILY_DECORATIVE, FONTFAMILY_ROMAN, FONTFAMILY_SCRIPT,
+    FONTFAMILY_SWISS, FONTFAMILY_MODERN, FONTFAMILY_TELETYPE, FONTSTYLE_NORMAL,
+    FONTSTYLE_ITALIC, FONTSTYLE_SLANT, FONTWEIGHT_NORMAL, FONTWEIGHT_LIGHT, FONTWEIGHT_BOLD
+};
+pub use crate::font_data::FontData; 

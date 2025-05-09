@@ -4,6 +4,7 @@ use wxdragon::id;
 use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
 use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
 use wxdragon::dialogs::colour_dialog::ColourDialog;
+use wxdragon::dialogs::font_dialog::FontDialog;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {
@@ -17,6 +18,8 @@ pub struct DialogTabControls {
     pub text_entry_status_label: StaticText,
     pub choose_colour_btn: Button,
     pub colour_dialog_status_label: StaticText,
+    pub font_button: Button,
+    pub font_sample_text: StaticText,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -75,6 +78,19 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .with_label("Colour Dialog Status: -")
         .build();
 
+    // Add FontDialog button after the ColourDialog
+    // Create button to choose a font
+    let font_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Font Dialog:")
+        .build();
+    let font_button = Button::builder(&dialog_panel)
+        .with_label("Choose Font...")
+        .build();
+    font_button.set_tooltip("Click to show a font picker dialog.");
+    let font_sample_text = StaticText::builder(&dialog_panel)
+        .with_label("Font Sample")
+        .build();
+
     // Layout using Main Vertical BoxSizer and child FlexGridSizer
     let main_sizer = BoxSizer::builder(VERTICAL).build();
     let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
@@ -117,6 +133,14 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     colour_dialog_sizer.add(&colour_dialog_status_label, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&colour_dialog_sizer, 1, EXPAND, 0);
 
+    // Add FontDialog controls
+    grid_sizer.add(&font_dialog_label, 0, label_flags, 0);
+    let font_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
+    font_dialog_sizer.add(&font_button, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    font_dialog_sizer.add_spacer(10);
+    font_dialog_sizer.add(&font_sample_text, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&font_dialog_sizer, 1, EXPAND, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
 
@@ -133,6 +157,8 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         text_entry_status_label,
         choose_colour_btn,
         colour_dialog_status_label,
+        font_button,
+        font_sample_text,
     }
 }
 
@@ -274,6 +300,39 @@ impl DialogTabControls {
                 println!("Colour Selection Cancelled.");
             }
             println!("Colour Dialog Closed.");
+        });
+        
+        // Add a handler for the font button
+        let frame_parent_font_ctx = frame.clone();
+        let font_sample_text_clone = self.font_sample_text.clone();
+        self.font_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Choose Font button clicked.");
+            
+            // Create the dialog without a specific FontData
+            let dialog = FontDialog::builder(Some(&frame_parent_font_ctx))
+                .with_title("Choose a font")
+                .build();
+            
+            // Show the dialog
+            if dialog.show_modal() == id::ID_OK {
+                // Get the selected font
+                if let Some(font) = dialog.get_font() {
+                    let font_info = format!("Font: {} ({} pt, {})",
+                        font.get_face_name(),
+                        font.get_point_size(),
+                        if font.is_underlined() { "underlined" } else { "not underlined" }
+                    );
+                    font_sample_text_clone.set_label(&font_info);
+                    println!("Selected {}", font_info);
+                    // Ideally, we would also set the font on the sample text,
+                    // but that would require more bindings not yet implemented
+                } else {
+                    font_sample_text_clone.set_label("No font selected");
+                    println!("No font was returned by the dialog");
+                }
+            } else {
+                println!("Font Dialog Cancelled.");
+            }
         });
     }
 } 
