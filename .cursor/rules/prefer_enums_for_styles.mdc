@@ -1,0 +1,86 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule Defintion:
+
+Name: 
+
+Description: When defining a set of related constants, especially those used for style flags, widget options, or art identifiers, prefer using strongly-typed enums over individual `pub const` definitions. This improves type safety, discoverability, and code clarity.
+
+## Rule Example:
+
+Bad:
+```rust
+// rust/wxdragon/src/widgets/some_widget.rs
+pub const OPTION_A: i64 = 0x01;
+pub const OPTION_B: i64 = 0x02;
+pub const OPTION_DEFAULT: i64 = OPTION_A;
+
+// Usage
+SomeWidget::builder().with_style(OPTION_A | OPTION_B).build();
+```
+
+Good:
+```rust
+// rust/wxdragon/src/widgets/some_widget.rs
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)] // Or appropriate underlying type
+pub enum SomeWidgetStyle {
+    Default = 0x01, // Or specific FFI constant like ffi::WXD_OPTION_A
+    OptionA = 0x01, // Or ffi::WXD_OPTION_A
+    OptionB = 0x02, // Or ffi::WXD_OPTION_B
+    // ... other variants
+}
+
+impl SomeWidgetStyle {
+    pub fn bits(self) -> i64 { // Or appropriate underlying type
+        self as i64
+    }
+}
+
+impl Default for SomeWidgetStyle {
+    fn default() -> Self {
+        SomeWidgetStyle::Default
+    }
+}
+
+impl std::ops::BitOr for SomeWidgetStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl std::ops::BitOrAssign for SomeWidgetStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}
+
+// Update builder
+// pub struct SomeWidgetBuilder { style: i64, ... }
+// pub fn with_style(mut self, style: i64) -> Self { ... }
+// becomes
+// pub struct SomeWidgetBuilder { style: SomeWidgetStyle, ... }
+// pub fn with_style(mut self, style: SomeWidgetStyle) -> Self { ... }
+// In build(): self.style.bits()
+
+// Usage
+SomeWidget::builder().with_style(SomeWidgetStyle::OptionA | SomeWidgetStyle::OptionB).build();
+```
+
+## Notes and Guidelines:
+
+*   **Underlying Type:** Use `#[repr(i64)]` (or `i32`, `u32`, etc.) if the enum values need to map to specific integer values for FFI or bitwise operations.
+*   **FFI Constants:** If the enum variants correspond to FFI constants (e.g., `ffi::WXD_XXX`), use those directly as discriminant values: `MyStyle::Variant = ffi::WXD_MY_VARIANT;`.
+*   **`bits()` Method:** Provide a `bits(&self) -> UnderlyingType` method to easily get the raw integer value when calling FFI functions.
+*   **`Default` Trait:** Implement `Default` for the enum, usually mapping to a common default style (e.g., `0` or a specific default FFI constant).
+*   **Bitwise Operations:** For style flags that can be combined, implement `std::ops::BitOr` and `std::ops::BitOrAssign`.
+*   **Builder Integration:** Update associated widget builders to use the new enum type for their style fields and `with_style()` methods. The `build()` method should then use the enum's `bits()` method to pass the value to the FFI creation function.
+*   **Remove Old Constants:** Once the enum is in place and used, remove the old `pub const` definitions from the widget's module and update any re-exports in `prelude.rs` or `widgets/mod.rs`.
+*   **Clarity over Raw Values:** Prefer enum variants in client code over raw integer values or `ffi::WXD_XXX` constants directly.
+*   **Art Identifiers:** This pattern also applies to sets of string constants, like those in [`rust/wxdragon/src/art_provider.rs`](mdc:rust/wxdragon/src/art_provider.rs), which were refactored into `ArtId` and `ArtClient` enums.
+
+This approach enhances the API by making style and option parameters more explicit, self-documenting, and less prone to errors from using incorrect integer values.
