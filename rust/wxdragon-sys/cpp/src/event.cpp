@@ -20,6 +20,7 @@
 #include <wx/srchctrl.h> // ADDED: For wxEVT_SEARCHCTRL_SEARCH_BTN, wxEVT_SEARCHCTRL_CANCEL_BTN
 #include <wx/hyperlink.h> // ADDED: For wxHyperlinkEvent
 #include <wx/calctrl.h> // ADDED: For wxCalendarCtrl events
+#include <wx/filepicker.h> // ADDED: For wxEVT_FILEPICKER_CHANGED
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -534,6 +535,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_SCROLL_CHANGED, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_FILEPICKER_CHANGED:
+            wx_handler->Bind(wxEVT_FILEPICKER_CHANGED, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -725,6 +730,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_SCROLL_THUMBTRACK: return wxEVT_SCROLL_THUMBTRACK;
         case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE: return wxEVT_SCROLL_THUMBRELEASE;
         case WXD_EVENT_TYPE_SCROLL_CHANGED: return wxEVT_SCROLL_CHANGED;
+        case WXD_EVENT_TYPE_FILEPICKER_CHANGED: return wxEVT_FILEPICKER_CHANGED;
 
         default:
             // Optionally log an error or return a specific wxEventType to indicate failure

@@ -1,7 +1,7 @@
 #ifndef WXD_PICKERS_H
 #define WXD_PICKERS_H
 
-#include "../wxd_types.h"
+#include "../wxdragon.h"
 
 // --- ColourPickerCtrl ---
 WXD_EXPORTED wxd_ColourPickerCtrl_t* wxd_ColourPickerCtrl_Create(wxd_Window_t* parent, wxd_Id id, wxd_Colour_t initial_colour, wxd_Point pos, wxd_Size size, wxd_Style_t style);
@@ -14,5 +14,19 @@ WXD_EXPORTED wxd_DateTime_t wxd_DatePickerCtrl_GetValue(wxd_DatePickerCtrl_t* se
 WXD_EXPORTED void wxd_DatePickerCtrl_SetValue(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt);
 WXD_EXPORTED bool wxd_DatePickerCtrl_GetRange(wxd_DatePickerCtrl_t* self, wxd_DateTime_t* dt1, wxd_DateTime_t* dt2);
 WXD_EXPORTED void wxd_DatePickerCtrl_SetRange(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt1, const wxd_DateTime_t* dt2);
+
+// --- FilePickerCtrl ---
+WXD_EXPORTED wxd_FilePickerCtrl_t* wxd_FilePickerCtrl_Create(
+    wxd_Window_t* parent, 
+    wxd_Id id, 
+    const char* message, 
+    const char* wildcard, 
+    const char* path, 
+    wxd_Point pos, 
+    wxd_Size size, 
+    wxd_Style_t style
+);
+WXD_EXPORTED const char* wxd_FilePickerCtrl_GetPath(wxd_FilePickerCtrl_t* self);
+WXD_EXPORTED void wxd_FilePickerCtrl_SetPath(wxd_FilePickerCtrl_t* self, const char* path);
 
 #endif // WXD_PICKERS_H 

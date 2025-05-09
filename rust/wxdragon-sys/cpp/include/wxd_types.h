@@ -93,6 +93,7 @@ typedef enum {
     WXD_EVENT_TYPE_SCROLL_THUMBTRACK = 58,
     WXD_EVENT_TYPE_SCROLL_THUMBRELEASE = 59,
     WXD_EVENT_TYPE_SCROLL_CHANGED = 60,
+    WXD_EVENT_TYPE_FILEPICKER_CHANGED = 61,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -166,6 +167,7 @@ typedef struct wxd_FontDialog wxd_FontDialog_t;
 typedef struct wxd_TextEntryDialog wxd_TextEntryDialog_t;
 typedef struct wxd_ProgressDialog wxd_ProgressDialog_t;
 typedef struct wxd_AnimationCtrl wxd_AnimationCtrl_t;
+typedef struct wxd_FilePickerCtrl_t wxd_FilePickerCtrl_t;
 
 typedef struct {
     short day;

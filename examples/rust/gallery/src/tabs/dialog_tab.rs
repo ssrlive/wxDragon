@@ -24,6 +24,10 @@ pub struct DialogTabControls {
     pub font_button: Button,
     pub font_sample_text: StaticText,
     pub progress_button: Button,
+    // Added for FilePickerCtrl
+    pub file_picker_ctrl_label: StaticText,
+    pub file_picker_ctrl: FilePickerCtrl,
+    pub file_picker_status_label: StaticText,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -104,17 +108,31 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
     progress_button.set_tooltip("Click to show a progress dialog demonstration.");
 
+    // FilePickerCtrl section
+    let file_picker_ctrl_label = StaticText::builder(&dialog_panel)
+        .with_label("FilePickerCtrl:")
+        .build();
+    let file_picker_ctrl = FilePickerCtrl::builder(&dialog_panel)
+        .with_message("Select a file with FilePickerCtrl")
+        .with_wildcard("Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*")
+        .with_style(FLP_OPEN | FLP_FILE_MUST_EXIST)
+        .build();
+    file_picker_ctrl.set_tooltip("Select a file to see its path below.");
+    let file_picker_status_label = StaticText::builder(&dialog_panel)
+        .with_label("FilePickerCtrl Path: -")
+        .build();
+
     // Layout using Main Vertical BoxSizer and child FlexGridSizer
     let main_sizer = BoxSizer::builder(VERTICAL).build();
     let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
-    let control_flags = EXPAND;
+    let control_flags = EXPAND; // General flag for controls spanning the column
 
-    let grid_sizer = FlexGridSizer::builder(0, 2)
+    let grid_sizer = FlexGridSizer::builder(0, 2) // 0 rows means flexible, 2 columns
         .with_vgap(5)
         .with_hgap(5)
         .build();
-    grid_sizer.add_growable_col(0, 1);
-    grid_sizer.add_growable_col(1, 3);
+    grid_sizer.add_growable_col(0, 1); // Label column (flex factor 1)
+    grid_sizer.add_growable_col(1, 3); // Control column (flex factor 3)
 
     // Add Message Dialog controls
     grid_sizer.add(&show_msg_dialog_label, 0, label_flags, 0);
@@ -160,10 +178,16 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     progress_dialog_sizer.add(&progress_button, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
     grid_sizer.add_sizer(&progress_dialog_sizer, 1, EXPAND, 0);
 
+    // Add FilePickerCtrl controls
+    grid_sizer.add(&file_picker_ctrl_label, 0, label_flags, 0);
+    let fpc_sizer = BoxSizer::builder(HORIZONTAL).build();
+    fpc_sizer.add(&file_picker_ctrl, 1, EXPAND | ALL, 2);
+    fpc_sizer.add_spacer(5); // Small spacer
+    fpc_sizer.add(&file_picker_status_label, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&fpc_sizer, 1, EXPAND, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
-
-    // Event bindings moved to bind_events method
 
     DialogTabControls {
         panel: dialog_panel,
@@ -179,6 +203,10 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         font_button,
         font_sample_text,
         progress_button,
+        // Added for FilePickerCtrl
+        file_picker_ctrl_label,
+        file_picker_ctrl,
+        file_picker_status_label,
     }
 }
 
@@ -271,7 +299,7 @@ impl DialogTabControls {
                     "Enter some text:",
                     "Text Input",
                 )
-                .with_default_value("Default text")
+                .with_default_value("Default text") // Assuming with_default_value is correct for original
                 .build();
                 if dialog.show_modal() == id::ID_OK {
                     let entered_value = dialog.get_value().unwrap_or_else(|| "<empty>".to_string());
@@ -292,7 +320,7 @@ impl DialogTabControls {
                     "Enter your password:",
                     "Password Input",
                 )
-                .password()
+                .password() // Assuming .password() is correct for original
                 .build();
                 if dialog.show_modal() == id::ID_OK {
                     te_status_pass_clone
@@ -309,14 +337,10 @@ impl DialogTabControls {
         self.choose_colour_btn
             .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
                 println!("Choose Colour button clicked.");
-
-                // Create the dialog without custom initial data
                 let dialog = ColourDialog::builder(Some(&frame_parent_colour_ctx))
-                    .with_title("Choose a colour")
+                    .with_title("Choose a colour") // Assuming this is correct for original
                     .build();
-
                 if dialog.show_modal() == id::ID_OK {
-                    // Get the chosen colour
                     if let Some(colour) = dialog.get_colour() {
                         let status = format!(
                             "Selected colour: RGB({}, {}, {})",
@@ -341,15 +365,10 @@ impl DialogTabControls {
         self.font_button
             .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
                 println!("Choose Font button clicked.");
-
-                // Create the dialog without a specific FontData
                 let dialog = FontDialog::builder(Some(&frame_parent_font_ctx))
-                    .with_title("Choose a font")
+                    .with_title("Choose a font") // Assuming this is correct for original
                     .build();
-
-                // Show the dialog
                 if dialog.show_modal() == id::ID_OK {
-                    // Get the selected font
                     if let Some(font) = dialog.get_font() {
                         let font_info = format!(
                             "Font: {} ({} pt, {})",
@@ -363,8 +382,6 @@ impl DialogTabControls {
                         );
                         font_sample_text_clone.set_label(&font_info);
                         println!("Selected {}", font_info);
-                        // Ideally, we would also set the font on the sample text,
-                        // but that would require more bindings not yet implemented
                     } else {
                         font_sample_text_clone.set_label("No font selected");
                         println!("No font was returned by the dialog");
@@ -379,55 +396,57 @@ impl DialogTabControls {
         self.progress_button
             .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
                 println!("Show Progress Dialog button clicked.");
-
-                // Create a progress dialog with a range of 0-100
-                let dialog = ProgressDialog::builder(
+                let dialog = ProgressDialog::builder( // Assuming original signature
                     Some(&frame_parent_progress_ctx),
                     "Progress Demonstration",
                     "Processing items...",
-                    100,
+                    100, // Max value
                 )
-                .can_abort() // Add Cancel button
-                .can_skip() // Add Skip button
-                .show_elapsed_time() // Show elapsed time
-                .show_remaining_time() // Show estimated remaining time
+                .can_abort()
+                .can_skip()
+                .show_elapsed_time()
+                .show_remaining_time()
                 .build();
-
-                // Process 100 items with a small delay between each
                 let mut continue_progress = true;
                 for i in 0..=100 {
                     if !continue_progress {
                         break;
                     }
-
-                    // Artificial delay to simulate processing
                     thread::sleep(Duration::from_millis(50));
-
-                    // Update progress dialog with new value and custom message
                     let message = if i % 10 == 0 && i > 0 {
                         Some(format!("Processed {} items...", i))
                     } else {
                         None
                     };
-
-                    // Use update_with_skip instead of update to get skip status
                     let (should_continue, was_skipped) =
                         dialog.update_with_skip(i, message.as_deref());
                     continue_progress = should_continue;
-
-                    // Log when the skip button is clicked
                     if was_skipped {
                         println!("Progress operation was skipped at step {}.", i);
                     }
-
-                    // Check if user clicked Cancel
                     if dialog.was_cancelled() {
                         println!("Progress operation was cancelled by user.");
                         break;
                     }
                 }
-
                 println!("Progress Dialog Closed.");
             });
+
+        // Event handler for FilePickerCtrl
+        let fpc_status_label_clone = self.file_picker_status_label.clone();
+        let file_picker_ctrl_clone = self.file_picker_ctrl.clone(); // Clone for the closure
+        self.file_picker_ctrl.bind(EventType::FILE_PICKER_CHANGED, move |_event: Event| {
+            let path_string: String = file_picker_ctrl_clone.get_path(); // get_path() returns String
+            
+            if !path_string.is_empty() {
+                let status = format!("Selected Path: {}", path_string);
+                fpc_status_label_clone.set_label(&status);
+                println!("FilePickerCtrl Path Changed: {}", path_string);
+            } else {
+                // This case means get_path() returned an empty string (e.g., no selection or cleared)
+                fpc_status_label_clone.set_label("FilePickerCtrl: No path selected or path is empty.");
+                println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
+            }
+        });
     }
 }

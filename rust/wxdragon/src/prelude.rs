@@ -200,3 +200,6 @@ pub use crate::font_data::FontData;
 
 // ADDED: ProgressDialog
 pub use crate::dialogs::progress_dialog::ProgressDialog;
+
+// ADDED: FilePickerCtrl, its builder, and style constants
+pub use crate::widgets::{FilePickerCtrl, FilePickerCtrlBuilder, FLP_DEFAULT_STYLE, FLP_OPEN, FLP_SAVE, FLP_OVERWRITE_PROMPT, FLP_FILE_MUST_EXIST, FLP_CHANGE_DIR};

@@ -141,6 +141,8 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_SCROLL_THUMBRELEASE);
     pub const SCROLL_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_SCROLL_CHANGED);
+    pub const FILE_PICKER_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_FILEPICKER_CHANGED);
     // Add others as needed
 
     /// Get the underlying stable C enum value.
