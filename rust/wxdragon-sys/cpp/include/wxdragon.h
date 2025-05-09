@@ -1022,13 +1022,27 @@ WXD_EXPORTED void wxd_FileDialog_GetFilenames(wxd_FileDialog_t* self, wxd_ArrayS
 WXD_EXPORTED int wxd_FileDialog_GetDirectory(wxd_FileDialog_t* self, char* buffer, int bufLen);
 WXD_EXPORTED int wxd_FileDialog_GetFilterIndex(wxd_FileDialog_t* self);
 
+// --- wxColourData ---
+typedef struct wxd_ColourData wxd_ColourData_t;
+
+WXD_EXPORTED wxd_ColourData_t* wxd_ColourData_Create(void);
+WXD_EXPORTED void wxd_ColourData_SetColour(wxd_ColourData_t* self, wxd_Colour_t colour);
+WXD_EXPORTED wxd_Colour_t wxd_ColourData_GetColour(wxd_ColourData_t* self);
+WXD_EXPORTED void wxd_ColourData_Destroy(wxd_ColourData_t* self);
+
+// --- wxColourDialog ---
+typedef struct wxd_ColourDialog wxd_ColourDialog_t;
+
+WXD_EXPORTED wxd_ColourDialog_t* wxd_ColourDialog_Create(
+    wxd_Window_t* parent,
+    const char* title,
+    wxd_ColourData_t* data);
+
+WXD_EXPORTED wxd_ColourData_t* wxd_ColourDialog_GetColourData(wxd_ColourDialog_t* self);
+
 // Setters (optional for now, can be added later if needed by Rust wrapper)
 // WXD_EXPORTED void wxd_FileDialog_SetMessage(wxd_FileDialog_t* self, const char* message);
 // WXD_EXPORTED void wxd_FileDialog_SetPath(wxd_FileDialog_t* self, const char* path);
-// WXD_EXPORTED void wxd_FileDialog_SetDirectory(wxd_FileDialog_t* self, const char* directory);
-// WXD_EXPORTED void wxd_FileDialog_SetFilename(wxd_FileDialog_t* self, const char* name);
-// WXD_EXPORTED void wxd_FileDialog_SetWildcard(wxd_FileDialog_t* self, const char* wildCard);
-// WXD_EXPORTED void wxd_FileDialog_SetFilterIndex(wxd_FileDialog_t* self, int filterIndex);
 
 // --- wxTextEntryDialog ---
 typedef struct wxd_TextEntryDialog wxd_TextEntryDialog_t;

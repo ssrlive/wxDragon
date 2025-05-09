@@ -3,6 +3,7 @@ use wxdragon::id;
 
 use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
 use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+use wxdragon::dialogs::colour_dialog::ColourDialog;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {
@@ -14,6 +15,8 @@ pub struct DialogTabControls {
     pub get_text_btn: Button,
     pub get_password_btn: Button,
     pub text_entry_status_label: StaticText,
+    pub choose_colour_btn: Button,
+    pub colour_dialog_status_label: StaticText,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -59,6 +62,18 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let text_entry_status_label = StaticText::builder(&dialog_panel)
         .with_label("Text Entry Status: -")
         .build();
+    
+    // Colour Dialog section
+    let colour_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Colour Dialog:")
+        .build();
+    let choose_colour_btn = Button::builder(&dialog_panel)
+        .with_label("Choose Colour...")
+        .build();
+    choose_colour_btn.set_tooltip("Click to show a colour picker dialog.");
+    let colour_dialog_status_label = StaticText::builder(&dialog_panel)
+        .with_label("Colour Dialog Status: -")
+        .build();
 
     // Layout using Main Vertical BoxSizer and child FlexGridSizer
     let main_sizer = BoxSizer::builder(VERTICAL).build();
@@ -93,6 +108,14 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     text_entry_btns_sizer.add_spacer(10);
     text_entry_btns_sizer.add(&text_entry_status_label, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&text_entry_btns_sizer, 1, EXPAND, 0);
+    
+    // Add Colour Dialog controls
+    grid_sizer.add(&colour_dialog_label, 0, label_flags, 0);
+    let colour_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
+    colour_dialog_sizer.add(&choose_colour_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    colour_dialog_sizer.add_spacer(10);
+    colour_dialog_sizer.add(&colour_dialog_status_label, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&colour_dialog_sizer, 1, EXPAND, 0);
 
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
@@ -108,6 +131,8 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         get_text_btn,
         get_password_btn,
         text_entry_status_label,
+        choose_colour_btn,
+        colour_dialog_status_label,
     }
 }
 
@@ -220,6 +245,35 @@ impl DialogTabControls {
                 te_status_pass_clone.set_label("Password Entry Cancelled.");
             }
             println!("Password Entry Dialog Closed.");
+        });
+        
+        // Event handler for Colour Dialog
+        let colour_status_label_clone = self.colour_dialog_status_label.clone();
+        let frame_parent_colour_ctx = frame.clone();
+        self.choose_colour_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Choose Colour button clicked.");
+            
+            // Create the dialog without custom initial data
+            let dialog = ColourDialog::builder(Some(&frame_parent_colour_ctx))
+                .with_title("Choose a colour")
+                .build();
+                
+            if dialog.show_modal() == id::ID_OK {
+                // Get the chosen colour
+                if let Some(colour) = dialog.get_colour() {
+                    let status = format!("Selected colour: RGB({}, {}, {})", 
+                        colour.r, colour.g, colour.b);
+                    colour_status_label_clone.set_label(&status);
+                    println!("{}", status);
+                } else {
+                    colour_status_label_clone.set_label("Colour Dialog: No colour returned.");
+                    println!("Colour Dialog: No colour returned.");
+                }
+            } else {
+                colour_status_label_clone.set_label("Colour Selection Cancelled.");
+                println!("Colour Selection Cancelled.");
+            }
+            println!("Colour Dialog Closed.");
         });
     }
 } 
