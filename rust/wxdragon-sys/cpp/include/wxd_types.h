@@ -96,6 +96,9 @@ typedef enum {
     WXD_EVENT_TYPE_FILEPICKER_CHANGED = 61,
     WXD_EVENT_TYPE_DIRPICKER_CHANGED = 62,
     WXD_EVENT_TYPE_FONTPICKER_CHANGED = 63,
+    WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK = 64,
+    WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED = 65,
+    WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION = 66,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -172,6 +175,7 @@ typedef struct wxd_AnimationCtrl wxd_AnimationCtrl_t;
 typedef struct wxd_FilePickerCtrl_t wxd_FilePickerCtrl_t;
 typedef struct wxd_DirPickerCtrl_t wxd_DirPickerCtrl_t;
 typedef struct wxd_FontPickerCtrl_t wxd_FontPickerCtrl_t;
+typedef struct wxd_NotificationMessage_t wxd_NotificationMessage_t;
 
 typedef struct {
     short day;

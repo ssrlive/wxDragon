@@ -36,6 +36,9 @@ pub struct DialogTabControls {
     pub font_picker_ctrl_label: StaticText,
     pub font_picker_ctrl: FontPickerCtrl,
     pub font_picker_status_label: StaticText,
+    // Added for NotificationMessage
+    pub show_notification_btn: Button,
+    pub notification_status_label: StaticText,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -233,6 +236,25 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     font_pc_sizer.add(&font_picker_status_label, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&font_pc_sizer, 1, EXPAND, 0);
 
+    // --- NotificationMessage ---
+    let notification_label = StaticText::builder(&dialog_panel)
+        .with_label("Notification:")
+        .build();
+    let show_notification_btn = Button::builder(&dialog_panel)
+        .with_label("Show Notification")
+        .build();
+    show_notification_btn.set_tooltip("Click to show a notification message with actions.");
+    let notification_status_label = StaticText::builder(&dialog_panel)
+        .with_label("Notification Status: -")
+        .build();
+
+    grid_sizer.add(&notification_label, 0, label_flags, 0);
+    let notification_sizer = BoxSizer::builder(HORIZONTAL).build();
+    notification_sizer.add(&show_notification_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    notification_sizer.add_spacer(10);
+    notification_sizer.add(&notification_status_label, 1, EXPAND | ALL, 2);
+    grid_sizer.add_sizer(&notification_sizer, 1, EXPAND, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
 
@@ -262,6 +284,9 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         font_picker_ctrl_label,
         font_picker_ctrl,
         font_picker_status_label,
+        // NotificationMessage
+        show_notification_btn,
+        notification_status_label,
     }
 }
 
@@ -528,7 +553,7 @@ impl DialogTabControls {
 
         // Event handler for FontPickerCtrl
         let font_pc_status_label_clone = self.font_picker_status_label.clone();
-        let font_picker_ctrl_clone = self.font_picker_ctrl.clone();
+        let font_picker_ctrl_clone = self.font_picker_ctrl.clone(); // Clone for the closure
         self.font_picker_ctrl.bind(EventType::FONT_PICKER_CHANGED, move |_event: Event| {
             if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
                 let status = format!("Selected Font: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
@@ -536,12 +561,70 @@ impl DialogTabControls {
                 // Apply the selected font to the status label
                 font_pc_status_label_clone.set_font(&selected_font);
                 println!("FontPickerCtrl Font Changed: {} pt {}", selected_font.get_point_size(), selected_font.get_face_name());
-                // The selected_font (which owns the C++ wxFont) will be dropped at the end of this scope,
-                // but the label should have had its font properties updated by wxWidgets.
             } else {
                 font_pc_status_label_clone.set_label("FontPickerCtrl: No font selected or font is invalid.");
                 println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");
             }
+        });
+
+        // --- NotificationMessage Events ---
+        let notification_status_label_clone = self.notification_status_label.clone();
+        let panel_for_notif_handler = self.panel.clone(); // Clone for notification related event handlers
+        let frame_for_notif_parent = frame.clone(); // Clone the frame for the notification parent
+
+        self.show_notification_btn.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            let notif_builder = NotificationMessage::builder()
+                .with_title("Hello from wxDragon!")
+                .with_message("This is a notification with actions.")
+                .with_flags(ICON_INFORMATION); // Use one of the imported constants
+
+            match notif_builder.build() {
+                Ok(notif_msg) => { // Make notif_msg mutable to call set_parent
+                    // Set the main frame as the parent
+                    if let Err(e) = notif_msg.set_parent(Some(&frame_for_notif_parent)) {
+                        println!("Error: Failed to set notification parent: {:?}", e);
+                    }
+
+                    if let Err(e) = notif_msg.add_action(101, "Action 1") {
+                        println!("Error: Failed to add action 1: {:?}", e);
+                    }
+                    if let Err(e) = notif_msg.add_action(102, "Action 2") {
+                        println!("Error: Failed to add action 2: {:?}", e);
+                    }
+
+                    if notif_msg.show(TIMEOUT_NEVER) { // Changed to TIMEOUT_NEVER
+                        notification_status_label_clone.set_label("Notification shown (TIMEOUT_NEVER).");
+                        println!("Info: Notification shown (TIMEOUT_NEVER).");
+                    } else {
+                        notification_status_label_clone.set_label("Failed to show notification.");
+                        println!("Error: Failed to show notification.");
+                    }
+                }
+                Err(e) => {
+                    notification_status_label_clone.set_label("Failed to build notification.");
+                    println!("Error: Failed to build notification: {:?}", e);
+                }
+            }
+        });
+
+        // Bind notification events to the panel
+        let notif_status_click_clone = self.notification_status_label.clone();
+        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_CLICK, move |_event| {
+            notif_status_click_clone.set_label("Notification: Clicked!");
+            println!("Info: Notification Clicked");
+        });
+
+        let notif_status_dismiss_clone = self.notification_status_label.clone();
+        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_DISMISSED, move |_event| {
+            notif_status_dismiss_clone.set_label("Notification: Dismissed!");
+            println!("Info: Notification Dismissed");
+        });
+
+        let notif_status_action_clone = self.notification_status_label.clone();
+        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_ACTION, move |event| {
+            let action_id = event.get_id(); // wxCommandEvent::GetId()
+            notif_status_action_clone.set_label(&format!("Notification: Action {} clicked!", action_id));
+            println!("Info: Notification Action {} clicked", action_id);
         });
     }
 }

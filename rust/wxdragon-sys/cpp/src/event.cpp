@@ -22,6 +22,7 @@
 #include <wx/calctrl.h> // ADDED: For wxCalendarCtrl events
 #include <wx/filepicker.h> // ADDED: For wxEVT_FILEPICKER_CHANGED and wxEVT_DIRPICKER_CHANGED
 #include <wx/fontpicker.h> // ADDED: For wxEVT_FONTPICKER_CHANGED
+#include <wx/notifmsg.h> // For wxNotificationMessage events
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -548,6 +549,18 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_FONTPICKER_CHANGED, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK:
+            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED:
+            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_DISMISSED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION:
+            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_ACTION, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -742,6 +755,9 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_FILEPICKER_CHANGED: return wxEVT_FILEPICKER_CHANGED;
         case WXD_EVENT_TYPE_DIRPICKER_CHANGED: return wxEVT_DIRPICKER_CHANGED;
         case WXD_EVENT_TYPE_FONTPICKER_CHANGED: return wxEVT_FONTPICKER_CHANGED;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK: return wxEVT_NOTIFICATION_MESSAGE_CLICK;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED: return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION: return wxEVT_NOTIFICATION_MESSAGE_ACTION;
 
         default:
             // Optionally log an error or return a specific wxEventType to indicate failure

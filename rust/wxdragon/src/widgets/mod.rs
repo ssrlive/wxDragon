@@ -50,6 +50,9 @@ pub use dir_picker_ctrl::*;
 mod font_picker_ctrl;
 pub use font_picker_ctrl::*;
 
+pub mod notification_message;
+pub use notification_message::*;
+
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
 pub use animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder};

@@ -147,6 +147,14 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DIRPICKER_CHANGED);
     pub const FONT_PICKER_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_FONTPICKER_CHANGED);
+
+    pub const NOTIFICATION_MESSAGE_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK);
+    pub const NOTIFICATION_MESSAGE_DISMISSED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED);
+    pub const NOTIFICATION_MESSAGE_ACTION: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION);
+
     // Add others as needed
 
     /// Get the underlying stable C enum value.

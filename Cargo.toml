@@ -19,8 +19,6 @@ description = "Cross-platform GUI development with wxWidgets and Rust."
 keywords = ["gui", "wxwidgets", "ui", "cross-platform"]
 categories = ["gui", "external-ffi-bindings"]
 readme = "README.md" # Consider adding if you have a good workspace-level README
-
-[workspace.dependencies]
 # Common dependencies for wxdragon and examples could go here if needed,
 # but for now, wxdragon itself will be a primary dependency for examples.
 # wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this. 

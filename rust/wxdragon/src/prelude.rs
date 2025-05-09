@@ -205,3 +205,10 @@ pub use crate::dialogs::progress_dialog::ProgressDialog;
 pub use crate::widgets::{FilePickerCtrl, FilePickerCtrlBuilder, FLP_DEFAULT_STYLE, FLP_OPEN, FLP_SAVE, FLP_OVERWRITE_PROMPT, FLP_FILE_MUST_EXIST, FLP_CHANGE_DIR, FLP_USE_TEXTCTRL};
 pub use crate::widgets::{DirPickerCtrl, DirPickerCtrlBuilder, DIRP_DEFAULT_STYLE, DIRP_DIR_MUST_EXIST, DIRP_CHANGE_DIR, DIRP_USE_TEXTCTRL};
 pub use crate::widgets::{FontPickerCtrl, FontPickerCtrlBuilder, FNTP_DEFAULT_STYLE, FNTP_USE_TEXTCTRL, FNTP_FONTDESC_AS_LABEL, FNTP_USEFONT_FOR_LABEL};
+
+// NotificationMessage
+pub use crate::widgets::notification_message::{
+    NotificationMessage, NotificationMessageBuilder,
+    // ICON_INFORMATION, ICON_WARNING, ICON_ERROR, ICON_QUESTION, // Removed to avoid conflict with message_dialog exports
+    TIMEOUT_AUTO, TIMEOUT_NEVER,
+};

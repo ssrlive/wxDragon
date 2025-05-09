@@ -10,10 +10,6 @@ WXD_EXPORTED wxd_Panel_t* wxd_Panel_Create(wxd_Window_t* parent, wxd_Id id, wxd_
 WXD_EXPORTED wxd_StaticBox_t* wxd_StaticBox_Create(wxd_Window_t* parent, wxd_Id id, const char* label, wxd_Point pos, wxd_Size size, wxd_Style_t style);
 
 // --- Notebook ---
-WXD_EXPORTED wxd_Notebook_t* wxd_Notebook_Create(wxd_Window_t* parent, wxd_Id id, wxd_Point pos, wxd_Size size, wxd_Style_t style);
-WXD_EXPORTED bool wxd_Notebook_AddPage(wxd_Notebook_t* self, wxd_Window_t* page, const char* text, bool select);
-WXD_EXPORTED int wxd_Notebook_GetSelection(wxd_Notebook_t* self);
-WXD_EXPORTED int wxd_Notebook_SetSelection(wxd_Notebook_t* self, int page);
 
 // --- SplitterWindow ---
 WXD_EXPORTED wxd_SplitterWindow_t* wxd_SplitterWindow_Create(wxd_Window_t* parent, wxd_Id id, wxd_Point pos, wxd_Size size, wxd_Style_t style);

@@ -2,7 +2,7 @@
 #define WXDRAGON_H
 
 // Define WXDRAGON_API for export/import
-#define WXDRAGON_API
+        #define WXDRAGON_API
 
 // Define export macro (used by all sub-headers indirectly via wxd_types.h or if they need it themselves)
 #ifndef WXD_EXPORTED
@@ -31,7 +31,9 @@ extern "C" {
 #include "widgets/wxd_controls.h"
 #include "widgets/wxd_choices.h"
 #include "widgets/wxd_containers.h"
+#include "widgets/wxd_notebook.h"
 #include "widgets/wxd_pickers.h"
+#include "widgets/wxd_adv_ui.h" // For wxNotificationMessage etc.
 #include "widgets/wxd_misc_widgets.h"
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"
