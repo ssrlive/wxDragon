@@ -7,6 +7,7 @@ pub mod file_dialog;
 pub mod text_entry_dialog;
 pub mod colour_dialog;
 pub mod font_dialog;
+pub mod progress_dialog;
 
 // Opaque C pointer for wxDialog
 pub type DialogPtr = *mut ffi::wxd_Dialog;

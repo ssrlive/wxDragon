@@ -202,4 +202,7 @@ pub use crate::font::{
     FONTFAMILY_SWISS, FONTFAMILY_MODERN, FONTFAMILY_TELETYPE, FONTSTYLE_NORMAL,
     FONTSTYLE_ITALIC, FONTSTYLE_SLANT, FONTWEIGHT_NORMAL, FONTWEIGHT_LIGHT, FONTWEIGHT_BOLD
 };
-pub use crate::font_data::FontData; 
+pub use crate::font_data::FontData;
+
+// ADDED: ProgressDialog
+pub use crate::dialogs::progress_dialog::ProgressDialog; 

@@ -5,6 +5,9 @@ use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
 use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
 use wxdragon::dialogs::colour_dialog::ColourDialog;
 use wxdragon::dialogs::font_dialog::FontDialog;
+use wxdragon::dialogs::progress_dialog::ProgressDialog;
+use std::thread;
+use std::time::Duration;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {
@@ -20,6 +23,7 @@ pub struct DialogTabControls {
     pub colour_dialog_status_label: StaticText,
     pub font_button: Button,
     pub font_sample_text: StaticText,
+    pub progress_button: Button,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -91,6 +95,15 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .with_label("Font Sample")
         .build();
 
+    // Progress Dialog section
+    let progress_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Progress Dialog:")
+        .build();
+    let progress_button = Button::builder(&dialog_panel)
+        .with_label("Show Progress...")
+        .build();
+    progress_button.set_tooltip("Click to show a progress dialog demonstration.");
+
     // Layout using Main Vertical BoxSizer and child FlexGridSizer
     let main_sizer = BoxSizer::builder(VERTICAL).build();
     let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
@@ -141,6 +154,12 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     font_dialog_sizer.add(&font_sample_text, 1, EXPAND | ALL, 2);
     grid_sizer.add_sizer(&font_dialog_sizer, 1, EXPAND, 0);
 
+    // Add ProgressDialog controls
+    grid_sizer.add(&progress_dialog_label, 0, label_flags, 0);
+    let progress_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
+    progress_dialog_sizer.add(&progress_button, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    grid_sizer.add_sizer(&progress_dialog_sizer, 1, EXPAND, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
 
@@ -159,6 +178,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         colour_dialog_status_label,
         font_button,
         font_sample_text,
+        progress_button,
     }
 }
 
@@ -333,6 +353,59 @@ impl DialogTabControls {
             } else {
                 println!("Font Dialog Cancelled.");
             }
+        });
+        
+        // Add a handler for the progress dialog button
+        let frame_parent_progress_ctx = frame.clone();
+        self.progress_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
+            println!("Show Progress Dialog button clicked.");
+            
+            // Create a progress dialog with a range of 0-100
+            let dialog = ProgressDialog::builder(
+                    Some(&frame_parent_progress_ctx),
+                    "Progress Demonstration",
+                    "Processing items...",
+                    100)
+                .can_abort() // Add Cancel button
+                .can_skip()  // Add Skip button
+                .show_elapsed_time() // Show elapsed time
+                .show_remaining_time() // Show estimated remaining time
+                .build();
+            
+            // Process 100 items with a small delay between each
+            let mut continue_progress = true;
+            for i in 0..=100 {
+                if !continue_progress {
+                    break;
+                }
+                
+                // Artificial delay to simulate processing
+                thread::sleep(Duration::from_millis(50));
+                
+                // Update progress dialog with new value and custom message
+                let message = if i % 10 == 0 && i > 0 {
+                    Some(format!("Processed {} items...", i))
+                } else {
+                    None
+                };
+                
+                // Use update_with_skip instead of update to get skip status
+                let (should_continue, was_skipped) = dialog.update_with_skip(i, message.as_deref());
+                continue_progress = should_continue;
+                
+                // Log when the skip button is clicked
+                if was_skipped {
+                    println!("Progress operation was skipped at step {}.", i);
+                }
+                
+                // Check if user clicked Cancel
+                if dialog.was_cancelled() {
+                    println!("Progress operation was cancelled by user.");
+                    break;
+                }
+            }
+            
+            println!("Progress Dialog Closed.");
         });
     }
 } 

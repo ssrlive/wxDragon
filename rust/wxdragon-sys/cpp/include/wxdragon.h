@@ -1086,6 +1086,36 @@ WXD_EXPORTED wxd_TextEntryDialog_t* wxd_TextEntryDialog_Create(
 
 WXD_EXPORTED int wxd_TextEntryDialog_GetValue(wxd_TextEntryDialog_t* self, char* buffer, int bufLen);
 
+// --- wxProgressDialog ---
+typedef struct wxd_ProgressDialog wxd_ProgressDialog_t;
+
+WXD_EXPORTED wxd_ProgressDialog_t* wxd_ProgressDialog_Create(
+    wxd_Window_t* parent,
+    const char* title,
+    const char* message,
+    int maximum,
+    wxd_Style_t style
+);
+
+WXD_EXPORTED bool wxd_ProgressDialog_Update(
+    wxd_ProgressDialog_t* self,
+    int value,
+    const char* newmsg, /* can be NULL */
+    bool* skip /* can be NULL */
+);
+
+WXD_EXPORTED bool wxd_ProgressDialog_Pulse(
+    wxd_ProgressDialog_t* self, 
+    const char* newmsg, /* can be NULL */
+    bool* skip /* can be NULL */
+);
+
+WXD_EXPORTED void wxd_ProgressDialog_Resume(wxd_ProgressDialog_t* self);
+WXD_EXPORTED int wxd_ProgressDialog_GetValue(wxd_ProgressDialog_t* self);
+WXD_EXPORTED int wxd_ProgressDialog_GetRange(wxd_ProgressDialog_t* self);
+WXD_EXPORTED bool wxd_ProgressDialog_WasCancelled(wxd_ProgressDialog_t* self);
+WXD_EXPORTED bool wxd_ProgressDialog_WasSkipped(wxd_ProgressDialog_t* self);
+
 #ifdef __cplusplus
 }
 
