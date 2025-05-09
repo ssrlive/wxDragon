@@ -215,6 +215,26 @@ pub trait WxWidget {
         }
     }
 
+    /// Enables or disables the widget.
+    ///
+    /// A disabled widget does not receive user input and is usually visually distinct.
+    fn enable(&self, enable: bool) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Enable(handle, enable) }
+        }
+    }
+
+    /// Returns `true` if the widget is enabled, `false` otherwise.
+    fn is_enabled(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_IsEnabled(handle) }
+        } else {
+            false // If handle is null, widget can't be enabled
+        }
+    }
+
     // Other common methods (SetSize, GetSize, etc.) can be added here
     // if corresponding wxd_Window_* functions are added to the C API.
 }

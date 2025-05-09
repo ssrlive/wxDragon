@@ -182,4 +182,26 @@ WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self) {
     return { wx_position.x, wx_position.y };
 }
 
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetParent(wxd_Window_t* self) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(self);
+    if (!wx_window) return NULL;
+    return reinterpret_cast<wxd_Window_t*>(wx_window->GetParent());
+}
+
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetGrandParent(wxd_Window_t* self) {
+    if (!self) return NULL;
+    wxWindow* self_wnd = reinterpret_cast<wxWindow*>(self);
+    return reinterpret_cast<wxd_Window_t*>(self_wnd->GetGrandParent());
+}
+
+WXD_EXPORTED bool wxd_Window_IsEnabled(wxd_Window_t *self) {
+    if (!self) return false;
+    return reinterpret_cast<wxWindow*>(self)->IsEnabled();
+}
+
+WXD_EXPORTED void wxd_Window_Enable(wxd_Window_t *self, bool enable) {
+    if (!self) return;
+    reinterpret_cast<wxWindow*>(self)->Enable(enable);
+}
+
 } // extern "C"

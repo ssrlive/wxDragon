@@ -22,6 +22,12 @@ WXD_EXPORTED void wxd_Window_SetId(wxd_Window_t* self, int id);
 WXD_EXPORTED void wxd_Window_SetLabel(wxd_Window_t* self, const char* label);
 WXD_EXPORTED char* wxd_Window_GetLabel(wxd_Window_t* self); // Caller must free with wxd_free_string
 
+WXD_EXPORTED bool wxd_Window_IsEnabled(wxd_Window_t *self);
+WXD_EXPORTED void wxd_Window_Enable(wxd_Window_t *self, bool enable);
+
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetParent(wxd_Window_t* self);
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetGrandParent(wxd_Window_t* self);
+
 // Window cleanup notifier functions
 WXD_EXPORTED void wxd_Window_AttachCleanupNotifier(wxd_Window_t* win_ptr);
 WXD_EXPORTED void wxd_Window_DetachCleanupNotifier(wxd_Window_t* win_ptr);

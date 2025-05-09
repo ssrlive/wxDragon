@@ -84,3 +84,4 @@ SomeWidget::builder().with_style(SomeWidgetStyle::OptionA | SomeWidgetStyle::Opt
 *   **Art Identifiers:** This pattern also applies to sets of string constants, like those in [`rust/wxdragon/src/art_provider.rs`](mdc:rust/wxdragon/src/art_provider.rs), which were refactored into `ArtId` and `ArtClient` enums.
 
 This approach enhances the API by making style and option parameters more explicit, self-documenting, and less prone to errors from using incorrect integer values.
+
