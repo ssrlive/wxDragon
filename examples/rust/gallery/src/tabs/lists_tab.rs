@@ -81,14 +81,14 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // --- ADDED: ListCtrl Example ---
     let list_ctrl = ListCtrl::builder(&panel)
         .with_id(id::ID_HIGHEST + 7) // ID_LIST_CTRL
-        .with_style(LC_REPORT | LC_SINGLE_SEL | LC_HRULES | LC_VRULES) // Report style, single selection, rules
+        .with_style(ListCtrlStyle::Report | ListCtrlStyle::SingleSel | ListCtrlStyle::HRules | ListCtrlStyle::VRules) // Report style, single selection, rules
         .build();
 
     // Add columns
-    list_ctrl.insert_column(0, "ID", LIST_FORMAT_RIGHT, 60);
-    list_ctrl.insert_column(1, "Description", LIST_FORMAT_LEFT, 150);
-    list_ctrl.insert_column(2, "Quantity", LIST_FORMAT_RIGHT, 100);
-    list_ctrl.insert_column(3, "Notes", LIST_FORMAT_LEFT, -1); // Fill remaining space
+    list_ctrl.insert_column(0, "ID", ListColumnFormat::Right, 60);
+    list_ctrl.insert_column(1, "Description", ListColumnFormat::Left, 150);
+    list_ctrl.insert_column(2, "Quantity", ListColumnFormat::Right, 100);
+    list_ctrl.insert_column(3, "Notes", ListColumnFormat::Left, -1); // Fill remaining space
 
     // Insert items and get their indices. This sets the text for column 0.
     let _item1_idx = list_ctrl.insert_item(0, "P001");

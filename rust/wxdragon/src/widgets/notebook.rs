@@ -1,21 +1,72 @@
 //!
 //! Safe wrapper for wxNotebook.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::base::{Point, Size, ID_ANY};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
+use std::marker::PhantomData;
+use std::ops::{BitOr, BitOrAssign};
+use std::default::Default;
 
-// wxNotebook styles
-pub const NB_DEFAULT: i64 = ffi::WXD_NB_TOP; // Default to top tabs
-pub const NB_TOP: i64 = ffi::WXD_NB_TOP;
-pub const NB_BOTTOM: i64 = ffi::WXD_NB_BOTTOM;
-pub const NB_LEFT: i64 = ffi::WXD_NB_LEFT;
-pub const NB_RIGHT: i64 = ffi::WXD_NB_RIGHT;
-// Add others like NB_FIXEDWIDTH if needed
+/// Window style flags for `Notebook`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum NotebookStyle {
+    /// Default style, tabs at the top.
+    Default = ffi::WXD_NB_DEFAULT, // Note: WXD_NB_DEFAULT is often WXD_NB_TOP
+    /// Place tabs at the top.
+    Top = ffi::WXD_NB_TOP,
+    /// Place tabs at the bottom.
+    Bottom = ffi::WXD_NB_BOTTOM,
+    /// Place tabs on the left.
+    Left = ffi::WXD_NB_LEFT,
+    /// Place tabs on the right.
+    Right = ffi::WXD_NB_RIGHT,
+    /// Display all tabs in a single row, possibly with arrows if too many.
+    FixedWidth = ffi::WXD_NB_FIXEDWIDTH,
+    /// Allow multiple lines of tabs.
+    Multiline = ffi::WXD_NB_MULTILINE,
+    /// Under MSW, don't draw the page theme (allows pages to have individual colours).
+    NoPageTheme = ffi::WXD_NB_NOPAGETHEME,
+}
+
+impl NotebookStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+
+    /// The default style for `Notebook`.
+    pub const DEFAULT: NotebookStyle = NotebookStyle::Default;
+}
+
+impl Default for NotebookStyle {
+    fn default() -> Self {
+        NotebookStyle::DEFAULT
+    }
+}
+
+impl BitOr for NotebookStyle {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for NotebookStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
+    }
+}
 
 /// Represents a wxNotebook widget.
 #[derive(Clone)]
@@ -82,23 +133,25 @@ impl WxEvtHandler for Notebook {
 }
 
 /// Builder for creating `Notebook` widgets.
-pub struct NotebookBuilder {
-    parent: *mut ffi::wxd_Window_t,
+pub struct NotebookBuilder<'a> {
+    parent_ptr: *mut ffi::wxd_Window_t,
     id: Id,
     pos: Point,
     size: Size,
-    style: i64,
+    style: NotebookStyle,
+    _phantom: PhantomData<&'a ()>,
 }
 
-impl NotebookBuilder {
+impl<'a> NotebookBuilder<'a> {
     /// Creates a new Notebook builder with default values.
-    pub fn new<W: WxWidget>(parent: &W) -> Self {
+    pub fn new(parent: &'a dyn WxWidget) -> Self {
         NotebookBuilder {
-            parent: parent.handle_ptr(),
+            parent_ptr: parent.handle_ptr(),
             id: ID_ANY,
-            pos: DEFAULT_POSITION,
-            size: DEFAULT_SIZE,
-            style: NB_DEFAULT,
+            pos: Point::default(),
+            size: Size::default(),
+            style: NotebookStyle::DEFAULT,
+            _phantom: PhantomData,
         }
     }
 
@@ -121,7 +174,7 @@ impl NotebookBuilder {
     }
 
     /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: NotebookStyle) -> Self {
         self.style = style;
         self
     }
@@ -130,11 +183,11 @@ impl NotebookBuilder {
     pub fn build(self) -> Notebook {
         let notebook_ptr = unsafe {
             ffi::wxd_Notebook_Create(
-                self.parent,
+                self.parent_ptr,
                 self.id as c_int,
                 self.pos.into(),
                 self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if notebook_ptr.is_null() {

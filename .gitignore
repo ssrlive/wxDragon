@@ -3,3 +3,4 @@ rust/wxdragon-sys/target
 target
 reference
 .DS_Store
+rust/wxdragon-sys/cpp/tools/const_extractor/const_extractor

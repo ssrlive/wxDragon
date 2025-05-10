@@ -33,6 +33,7 @@ extern "C" {
 #include "widgets/wxd_containers.h"
 #include "widgets/wxd_notebook.h"
 #include "widgets/wxd_pickers.h"
+#include "widgets/wxd_file_ctrl.h"
 #include "widgets/wxd_adv_ui.h" // For wxNotificationMessage etc.
 #include "widgets/wxd_misc_widgets.h"
 #include "sizers/wxd_sizers.h"

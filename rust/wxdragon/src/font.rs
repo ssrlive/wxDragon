@@ -1,5 +1,76 @@
-use std::ffi::CStr;
+ // Point, Size, etc. may not be needed directly here but good for consistency
+use std::ffi::{c_int, CStr};
 use wxdragon_sys as ffi;
+use std::default::Default;
+
+/// Specifies the general appearance of the font.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i32)]
+pub enum FontFamily {
+    Default = 0,
+    Decorative = 1,
+    Roman = 2,
+    Script = 3,
+    Swiss = 4,
+    Modern = 5,
+    Teletype = 6,
+    // Unknown = 7, // wxFONTFAMILY_UNKNOWN usually maps to MAX or is separate
+}
+
+impl FontFamily {
+    pub fn as_i32(self) -> i32 {
+        self as i32
+    }
+}
+
+impl Default for FontFamily {
+    fn default() -> Self {
+        FontFamily::Default
+    }
+}
+
+/// Specifies the style of the font (normal, italic, or slanted).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i32)]
+pub enum FontStyle {
+    Normal = 0,
+    Italic = 1,
+    Slant = 2,
+}
+
+impl FontStyle {
+    pub fn as_i32(self) -> i32 {
+        self as i32
+    }
+}
+
+impl Default for FontStyle {
+    fn default() -> Self {
+        FontStyle::Normal
+    }
+}
+
+/// Specifies the weight of the font (e.g., normal, light, bold).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i32)]
+pub enum FontWeight {
+    Normal = 0,
+    Light = 1,
+    Bold = 2,
+    // Max = 3, // wxFONTWEIGHT_MAX usually maps to this or similar
+}
+
+impl FontWeight {
+    pub fn as_i32(self) -> i32 {
+        self as i32
+    }
+}
+
+impl Default for FontWeight {
+    fn default() -> Self {
+        FontWeight::Normal
+    }
+}
 
 /// Wrapper for wxFont.
 #[derive(Clone)]
@@ -13,7 +84,7 @@ unsafe impl Send for Font {}
 impl Font {
     /// Creates a new default font.
     pub fn new() -> Self {
-        let ptr = unsafe { ffi::wxd_Font_Create() };
+        let ptr = unsafe { ffi::wxd_Font_Create() }; // Assumed to exist from lack of lint error
         Self { ptr, owned: true }
     }
 
@@ -21,7 +92,7 @@ impl Font {
     /// Returns true on success, false on failure.
     pub fn add_private_font(path: &str) -> bool {
         if let Ok(c_path) = std::ffi::CString::new(path) {
-            unsafe { ffi::wxd_Font_AddPrivateFont(c_path.as_ptr()) }
+            unsafe { ffi::wxd_Font_AddPrivateFont(c_path.as_ptr()) } // Assumed to exist
         } else {
             false
         }
@@ -31,17 +102,18 @@ impl Font {
     /// Returns `None` if the font cannot be created (e.g., invalid parameters or face name not found).
     pub fn new_with_details(
         point_size: i32,
-        family: i32, // Use FONTFAMILY_* constants
-        style: i32,  // Use FONTSTYLE_* constants
-        weight: i32, // Use FONTWEIGHT_* constants
+        family: i32, // Takes i32, matching FONTFAMILY_* underlying values
+        style: i32,  // Takes i32, matching FONTSTYLE_* underlying values
+        weight: i32, // Takes i32, matching FONTWEIGHT_* underlying values
         underlined: bool,
         face_name: &str,
     ) -> Option<Self> {
         let c_face_name = match std::ffi::CString::new(face_name) {
             Ok(s) => s,
-            Err(_) => return None, // Invalid face_name (e.g., contains null bytes)
+            Err(_) => return None, 
         };
         let ptr = unsafe {
+            // This FFI function seems to be available based on lack of lint errors for it.
             ffi::wxd_Font_CreateEx(
                 point_size,
                 family,
@@ -76,18 +148,21 @@ impl Font {
     }
 
     /// Get the font family.
-    pub fn get_family(&self) -> i32 {
-        unsafe { ffi::wxd_Font_GetFamily(self.ptr) }
+    pub fn get_family(&self) -> FontFamily {
+        let val = unsafe { ffi::wxd_Font_GetFamily(self.ptr) };
+        unsafe { std::mem::transmute(val as i32) } // Ensure FFI result is i32 for transmute
     }
 
     /// Get the font style.
-    pub fn get_style(&self) -> i32 {
-        unsafe { ffi::wxd_Font_GetStyle(self.ptr) }
+    pub fn get_style(&self) -> FontStyle {
+        let val = unsafe { ffi::wxd_Font_GetStyle(self.ptr) };
+        unsafe { std::mem::transmute(val as i32) }
     }
 
     /// Get the font weight.
-    pub fn get_weight(&self) -> i32 {
-        unsafe { ffi::wxd_Font_GetWeight(self.ptr) }
+    pub fn get_weight(&self) -> FontWeight {
+        let val = unsafe { ffi::wxd_Font_GetWeight(self.ptr) };
+        unsafe { std::mem::transmute(val as i32) }
     }
 
     /// Get whether the font is underlined.
@@ -97,7 +172,7 @@ impl Font {
 
     /// Get the font face name.
     pub fn get_face_name(&self) -> String {
-        let mut buffer = vec![0u8; 256]; // Reasonable initial buffer size
+        let mut buffer = vec![0u8; 256];
         let len = unsafe {
             ffi::wxd_Font_GetFaceName(
                 self.ptr,
@@ -105,9 +180,7 @@ impl Font {
                 buffer.len() as i32,
             )
         };
-
         if len > 0 {
-            // Resize buffer to actual length + 1 for null terminator
             buffer.resize((len + 1) as usize, 0);
             let c_str = unsafe { CStr::from_ptr(buffer.as_ptr() as *const i8) };
             c_str.to_string_lossy().into_owned()
@@ -119,6 +192,10 @@ impl Font {
     /// Check if the font is valid.
     pub fn is_ok(&self) -> bool {
         unsafe { ffi::wxd_Font_IsOk(self.ptr) }
+    }
+
+    pub fn builder() -> FontBuilder {
+        FontBuilder::default()
     }
 }
 
@@ -138,21 +215,58 @@ impl Drop for Font {
     }
 }
 
-// Font family constants
-pub const FONTFAMILY_DEFAULT: i32 = 0;
-pub const FONTFAMILY_DECORATIVE: i32 = 1;
-pub const FONTFAMILY_ROMAN: i32 = 2;
-pub const FONTFAMILY_SCRIPT: i32 = 3;
-pub const FONTFAMILY_SWISS: i32 = 4;
-pub const FONTFAMILY_MODERN: i32 = 5;
-pub const FONTFAMILY_TELETYPE: i32 = 6;
+/// Builder for creating `Font` objects.
+#[derive(Default)]
+pub struct FontBuilder {
+    point_size: i32,
+    family: FontFamily,
+    style: FontStyle,
+    weight: FontWeight,
+    underline: bool,
+    face_name: String,
+}
 
-// Font style constants
-pub const FONTSTYLE_NORMAL: i32 = 0;
-pub const FONTSTYLE_ITALIC: i32 = 1;
-pub const FONTSTYLE_SLANT: i32 = 2;
+impl FontBuilder {
+    pub fn with_point_size(mut self, size: i32) -> Self {
+        self.point_size = size;
+        self
+    }
 
-// Font weight constants
-pub const FONTWEIGHT_NORMAL: i32 = 0;
-pub const FONTWEIGHT_LIGHT: i32 = 1;
-pub const FONTWEIGHT_BOLD: i32 = 2;
+    pub fn with_family(mut self, family: FontFamily) -> Self {
+        self.family = family;
+        self
+    }
+
+    pub fn with_style(mut self, style: FontStyle) -> Self {
+        self.style = style;
+        self
+    }
+
+    pub fn with_weight(mut self, weight: FontWeight) -> Self {
+        self.weight = weight;
+        self
+    }
+
+    pub fn with_underline(mut self, underline: bool) -> Self {
+        self.underline = underline;
+        self
+    }
+
+    pub fn with_face_name(mut self, name: &str) -> Self {
+        self.face_name = name.to_string();
+        self
+    }
+
+    pub fn build(self) -> Option<Font> {
+        let point_size = if self.point_size == 0 { 10 } else { self.point_size }; 
+
+        Font::new_with_details(
+            point_size as c_int,
+            self.family.as_i32(), // Convert enum to i32
+            self.style.as_i32(),  // Convert enum to i32
+            self.weight.as_i32(), // Convert enum to i32
+            self.underline,
+            &self.face_name,
+        )
+    }
+}

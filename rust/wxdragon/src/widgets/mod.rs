@@ -11,17 +11,21 @@ pub mod colourpickerctrl;
 pub mod combobox;
 pub mod command_link_button;
 pub mod datepickerctrl;
+pub mod dir_picker_ctrl;
+pub mod file_picker_ctrl;
+pub mod file_ctrl;
+pub mod font_picker_ctrl;
 pub mod frame;
 pub mod gauge;
 pub mod hyperlink_ctrl;
 pub mod list_ctrl;
 pub mod listbox;
 pub mod notebook;
+pub mod notification_message;
 pub mod panel;
 pub mod radio_button;
 pub mod radiobox;
 pub mod scrollbar;
-pub mod scrolled_window;
 pub mod search_ctrl;
 pub mod slider;
 pub mod spinbutton;
@@ -38,19 +42,12 @@ pub mod togglebutton;
 pub mod toolbar;
 pub mod treebook;
 pub mod treectrl;
+pub mod scrolled_window;
 
 pub use datepickerctrl::*;
 
-mod file_picker_ctrl;
-pub use file_picker_ctrl::*;
-
-mod dir_picker_ctrl;
 pub use dir_picker_ctrl::*;
 
-mod font_picker_ctrl;
-pub use font_picker_ctrl::*;
-
-pub mod notification_message;
 pub use notification_message::*;
 
 // Re-export the main widget types and builders for convenience
@@ -67,6 +64,7 @@ pub use colourpickerctrl::{colours, Colour, ColourPickerCtrl, ColourPickerCtrlBu
 pub use combobox::{ComboBox, ComboBoxBuilder};
 pub use command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
 pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder, DateTime};
+pub use font_picker_ctrl::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlStyle};
 pub use frame::{Frame, FrameBuilder};
 pub use gauge::{Gauge, GaugeBuilder};
 pub use hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};

@@ -3,7 +3,7 @@
 
 #include <wx/gdicmn.h> // For wxPoint, wxSize, wxDefaultPosition, wxDefaultSize
 #include <wx/string.h> // For wxString
-#include "../include/wxdragon.h" // For wxd_Point, wxd_Size  // This includes wxdragon.h itself
+#include "../include/wxd_types.h" // For wxd_Point, wxd_Size (CHANGED from wxdragon.h)
 #include <wx/colour.h> // For wxColour type
 
 #ifdef __cplusplus

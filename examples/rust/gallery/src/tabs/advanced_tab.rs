@@ -1,11 +1,4 @@
 use wxdragon::prelude::*;
-use wxdragon::widgets::gauge::GaugeStyle;
-use wxdragon::widgets::slider::SliderStyle;
-use wxdragon::widgets::spinctrl::SpinCtrlStyle;
-use wxdragon::widgets::splitterwindow::SplitterWindowStyle;
-// use wxdragon::widgets::splitterwindow; // For SP_XXX constants if available
-// use wxdragon::widgets::slider; // For SL_XXX constants if available
-// use wxdragon::widgets::spinctrl; // For SP_XXX constants if available
 
 pub struct AdvancedTabControls {
     pub tree_ctrl: TreeCtrl,
@@ -33,7 +26,7 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     let tree_panel = Panel::builder(&splitter).build();
     let tree_ctrl = TreeCtrl::builder(&tree_panel)
         .with_id(111)
-        .with_style(TR_DEFAULT_STYLE | TR_HAS_BUTTONS | TR_LINES_AT_ROOT)
+        .with_style(TreeCtrlStyle::DefaultStyle | TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
         .build();
     if let Some(root_id) = tree_ctrl.add_root("Root Node") {
         if let Some(child1_id) = tree_ctrl.append_item(&root_id, "Child 1") {
@@ -93,6 +86,13 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_size(Size::new(80, -1))
         .build();
 
+    // Create FileCtrl
+    let file_ctrl = FileCtrl::builder(&controls_panel)
+        .with_id(115) // New ID
+        // .with_style(FC_DEFAULT_STYLE | FC_MULTIPLE) // Example custom style
+        .with_size(Size::new(-1, 200)) // Expand horizontally, fixed height
+        .build();
+
     // Sizer for Controls Panel
     let controls_sizer = BoxSizer::builder(VERTICAL).build();
 
@@ -112,6 +112,9 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     slider_spin_sizer.add(&spin_ctrl, 0, ALL | ALIGN_CENTER_VERTICAL, 5);
     slider_spin_sizer.add(&spin_ctrl_label, 0, ALL | ALIGN_CENTER_VERTICAL, 5);
     controls_sizer.add_sizer(&slider_spin_sizer, 0, EXPAND | ALL, 5);
+
+    // Add FileCtrl to sizer
+    controls_sizer.add(&file_ctrl, 1, EXPAND | ALL, 5); // Expand to take space
 
     controls_panel.set_sizer(controls_sizer, true);
 
@@ -195,5 +198,8 @@ impl AdvancedTabControls {
                 );
             }
         });
+
+        // FileCtrl events (if any are desired, e.g., selection change)
+        // self.file_ctrl.bind(EventType::FILECTRL_SELECTIONCHANGED, |event| { ... });
     }
 }

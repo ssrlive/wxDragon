@@ -5,18 +5,68 @@ use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::WxWidget;
 use std::ffi::CString;
+use std::ops::{BitOr, BitOrAssign};
+use std::default::Default;
 use std::ptr;
 use wxdragon_sys as ffi;
 
-// Style flags
-pub const TR_DEFAULT_STYLE: i64 = ffi::WXD_TR_DEFAULT_STYLE as i64;
-pub const TR_HAS_BUTTONS: i64 = ffi::WXD_TR_HAS_BUTTONS as i64;
-pub const TR_LINES_AT_ROOT: i64 = ffi::WXD_TR_LINES_AT_ROOT as i64;
-pub const TR_NO_LINES: i64 = ffi::WXD_TR_NO_LINES as i64;
-pub const TR_SINGLE: i64 = ffi::WXD_TR_SINGLE as i64;
-pub const TR_HIDE_ROOT: i64 = ffi::WXD_TR_HIDE_ROOT as i64;
-pub const TR_EDIT_LABELS: i64 = ffi::WXD_TR_EDIT_LABELS as i64;
-// Add other TR_ constants as needed
+/// Window style flags for `TreeCtrl`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum TreeCtrlStyle {
+    /// Default style. Combines `HasButtons` and `LinesAtRoot`.
+    DefaultStyle = ffi::WXD_TR_DEFAULT_STYLE as i64,
+    /// Use buttons to show expand/collapse state.
+    HasButtons = ffi::WXD_TR_HAS_BUTTONS as i64,
+    /// Use lines to show hierarchy at the root level.
+    LinesAtRoot = ffi::WXD_TR_LINES_AT_ROOT as i64,
+    /// Don't show any lines.
+    NoLines = ffi::WXD_TR_NO_LINES as i64,
+    /// Only allow a single item to be selected.
+    Single = ffi::WXD_TR_SINGLE as i64,
+    /// Hide the root item, making its children appear as top-level items.
+    HideRoot = ffi::WXD_TR_HIDE_ROOT as i64,
+    /// Allow editing of item labels.
+    EditLabels = ffi::WXD_TR_EDIT_LABELS as i64,
+    // Add other TR_ styles as needed, e.g., TR_FULL_ROW_HIGHLIGHT, TR_MULTIPLE, etc.
+    // TR_NO_BUTTONS = ffi::WXD_TR_NO_BUTTONS as i64, (if available)
+    // TR_ROW_LINES = ffi::WXD_TR_ROW_LINES as i64, (if available)
+    // TR_TWIST_BUTTONS = ffi::WXD_TR_TWIST_BUTTONS as i64, (if available)
+}
+
+impl TreeCtrlStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+
+    /// The default style for `TreeCtrl`.
+    pub const DEFAULT: TreeCtrlStyle = TreeCtrlStyle::DefaultStyle;
+}
+
+impl Default for TreeCtrlStyle {
+    fn default() -> Self {
+        TreeCtrlStyle::DEFAULT
+    }
+}
+
+impl BitOr for TreeCtrlStyle {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for TreeCtrlStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
+    }
+}
 
 // Represents the opaque wxTreeItemId used by wxWidgets.
 // This struct owns the pointer returned by the C++ FFI functions
@@ -168,9 +218,9 @@ impl TreeCtrl {
 pub struct TreeCtrlBuilder<'a> {
     parent: &'a dyn WxWidget,
     id: Id,
-    pos: Option<Point>,
-    size: Option<Size>,
-    style: i64, // Keep as i64
+    pos: Point,
+    size: Size,
+    style: TreeCtrlStyle,
 }
 
 impl<'a> TreeCtrlBuilder<'a> {
@@ -178,9 +228,9 @@ impl<'a> TreeCtrlBuilder<'a> {
         Self {
             parent,
             id: ID_ANY as Id,
-            pos: None,
-            size: None,
-            style: TR_DEFAULT_STYLE as i64, // Use the i64 constant
+            pos: DEFAULT_POSITION,
+            size: DEFAULT_SIZE,
+            style: TreeCtrlStyle::DEFAULT,
         }
     }
 
@@ -189,27 +239,26 @@ impl<'a> TreeCtrlBuilder<'a> {
         self
     }
 
-    pub fn with_pos(mut self, x: i32, y: i32) -> Self {
-        self.pos = Some(Point { x, y });
+    pub fn with_pos(mut self, pos: Point) -> Self {
+        self.pos = pos;
         self
     }
 
-    pub fn with_size(mut self, width: i32, height: i32) -> Self {
-        self.size = Some(Size { width, height });
+    pub fn with_size(mut self, size: Size) -> Self {
+        self.size = size;
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
-        // Keep param as i64
+    pub fn with_style(mut self, style: TreeCtrlStyle) -> Self {
         self.style = style;
         self
     }
 
     pub fn build(self) -> TreeCtrl {
         let parent_ptr = self.parent.handle_ptr();
-        let pos = self.pos.unwrap_or(DEFAULT_POSITION);
-        let size = self.size.unwrap_or(DEFAULT_SIZE);
-        TreeCtrl::new_impl(parent_ptr, self.id, pos, size, self.style)
+        let pos = self.pos;
+        let size = self.size;
+        TreeCtrl::new_impl(parent_ptr, self.id, pos, size, self.style.bits())
     }
 }
 

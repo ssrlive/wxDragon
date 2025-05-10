@@ -129,7 +129,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let file_picker_ctrl = FilePickerCtrl::builder(&dialog_panel)
         .with_message("Select a file with FilePickerCtrl")
         .with_wildcard("Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*")
-        .with_style(FLP_OPEN | FLP_FILE_MUST_EXIST)
+        .with_style(FilePickerCtrlStyle::Open | FilePickerCtrlStyle::FileMustExist)
         .build();
     file_picker_ctrl.set_tooltip("Select a file to see its path below.");
     let file_picker_status_label = StaticText::builder(&dialog_panel)
@@ -205,7 +205,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .with_label("Dir Picker Ctrl:")
         .build();
     let dir_picker_ctrl = DirPickerCtrl::builder(&dialog_panel)
-        .with_style(DIRP_DEFAULT_STYLE | DIRP_DIR_MUST_EXIST)
+        .with_style(DirPickerCtrlStyle::Default | DirPickerCtrlStyle::DirMustExist)
         .with_message("Choose a directory")
         .build();
     let dir_picker_status_label = StaticText::builder(&dialog_panel)
@@ -226,7 +226,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let initial_font_for_picker = Font::new(); // Use default font for now
     let font_picker_ctrl = FontPickerCtrl::builder(&dialog_panel)
         .with_initial_font(initial_font_for_picker)
-        .with_style(FNTP_DEFAULT_STYLE | FNTP_USEFONT_FOR_LABEL)
+        .with_style(FontPickerCtrlStyle::Default | FontPickerCtrlStyle::UseFontForLabel)
         .build();
     let font_picker_status_label = StaticText::builder(&dialog_panel)
         .with_label("FontPicker: Initial font set.")

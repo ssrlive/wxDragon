@@ -176,6 +176,7 @@ typedef struct wxd_FilePickerCtrl_t wxd_FilePickerCtrl_t;
 typedef struct wxd_DirPickerCtrl_t wxd_DirPickerCtrl_t;
 typedef struct wxd_FontPickerCtrl_t wxd_FontPickerCtrl_t;
 typedef struct wxd_NotificationMessage_t wxd_NotificationMessage_t;
+typedef struct wxd_FileCtrl_t wxd_FileCtrl_t;
 
 typedef struct {
     short day;

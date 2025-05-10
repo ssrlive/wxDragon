@@ -38,6 +38,7 @@
 #include <wx/msgdlg.h> // ADDED for wxMessageDialog
 #include <wx/statline.h>    // For wxStaticLine constants
 #include <wx/statbmp.h> // ADDED for wxStaticBitmap constants
+#include <wx/filectrl.h> // ADDED for wxFileCtrl constants
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -175,6 +176,14 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxCHK_2STATE", wxCHK_2STATE});
     constants_to_extract.push_back({"wxCHK_3STATE", wxCHK_3STATE});
     constants_to_extract.push_back({"wxCHK_ALLOW_3RD_STATE_FOR_USER", wxCHK_ALLOW_3RD_STATE_FOR_USER});
+
+    // wxFileCtrl styles
+    constants_to_extract.push_back({"wxFC_OPEN", wxFC_OPEN});
+    constants_to_extract.push_back({"wxFC_SAVE", wxFC_SAVE});
+    constants_to_extract.push_back({"wxFC_MULTIPLE", wxFC_MULTIPLE});
+    constants_to_extract.push_back({"wxFC_NOSHOWHIDDEN", wxFC_NOSHOWHIDDEN});
+    constants_to_extract.push_back({"wxFC_DEFAULT_STYLE", wxFC_DEFAULT_STYLE});
+
     // TreeCtrl Styles
     constants_to_extract.push_back({"wxTR_DEFAULT_STYLE", wxTR_DEFAULT_STYLE});
     constants_to_extract.push_back({"wxTR_EDIT_LABELS", wxTR_EDIT_LABELS});
@@ -216,6 +225,9 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxNB_BOTTOM", wxNB_BOTTOM});
     constants_to_extract.push_back({"wxNB_LEFT", wxNB_LEFT});
     constants_to_extract.push_back({"wxNB_RIGHT", wxNB_RIGHT});
+    constants_to_extract.push_back({"wxNB_FIXEDWIDTH", wxNB_FIXEDWIDTH});
+    constants_to_extract.push_back({"wxNB_MULTILINE", wxNB_MULTILINE});
+    constants_to_extract.push_back({"wxNB_NOPAGETHEME", wxNB_NOPAGETHEME});
     // SplitterWindow Styles
     constants_to_extract.push_back({"wxSP_NOBORDER", wxSP_NOBORDER});
     constants_to_extract.push_back({"wxSP_THIN_SASH", wxSP_THIN_SASH});
