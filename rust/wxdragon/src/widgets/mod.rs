@@ -43,6 +43,10 @@ pub mod toolbar;
 pub mod treebook;
 pub mod treectrl;
 pub mod scrolled_window;
+pub mod aui_mdi_parent_frame;
+pub mod aui_mdi_child_frame;
+pub mod aui_notebook;
+pub mod aui_toolbar;
 
 pub use datepickerctrl::*;
 
@@ -93,3 +97,7 @@ pub use toolbar::ToolBar;
 pub use treebook::Treebook;
 pub use treebook::TreebookBuilder;
 pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
+pub use aui_mdi_parent_frame::*;
+pub use aui_mdi_child_frame::*;
+pub use aui_notebook::*;
+pub use aui_toolbar::{AuiToolBar, AuiToolBarBuilder, ItemKind};

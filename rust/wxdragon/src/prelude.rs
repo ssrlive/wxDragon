@@ -72,6 +72,8 @@ pub use crate::menus::{ItemKind, Menu, MenuBar, MenuItem};
 // pub use crate::menus::menuitem::{ITEM_NORMAL, ITEM_SEPARATOR, ITEM_CHECK, ITEM_RADIO};
 // ADDED: Export standard IDs
 pub use crate::menus::menuitem::{ID_ABOUT, ID_EXIT, ID_SEPARATOR};
+pub use crate::id::ID_ANY; // ADDED: Directly export ID_ANY
+// pub use crate::id::ID_HIGHEST; // REMOVED: Already exported at the end of the file
 // ADDED: Bitmap
 pub use crate::bitmap::Bitmap;
 

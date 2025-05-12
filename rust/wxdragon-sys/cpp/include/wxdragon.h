@@ -38,6 +38,7 @@ extern "C" {
 #include "widgets/wxd_misc_widgets.h"
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"
+#include "widgets/wxd_aui.h"
 
 #ifdef __cplusplus
 } // extern "C"

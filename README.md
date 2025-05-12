@@ -232,10 +232,11 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxSplitterWindow`
         *   [x] `wxNotebook` (Tabs)
         *   [x] `wxStaticBox`
-        *   [ ] `wxAuiMDIChildFrame`
-        *   [ ] `wxAuiMDIClientWindow`
-        *   [ ] `wxAuiMDIParentFrame`
-        *   [ ] `wxAuiNotebook`
+        *   [x] `wxAuiMDIChildFrame`
+        *   [x] `wxAuiMDIParentFrame`
+        *   [x] `wxAuiMDIClientWindow`
+        *   [x] `wxAuiNotebook`
+        *   [ ] `wxAuiToolBar`
         *   [ ] `wxBannerWindow`
         *   [ ] `wxChoicebook`
         *   [ ] `wxCollapsiblePane`
@@ -244,7 +245,6 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxTreebook`
     *   **Other:**
         *   [x] `wxArtProvider` (*Basic support for `GetBitmap`*)
-        *   [ ] `wxAuiToolBar`
         *   [x] `wxCalendarCtrl`
         *   [ ] `wxGLCanvas`
         *   [ ] `wxHtmlWindow`
@@ -303,16 +303,4 @@ When implementing any new feature (widget, sizer, event, etc.), prioritize safet
         2. Run the compiled `const_extractor` against that platform's wxWidgets build.
         3. Save the output into the corresponding platform-specific file in `rust/wxdragon-sys/src/generated_constants/` (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`). These files should generate `pub const WXD_XXX` constants.
         4. Commit these updated pre-generated files to the repository.
-    . **Usage in Safe Wrapper:** Use the `WXD_XXX` constants (which will be available via `wxdragon_sys::WXD_XXX` after `build.rs` copies the correct file) in the safe Rust wrapper, typically by defining local constants within the relevant widget module (e.g., `pub const TAB_TRAVERSAL: i64 = wxdragon_sys::WXD_TAB_TRAVERSAL;` in `panel.rs`).
-. **Build Check (During Development of Constant Generation):** When modifying `const_extractor` or the generation process, verify constants are generated correctly into the platform-specific files and that `build.rs` copies the correct one to `$OUT_DIR/wx_other_constants.rs` making them accessible via `wxdragon_sys::WXD_XXX`.
-
-## C API (`rust/wxdragon-sys/cpp/include/wxdragon.h`):
-. Define the minimal C interface (opaque pointers, C types, `const char*`).
-. **Events:** Use the existing `wxd_EvtHandler_Bind`. Add C functions (e.g., `wxd_CommandEvent_GetString`) if specific event data needs accessing from Rust.
-. Keep function signatures C-idiomatic.
-. **Build Check:** `cd rust && cargo build` (or `cargo build -p wxdragon-sys`). Ensure `bindgen` can parse `rust/wxdragon-sys/cpp/include/wxdragon.h` correctly and `wxdragon-sys` compiles.
-
-## C++ Implementation (`rust/wxdragon-sys/cpp/src/*.cpp`):
-. Implement the C functions defined in `rust/wxdragon-sys/cpp/include/wxdragon.h`.
-. Translate C calls directly to the corresponding wxWidgets C++ calls...
-. **Build Check:** `cd rust && cargo build` (or `cargo build -p wxdragon-sys`). This will trigger CMake via `wxdragon-sys/build.rs` to compile the C++ code. Fix any C++ compilation or linking errors.
+    . **Usage in Safe Wrapper:** Use the `WXD_XXX` constants (which will be available via `wxdragon_sys::WXD_XXX` after `

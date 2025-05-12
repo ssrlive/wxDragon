@@ -178,6 +178,29 @@ typedef struct wxd_FontPickerCtrl_t wxd_FontPickerCtrl_t;
 typedef struct wxd_NotificationMessage_t wxd_NotificationMessage_t;
 typedef struct wxd_FileCtrl_t wxd_FileCtrl_t;
 
+typedef struct wxd_AuiMDIParentFrame_t wxd_AuiMDIParentFrame_t;
+typedef struct wxd_AuiMDIChildFrame_t wxd_AuiMDIChildFrame_t;
+typedef struct wxd_AuiManager_t wxd_AuiManager_t;
+typedef struct wxd_AuiManagerEvent_t wxd_AuiManagerEvent_t;
+typedef struct wxd_AuiNotebook_t wxd_AuiNotebook_t;
+typedef struct wxd_AuiNotebookEvent_t wxd_AuiNotebookEvent_t;
+
+// wxAuiToolBar
+typedef struct wxd_AuiToolBar_t wxd_AuiToolBar_t;
+
+// wxBitmap (placeholder for future use)
+typedef struct wxd_Bitmap_t wxd_Bitmap_t;
+
+// wxItemKind C Enum (for wxAuiToolBar, wxMenu, etc.)
+typedef enum {
+    WXD_ITEM_NORMAL = 0,     // wxITEM_NORMAL
+    WXD_ITEM_CHECK = 1,      // wxITEM_CHECK
+    WXD_ITEM_RADIO = 2,      // wxITEM_RADIO
+    WXD_ITEM_SEPARATOR = 3,  // wxITEM_SEPARATOR
+    // wxITEM_DROPDOWN (specific to wxToolBar and wxRibbonBar, might add later if needed)
+    // wxITEM_MAX is not typically used directly as a kind
+} WXDItemKindCEnum;
+
 typedef struct {
     short day;
     unsigned short month;

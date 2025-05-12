@@ -39,6 +39,7 @@
 #include <wx/statline.h>    // For wxStaticLine constants
 #include <wx/statbmp.h> // ADDED for wxStaticBitmap constants
 #include <wx/filectrl.h> // ADDED for wxFileCtrl constants
+#include <wx/aui/aui.h>
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -495,8 +496,36 @@ int main(int argc, char **argv) {
     // Dialogs
     constants_to_extract.push_back({"wxCENTRE", wxCENTRE});
     
+    // wxAuiNotebook styles
+    constants_to_extract.push_back({"wxAUI_NB_DEFAULT_STYLE", wxAUI_NB_DEFAULT_STYLE});
+    constants_to_extract.push_back({"wxAUI_NB_TOP", wxAUI_NB_TOP});
+    constants_to_extract.push_back({"wxAUI_NB_BOTTOM", wxAUI_NB_BOTTOM}); // Added for completeness, though not in DEFAULT_STYLE
+    constants_to_extract.push_back({"wxAUI_NB_LEFT", wxAUI_NB_LEFT});   // Added for completeness
+    constants_to_extract.push_back({"wxAUI_NB_RIGHT", wxAUI_NB_RIGHT});  // Added for completeness
+    constants_to_extract.push_back({"wxAUI_NB_TAB_SPLIT", wxAUI_NB_TAB_SPLIT});
+    constants_to_extract.push_back({"wxAUI_NB_TAB_MOVE", wxAUI_NB_TAB_MOVE});
+    constants_to_extract.push_back({"wxAUI_NB_SCROLL_BUTTONS", wxAUI_NB_SCROLL_BUTTONS});
+    constants_to_extract.push_back({"wxAUI_NB_WINDOWLIST_BUTTON", wxAUI_NB_WINDOWLIST_BUTTON});
+    constants_to_extract.push_back({"wxAUI_NB_CLOSE_BUTTON", wxAUI_NB_CLOSE_BUTTON});
+    constants_to_extract.push_back({"wxAUI_NB_CLOSE_ON_ACTIVE_TAB", wxAUI_NB_CLOSE_ON_ACTIVE_TAB});
+    constants_to_extract.push_back({"wxAUI_NB_CLOSE_ON_ALL_TABS", wxAUI_NB_CLOSE_ON_ALL_TABS});
+    constants_to_extract.push_back({"wxAUI_NB_MIDDLE_CLICK_CLOSE", wxAUI_NB_MIDDLE_CLICK_CLOSE});
+    constants_to_extract.push_back({"wxAUI_NB_TAB_EXTERNAL_MOVE", wxAUI_NB_TAB_EXTERNAL_MOVE});
+    constants_to_extract.push_back({"wxAUI_NB_TAB_FIXED_WIDTH", wxAUI_NB_TAB_FIXED_WIDTH});
 
-    // Add more constants as needed
+    // wxAuiToolBar styles
+    constants_to_extract.push_back({"wxAUI_TB_TEXT", wxAUI_TB_TEXT});
+    constants_to_extract.push_back({"wxAUI_TB_NO_TOOLTIPS", wxAUI_TB_NO_TOOLTIPS});
+    constants_to_extract.push_back({"wxAUI_TB_NO_AUTORESIZE", wxAUI_TB_NO_AUTORESIZE});
+    constants_to_extract.push_back({"wxAUI_TB_GRIPPER", wxAUI_TB_GRIPPER});
+    constants_to_extract.push_back({"wxAUI_TB_OVERFLOW", wxAUI_TB_OVERFLOW});
+    constants_to_extract.push_back({"wxAUI_TB_VERTICAL", wxAUI_TB_VERTICAL});
+    constants_to_extract.push_back({"wxAUI_TB_HORZ_LAYOUT", wxAUI_TB_HORZ_LAYOUT});
+    constants_to_extract.push_back({"wxAUI_TB_HORIZONTAL", wxAUI_TB_HORIZONTAL});
+    constants_to_extract.push_back({"wxAUI_TB_DEFAULT_STYLE", wxAUI_TB_DEFAULT_STYLE});
+
+    // Add other constants here, e.g.:
+    // "wxBORDER_DEFAULT",
 
     // Output the constants in the Rust pub const format
     for (const auto& pair : constants_to_extract) {
