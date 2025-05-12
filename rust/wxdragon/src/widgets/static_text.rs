@@ -1,11 +1,23 @@
 //! Safe wrapper for wxStaticText.
 
-use crate::prelude::*; // Use prelude
+use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
+use crate::id::Id;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
-use wxdragon_sys as ffi; // ADDED for enum bitwise operations
+use wxdragon_sys as ffi;
+
+widget_style_enum!(
+    name: StaticTextStyle,
+    doc: "Style flags for StaticText.",
+    variants: {
+        Default: ffi::WXD_ALIGN_LEFT, "Default style (left-aligned, auto-resizing).",
+        AlignRight: ffi::WXD_ALIGN_RIGHT, "Align text to the right.",
+        AlignCenterHorizontal: ffi::WXD_ALIGN_CENTRE_HORIZONTAL, "Align text to the center horizontally."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxStaticText control.
 #[derive(Clone)] // Allow cloning the wrapper
@@ -13,121 +25,43 @@ pub struct StaticText {
     window: Window, // Composition: StaticText IS a Window
 }
 
-// --- StaticText Builder ---
-
-/// Builder pattern for creating `StaticText` widgets.
-pub struct StaticTextBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    label: String,
-    pos: Point,
-    size: Size,
-    style: StaticTextStyle, // MODIFIED: Use StaticTextStyle enum
-}
-
-impl<'a> StaticTextBuilder<'a> {
-    /// Creates a new builder.
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: ffi::WXD_ID_ANY as i32, // Use WXD_ID_ANY (i64) cast to Id (i32)
-            label: String::new(),
-            pos: Point { x: -1, y: -1 }, // Explicit default
-            size: Size {
-                width: -1,
-                height: -1,
-            }, // Explicit default
-            style: StaticTextStyle::Default, // MODIFIED: Default style
-        }
-    }
-
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the text label.
-    pub fn with_label(mut self, label: &str) -> Self {
-        self.label = label.to_string();
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the window style flags (e.g., alignment flags like `wxALIGN_CENTER_HORIZONTAL`).
-    pub fn with_style(mut self, style: StaticTextStyle) -> Self {
-        // MODIFIED: Parameter is StaticTextStyle
-        self.style = style;
-        self
-    }
-
-    /// Builds the `StaticText`.
-    ///
-    /// # Panics
-    /// Panics if static text creation fails in the underlying C++ layer.
-    pub fn build(self) -> StaticText {
-        StaticText::new(
-            self.parent,
-            self.id,
-            self.label,
-            self.pos,
-            self.size,
-            self.style.bits(), // MODIFIED: Use .bits() to get i64 value
-        )
-        .expect("Failed to create StaticText widget")
-    }
-}
-
-// --- StaticText Implementation ---
-
-impl StaticText {
-    /// Creates a new `StaticTextBuilder`.
-    pub fn builder(parent: &dyn WxWidget) -> StaticTextBuilder {
-        StaticTextBuilder::new(parent)
-    }
-
-    /// Creates a new StaticText (low-level constructor used by builder).
-    fn new(
-        parent: &dyn WxWidget,
-        id: Id,
-        label: String,
-        pos: Point,
-        size: Size,
-        style: i64, // Keep i64 here as it's the raw value passed to FFI
-    ) -> Option<Self> {
-        let c_label = CString::new(label).ok()?;
+widget_builder!(
+    name: StaticText,
+    parent_type: &'a dyn WxWidget,
+    style_type: StaticTextStyle,
+    fields: {
+        label: String = String::new()
+    },
+    build_impl: |slf| {
+        let c_label = CString::new(&slf.label[..]).unwrap_or_default();
         unsafe {
-            let parent_ptr = parent.handle_ptr();
+            let parent_ptr = slf.parent.handle_ptr();
             if parent_ptr.is_null() {
-                return None;
+                panic!("Parent widget must not be null");
             }
             let ptr = ffi::wxd_StaticText_Create(
                 parent_ptr as *mut _,
-                id,
+                slf.id,
                 c_label.as_ptr(),
-                pos.into(),
-                size.into(),
-                style.try_into().unwrap(),
+                slf.pos.into(),
+                slf.size.into(),
+                slf.style.bits().try_into().unwrap(),
             );
             if ptr.is_null() {
-                None
+                panic!("Failed to create StaticText widget");
             } else {
-                Some(StaticText {
+                StaticText {
                     window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
-                })
+                }
             }
         }
+    }
+);
+
+impl StaticText {
+    /// Creates a new StaticText builder.
+    pub fn builder<W: WxWidget>(parent: &W) -> StaticTextBuilder<'_> {
+        StaticTextBuilder::new(parent)
     }
 
     /// Sets the text control's label.
@@ -182,67 +116,5 @@ impl StaticText {
     }
 }
 
-// Implement WxWidget for StaticText.
-impl WxWidget for StaticText {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-/// Drop behavior for StaticText.
-/// As a child widget, its C++ object is managed by the parent.
-impl Drop for StaticText {
-    fn drop(&mut self) {
-        // No-op: Parent wxWindow is responsible for destroying the C++ object.
-    }
-}
-
-// Allow StaticText to be used where a Window is expected via Deref.
-impl std::ops::Deref for StaticText {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-// --- StaticTextStyle Enum ---
-
-/// Style flags for `StaticText`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum StaticTextStyle {
-    /// Default style (left-aligned, auto-resizing).
-    Default = ffi::WXD_ALIGN_LEFT, // WXD_ALIGN_LEFT is typically 0
-    /// Align text to the right.
-    AlignRight = ffi::WXD_ALIGN_RIGHT,
-    /// Align text to the center horizontally.
-    AlignCenterHorizontal = ffi::WXD_ALIGN_CENTRE_HORIZONTAL, // Using WXD_ALIGN_CENTRE_HORIZONTAL for clarity
-                                                              // /// Align text to the center (combines horizontal and vertical, though vertical might not apply well here).
-                                                              // AlignCenter = ffi::WXD_ALIGN_CENTRE, // WXD_ALIGN_CENTRE usually means both horizontal and vertical
-                                                              // /// Do not automatically resize the control to fit its contents.
-                                                              // NoAutoResize = ffi::WXD_ST_NO_AUTORESIZE, // Not yet available
-}
-
-impl StaticTextStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl BitOr for StaticTextStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for StaticTextStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+// Use the macro to implement all the standard traits
+implement_widget_traits_with_target!(StaticText, window, Window);

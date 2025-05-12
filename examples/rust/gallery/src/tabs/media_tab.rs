@@ -71,7 +71,7 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
             let (width, height) = img.dimensions();
             if let Some(bitmap_obj) = Bitmap::from_rgba(rgba_data.as_raw(), width, height) {
                 let static_bitmap_ctrl = StaticBitmap::builder(&panel)
-                    .with_bitmap(&bitmap_obj)
+                    .with_bitmap(Some(bitmap_obj))
                     .with_size(Size::new(width as i32, height as i32))
                     .build();
 

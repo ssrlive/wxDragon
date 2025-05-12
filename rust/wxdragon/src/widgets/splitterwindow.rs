@@ -1,36 +1,60 @@
 //!
 //! Safe wrapper for wxSplitterWindow.
 
-use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::id::ID_ANY;
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-
-// wxSplitterWindow styles (Combine with SP_ from SpinCtrl/Button if appropriate)
-// pub const SP_HORIZONTAL: i64 = ffi::WXD_SP_HORIZONTAL;
-// pub const SP_VERTICAL: i64 = ffi::WXD_SP_VERTICAL;
-// pub const SP_3D: i64 = ffi::WXD_SP_3D;
-// pub const SP_BORDER: i64 = ffi::WXD_SP_BORDER;
-// pub const SP_PERMIT_UNSPLIT: i64 = ffi::WXD_SP_PERMIT_UNSPLIT;
-// pub const SP_LIVE_UPDATE: i64 = ffi::WXD_SP_LIVE_UPDATE;
-// pub const SP_NOBORDER: i64 = ffi::WXD_SP_NOBORDER;
-// pub const SP_THIN_SASH: i64 = ffi::WXD_SP_THIN_SASH;
-// pub const SP_DEFAULT_STYLE: i64 = ffi::WXD_SP_BORDER;
 
 /// Represents a wxSplitterWindow widget.
 #[derive(Clone)]
 pub struct SplitterWindow(pub(crate) *mut ffi::wxd_SplitterWindow_t);
+
+widget_style_enum!(
+    name: SplitterWindowStyle,
+    doc: "Style flags for the SplitterWindow widget.",
+    variants: {
+        Default: ffi::WXD_SP_BORDER, "Default style with a border.",
+        Horizontal: ffi::WXD_SP_HORIZONTAL, "Horizontal split mode (one pane above the other).",
+        Vertical: ffi::WXD_SP_VERTICAL, "Vertical split mode (one pane beside the other).",
+        PermitUnsplit: ffi::WXD_SP_PERMIT_UNSPLIT, "Always allow unsplitting, even with no minimum pane size.",
+        LiveUpdate: ffi::WXD_SP_LIVE_UPDATE, "Redraw window as the sash is moved, rather than just display a line.",
+        ThinSash: ffi::WXD_SP_THIN_SASH, "Use a thin sash."
+    },
+    default_variant: Default
+);
+
+widget_builder!(
+    name: SplitterWindow,
+    parent_type: &'a dyn WxWidget,
+    style_type: SplitterWindowStyle,
+    fields: {
+    },
+    build_impl: |slf| {
+        let splitter_ptr = unsafe {
+            ffi::wxd_SplitterWindow_Create(
+                slf.parent.handle_ptr(),
+                slf.id as c_int,
+                slf.pos.into(),
+                slf.size.into(),
+                slf.style.bits() as ffi::wxd_Style_t,
+            )
+        };
+        if splitter_ptr.is_null() {
+            panic!("Failed to create SplitterWindow");
+        }
+        unsafe { SplitterWindow::from_ptr(splitter_ptr) }
+    }
+);
 
 impl SplitterWindow {
     /// Creates a new SplitterWindow builder.
     pub fn builder<W: WxWidget>(parent: &W) -> SplitterWindowBuilder {
         SplitterWindowBuilder::new(parent)
     }
-
+    
     // Internal constructor - Revert back to crate-public
     // SAFETY: Caller must ensure ptr is a valid wxd_SplitterWindow_t
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_SplitterWindow_t) -> Self {
@@ -132,103 +156,9 @@ impl WxEvtHandler for SplitterWindow {
     }
 }
 
-// --- SplitterWindowStyle Enum ---
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum SplitterWindowStyle {
-    Default = ffi::WXD_SP_BORDER, // Default to having a border (e.g. 512)
-    Horizontal = ffi::WXD_SP_HORIZONTAL,
-    Vertical = ffi::WXD_SP_VERTICAL,
-    PermitUnsplit = ffi::WXD_SP_PERMIT_UNSPLIT,
-    LiveUpdate = ffi::WXD_SP_LIVE_UPDATE,
-    ThinSash = ffi::WXD_SP_THIN_SASH,
-}
-
-impl SplitterWindowStyle {
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl Default for SplitterWindowStyle {
-    fn default() -> Self {
-        SplitterWindowStyle::Default
-    }
-}
-
-impl BitOr for SplitterWindowStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for SplitterWindowStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
-    }
-}
-
-/// Builder for creating `SplitterWindow` widgets.
-pub struct SplitterWindowBuilder {
-    parent: *mut ffi::wxd_Window_t,
-    id: Id,
-    pos: Point,
-    size: Size,
-    style: SplitterWindowStyle,
-}
-
-impl SplitterWindowBuilder {
-    /// Creates a new SplitterWindow builder with default values.
-    pub fn new<W: WxWidget>(parent: &W) -> Self {
-        SplitterWindowBuilder {
-            parent: parent.handle_ptr(),
-            id: ID_ANY as i32,
-            pos: DEFAULT_POSITION,
-            size: DEFAULT_SIZE,
-            style: SplitterWindowStyle::default(),
-        }
-    }
-
-    /// Sets the window ID.
-    pub fn with_id(mut self, id: i32) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the style flags.
-    pub fn with_style(mut self, style: SplitterWindowStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Builds the SplitterWindow widget.
-    /// Note: Call `initialize` or one of the `split_` methods after building.
-    pub fn build(self) -> SplitterWindow {
-        let splitter_ptr = unsafe {
-            ffi::wxd_SplitterWindow_Create(
-                self.parent,
-                self.id as c_int,
-                self.pos.into(),
-                self.size.into(),
-                self.style.bits() as ffi::wxd_Style_t,
-            )
-        };
-        if splitter_ptr.is_null() {
-            panic!("Failed to create SplitterWindow");
-        }
-        unsafe { SplitterWindow::from_ptr(splitter_ptr) }
+// No explicit Drop implementation needed - child widget managed by parent
+impl Drop for SplitterWindow {
+    fn drop(&mut self) {
+        // Child widgets are typically managed by their parent in wxWidgets
     }
 }

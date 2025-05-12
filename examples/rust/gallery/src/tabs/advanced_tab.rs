@@ -26,7 +26,7 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     let tree_panel = Panel::builder(&splitter).build();
     let tree_ctrl = TreeCtrl::builder(&tree_panel)
         .with_id(111)
-        .with_style(TreeCtrlStyle::DefaultStyle | TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
+        .with_style(TreeCtrlStyle::Default | TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
         .build();
     if let Some(root_id) = tree_ctrl.add_root("Root Node") {
         if let Some(child1_id) = tree_ctrl.append_item(&root_id, "Child 1") {

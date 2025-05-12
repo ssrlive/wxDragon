@@ -1,12 +1,33 @@
-// ! Safe wrapper for wxToggleButton.
+//! 
+//! Safe wrapper for wxToggleButton.
 
-use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::id::{Id, ID_ANY};
+use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
+use crate::id::Id;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+
+// --- Toggle Button Styles ---
+widget_style_enum!(
+    name: ToggleButtonStyle,
+    doc: "Style flags for ToggleButton widget.",
+    variants: {
+        Default: 0, "Default style (no specific alignment, standard border).",
+        Left: ffi::WXD_BU_LEFT, "Align label to the left.",
+        Top: ffi::WXD_BU_TOP, "Align label to the top.",
+        Right: ffi::WXD_BU_RIGHT, "Align label to the right.",
+        Bottom: ffi::WXD_BU_BOTTOM, "Align label to the bottom.",
+        ExactFit: ffi::WXD_BU_EXACTFIT, "Button size will be adjusted to exactly fit the label.",
+        NoText: ffi::WXD_BU_NOTEXT, "Do not display the label string (useful for buttons with only an image).",
+        BorderNone: ffi::WXD_BORDER_NONE, "No border."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxToggleButton control.
 #[derive(Clone)]
@@ -15,42 +36,47 @@ pub struct ToggleButton {
 }
 
 impl ToggleButton {
-    /// Creates a new `ToggleButtonBuilder`.
+    /// Creates a new ToggleButton builder.
     pub fn builder(parent: &dyn WxWidget) -> ToggleButtonBuilder {
         ToggleButtonBuilder::new(parent)
     }
 
-    /// Low-level constructor used by the builder.
-    fn new(
-        parent: &dyn WxWidget,
+    /// Creates a new ToggleButton wrapper from a raw pointer.
+    /// # Safety
+    /// The pointer must be a valid `wxd_ToggleButton_t` pointer.
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_ToggleButton_t) -> Self {
+        ToggleButton {
+            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+
+    /// Internal implementation used by the builder.
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
         id: Id,
         label: &str,
         pos: Point,
         size: Size,
         style: i64,
-    ) -> Option<Self> {
-        unsafe {
-            let parent_ptr = parent.handle_ptr();
-            if parent_ptr.is_null() {
-                return None;
-            }
-            let c_label = CString::new(label).ok()?;
-            let ctrl_ptr = ffi::wxd_ToggleButton_Create(
-                parent_ptr as *mut _,
+    ) -> Self {
+        let c_label = CString::new(label).unwrap_or_default();
+        
+        let ptr = unsafe {
+            ffi::wxd_ToggleButton_Create(
+                parent_ptr,
                 id,
                 c_label.as_ptr(),
                 pos.into(),
                 size.into(),
                 style as ffi::wxd_Style_t,
-            );
-            if ctrl_ptr.is_null() {
-                None
-            } else {
-                Some(ToggleButton {
-                    window: Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t),
-                })
-            }
+            )
+        };
+        
+        if ptr.is_null() {
+            panic!("Failed to create ToggleButton widget");
         }
+        
+        unsafe { ToggleButton::from_ptr(ptr) }
     }
 
     /// Gets the current state of the toggle button (true if pressed/down, false if not).
@@ -108,144 +134,25 @@ impl ToggleButton {
     }
 }
 
-// --- ToggleButton Builder ---
+// Apply common trait implementations for this widget
+implement_widget_traits_with_target!(ToggleButton, window, Window);
 
-/// Builder pattern for creating `ToggleButton` widgets.
-#[derive(Clone)]
-pub struct ToggleButtonBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    label: String,
-    pos: Option<Point>,
-    size: Option<Size>,
-    style: ToggleButtonStyle,
-}
-
-impl<'a> ToggleButtonBuilder<'a> {
-    /// Creates a new builder.
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: ID_ANY as Id,
-            label: String::new(),
-            pos: None,
-            size: None,
-            style: ToggleButtonStyle::Default,
-        }
-    }
-
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the button label.
-    pub fn with_label(mut self, label: &str) -> Self {
-        self.label = label.to_string();
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = Some(pos);
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = Some(size);
-        self
-    }
-
-    /// Sets the window style flags (use constants from `togglebutton` module).
-    pub fn with_style(mut self, style: ToggleButtonStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Builds the `ToggleButton`.
-    pub fn build(self) -> ToggleButton {
-        let pos = self.pos.unwrap_or(DEFAULT_POSITION);
-        let size = self.size.unwrap_or(DEFAULT_SIZE);
-        ToggleButton::new(
-            self.parent,
-            self.id,
-            &self.label,
-            pos,
-            size,
-            self.style.bits(),
+// Use the widget_builder macro for ToggleButton
+widget_builder!(
+    name: ToggleButton,
+    parent_type: &'a dyn WxWidget,
+    style_type: ToggleButtonStyle,
+    fields: {
+        label: String = String::new()
+    },
+    build_impl: |slf| {
+        ToggleButton::new_impl(
+            slf.parent.handle_ptr(),
+            slf.id,
+            &slf.label,
+            slf.pos,
+            slf.size,
+            slf.style.bits()
         )
-        .expect("Failed to create ToggleButton")
     }
-}
-
-// --- Trait Implementations ---
-
-impl WxWidget for ToggleButton {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-impl Drop for ToggleButton {
-    fn drop(&mut self) {
-        // Window's Drop handles cleanup via WxdCleaner
-    }
-}
-
-impl std::ops::Deref for ToggleButton {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-// --- ToggleButtonStyle Enum ---
-
-/// Style flags for `ToggleButton`.
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum ToggleButtonStyle {
-    /// Default style (no specific alignment, standard border).
-    Default = 0,
-    /// Align label to the left.
-    Left = ffi::WXD_BU_LEFT,
-    /// Align label to the top.
-    Top = ffi::WXD_BU_TOP,
-    /// Align label to the right.
-    Right = ffi::WXD_BU_RIGHT,
-    /// Align label to the bottom.
-    Bottom = ffi::WXD_BU_BOTTOM,
-    /// Button size will be adjusted to exactly fit the label.
-    ExactFit = ffi::WXD_BU_EXACTFIT,
-    /// Do not display the label string (useful for buttons with only an image).
-    NoText = ffi::WXD_BU_NOTEXT,
-    /// No border.
-    BorderNone = ffi::WXD_BORDER_NONE,
-    // /// A simple border (rarely used for buttons, which have a default look).
-    // BorderSimple = ffi::WXD_BORDER_SIMPLE, // Typically not used for ToggleButton
-}
-
-impl ToggleButtonStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl BitOr for ToggleButtonStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for ToggleButtonStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+); 
