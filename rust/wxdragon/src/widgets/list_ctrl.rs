@@ -1,70 +1,53 @@
-use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::id::ID_ANY;
-use crate::event::{Event, EventType, WxEvtHandler};
+//! wxListCtrl wrapper
+
+use crate::geometry::{Point, Size};
+use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
-use std::default::Default;
+use crate::widget_style_enum;
+use crate::widget_builder;
+use crate::implement_widget_traits_with_target;
 use std::ffi::CString;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_long};
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
 
-// --- ListCtrlStyle Enum (for LC_... constants) ---
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum ListCtrlStyle {
-    List = ffi::WXD_LC_LIST,
-    Report = ffi::WXD_LC_REPORT,
-    Icon = ffi::WXD_LC_ICON,
-    SmallIcon = ffi::WXD_LC_SMALL_ICON,
-    AlignTop = ffi::WXD_LC_ALIGN_TOP,
-    AlignLeft = ffi::WXD_LC_ALIGN_LEFT,
-    AutoArrange = ffi::WXD_LC_AUTOARRANGE,
-    EditLabels = ffi::WXD_LC_EDIT_LABELS,
-    NoHeader = ffi::WXD_LC_NO_HEADER,
-    SingleSel = ffi::WXD_LC_SINGLE_SEL,
-    SortAscending = ffi::WXD_LC_SORT_ASCENDING,
-    SortDescending = ffi::WXD_LC_SORT_DESCENDING,
-    HRules = ffi::WXD_LC_HRULES,
-    VRules = ffi::WXD_LC_VRULES,
-}
-
-impl ListCtrlStyle {
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl Default for ListCtrlStyle {
-    fn default() -> Self {
-        ListCtrlStyle::Report
-    }
-}
-
-impl BitOr for ListCtrlStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for ListCtrlStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
-    }
-}
+// --- ListCtrl Styles ---
+widget_style_enum!(
+    name: ListCtrlStyle,
+    doc: "Style flags for ListCtrl widget.",
+    variants: {
+        List: ffi::WXD_LC_LIST, "Display items in a list format, one item per row.",
+        Report: ffi::WXD_LC_REPORT, "Display items in a multicolumn report view.",
+        Icon: ffi::WXD_LC_ICON, "Display items as large icons.",
+        SmallIcon: ffi::WXD_LC_SMALL_ICON, "Display items as small icons.",
+        AlignTop: ffi::WXD_LC_ALIGN_TOP, "Align items to the top (icon view only).",
+        AlignLeft: ffi::WXD_LC_ALIGN_LEFT, "Align items to the left (icon view only).",
+        AutoArrange: ffi::WXD_LC_AUTOARRANGE, "Automatically arrange items.",
+        EditLabels: ffi::WXD_LC_EDIT_LABELS, "Allow item labels to be edited.",
+        NoHeader: ffi::WXD_LC_NO_HEADER, "Don't display column headers in report mode.",
+        SingleSel: ffi::WXD_LC_SINGLE_SEL, "Allow only a single item to be selected.",
+        SortAscending: ffi::WXD_LC_SORT_ASCENDING, "Sort items in ascending order.",
+        SortDescending: ffi::WXD_LC_SORT_DESCENDING, "Sort items in descending order.",
+        HRules: ffi::WXD_LC_HRULES, "Display horizontal rules between rows in report mode.",
+        VRules: ffi::WXD_LC_VRULES, "Display vertical rules between columns in report mode."
+    },
+    default_variant: Report
+);
 
 // --- ListColumnFormat Enum (for LIST_FORMAT_... constants) ---
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i32)]
 pub enum ListColumnFormat {
+    /// Align column content to the left
     Left = ffi::WXD_LIST_FORMAT_LEFT as i32,
+    /// Align column content to the right
     Right = ffi::WXD_LIST_FORMAT_RIGHT as i32,
+    /// Align column content to the center
     Centre = ffi::WXD_LIST_FORMAT_CENTRE as i32,
 }
 
 impl ListColumnFormat {
+    /// Returns the raw integer value of the format
     pub fn as_i32(self) -> i32 {
         self as i32
     }
@@ -80,27 +63,32 @@ impl Default for ListColumnFormat {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i64)]
 pub enum ListItemState {
+    /// Item is selected
     Selected = ffi::WXD_LIST_STATE_SELECTED,
+    /// Item has focus
     Focused = ffi::WXD_LIST_STATE_FOCUSED,
+    /// Item is disabled
     Disabled = ffi::WXD_LIST_STATE_DISABLED,
+    /// Item is highlighted as a drop target
     DropHilited = ffi::WXD_LIST_STATE_DROPHILITED,
 }
 
 impl ListItemState {
+    /// Returns the raw integer value of the state
     pub fn bits(self) -> i64 {
         self as i64
     }
 }
 
 // BitOr and BitOrAssign for ListItemState allow combining states
-impl BitOr for ListItemState {
+impl std::ops::BitOr for ListItemState {
     type Output = Self;
     fn bitor(self, rhs: Self) -> Self::Output {
         unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
     }
 }
 
-impl BitOrAssign for ListItemState {
+impl std::ops::BitOrAssign for ListItemState {
     fn bitor_assign(&mut self, rhs: Self) {
         unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
     }
@@ -110,14 +98,20 @@ impl BitOrAssign for ListItemState {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i32)]
 pub enum ListNextItemFlag {
+    /// All items, no geometric restriction
     All = ffi::WXD_LIST_NEXT_ALL as i32,
+    /// Item above current one
     Above = ffi::WXD_LIST_NEXT_ABOVE as i32,
+    /// Item below current one
     Below = ffi::WXD_LIST_NEXT_BELOW as i32,
+    /// Item to the left of current one
     Left = ffi::WXD_LIST_NEXT_LEFT as i32,
+    /// Item to the right of current one
     Right = ffi::WXD_LIST_NEXT_RIGHT as i32,
 }
 
 impl ListNextItemFlag {
+    /// Returns the raw integer value of the flag
     pub fn as_i32(self) -> i32 {
         self as i32
     }
@@ -129,25 +123,72 @@ impl Default for ListNextItemFlag {
     }
 }
 
+/// A control for displaying and manipulating multiple items
+///
+/// The ListCtrl can display items in various formats including:
+/// - List view (one column)
+/// - Report view (multiple columns with headers)
+/// - Icon view (large or small icons)
 #[derive(Clone)]
 pub struct ListCtrl {
-    ptr: *mut ffi::wxd_ListCtrl_t,
     window: Window,
 }
 
 impl ListCtrl {
-    pub fn builder(parent: &impl WxWidget) -> ListCtrlBuilder<Window> {
-        let mut builder = ListCtrlBuilder::<Window>::default();
-        builder.parent_ptr = parent.handle_ptr();
-        builder
+    /// Creates a new ListCtrl builder.
+    pub fn builder(parent: &dyn WxWidget) -> ListCtrlBuilder {
+        ListCtrlBuilder::new(parent)
+    }
+
+    /// Internal implementation used by the builder.
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
+        id: Id,
+        pos: Point,
+        size: Size,
+        style: i64,
+    ) -> Self {
+        assert!(!parent_ptr.is_null(), "ListCtrl requires a parent");
+        
+        let ptr = unsafe {
+            ffi::wxd_ListCtrl_Create(
+                parent_ptr,
+                id,
+                pos.into(),
+                size.into(),
+                style,
+            )
+        };
+        
+        if ptr.is_null() {
+            panic!("Failed to create ListCtrl: FFI returned null pointer.");
+        }
+        
+        unsafe { Self::from_ptr(ptr) }
+    }
+    
+    /// Creates a ListCtrl from a raw pointer.
+    /// 
+    /// # Safety
+    /// The pointer must be a valid wxd_ListCtrl_t pointer.
+    unsafe fn from_ptr(ptr: *mut ffi::wxd_ListCtrl_t) -> Self {
+        ListCtrl {
+            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+    
+    /// Returns the ListCtrl pointer from the window pointer.
+    #[inline]
+    fn as_list_ctrl_ptr(&self) -> *mut ffi::wxd_ListCtrl_t {
+        self.handle_ptr() as *mut ffi::wxd_ListCtrl_t
     }
 
     /// Inserts a column at the specified position.
     pub fn insert_column(&self, col: i64, heading: &str, format: ListColumnFormat, width: i32) -> i32 {
-        let c_heading = CString::new(heading).unwrap();
+        let c_heading = CString::new(heading).unwrap_or_default();
         unsafe {
             ffi::wxd_ListCtrl_InsertColumn(
-                self.ptr,
+                self.as_list_ctrl_ptr(),
                 col as c_long,
                 c_heading.as_ptr(),
                 format as c_int,
@@ -158,34 +199,63 @@ impl ListCtrl {
 
     /// Sets the width of the specified column.
     pub fn set_column_width(&self, col: i64, width: i32) -> bool {
-        unsafe { ffi::wxd_ListCtrl_SetColumnWidth(self.ptr, col as c_long, width) }
+        unsafe { 
+            ffi::wxd_ListCtrl_SetColumnWidth(
+                self.as_list_ctrl_ptr(), 
+                col as c_long, 
+                width
+            ) 
+        }
     }
 
     /// Gets the width of the specified column.
     pub fn get_column_width(&self, col: i64) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetColumnWidth(self.ptr, col as c_long) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetColumnWidth(
+                self.as_list_ctrl_ptr(), 
+                col as c_long
+            ) 
+        }
     }
 
+    /// Gets the number of columns in the list control.
     pub fn get_column_count(&self) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetColumnCount(self.ptr) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetColumnCount(
+                self.as_list_ctrl_ptr()
+            ) 
+        }
     }
 
     /// Inserts a simple item (label only) at the specified index.
     pub fn insert_item(&self, index: i64, label: &str) -> i32 {
-        let c_label = CString::new(label).unwrap();
-        unsafe { ffi::wxd_ListCtrl_InsertItem_Simple(self.ptr, index as c_long, c_label.as_ptr()) }
+        let c_label = CString::new(label).unwrap_or_default();
+        unsafe { 
+            ffi::wxd_ListCtrl_InsertItem_Simple(
+                self.as_list_ctrl_ptr(), 
+                index as c_long, 
+                c_label.as_ptr()
+            ) 
+        }
     }
 
     /// Sets the text of an item (label in column 0).
     pub fn set_item_text(&self, index: i64, text: &str) {
         let c_text = CString::new(text).unwrap_or_default();
-        unsafe { ffi::wxd_ListCtrl_SetItemText(self.ptr, index as c_long, c_text.as_ptr()) }
+        unsafe { 
+            ffi::wxd_ListCtrl_SetItemText(
+                self.as_list_ctrl_ptr(), 
+                index as c_long, 
+                c_text.as_ptr()
+            ) 
+        }
     }
 
+    /// Gets the text of an item in the specified column.
     pub fn get_item_text(&self, index: i64, col: i32) -> String {
         unsafe {
             let needed_len = ffi::wxd_ListCtrl_GetItemText(
-                self.ptr,
+                self.as_list_ctrl_ptr(),
                 index as c_long,
                 col,
                 std::ptr::null_mut(),
@@ -196,7 +266,7 @@ impl ListCtrl {
             }
             let mut buffer: Vec<u8> = Vec::with_capacity(needed_len as usize);
             let actual_len = ffi::wxd_ListCtrl_GetItemText(
-                self.ptr,
+                self.as_list_ctrl_ptr(),
                 index as c_long,
                 col,
                 buffer.as_mut_ptr() as *mut i8,
@@ -210,15 +280,20 @@ impl ListCtrl {
         }
     }
 
+    /// Gets the number of items in the list control.
     pub fn get_item_count(&self) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetItemCount(self.ptr) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetItemCount(
+                self.as_list_ctrl_ptr()
+            ) 
+        }
     }
 
     /// Sets the state of an item.
     pub fn set_item_state(&self, item: i64, state: i64, state_mask: i64) -> bool {
         unsafe {
             ffi::wxd_ListCtrl_SetItemState(
-                self.ptr,
+                self.as_list_ctrl_ptr(),
                 item as c_long,
                 state as c_long,
                 state_mask as c_long,
@@ -228,38 +303,77 @@ impl ListCtrl {
 
     /// Gets the state of an item.
     pub fn get_item_state(&self, item: i64, state_mask: i64) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetItemState(self.ptr, item as c_long, state_mask as c_long) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetItemState(
+                self.as_list_ctrl_ptr(), 
+                item as c_long, 
+                state_mask as c_long
+            ) 
+        }
     }
 
     /// Gets the next item based on geometry and state.
     pub fn get_next_item(&self, item: i64, geometry: ListNextItemFlag, state: ListItemState) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetNextItem(self.ptr, item as c_long, geometry as c_int, state as c_int) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetNextItem(
+                self.as_list_ctrl_ptr(), 
+                item as c_long, 
+                geometry as c_int, 
+                state as c_int
+            ) 
+        }
     }
 
+    /// Gets the first selected item in the list control.
     pub fn get_first_selected_item(&self) -> i32 {
         self.get_next_item(-1, ListNextItemFlag::All, ListItemState::Selected)
     }
 
     /// Deletes the specified item.
     pub fn delete_item(&self, item: i64) -> bool {
-        unsafe { ffi::wxd_ListCtrl_DeleteItem(self.ptr, item as c_long) }
+        unsafe { 
+            ffi::wxd_ListCtrl_DeleteItem(
+                self.as_list_ctrl_ptr(), 
+                item as c_long
+            ) 
+        }
     }
 
+    /// Deletes all items from the list control.
     pub fn delete_all_items(&self) -> bool {
-        unsafe { ffi::wxd_ListCtrl_DeleteAllItems(self.ptr) }
+        unsafe { 
+            ffi::wxd_ListCtrl_DeleteAllItems(
+                self.as_list_ctrl_ptr()
+            ) 
+        }
     }
 
+    /// Deletes all items and columns from the list control.
     pub fn clear_all(&self) -> bool {
-        unsafe { ffi::wxd_ListCtrl_ClearAll(self.ptr) }
+        unsafe { 
+            ffi::wxd_ListCtrl_ClearAll(
+                self.as_list_ctrl_ptr()
+            ) 
+        }
     }
 
+    /// Gets the number of selected items.
     pub fn get_selected_item_count(&self) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetSelectedItemCount(self.ptr) }
+        unsafe { 
+            ffi::wxd_ListCtrl_GetSelectedItemCount(
+                self.as_list_ctrl_ptr()
+            ) 
+        }
     }
 
     /// Ensures that the specified item is visible.
     pub fn ensure_visible(&self, item: i64) -> bool {
-        unsafe { ffi::wxd_ListCtrl_EnsureVisible(self.ptr, item as c_long) }
+        unsafe { 
+            ffi::wxd_ListCtrl_EnsureVisible(
+                self.as_list_ctrl_ptr(), 
+                item as c_long
+            ) 
+        }
     }
 
     /// Determines which item, if any, is at the specified point.
@@ -269,7 +383,7 @@ impl ListCtrl {
         let mut subitem: c_long = 0;
         let item = unsafe {
             ffi::wxd_ListCtrl_HitTest(
-                self.ptr,
+                self.as_list_ctrl_ptr(),
                 point.into(),
                 &mut flags as *mut i32,
                 &mut subitem as *mut c_long,
@@ -280,100 +394,31 @@ impl ListCtrl {
 
     /// Starts editing the label of the specified item.
     pub fn edit_label(&self, item: i64) {
-        unsafe { ffi::wxd_ListCtrl_EditLabel(self.ptr, item as c_long) }
-    }
-
-    pub fn bind<F>(&self, event_type: EventType, callback: F)
-    where
-        F: FnMut(Event) + 'static,
-    {
-        self.window.bind(event_type, callback)
-    }
-}
-
-impl WxWidget for ListCtrl {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-impl Drop for ListCtrl {
-    fn drop(&mut self) {
-        // Ownership is managed by the parent window/app in wxWidgets typically
-        // No explicit Destroy call needed for ListCtrl if it's a child of a window
-        // that gets destroyed, unless specifically detached or created as a top-level like window.
-        // For now, assume it's cleaned up by parent like other controls.
-    }
-}
-
-pub struct ListCtrlBuilder<P: WxWidget + Clone> {
-    parent_ptr: *mut ffi::wxd_Window_t,
-    id: Id,
-    pos: Point,
-    size: Size,
-    style: ListCtrlStyle,
-    _phantom: PhantomData<P>,
-}
-
-impl<P: WxWidget + Clone> Default for ListCtrlBuilder<P> {
-    fn default() -> Self {
-        Self {
-            parent_ptr: std::ptr::null_mut(),
-            id: ID_ANY as i32,
-            pos: DEFAULT_POSITION,
-            size: DEFAULT_SIZE,
-            style: ListCtrlStyle::default(),
-            _phantom: PhantomData,
+        unsafe { 
+            ffi::wxd_ListCtrl_EditLabel(
+                self.as_list_ctrl_ptr(), 
+                item as c_long
+            ) 
         }
     }
 }
 
-impl<P: WxWidget + Clone> ListCtrlBuilder<P> {
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
+// Implement common widget traits
+implement_widget_traits_with_target!(ListCtrl, window, Window);
 
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
+// Use the widget_builder macro for ListCtrl
+widget_builder!(
+    name: ListCtrl,
+    parent_type: &'a dyn WxWidget,
+    style_type: ListCtrlStyle,
+    fields: {},
+    build_impl: |slf| {
+        ListCtrl::new_impl(
+            slf.parent.handle_ptr(),
+            slf.id,
+            slf.pos,
+            slf.size,
+            slf.style.bits()
+        )
     }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: ListCtrlStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn build(self) -> ListCtrl {
-        assert!(!self.parent_ptr.is_null(), "ListCtrl requires a parent");
-        let ptr = unsafe {
-            ffi::wxd_ListCtrl_Create(
-                self.parent_ptr,
-                self.id,
-                self.pos.into(),
-                self.size.into(),
-                self.style.bits(),
-            )
-        };
-        if ptr.is_null() {
-            panic!("Failed to create ListCtrl: FFI returned null pointer.");
-        } else {
-            unsafe {
-                ListCtrl {
-                    ptr,
-                    window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
-                }
-            }
-        }
-    }
-}
-
-// Add specific ListEventData if needed, or ensure current Event can handle it.
-// For example, if ListEventData needs methods like get_item_index(), get_column(), get_label().
-// For now, assuming base Event with get_id() is used, and specific data access
-// will be added to the generic Event<T> system or through specialized event types.
+);
