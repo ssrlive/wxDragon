@@ -89,7 +89,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Radio Box:")
         .build();
     let radio_box_choices = ["Option 1", "Option 2", "Option 3"];
-    let radio_box = RadioBox::builder(Some(&basic_panel), &radio_box_choices)
+    let radio_box = RadioBox::builder(&basic_panel, &radio_box_choices)
         .with_label("RadioBox Title")
         .with_major_dimension(1) // 1 column
         .with_style(RadioBoxStyle::SpecifyCols)
@@ -152,7 +152,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Bitmap Button:")
         .build();
     let bitmap_button = BitmapButton::builder(&basic_panel)
-        .with_bitmap(&red_bitmap)
+        .with_bitmap(Some(red_bitmap))
         .build();
     bitmap_button.set_tooltip("A button with a custom red square bitmap.");
 
@@ -163,7 +163,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Art Button:")
         .build();
     let art_button = BitmapButton::builder(&basic_panel)
-        .with_bitmap(&open_icon_bitmap)
+        .with_bitmap(Some(open_icon_bitmap))
         .build();
     art_button.set_tooltip("A button using an icon from the ArtProvider.");
 
@@ -233,9 +233,9 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let save_bmp =
         ArtProvider::get_bitmap(ArtId::FileSave, ArtClient::Menu, None).expect("Failed art");
     let new_bmp = ArtProvider::get_bitmap(ArtId::New, ArtClient::Menu, None).expect("Failed art");
-    let bitmap_combo_box = BitmapComboBox::builder(Some(&basic_panel))
+    let bitmap_combo_box = BitmapComboBox::builder(&basic_panel)
         .with_size(Size::new(200, -1))
-        .with_value("Default Value")
+        .with_value("Default Value".to_string())
         .build();
     bitmap_combo_box.append("Open", Some(&open_bmp));
     bitmap_combo_box.append("Save", Some(&save_bmp));

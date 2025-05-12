@@ -1,10 +1,13 @@
-//! Basic geometry types (Point, Size).
+//! Geometry types for wxDragon (Point, Size, Rect)
+//! 
+//! This module contains the basic geometry types used throughout
+//! the wxDragon library, providing conversions to and from the FFI types.
 
 use wxdragon_sys as ffi;
 
-// Use repr(C) to ensure memory layout compatibility with FFI types.
-// Derive common traits.
-
+/// Standard window position type.
+/// 
+/// Represents a point in 2D space with x, y coordinates.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Point {
@@ -31,6 +34,12 @@ impl From<ffi::wxd_Point> for Point {
     }
 }
 
+/// Default position (-1, -1) that lets the system choose the position.
+pub const DEFAULT_POSITION: Point = Point { x: -1, y: -1 };
+
+/// Standard window size type.
+/// 
+/// Represents a size in 2D space with width and height.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Size {
@@ -63,7 +72,16 @@ impl From<ffi::wxd_Size> for Size {
     }
 }
 
+/// Default size (-1, -1) that lets the system choose the size.
+pub const DEFAULT_SIZE: Size = Size {
+    width: -1,
+    height: -1,
+};
+
 /// Represents a rectangle with position (x, y) and dimensions (width, height).
+/// 
+/// Combines Point and Size to define a rectangular area.
+#[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Rect {
     pub x: i32,
@@ -73,6 +91,7 @@ pub struct Rect {
 }
 
 impl Rect {
+    /// Creates a new rectangle.
     pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self {
         Self {
             x,
@@ -81,12 +100,31 @@ impl Rect {
             height,
         }
     }
+    
+    /// Creates a rectangle from a position and size.
+    pub fn from_point_and_size(pos: Point, size: Size) -> Self {
+        Self {
+            x: pos.x,
+            y: pos.y,
+            width: size.width,
+            height: size.height,
+        }
+    }
+    
+    /// Returns the position component of the rectangle.
+    pub fn position(&self) -> Point {
+        Point::new(self.x, self.y)
+    }
+    
+    /// Returns the size component of the rectangle.
+    pub fn size(&self) -> Size {
+        Size::new(self.width, self.height)
+    }
 }
 
-// FFI Conversion: Rect into wxdragon_sys::wxd_Rect
-impl From<Rect> for wxdragon_sys::wxd_Rect {
+impl From<Rect> for ffi::wxd_Rect {
     fn from(rect: Rect) -> Self {
-        wxdragon_sys::wxd_Rect {
+        ffi::wxd_Rect {
             x: rect.x,
             y: rect.y,
             width: rect.width,
@@ -95,9 +133,8 @@ impl From<Rect> for wxdragon_sys::wxd_Rect {
     }
 }
 
-// Optional: wxdragon_sys::wxd_Rect into Rect (if needed elsewhere)
-impl From<wxdragon_sys::wxd_Rect> for Rect {
-    fn from(wxd_rect: wxdragon_sys::wxd_Rect) -> Self {
+impl From<ffi::wxd_Rect> for Rect {
+    fn from(wxd_rect: ffi::wxd_Rect) -> Self {
         Self {
             x: wxd_rect.x,
             y: wxd_rect.y,
@@ -105,53 +142,4 @@ impl From<wxdragon_sys::wxd_Rect> for Rect {
             height: wxd_rect.height,
         }
     }
-}
-
-// Common Constants
-
-/// Matches wxID_ANY (-1)
-pub const ID_ANY: i32 = -1;
-/// Matches wxDefaultPosition (-1, -1)
-pub const DEFAULT_POSITION: Point = Point { x: -1, y: -1 };
-/// Matches wxDefaultSize (-1, -1)
-pub const DEFAULT_SIZE: Size = Size {
-    width: -1,
-    height: -1,
-};
-
-// --- ADDED: RawWxProps Trait ---
-/// Trait to get the raw FFI pointer of a specific widget type.
-pub trait RawWxProps {
-    type RawWxPtr; // Associated type for the specific FFI pointer (e.g., wxd_Button_t)
-    fn raw_wx_ptr(&self) -> *mut Self::RawWxPtr;
-}
-
-// NEW: Colour struct for RGBA colours
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Colour {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-    pub a: u8, // Alpha component (0-255, 255 is opaque)
-}
-
-impl Colour {
-    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Colour { r, g, b, a }
-    }
-
-    // Create from a u32 in RGBA order (e.g., 0xRRGGBBAA)
-    pub fn from_u32(val: u32) -> Self {
-        Colour {
-            r: ((val >> 24) & 0xFF) as u8,
-            g: ((val >> 16) & 0xFF) as u8,
-            b: ((val >> 8) & 0xFF) as u8,
-            a: (val & 0xFF) as u8,
-        }
-    }
-
-    // Convert to u32 in RGBA order
-    pub fn as_u32(&self) -> u32 {
-        ((self.r as u32) << 24) | ((self.g as u32) << 16) | ((self.b as u32) << 8) | (self.a as u32)
-    }
-}
+} 

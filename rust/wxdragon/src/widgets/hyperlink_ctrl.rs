@@ -1,7 +1,10 @@
-use crate::base::{Colour, Point, RawWxProps, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::types::RawWxProps;
+use crate::id::ID_ANY;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
+use crate::color::Colour;
 use wxdragon_sys as ffi;
 
 use std::default::Default;
@@ -137,7 +140,7 @@ impl Default for HyperlinkCtrlBuilder {
     fn default() -> Self {
         Self {
             parent_ptr: ptr::null_mut(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             label: String::new(),
             url: String::new(),
             pos: DEFAULT_POSITION,

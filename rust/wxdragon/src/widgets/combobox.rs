@@ -1,21 +1,13 @@
 //! Safe wrapper for wxComboBox.
 
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
-use std::default::Default;
 use std::ffi::{CStr, CString};
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
-// --- Constants ---
-// Style flags
-// REMOVED: pub const CB_SIMPLE: i64 = ffi::WXD_CB_SIMPLE;
-// REMOVED: pub const CB_SORT: i64 = ffi::WXD_CB_SORT;
-// REMOVED: pub const CB_READONLY: i64 = ffi::WXD_CB_READONLY;
-// REMOVED: pub const CB_DROPDOWN: i64 = ffi::WXD_CB_DROPDOWN;
 // Value for GetSelection when nothing selected
 pub const NOT_FOUND: i32 = -1;
 
@@ -30,47 +22,8 @@ pub struct ComboBox {
 
 impl ComboBox {
     /// Creates a new `ComboBoxBuilder`.
-    pub fn builder(parent: &dyn WxWidget) -> ComboBoxBuilder {
-        let mut builder = ComboBoxBuilder::default();
-        builder.parent_ptr = parent.handle_ptr();
-        builder
-    }
-
-    /// Low-level constructor used by the builder's `build` method.
-    fn new(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        value: &str,
-        pos: Point,
-        size: Size,
-        style: i64,
-        choices: &[&str],
-    ) -> Option<Self> {
-        let c_value = CString::new(value).ok()?;
-        unsafe {
-            if parent_ptr.is_null() {
-                return None;
-            }
-            let ctrl_ptr = ffi::wxd_ComboBox_Create(
-                parent_ptr,
-                id,
-                c_value.as_ptr(),
-                pos.into(),
-                size.into(),
-                style as ffi::wxd_Style_t,
-            );
-            if ctrl_ptr.is_null() {
-                None
-            } else {
-                let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
-                let combo = ComboBox { window };
-                // Append initial choices
-                for item in choices {
-                    combo.append(item);
-                }
-                Some(combo)
-            }
-        }
+    pub fn builder(parent: &dyn WxWidget) -> ComboBoxBuilder<'_> {
+        ComboBoxBuilder::new(parent)
     }
 
     /// Appends an item to the combobox list.
@@ -147,159 +100,73 @@ impl ComboBox {
     }
 }
 
-// --- ComboBox Builder ---
+// --- Style enum using macro ---
+widget_style_enum!(
+    name: ComboBoxStyle,
+    doc: "Style flags for ComboBox widget.",
+    variants: {
+        Default: ffi::WXD_CB_DROPDOWN, "Default style: a regular dropdown combo box.",
+        Simple: ffi::WXD_CB_SIMPLE, "A simple combo box with a permanently displayed list.",
+        Sort: ffi::WXD_CB_SORT, "The list of items is kept sorted alphabetically.",
+        ReadOnly: ffi::WXD_CB_READONLY, "The text field is read-only (user can only select from the list).",
+        ProcessEnter: ffi::WXD_TE_PROCESS_ENTER, "Process the Enter key, generating a TEXT_ENTER event."
+    },
+    default_variant: Default
+);
 
-/// Builder pattern for creating `ComboBox` widgets.
-pub struct ComboBoxBuilder {
-    parent_ptr: *mut ffi::wxd_Window_t,
-    id: Id,
-    value: String,
-    pos: Point,
-    size: Size,
-    style: ComboBoxStyle,
-    choices: Vec<String>,
-}
-
-// Manual Default implementation
-impl Default for ComboBoxBuilder {
-    fn default() -> Self {
-        Self {
-            parent_ptr: std::ptr::null_mut(),
-            id: -1, // Explicit ID_ANY
-            value: String::new(),
-            pos: Point { x: -1, y: -1 }, // Explicit default
-            size: Size {
-                width: -1,
-                height: -1,
-            }, // Explicit default
-            style: ComboBoxStyle::Default,
-            choices: Vec::new(),
+// --- Builder pattern using macro ---
+widget_builder!(
+    name: ComboBox,
+    parent_type: &'a dyn WxWidget,
+    style_type: ComboBoxStyle,
+    fields: {
+        value: String = String::new(),
+        choices: Vec<String> = Vec::new()
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        assert!(!parent_ptr.is_null(), "ComboBox requires a parent");
+        
+        let c_value = CString::new(slf.value.as_str()).expect("Invalid CString for ComboBox value");
+        
+        unsafe {
+            let ctrl_ptr = ffi::wxd_ComboBox_Create(
+                parent_ptr,
+                slf.id,
+                c_value.as_ptr(),
+                slf.pos.into(),
+                slf.size.into(),
+                slf.style.bits() as ffi::wxd_Style_t,
+            );
+            
+            if ctrl_ptr.is_null() {
+                panic!("Failed to create ComboBox widget");
+            } else {
+                let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
+                let combo = ComboBox { window };
+                
+                // Append initial choices
+                for item in &slf.choices {
+                    combo.append(item);
+                }
+                
+                combo
+            }
         }
     }
-}
+);
 
-impl ComboBoxBuilder {
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the initial text value.
-    pub fn with_value(mut self, value: &str) -> Self {
-        self.value = value.to_string();
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the window style flags.
-    pub fn with_style(mut self, style: ComboBoxStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Sets the initial items in the dropdown list.
-    pub fn with_choices(mut self, choices: &[&str]) -> Self {
+// Add a convenience method to handle &[&str] choices
+impl<'a> ComboBoxBuilder<'a> {
+    /// Sets the initial items in the dropdown list from string slices.
+    pub fn with_string_choices(mut self, choices: &[&str]) -> Self {
         self.choices = choices.iter().map(|s| s.to_string()).collect();
         self
     }
-
-    /// Builds the `ComboBox`.
-    pub fn build(self) -> ComboBox {
-        assert!(!self.parent_ptr.is_null(), "ComboBox requires a parent");
-        let choice_slices: Vec<&str> = self.choices.iter().map(|s| s.as_str()).collect();
-        ComboBox::new(
-            self.parent_ptr,
-            self.id,
-            &self.value,
-            self.pos,
-            self.size,
-            self.style.bits(),
-            &choice_slices,
-        )
-        .expect("Failed to create ComboBox widget")
-    }
 }
 
-// Implement WxWidget trait
-impl WxWidget for ComboBox {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-// Implement Drop (no-op for child widgets)
-impl Drop for ComboBox {
-    fn drop(&mut self) {}
-}
-
-// Allow ComboBox to be used where a Window is expected via Deref
-impl std::ops::Deref for ComboBox {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-// Implement WxEvtHandler trait
-impl WxEvtHandler for ComboBox {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.handle_ptr() as *mut _
-    }
-}
-
-// --- ComboBoxStyle Enum ---
-
-/// Style flags for `ComboBox`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum ComboBoxStyle {
-    /// Default style: a regular dropdown combo box.
-    Default = ffi::WXD_CB_DROPDOWN,
-    /// A simple combo box with a permanently displayed list.
-    Simple = ffi::WXD_CB_SIMPLE,
-    /// The list of items is kept sorted alphabetically.
-    Sort = ffi::WXD_CB_SORT,
-    /// The text field is read-only (user can only select from the list).
-    ReadOnly = ffi::WXD_CB_READONLY,
-    /// Process the Enter key, generating a TEXT_ENTER event.
-    ProcessEnter = ffi::WXD_TE_PROCESS_ENTER,
-}
-
-impl ComboBoxStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl BitOr for ComboBoxStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for ComboBoxStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+// --- Widget traits implementation using macro ---
+implement_widget_traits!(ComboBox, window);
 
 // --- Helper Function --- (Consider moving to a common utils module)
 

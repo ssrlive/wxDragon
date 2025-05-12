@@ -1,6 +1,8 @@
-use crate::base::{Point, RawWxProps, Size, ID_ANY};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::window::WxWidget;
+use crate::id::ID_ANY;
+use crate::types::RawWxProps;
 use wxdragon_sys as ffi;
 
 use std::ffi::CString;
@@ -106,7 +108,7 @@ impl SpinCtrlDoubleBuilder {
     fn new(parent: &impl WxWidget) -> Self {
         SpinCtrlDoubleBuilder {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             value_str: String::new(),
             pos: Point { x: -1, y: -1 },
             size: Size {

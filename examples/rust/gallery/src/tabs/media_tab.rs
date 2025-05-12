@@ -40,7 +40,7 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
     };
 
     let animation_ctrl = AnimationCtrl::builder(&panel)
-        .with_animation_file("") // Pass empty string for file as we load from bytes
+        .with_animation_file("".to_string()) // Pass empty string for file as we load from bytes
         .with_size(animation_size) // Use determined or fallback size
         .build();
 
@@ -89,16 +89,16 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
             }
         }
         Err(e) => {
-            println!("[MediaTab] Failed to decode PNG for StaticBitmap: {}", e);
+            println!("[MediaTab] Failed to load static bitmap: {}", e);
             let bmp_error_label = StaticText::builder(&panel)
-                .with_label("StaticBitmap: Error decoding PNG")
+                .with_label("StaticBitmap: Failed to load from bytes")
                 .build();
             hbox_bitmap_example.add(&bmp_error_label, 0, ALIGN_CENTER_VERTICAL | ALL, 5);
         }
     }
-    sizer.add_sizer(&hbox_bitmap_example, 0, ALIGN_LEFT | ALL, 5);
-    // --- End StaticBitmap Demo ---
+    sizer.add_sizer(&hbox_bitmap_example, 0, ALL, 10);
 
+    // Finalize layout
     panel.set_sizer(sizer, true);
 
     MediaControls {

@@ -4,7 +4,7 @@
 // use crate::window::Window; // Unused
 use crate::widgets::frame::Frame; // Parent must be a Frame
                                   // use crate::base::Size; // Unused
-use crate::base::ID_ANY; // ADDED for ID_ANY constant
+use crate::id::ID_ANY; // ADDED for ID_ANY constant
 use crate::id::Id; // ADDED for Id type alias
 use crate::window::WxWidget; // Import trait for handle_ptr()
 use std::ffi::CString;
@@ -127,7 +127,7 @@ impl StatusBarBuilder {
     pub fn new(parent: &Frame) -> Self {
         Self {
             parent_frame: parent.clone(), // Clone the Frame wrapper
-            id: ID_ANY,                   // Use ID_ANY from base (already i32)
+            id: ID_ANY as i32,                   // Use ID_ANY from base (already i32)
             style: 0,                     // Default style (e.g., wxSTB_DEFAULT_STYLE)
             fields_count: None,
             status_widths: None,

@@ -1,7 +1,6 @@
-use crate::base::{Point, Size, DEFAULT_POSITION, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION};
 use crate::id::Id;
-// use crate::app::WxdApp; // Assuming App is the entry point
-// REMOVED: use crate::event::{EventType, WxEvtHandler, Event}; // Keep needed event imports
+use crate::id::ID_ANY;
 use crate::menus::MenuBar; // ADDED: Import MenuBar
 use crate::widgets::statusbar::StatusBar; // ADDED Import
 use crate::widgets::toolbar::{ToolBar, ToolBarStyle}; // Added ToolBarStyle
@@ -44,7 +43,7 @@ impl Default for FrameBuilder {
     fn default() -> Self {
         Self {
             parent_ptr: ptr::null_mut(),
-            id: ID_ANY,                          // Use ID_ANY from base (already i32)
+            id: ID_ANY as i32,                          // Use ID_ANY from base (already i32)
             title: "wxDragon Frame".to_string(), // Default title
             pos: DEFAULT_POSITION,               // Default position
             size: Size {

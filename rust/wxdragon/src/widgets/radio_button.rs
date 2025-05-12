@@ -1,6 +1,6 @@
 //! Safe wrapper for wxRadioButton.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::{Window, WxWidget};

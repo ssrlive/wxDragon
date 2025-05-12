@@ -1,66 +1,42 @@
 // ! Safe wrapper for wxCheckListBox.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, ID_ANY};
-use crate::widgets::listbox::ListBoxStyle;
+use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
-// Remove re-export of ListBox constants as they are now in ListBoxStyle enum
-// pub use crate::widgets::listbox::{
-//     LB_ALWAYS_SB, LB_EXTENDED, LB_HSCROLL, LB_MULTIPLE, LB_SINGLE, LB_SORT, NOT_FOUND,
-// };
+// Create a style enum for CheckListBox, reusing the values from ListBoxStyle
+widget_style_enum!(
+    name: CheckListBoxStyle,
+    doc: "Style flags for the CheckListBox widget.",
+    variants: {
+        Default: 0, "Default style.",
+        Single: ffi::WXD_LB_SINGLE, "Single-selection list.",
+        Multiple: ffi::WXD_LB_MULTIPLE, "Multiple-selection list.",
+        Extended: ffi::WXD_LB_EXTENDED, "Extended-selection list.",
+        HScroll: ffi::WXD_LB_HSCROLL, "Create horizontal scrollbar if contents are too wide.",
+        AlwaysSB: ffi::WXD_LB_ALWAYS_SB, "Always show a vertical scrollbar.",
+        Sort: ffi::WXD_LB_SORT, "Sort strings in the list alphabetically."
+    },
+    default_variant: Default
+);
 
-// Opaque pointer type from FFI
-pub type RawCheckListBox = ffi::wxd_CheckListBox_t;
-
-/// Represents a wxCheckListBox control.
+/// Represents a wxCheckListBox control, which combines a ListBox with checkboxes.
 #[derive(Clone)]
 pub struct CheckListBox {
     window: Window,
 }
 
 impl CheckListBox {
-    /// Creates a new `CheckListBoxBuilder`.
+    /// Creates a new `CheckListBoxBuilder` for constructing a check list box control.
     pub fn builder(parent: &dyn WxWidget) -> CheckListBoxBuilder {
         CheckListBoxBuilder::new(parent)
-    }
-
-    /// Low-level constructor used by the builder's `build` method.
-    #[allow(dead_code)]
-    fn new(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        pos: Point,
-        size: Size,
-        style: i64,
-        choices: &[&str],
-    ) -> Option<Self> {
-        unsafe {
-            if parent_ptr.is_null() {
-                return None;
-            }
-            let ctrl_ptr = ffi::wxd_CheckListBox_Create(
-                parent_ptr,
-                id as i32,
-                pos.into(),
-                size.into(),
-                style as ffi::wxd_Style_t,
-            );
-            if ctrl_ptr.is_null() {
-                None
-            } else {
-                let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
-                let clbox = CheckListBox { window };
-                for choice in choices {
-                    clbox.append(choice);
-                }
-                Some(clbox)
-            }
-        }
     }
 
     /// Appends an item to the list box.
@@ -193,115 +169,44 @@ impl CheckListBox {
     }
 }
 
-// --- CheckListBox Builder ---
-
-/// Builder for creating `CheckListBox` widgets.
-#[derive(Clone)]
-pub struct CheckListBoxBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    pos: Option<Point>,
-    size: Option<Size>,
-    style: ListBoxStyle,
-    choices: Vec<String>,
-}
-
-impl<'a> CheckListBoxBuilder<'a> {
-    /// Creates a new builder.
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: ID_ANY as i32,
-            pos: None,
-            size: None,
-            style: ListBoxStyle::Default,
-            choices: Vec::new(),
-        }
-    }
-
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id as i32;
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = Some(pos);
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = Some(size);
-        self
-    }
-
-    /// Sets the window style flags.
-    pub fn with_style(mut self, style: ListBoxStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Sets the initial list of choices.
-    pub fn with_choices(mut self, choices: &[&str]) -> Self {
-        self.choices = choices.iter().map(|s| s.to_string()).collect();
-        self
-    }
-
-    /// Builds the `CheckListBox`.
-    pub fn build(self) -> CheckListBox {
-        let parent_ptr = self.parent.handle_ptr();
-        let pos = self.pos.unwrap_or(DEFAULT_POSITION);
-        let size = self.size.unwrap_or(DEFAULT_SIZE);
-
+widget_builder!(
+    name: CheckListBox,
+    parent_type: &'a dyn WxWidget,
+    style_type: CheckListBoxStyle,
+    fields: {
+        choices: Vec<String> = Vec::new()
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        let pos = slf.pos.into();
+        let size = slf.size.into();
+        
+        // Create the control
         let ctrl_ptr = unsafe {
             ffi::wxd_CheckListBox_Create(
                 parent_ptr,
-                self.id as i32,
-                pos.into(),
-                size.into(),
-                self.style.bits(),
+                slf.id,
+                pos,
+                size,
+                slf.style.bits(),
             )
         };
-        assert!(!ctrl_ptr.is_null(), "Failed to create CheckListBox widget");
-        let clbox = unsafe {
-            let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
-            CheckListBox { window }
+        
+        if ctrl_ptr.is_null() {
+            panic!("Failed to create CheckListBox widget");
+        }
+        
+        let clbox = CheckListBox {
+            window: unsafe { Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t) },
         };
 
         // Append initial choices
-        for choice_str in &self.choices {
+        for choice_str in &slf.choices {
             clbox.append(choice_str);
         }
+        
         clbox
     }
-}
+);
 
-// --- Trait Implementations ---
-
-impl WxWidget for CheckListBox {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-impl Drop for CheckListBox {
-    fn drop(&mut self) {
-        // Window's Drop implementation handles cleanup via WxdCleaner
-        // No specific CheckListBox cleanup needed here
-    }
-}
-
-impl std::ops::Deref for CheckListBox {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-impl WxEvtHandler for CheckListBox {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
+implement_widget_traits!(CheckListBox, window);

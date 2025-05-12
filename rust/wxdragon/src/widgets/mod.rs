@@ -64,7 +64,7 @@ pub use calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};
 pub use checkbox::{CheckBox, CheckBoxBuilder};
 pub use checklistbox::{CheckListBox, CheckListBoxBuilder};
 pub use choice::{Choice, ChoiceBuilder};
-pub use colourpickerctrl::{colours, Colour, ColourPickerCtrl, ColourPickerCtrlBuilder};
+pub use colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 pub use combobox::{ComboBox, ComboBoxBuilder};
 pub use command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
 pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder, DateTime};

@@ -1,6 +1,7 @@
 //! Safe wrapper for wxSpinCtrl.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::id::ID_ANY;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
@@ -86,7 +87,7 @@ impl SpinCtrlBuilder {
     pub fn new<W: WxWidget>(parent: &W) -> Self {
         SpinCtrlBuilder {
             parent: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             value: "0".to_string(), // Default initial string
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,

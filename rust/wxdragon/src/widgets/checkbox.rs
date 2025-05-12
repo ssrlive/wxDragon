@@ -1,6 +1,7 @@
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, ID_ANY};
+use crate::id::Id;
+use crate::widget_builder;
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::ops::{BitOr, BitOrAssign};
@@ -65,76 +66,24 @@ impl CheckBox {
     }
 }
 
-// --- CheckBox Builder ---
-
-/// Builder pattern for creating `CheckBox` widgets.
-#[derive(Clone)]
-pub struct CheckBoxBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    label: String,
-    pos: Option<Point>,
-    size: Option<Size>,
-    style: CheckBoxStyle,
-}
-
-impl<'a> CheckBoxBuilder<'a> {
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: ID_ANY as Id,
-            label: String::new(),
-            pos: None,
-            size: None,
-            style: CheckBoxStyle::Default,
-        }
-    }
-
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the checkbox label.
-    pub fn with_label(mut self, label: &str) -> Self {
-        self.label = label.to_string();
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = Some(pos);
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = Some(size);
-        self
-    }
-
-    /// Sets the window style flags.
-    pub fn with_style(mut self, style: CheckBoxStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Builds the `CheckBox`.
-    pub fn build(self) -> CheckBox {
-        let parent_ptr = self.parent.handle_ptr();
-        let pos = self.pos.unwrap_or_default();
-        let size = self.size.unwrap_or_default();
+// Use the widget_builder macro to generate the CheckBoxBuilder implementation
+widget_builder!(
+    name: CheckBox,
+    parent_type: &'a dyn WxWidget,
+    style_type: CheckBoxStyle,
+    fields: {},
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
         CheckBox::new_impl(
             parent_ptr,
-            self.id,
-            &self.label,
-            pos,
-            size,
-            self.style.bits(),
+            slf.id,
+            &slf.label,
+            slf.pos,
+            slf.size,
+            slf.style.bits(),
         )
     }
-}
+);
 
 // Implement WxWidget trait
 impl WxWidget for CheckBox {
@@ -143,7 +92,12 @@ impl WxWidget for CheckBox {
     }
 }
 
-// Allow CheckBox to be used where a Window is expected (read-only access)
+// Implement Drop (no-op for child widgets)
+impl Drop for CheckBox {
+    fn drop(&mut self) {}
+}
+
+// Allow CheckBox to be used where a Window is expected via Deref
 impl std::ops::Deref for CheckBox {
     type Target = Window;
     fn deref(&self) -> &Self::Target {

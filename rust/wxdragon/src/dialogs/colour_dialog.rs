@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use crate::{dialogs::Dialog, widgets::colourpickerctrl::Colour, window::WxWidget};
+use crate::{color::Colour, dialogs::Dialog, window::WxWidget};
 use wxdragon_sys as ffi;
 
 /// Wrapper for wxColourDialog.

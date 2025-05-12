@@ -1,4 +1,4 @@
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::{Id, ID_ANY};
 use crate::window::WxWidget;

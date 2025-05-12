@@ -1,7 +1,8 @@
 //!
 //! Safe wrapper for wxStaticBitmap
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::id::ID_ANY;
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler; // Corrected: Though StaticBitmap rarely has specific events to bind
 use crate::window::{Window, WxWidget};
@@ -23,7 +24,7 @@ impl StaticBitmap {
     pub fn builder<W: WxWidget>(parent: &W) -> StaticBitmapBuilder {
         StaticBitmapBuilder {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             bitmap: None, // Must be set via with_bitmap
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,

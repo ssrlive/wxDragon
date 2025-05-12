@@ -1,7 +1,9 @@
-use crate::base::{Point, RawWxProps, Size, ID_ANY}; // ID_ANY and RawWxProps are in base
+use crate::geometry::{Point, Size}; // ID_ANY and RawWxProps are in base
 use crate::event::WxEvtHandler;
 use crate::id::Id;
+use crate::id::ID_ANY;
 use crate::window::WxWidget;
+use crate::types::RawWxProps;
 use wxdragon_sys as ffi; // ADDED for Id type alias
                          // ConvertResult path still TBD, will add if compiler needs it.
 
@@ -160,7 +162,7 @@ impl SearchCtrlBuilder {
     fn new(parent: &impl WxWidget) -> Self {
         SearchCtrlBuilder {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             value: String::new(),
             pos: Point { x: -1, y: -1 },
             size: Size {

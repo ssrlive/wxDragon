@@ -1,4 +1,5 @@
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::id::ID_ANY;
 use crate::event::{Event, EventType, WxEvtHandler};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
@@ -318,7 +319,7 @@ impl<P: WxWidget + Clone> Default for ListCtrlBuilder<P> {
     fn default() -> Self {
         Self {
             parent_ptr: std::ptr::null_mut(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
             style: ListCtrlStyle::default(),

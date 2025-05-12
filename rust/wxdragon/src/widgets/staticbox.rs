@@ -2,7 +2,7 @@
 //! wxStaticBox wrapper
 //!
 
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;

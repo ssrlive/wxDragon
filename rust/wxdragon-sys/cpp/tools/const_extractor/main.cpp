@@ -39,7 +39,9 @@
 #include <wx/statline.h>    // For wxStaticLine constants
 #include <wx/statbmp.h> // ADDED for wxStaticBitmap constants
 #include <wx/filectrl.h> // ADDED for wxFileCtrl constants
+#include <wx/calctrl.h> // ADDED for wxCalendarCtrl constants
 #include <wx/aui/aui.h>
+#include <wx/clrpicker.h>
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -370,10 +372,10 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxFNTP_FONTDESC_AS_LABEL", wxFNTP_FONTDESC_AS_LABEL});
     constants_to_extract.push_back({"wxFNTP_USEFONT_FOR_LABEL", wxFNTP_USEFONT_FOR_LABEL});
     // ColourPickerCtrl Styles
-    // constants_to_extract.push_back({"wxCLRP_DEFAULT_STYLE", wxCLRP_DEFAULT_STYLE}); // Temporarily comment out
-    // constants_to_extract.push_back({"wxCLRP_USE_TEXTCTRL", wxCLRP_USE_TEXTCTRL}); // Temporarily comment out
-    // constants_to_extract.push_back({"wxCLRP_SHOW_LABEL", wxCLRP_SHOW_LABEL}); // Temporarily comment out
-    // constants_to_extract.push_back({"wxCLRP_SMALL", wxCLRP_SMALL}); // Temporarily comment out
+    constants_to_extract.push_back({"wxCLRP_DEFAULT_STYLE", wxCLRP_DEFAULT_STYLE}); 
+    constants_to_extract.push_back({"wxCLRP_USE_TEXTCTRL", wxCLRP_USE_TEXTCTRL}); 
+    constants_to_extract.push_back({"wxCLRP_SHOW_LABEL", wxCLRP_SHOW_LABEL}); 
+    constants_to_extract.push_back({"wxCLRP_SHOW_ALPHA", wxCLRP_SHOW_ALPHA}); 
     // CollapsiblePane Styles
     constants_to_extract.push_back({"wxCP_DEFAULT_STYLE", wxCP_DEFAULT_STYLE});
     constants_to_extract.push_back({"wxCP_NO_TLW_RESIZE", wxCP_NO_TLW_RESIZE});
@@ -441,6 +443,14 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxDP_DEFAULT", wxDP_DEFAULT});
     constants_to_extract.push_back({"wxDP_ALLOWNONE", wxDP_ALLOWNONE});
     constants_to_extract.push_back({"wxDP_SHOWCENTURY", wxDP_SHOWCENTURY});
+    // Calendar Control Styles
+    constants_to_extract.push_back({"wxCAL_SUNDAY_FIRST", wxCAL_SUNDAY_FIRST});
+    constants_to_extract.push_back({"wxCAL_MONDAY_FIRST", wxCAL_MONDAY_FIRST});
+    constants_to_extract.push_back({"wxCAL_SHOW_HOLIDAYS", wxCAL_SHOW_HOLIDAYS});
+    constants_to_extract.push_back({"wxCAL_NO_YEAR_CHANGE", wxCAL_NO_YEAR_CHANGE});
+    constants_to_extract.push_back({"wxCAL_NO_MONTH_CHANGE", wxCAL_NO_MONTH_CHANGE});
+    constants_to_extract.push_back({"wxCAL_SEQUENTIAL_MONTH_SELECTION", wxCAL_SEQUENTIAL_MONTH_SELECTION});
+    constants_to_extract.push_back({"wxCAL_SHOW_SURROUNDING_WEEKS", wxCAL_SHOW_SURROUNDING_WEEKS});
     // ListBox Styles (Re-added)
     constants_to_extract.push_back({"wxLB_SINGLE", wxLB_SINGLE});
     constants_to_extract.push_back({"wxLB_MULTIPLE", wxLB_MULTIPLE});

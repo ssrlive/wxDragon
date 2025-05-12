@@ -107,16 +107,16 @@ pub trait WxWidget {
     }
 
     /// Gets the window's sizer-calculated best size.
-    fn get_best_size(&self) -> crate::base::Size {
+    fn get_best_size(&self) -> crate::geometry::Size {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            crate::base::Size {
+            crate::geometry::Size {
                 width: -1,
                 height: -1,
             }
         } else {
             let c_size = unsafe { ffi::wxd_Window_GetBestSize(handle) };
-            crate::base::Size {
+            crate::geometry::Size {
                 width: c_size.width,
                 height: c_size.height,
             }
@@ -132,7 +132,7 @@ pub trait WxWidget {
     }
 
     /// Sets the window's background color.
-    fn set_background_color(&self, color: crate::widgets::colourpickerctrl::Colour) {
+    fn set_background_color(&self, color: crate::color::Colour) {
         let window_ptr = self.handle_ptr();
         if !window_ptr.is_null() {
             unsafe {
@@ -142,7 +142,7 @@ pub trait WxWidget {
     }
 
     /// Sets the window's minimum size.
-    fn set_min_size(&self, size: crate::base::Size) {
+    fn set_min_size(&self, size: crate::geometry::Size) {
         let window_ptr = self.handle_ptr();
         if !window_ptr.is_null() {
             unsafe {
@@ -152,7 +152,7 @@ pub trait WxWidget {
     }
 
     /// Refreshes the window, optionally erasing the background and specifying a rectangle.
-    fn refresh(&self, erase_background: bool, rect: Option<&crate::base::Rect>) {
+    fn refresh(&self, erase_background: bool, rect: Option<&crate::geometry::Rect>) {
         let window_ptr = self.handle_ptr();
         if !window_ptr.is_null() {
             let c_rect_storage: wxdragon_sys::wxd_Rect;

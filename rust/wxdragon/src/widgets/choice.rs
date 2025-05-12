@@ -1,22 +1,27 @@
-//! Safe wrapper for wxChoice.
-
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::id::{Id, ID_ANY};
+use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
-// --- Constants ---
-// Style flags (uses ComboBox flags)
-// REMOVED: pub const CB_SORT: i64 = ffi::WXD_CB_SORT as i64;
 // Special value returned by GetSelection when nothing is selected
 pub const NOT_FOUND: i32 = -1; // wxNOT_FOUND is typically -1
 
-// Opaque pointer type from FFI
-pub type RawChoice = ffi::wxd_Choice_t;
+// Create a proper style enum for Choice
+widget_style_enum!(
+    name: ChoiceStyle,
+    doc: "Style flags for the Choice widget.",
+    variants: {
+        Default: 0, "Default style.",
+        Sort: ffi::WXD_CB_SORT, "The items in the choice control are kept sorted alphabetically."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxChoice control (dropdown list).
 #[derive(Clone)]
@@ -25,38 +30,9 @@ pub struct Choice {
 }
 
 impl Choice {
-    /// Creates a new `ChoiceBuilder`.
-    pub fn builder(parent: &impl WxWidget) -> ChoiceBuilder {
+    /// Creates a new `ChoiceBuilder` for constructing a choice control.
+    pub fn builder(parent: &dyn WxWidget) -> ChoiceBuilder {
         ChoiceBuilder::new(parent)
-    }
-
-    /// Shared implementation called by builder
-    fn new_impl(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        pos: Point,
-        size: Size,
-        style: i64,
-    ) -> Self {
-        unsafe {
-            let ctrl_ptr = ffi::wxd_Choice_Create(
-                parent_ptr,
-                id,
-                pos.into(),
-                size.into(),
-                style as ffi::wxd_Style_t, // Cast style to FFI type (5 args)
-            );
-            assert!(!ctrl_ptr.is_null(), "wxd_Choice_Create returned null");
-            Self::from_ptr(ctrl_ptr)
-        }
-    }
-
-    // Unsafe constructor from raw pointer
-    unsafe fn from_ptr(ptr: *mut RawChoice) -> Self {
-        assert!(!ptr.is_null());
-        Choice {
-            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
-        }
     }
 
     /// Appends an item to the choice control.
@@ -172,137 +148,44 @@ impl Choice {
     }
 }
 
-// --- Choice Builder ---
-
-/// Builder pattern for creating `Choice` widgets.
-pub struct ChoiceBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    pos: Option<Point>,
-    size: Option<Size>,
-    style: ChoiceStyle,
-    choices: Vec<String>,
-}
-
-impl<'a> ChoiceBuilder<'a> {
-    /// Creates a new builder.
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: ID_ANY as Id,
-            pos: None,
-            size: None,
-            style: ChoiceStyle::Default,
-            choices: Vec::new(),
+widget_builder!(
+    name: Choice,
+    parent_type: &'a dyn WxWidget,
+    style_type: ChoiceStyle,
+    fields: {
+        choices: Vec<String> = Vec::new()
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        let pos = slf.pos.into();
+        let size = slf.size.into();
+        
+        // Create the choice control
+        let ctrl_ptr = unsafe {
+            ffi::wxd_Choice_Create(
+                parent_ptr,
+                slf.id,
+                pos,
+                size,
+                slf.style.bits()
+            )
+        };
+        
+        if ctrl_ptr.is_null() {
+            panic!("Failed to create Choice widget");
         }
-    }
+        
+        let choice = Choice {
+            window: unsafe { Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t) },
+        };
 
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, x: i32, y: i32) -> Self {
-        self.pos = Some(Point { x, y });
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, width: i32, height: i32) -> Self {
-        self.size = Some(Size { width, height });
-        self
-    }
-
-    /// Sets the window style flags (e.g., `CB_SORT`).
-    pub fn with_style(mut self, style: ChoiceStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Sets the initial items in the choice control.
-    pub fn with_choices(mut self, choices: &[&str]) -> Self {
-        self.choices = choices.iter().map(|s| s.to_string()).collect();
-        self
-    }
-
-    /// Builds the `Choice`.
-    pub fn build(self) -> Choice {
-        let parent_ptr = self.parent.handle_ptr();
-        let pos = self.pos.unwrap_or(DEFAULT_POSITION);
-        let size = self.size.unwrap_or(DEFAULT_SIZE);
-        let choice_ctrl = Choice::new_impl(parent_ptr, self.id, pos, size, self.style.bits());
-
-        // Append initial choices if any
-        for choice_str in &self.choices {
-            choice_ctrl.append(choice_str);
+        // Add initial choices
+        for choice_str in &slf.choices {
+            choice.append(choice_str);
         }
-
-        choice_ctrl
+        
+        choice
     }
-}
+);
 
-// Implement WxWidget trait
-impl WxWidget for Choice {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-// Implement Drop (no-op for child widgets)
-impl Drop for Choice {
-    fn drop(&mut self) {}
-}
-
-// Allow Choice to be used where a Window is expected via Deref
-impl std::ops::Deref for Choice {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-// Implement WxEvtHandler trait
-impl WxEvtHandler for Choice {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
-
-// --- ChoiceStyle Enum ---
-
-/// Style flags for `Choice`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum ChoiceStyle {
-    /// Default style (items are not sorted).
-    Default = 0,
-    /// The items in the choice control are kept sorted alphabetically.
-    Sort = ffi::WXD_CB_SORT,
-}
-
-impl ChoiceStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl BitOr for ChoiceStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        // For Choice, styles are typically not combined, but allow for future flexibility.
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for ChoiceStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+implement_widget_traits!(Choice, window); 

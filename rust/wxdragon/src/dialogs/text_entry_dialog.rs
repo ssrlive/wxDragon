@@ -1,4 +1,4 @@
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::dialogs::Dialog;
 use crate::window::WxWidget;
 use std::ffi::{CStr, CString};

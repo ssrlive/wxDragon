@@ -18,7 +18,7 @@ When implementing any new feature (widget, sizer, event, etc.), prioritize safet
     . **Generation Process (Maintainer Task):**
         1. For each target platform (e.g., Windows, Linux, macOS), build wxWidgets and the `const_extractor` tool for that platform.
         2. Run the compiled `const_extractor` against that platform's wxWidgets build.
-        3. Save the output into the corresponding platform-specific file in [`rust/wxdragon-sys/src/generated_constants/`](mdc:rust/wxdragon-sys/src/generated_constants/) (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`). These files should generate `pub const WXD_XXX` constants.
+        3. Save the output into the corresponding platform-specific file in [`rust/wxdragon-sys/src/generated_constants/`](mdc:rust/wxdragon-sys/src/generated_constants) (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`). These files should generate `pub const WXD_XXX` constants.
         4. Commit these updated pre-generated files to the repository.
     . **Usage in Safe Wrapper:** Use the `WXD_XXX` constants (which will be available via `wxdragon_sys::WXD_XXX` after `build.rs` copies the correct file) in the safe Rust wrapper, typically by defining local constants within the relevant widget module (e.g., `pub const TAB_TRAVERSAL: i64 = wxdragon_sys::WXD_TAB_TRAVERSAL;` in `panel.rs`).
 . **Build Check (During Development of Constant Generation):** When modifying `const_extractor` or the generation process, verify constants are generated correctly into the platform-specific files and that `build.rs` copies the correct one to `$OUT_DIR/wx_other_constants.rs` making them accessible via `wxdragon_sys::WXD_XXX`.
@@ -55,33 +55,6 @@ When implementing any new feature (widget, sizer, event, etc.), prioritize safet
 . Use `Result` for fallible operations where appropriate.
 . Apply established patterns consistently (e.g., Widget Builder Pattern).
 . **Build Check:** Run `cd rust && cargo build`. Fix any Rust compilation errors.
-
-## Guideline for Widget Builder Pattern in wxDragon:
-
-When implementing a builder for a new widget `Foo`, follow this pattern for consistency:
-
-1.  **Builder Struct:** Define a public struct named `FooBuilder`.
-    *   It should hold fields for all configurable parameters, including the parent widget's raw pointer if applicable.
-    *   Avoid using `Option` for fields where a sensible default can be provided during initialization.
-
-2.  **Associated Function:** Implement an associated function on the main widget struct: `pub fn builder(parent: &impl WxWidget) -> FooBuilder`.
-    *   This function initializes the `FooBuilder` with default values and the provided parent.
-    *   For widgets that might not have a parent (like `Frame`), the `builder()` function takes no arguments. A separate `with_parent()` method should be added to the builder itself.
-
-3.  **Initialization (`new`):** The `FooBuilder::new(...)` method (called by `Widget::builder(...)`) should initialize all fields with sensible defaults (e.g., `ID_ANY`, empty strings, default positions/sizes like `-1`, zero style flags).
-
-4.  **Setter Methods:** Implement public methods on `FooBuilder` for setting parameters.
-    *   **Naming:** Use the `with_` prefix (e.g., `with_id`, `with_label`, `with_size`, `with_style`).
-    *   **Signature:** Methods should take `mut self` and return `Self` to enable chaining.
-    *   **Parameters:** Accept standard Rust types (`i32`, `&str`, `Point`, `Size`, `i64`, `bool`, etc.).
-
-5.  **`build()` Method:** Implement `pub fn build(self) -> Foo` (or potentially `Option<Foo>`/`Result<Foo, Error>` if creation failure needs to be handled gracefully without panicking).
-    *   This method consumes the builder (`self`).
-    *   Perform necessary conversions (e.g., `&str` to `CString`).
-    *   Call the appropriate `ffi::wxd_Foo_Create` function using the values stored in the builder.
-    *   **Error Handling:** Currently, the pattern is to `.expect()` or `panic!()` if the FFI call returns a null pointer. Consider changing this to return `Option<Foo>` in the future.
-    *   Wrap the resulting FFI pointer in the `Foo` struct using its private `Foo::new(...)` or `Foo::from_ptr(...)` constructor.
-    *   Handle any post-creation setup (like setting the initial checked state for `CheckBox`).
 
 ## Example/Usage (`examples/rust/gallery` or similar):
 . Update the example code to demonstrate the new feature using the safe Rust wrapper.

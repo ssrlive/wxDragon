@@ -1,8 +1,8 @@
 //! Safe wrappers for wxWidgets events.
 
-use crate::base::Point;
+use crate::geometry::Point;
 use crate::datetime::DateTime;
-use crate::widgets::colourpickerctrl::Colour;
+use crate::color::Colour;
 use crate::widgets::treectrl::TreeItemId;
 use crate::window::Window;
 use std::boxed::Box;

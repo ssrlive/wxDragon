@@ -1,9 +1,10 @@
 //!
 //! Safe wrapper for wxScrolledWindow.
 
-use crate::base::{Point, Size, ID_ANY};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
+use crate::id::ID_ANY;
 use crate::widgets::panel::Panel; // Inherits from Panel (used for Deref)
 use crate::window::WxWidget; // Used for builder parent type constraint
 use std::ops::{Deref, DerefMut};
@@ -125,7 +126,7 @@ impl ScrolledWindowBuilder {
     pub fn new(parent: &impl WxWidget) -> Self {
         Self {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: Point { x: -1, y: -1 }, // Default position
             size: Size {
                 width: -1,

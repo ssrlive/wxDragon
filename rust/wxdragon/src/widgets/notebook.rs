@@ -1,7 +1,8 @@
 //!
 //! Safe wrapper for wxNotebook.
 
-use crate::base::{Point, Size, ID_ANY};
+use crate::geometry::{Point, Size};
+use crate::id::ID_ANY;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
@@ -147,7 +148,7 @@ impl<'a> NotebookBuilder<'a> {
     pub fn new(parent: &'a dyn WxWidget) -> Self {
         NotebookBuilder {
             parent_ptr: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: Point::default(),
             size: Size::default(),
             style: NotebookStyle::DEFAULT,

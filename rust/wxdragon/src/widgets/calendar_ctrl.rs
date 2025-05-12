@@ -1,17 +1,30 @@
+use crate::geometry::{Point, Size};
 use crate::datetime::DateTime;
-use crate::prelude::*;
+use crate::event::WxEvtHandler;
+use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
-use std::ops::{Deref, Drop};
+use std::ptr;
 use wxdragon_sys as ffi;
 
-// CalendarCtrl specific style constants can be added here if exposed via WXD_*
-// Example:
-// pub const CAL_SUNDAY_FIRST: i64 = ffi::WXD_CAL_SUNDAY_FIRST;
-// pub const CAL_SHOW_HOLIDAYS: i64 = ffi::WXD_CAL_SHOW_HOLIDAYS;
-// pub const CAL_NO_YEAR_CHANGE: i64 = ffi::WXD_CAL_NO_YEAR_CHANGE;
-// pub const CAL_NO_MONTH_CHANGE: i64 = ffi::WXD_CAL_NO_MONTH_CHANGE;
-// pub const CAL_SEQUENTIAL_MONTH_SELECTION: i64 = ffi::WXD_CAL_SEQUENTIAL_MONTH_SELECTION;
-// pub const CAL_SHOW_SURROUNDING_WEEKS: i64 = ffi::WXD_CAL_SHOW_SURROUNDING_WEEKS;
+// Define a proper style enum for CalendarCtrl
+widget_style_enum!(
+    name: CalendarCtrlStyle,
+    doc: "Style flags for Calendar control.",
+    variants: {
+        Default: 0, "Default style.",
+        SundayFirst: ffi::WXD_CAL_SUNDAY_FIRST, "Show Sunday as the first day in the week.",
+        MondayFirst: ffi::WXD_CAL_MONDAY_FIRST, "Show Monday as the first day in the week.",
+        ShowHolidays: ffi::WXD_CAL_SHOW_HOLIDAYS, "Highlight holidays in the calendar.",
+        NoYearChange: ffi::WXD_CAL_NO_YEAR_CHANGE, "Disable year changing.",
+        NoMonthChange: ffi::WXD_CAL_NO_MONTH_CHANGE, "Disable month changing.",
+        SequentialMonthSelection: ffi::WXD_CAL_SEQUENTIAL_MONTH_SELECTION, "Use alternative, more compact, style for the month and year selection controls.",
+        ShowSurroundingWeeks: ffi::WXD_CAL_SHOW_SURROUNDING_WEEKS, "Show the neighbouring weeks in the previous and next months."
+    },
+    default_variant: Default
+);
 
 /// Represents a `wxCalendarCtrl`.
 #[derive(Clone)]
@@ -26,37 +39,37 @@ impl CalendarCtrl {
     }
 
     /// Low-level constructor used by the builder.
-    fn new(
-        parent: &dyn WxWidget,
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
         id: Id,
-        date: Option<&DateTime>, // Use Option<&DateTime> to pass to FFI
+        date: Option<&DateTime>,
         pos: Point,
         size: Size,
         style: i64,
-    ) -> Option<Self> {
+    ) -> Self {
+        assert!(!parent_ptr.is_null(), "CalendarCtrl requires a parent");
+        
         // Convert Option<&DateTime> to *const ffi::wxd_DateTime_t
-        // If date is None, pass null. If Some, pass pointer to its raw ffi::wxd_DateTime_t.
-        let c_date_ptr: *const ffi::wxd_DateTime_t = date.map_or(std::ptr::null(), |d| d.as_ptr());
+        let c_date_ptr: *const ffi::wxd_DateTime_t = date.map_or(ptr::null(), |d| d.as_ptr());
 
-        unsafe {
-            let parent_ptr = parent.handle_ptr();
-            if parent_ptr.is_null() {
-                return None;
-            }
-            let ctrl_ptr = ffi::wxd_CalendarCtrl_Create(
-                parent_ptr as *mut _,
+        let ptr = unsafe {
+            ffi::wxd_CalendarCtrl_Create(
+                parent_ptr,
                 id,
-                c_date_ptr, // Pass the potentially null pointer
+                c_date_ptr,
                 pos.into(),
                 size.into(),
-                style.try_into().unwrap_or(0), // Default style to 0 if conversion fails
-            );
-            if ctrl_ptr.is_null() {
-                None
-            } else {
-                let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
-                Some(CalendarCtrl { window })
-            }
+                style as ffi::wxd_Style_t,
+            )
+        };
+        
+        if ptr.is_null() {
+            panic!("Failed to create CalendarCtrl widget");
+        }
+        
+        unsafe {
+            let window = Window::from_ptr(ptr as *mut ffi::wxd_Window_t);
+            CalendarCtrl { window }
         }
     }
 
@@ -74,105 +87,25 @@ impl CalendarCtrl {
     }
 }
 
-// --- CalendarCtrl Builder ---
-
-/// Builder pattern for creating `CalendarCtrl` widgets.
-#[derive(Clone)] // DateTime is Copy, so builder can be Clone
-pub struct CalendarCtrlBuilder<'a> {
-    parent: &'a dyn WxWidget,
-    id: Id,
-    initial_date: Option<DateTime>, // Store an owned DateTime for the builder
-    pos: Point,
-    size: Size,
-    style: i64,
-}
-
-impl<'a> CalendarCtrlBuilder<'a> {
-    /// Creates a new builder.
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        Self {
-            parent,
-            id: crate::id::ID_ANY as Id, // Corrected usage
-            initial_date: None,
-            pos: Point { x: -1, y: -1 }, // Standard default
-            size: Size {
-                width: -1,
-                height: -1,
-            }, // Standard default
-            style: 0,
-        }
-    }
-
-    /// Sets the window identifier.
-    pub fn with_id(mut self, id: Id) -> Self {
-        // Ensure id is of type Id
-        self.id = id;
-        self
-    }
-
-    /// Sets the initially displayed date.
-    /// If not set, the control defaults to today's date.
-    pub fn with_initial_date(mut self, date: DateTime) -> Self {
-        self.initial_date = Some(date);
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the window style flags.
-    /// Common styles include `CAL_SUNDAY_FIRST`, `CAL_SHOW_HOLIDAYS`.
-    pub fn with_style(mut self, style: i64) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Builds the `CalendarCtrl`.
-    pub fn build(self) -> CalendarCtrl {
-        CalendarCtrl::new(
-            self.parent,
-            self.id,
-            self.initial_date.as_ref(), // Pass Option<&DateTime>
-            self.pos,
-            self.size,
-            self.style,
+// Use the widget_builder macro for CalendarCtrl
+widget_builder!(
+    name: CalendarCtrl,
+    parent_type: &'a dyn WxWidget,
+    style_type: CalendarCtrlStyle,
+    fields: {
+        initial_date: Option<DateTime> = None
+    },
+    build_impl: |slf| {
+        CalendarCtrl::new_impl(
+            slf.parent.handle_ptr(),
+            slf.id,
+            slf.initial_date.as_ref(),
+            slf.pos,
+            slf.size,
+            slf.style.bits(),
         )
-        .expect("Failed to create CalendarCtrl widget")
     }
-}
+);
 
-// Implement WxWidget trait
-impl WxWidget for CalendarCtrl {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-// Implement Drop
-impl Drop for CalendarCtrl {
-    fn drop(&mut self) {
-        // No explicit destruction needed here. The `Window` contained within
-        // (if it had specific drop logic) would run, but wxWidgets typically
-        // handles child widget destruction when the parent is destroyed.
-        // If specific cleanup were needed for CalendarCtrl beyond what Window provides,
-        // it would go here (e.g., calling a specific ffi::wxd_CalendarCtrl_Destroy if it existed
-        // and was necessary, but this is not the wxWidgets pattern for child controls).
-    }
-}
-
-// Allow CalendarCtrl to be used where a Window is expected (e.g., for sizers)
-impl Deref for CalendarCtrl {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
+// Apply common trait implementations for this widget
+implement_widget_traits!(CalendarCtrl, window);

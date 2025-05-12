@@ -3,6 +3,8 @@ use wxdragon::prelude::*;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::listbox::ListBoxStyle;
 use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::checklistbox::CheckListBoxStyle;
+use wxdragon::widgets::choice::ChoiceStyle;
 // use wxdragon::widgets::choice; // For CB_SORT if it were available directly
 
 #[allow(dead_code)]
@@ -44,11 +46,17 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .build();
     let checklistbox = CheckListBox::builder(&panel)
         .with_id(109)
-        .with_choices(&[
-            "Option A", "Option B", "Option C", "Option D", "Option E", "Option F", "Option G",
+        .with_choices(vec![
+            "Option A".to_string(), 
+            "Option B".to_string(), 
+            "Option C".to_string(), 
+            "Option D".to_string(), 
+            "Option E".to_string(), 
+            "Option F".to_string(), 
+            "Option G".to_string()
         ])
         // .with_style(LB_SORT) // Old
-        .with_style(ListBoxStyle::Sort) // New
+        .with_style(CheckListBoxStyle::Sort) // Correct type
         .build();
     checklistbox.check(1, true);
     let checklistbox_status_label = StaticText::builder(&panel)
@@ -58,9 +66,8 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Cyan", "Magenta",
     ];
     let choice_ctrl = Choice::builder(&panel)
-        .with_choices(&choice_items)
-        // .with_style(CB_SORT) // Old - CB_SORT may not be applicable or available for Choice directly yet
-        // Commenting out style for Choice as it's not refactored with an enum
+        .with_choices(choice_items.iter().map(|s| s.to_string()).collect())
+        .with_style(ChoiceStyle::Sort) // Now we can use the enum
         .build();
     choice_ctrl.set_selection(0);
     let choice_status_label = StaticText::builder(&panel)
@@ -70,7 +77,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         "Cabbage", "Carrot", "Cucumber", "Celery", "Broccoli", "Spinach", "Kale", "Lettuce",
     ];
     let combo_box = ComboBox::builder(&panel)
-        .with_choices(&combo_items)
+        .with_string_choices(&combo_items)
         // .with_style(CB_SORT) // Old
         .with_style(ComboBoxStyle::Sort | ComboBoxStyle::ProcessEnter) // Ensure ProcessEnter for TEXT_ENTER event
         .build();

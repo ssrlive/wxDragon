@@ -2,9 +2,10 @@
 //! Safe wrapper for wxScrollBar.
 //!
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::event::WxEvtHandler;
 use crate::window::{Window, WxWidget};
+use crate::id::ID_ANY;
 use std::default::Default;
 use std::marker::PhantomData;
 use std::ops::{BitOr, BitOrAssign};
@@ -108,7 +109,7 @@ impl<'a, P: WxWidget> Default for ScrollBarBuilder<'a, P> {
     fn default() -> Self {
         ScrollBarBuilder {
             parent_ptr: std::ptr::null_mut(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
             style: ScrollBarStyle::Default,

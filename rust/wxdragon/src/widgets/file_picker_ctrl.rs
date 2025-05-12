@@ -1,7 +1,7 @@
 /* This is a new file */
 //! Safe wrapper for wxFilePickerCtrl.
 
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 // use crate::Frame; // Unused
 // use crate::Window; // Will be used via crate::window::Window

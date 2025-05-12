@@ -1,12 +1,14 @@
 // Re-export items from the sys crate for convenience?
 // pub use wxdragon_sys as ffi;
 
+#[macro_use]
+pub mod macros;
 pub mod app;
 pub mod art_provider;
-pub mod base;
+pub mod color;
+pub mod geometry;
 pub mod bitmap;
 pub mod datetime;
-pub mod defs;
 pub mod dialogs;
 pub mod event;
 pub mod font;
@@ -15,12 +17,19 @@ pub mod id;
 pub mod menus;
 pub mod prelude;
 pub mod sizers;
+pub mod types;
 pub mod widgets;
 pub mod window;
 
 // Re-export the main entry point and handle
 pub use app::main;
 pub use app::WxdAppHandle;
+
+// Re-export common types from their new module locations
+pub use color::{Colour, colours};
+pub use geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+pub use id::{Id, ID_ANY, ID_HIGHEST};
+pub use types::{Style, RawWxProps};
 
 // Re-export core types
 // pub use app::{App, WxApp}; // REMOVED - Not exported from app.rs

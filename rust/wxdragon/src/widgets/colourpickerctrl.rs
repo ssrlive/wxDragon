@@ -1,229 +1,86 @@
-//! Safe wrapper for wxColourPickerCtrl.
-
-use crate::base::{Point, Size, DEFAULT_POSITION, ID_ANY};
-use crate::defs::Style;
-use crate::event::WxEvtHandler; // EventType and Event itself will be used via Event::get_colour
+use crate::color::{Colour, colours};
+use crate::geometry::{Point, Size};
+use crate::event::WxEvtHandler;
 use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
-// use std::ffi::CString; // Not strictly needed for ColourPickerCtrl itself unless styles have string names
 use std::default::Default;
-use wxdragon_sys as ffi; // Import Default
+use wxdragon_sys as ffi;
 
-// --- Colour Struct ---
-// Can be moved to base.rs or a new colour.rs if generally useful.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-#[repr(C)] // Matches ffi::wxd_Colour_t layout
-pub struct Colour {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-    pub a: u8, // Alpha component (0-255, 255 is opaque)
-}
+// --- ColourPickerCtrl Style Enum ---
 
-impl Colour {
-    /// Creates a new Colour with full opacity.
-    pub fn new(r: u8, g: u8, b: u8) -> Self {
-        Colour { r, g, b, a: 255 }
-    }
-
-    /// Creates a new Colour with specified alpha.
-    pub fn new_with_alpha(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Colour { r, g, b, a }
-    }
-}
-
-impl From<ffi::wxd_Colour_t> for Colour {
-    fn from(c: ffi::wxd_Colour_t) -> Self {
-        Colour {
-            r: c.r,
-            g: c.g,
-            b: c.b,
-            a: c.a,
-        }
-    }
-}
-
-impl From<Colour> for ffi::wxd_Colour_t {
-    fn from(c: Colour) -> Self {
-        ffi::wxd_Colour_t {
-            r: c.r,
-            g: c.g,
-            b: c.b,
-            a: c.a,
-        }
-    }
-}
-
-// Some common colours (optional, but can be handy)
-pub mod colours {
-    use super::Colour;
-    pub const BLACK: Colour = Colour {
-        r: 0,
-        g: 0,
-        b: 0,
-        a: 255,
-    };
-    pub const WHITE: Colour = Colour {
-        r: 255,
-        g: 255,
-        b: 255,
-        a: 255,
-    };
-    pub const RED: Colour = Colour {
-        r: 255,
-        g: 0,
-        b: 0,
-        a: 255,
-    };
-    pub const GREEN: Colour = Colour {
-        r: 0,
-        g: 255,
-        b: 0,
-        a: 255,
-    };
-    pub const BLUE: Colour = Colour {
-        r: 0,
-        g: 0,
-        b: 255,
-        a: 255,
-    };
-    pub const YELLOW: Colour = Colour {
-        r: 255,
-        g: 255,
-        b: 0,
-        a: 255,
-    };
-    pub const CYAN: Colour = Colour {
-        r: 0,
-        g: 255,
-        b: 255,
-        a: 255,
-    };
-    pub const MAGENTA: Colour = Colour {
-        r: 255,
-        g: 0,
-        b: 255,
-        a: 255,
-    };
-}
+widget_style_enum!(
+    name: ColourPickerCtrlStyle,
+    doc: "Style flags for the ColourPickerCtrl widget.",
+    variants: {
+        Default: ffi::WXD_CLRP_DEFAULT_STYLE, "Default style with no specific options.",
+        UseTextCtrl: ffi::WXD_CLRP_USE_TEXTCTRL, "Creates a text control to the left of the picker button which can be used by the user to specify a colour.",
+        ShowLabel: ffi::WXD_CLRP_SHOW_LABEL, "Shows the colour in HTML form (AABBCC) as colour button label.",
+        ShowAlpha: ffi::WXD_CLRP_SHOW_ALPHA, "Allows selecting opacity in the colour-chooser (effective under wxGTK and wxOSX)."
+    },
+    default_variant: Default
+);
 
 // --- ColourPickerCtrl Widget ---
 
-// wxColourPickerCtrl specific style flags (from wx/clrpicker.h)
-// Example: pub const CP_DEFAULT_STYLE: Style = 0;
-// pub const CP_USE_ALPHA: Style = 0x0008; // wxCLRP_USE_ALPHA - if this is a defined style for creation
-// Constants like WXD_CP_USE_ALPHA would be generated from const_extractor if available
-// For now, assume standard window styles are sufficient or specific picker styles are passed as long.
-
+/// Represents a wxColourPickerCtrl, which allows the user to select a colour.
 #[derive(Clone)]
 pub struct ColourPickerCtrl {
     window: Window,
 }
 
 impl ColourPickerCtrl {
-    pub fn builder<'a>(parent: &'a dyn WxWidget) -> ColourPickerCtrlBuilder<'a> {
+    /// Creates a new `ColourPickerCtrlBuilder` for constructing a colour picker control.
+    pub fn builder(parent: &dyn WxWidget) -> ColourPickerCtrlBuilder {
         ColourPickerCtrlBuilder::new(parent)
     }
 
-    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_ColourPickerCtrl_t) -> Self {
-        ColourPickerCtrl {
-            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
-        }
-    }
-
+    /// Gets the currently selected colour.
     pub fn get_colour(&self) -> Colour {
-        let c_colour = unsafe { ffi::wxd_ColourPickerCtrl_GetColour(self.as_ptr()) };
+        let c_colour = unsafe { ffi::wxd_ColourPickerCtrl_GetColour(self.window.as_ptr() as *mut _) };
         Colour::from(c_colour)
     }
 
+    /// Sets the currently selected colour.
     pub fn set_colour(&self, colour: Colour) {
-        unsafe { ffi::wxd_ColourPickerCtrl_SetColour(self.as_ptr(), colour.into()) };
-    }
-
-    fn as_ptr(&self) -> *mut ffi::wxd_ColourPickerCtrl_t {
-        self.window.as_ptr() as *mut _
+        unsafe { ffi::wxd_ColourPickerCtrl_SetColour(self.window.as_ptr() as *mut _, colour.into()) };
     }
 }
 
-// --- Builder ---
-
-pub struct ColourPickerCtrlBuilder<'a> {
-    parent: &'a dyn WxWidget, // wxColourPickerCtrl usually requires a parent.
-    id: Id,
-    initial_colour: Colour,
-    pos: Point,
-    size: Size,
-    style: Style,
-}
-
-impl<'a> ColourPickerCtrlBuilder<'a> {
-    pub fn new(parent: &'a dyn WxWidget) -> Self {
-        ColourPickerCtrlBuilder {
-            parent,
-            id: ID_ANY,
-            initial_colour: colours::BLACK,
-            pos: DEFAULT_POSITION,
-            size: Size::new(80, -1),
-            style: 0,
-        }
-    }
-
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    pub fn with_initial_colour(mut self, colour: Colour) -> Self {
-        self.initial_colour = colour;
-        self
-    }
-
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: Style) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn build(self) -> ColourPickerCtrl {
-        let parent_ptr = self.parent.handle_ptr();
+widget_builder!(
+    name: ColourPickerCtrl,
+    parent_type: &'a dyn WxWidget,
+    style_type: ColourPickerCtrlStyle,
+    fields: {
+        initial_colour: Colour = colours::BLACK
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        let pos = slf.pos.into();
+        let size = slf.size.into();
+        let colour = slf.initial_colour.into();
+        
         let ptr = unsafe {
             ffi::wxd_ColourPickerCtrl_Create(
                 parent_ptr,
-                self.id,
-                self.initial_colour.into(),
-                self.pos.into(),
-                self.size.into(),
-                self.style as ffi::wxd_Style_t,
+                slf.id,
+                colour,
+                pos,
+                size,
+                slf.style.bits(),
             )
         };
+        
         if ptr.is_null() {
             panic!("Failed to create wxColourPickerCtrl");
         }
-        unsafe { ColourPickerCtrl::from_ptr(ptr) }
+        
+        ColourPickerCtrl {
+            window: unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) },
+        }
     }
-}
+);
 
-// --- Trait Implementations ---
-
-impl WxWidget for ColourPickerCtrl {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.as_ptr()
-    }
-}
-
-impl WxEvtHandler for ColourPickerCtrl {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
-
-// No explicit Drop needed for ColourPickerCtrl; Window handles destruction.
+implement_widget_traits!(ColourPickerCtrl, window); 

@@ -1,6 +1,7 @@
 //! Safe wrapper for wxSpinButton.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::id::ID_ANY;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::WxWidget;
@@ -86,7 +87,7 @@ impl SpinButtonBuilder {
     pub fn new<W: WxWidget>(parent: &W) -> Self {
         SpinButtonBuilder {
             parent: parent.handle_ptr(),
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
             style: SpinButtonStyle::Default,

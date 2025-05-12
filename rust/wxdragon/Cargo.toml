@@ -14,3 +14,4 @@ categories = ["gui", "api-bindings"] # Already good
 wxdragon-sys = { path = "../../rust/wxdragon-sys" } 
 # Add other dependencies as needed (e.g., for advanced event handling)
 lazy_static = "1.4.0" 
+paste = "1.0.15"

@@ -1,8 +1,10 @@
 // --- Core Types & Traits ---
 pub use crate::app::{main, WxdAppHandle};
-pub use crate::base::{Point, Size};
+pub use crate::color::{Colour, colours};
+pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+pub use crate::id::{Id, ID_ANY};
+pub use crate::types::{Style, RawWxProps};
 pub use crate::event::{Event, EventType, WxEvtHandler};
-pub use crate::id::Id;
 pub use crate::sizers::WxSizer;
 pub use crate::window::{WindowUserData, WxWidget};
 
@@ -72,7 +74,7 @@ pub use crate::menus::{ItemKind, Menu, MenuBar, MenuItem};
 // pub use crate::menus::menuitem::{ITEM_NORMAL, ITEM_SEPARATOR, ITEM_CHECK, ITEM_RADIO};
 // ADDED: Export standard IDs
 pub use crate::menus::menuitem::{ID_ABOUT, ID_EXIT, ID_SEPARATOR};
-pub use crate::id::ID_ANY; // ADDED: Directly export ID_ANY
+// pub use crate::id::ID_ANY; // REMOVED: Duplicate export
 // pub use crate::id::ID_HIGHEST; // REMOVED: Already exported at the end of the file
 // ADDED: Bitmap
 pub use crate::bitmap::Bitmap;
@@ -89,9 +91,7 @@ pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder};
 pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder};
 
 // ADDED: Re-export ColourPickerCtrl and related items
-pub use crate::widgets::colourpickerctrl::{
-    colours, Colour, ColourPickerCtrl, ColourPickerCtrlBuilder,
-};
+pub use crate::widgets::colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 
 // ADDED: Re-export DatePickerCtrl, DatePickerCtrlBuilder, and DateTime
 pub use crate::widgets::datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder, DateTime};

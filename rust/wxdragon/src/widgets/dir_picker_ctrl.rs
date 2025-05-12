@@ -1,7 +1,7 @@
 /* This is a new file */
 //! Safe wrapper for wxDirPickerCtrl.
 
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::window::Window;
 use crate::WxWidget;

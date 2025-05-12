@@ -1,12 +1,14 @@
 //!
 //! Safe wrapper for wxBitmapButton.
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
+use crate::id::Id;
+use crate::widget_builder;
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
-use std::ops::{Deref, DerefMut};
+use std::ops::{BitOr, BitOrAssign, Deref, DerefMut};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
 
@@ -19,6 +21,52 @@ pub const BU_EXACTFIT: i64 = ffi::WXD_BU_EXACTFIT;
 pub const BORDER_NONE: i64 = ffi::WXD_BORDER_NONE;
 pub const BU_NOTEXT: i64 = ffi::WXD_BU_NOTEXT;
 
+/// Style flags for `BitmapButton`.
+///
+/// These flags can be combined using the bitwise OR operator (`|`).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i64)]
+pub enum BitmapButtonStyle {
+    /// Default style (no specific alignment or flags).
+    Default = 0,
+    /// Align the bitmap and/or label to the left.
+    Left = BU_LEFT,
+    /// Align the bitmap and/or label to the top.
+    Top = BU_TOP,
+    /// Align the bitmap and/or label to the right.
+    Right = BU_RIGHT,
+    /// Align the bitmap and/or label to the bottom.
+    Bottom = BU_BOTTOM,
+    /// Button size will be adjusted to exactly fit the bitmap.
+    ExactFit = BU_EXACTFIT,
+    /// Do not display a label (useful for bitmap-only buttons).
+    NoText = BU_NOTEXT,
+    /// No border.
+    BorderNone = BORDER_NONE,
+}
+
+impl BitmapButtonStyle {
+    /// Returns the raw integer value of the style.
+    pub fn bits(self) -> i64 {
+        self as i64
+    }
+}
+
+impl BitOr for BitmapButtonStyle {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
+    }
+}
+
+impl BitOrAssign for BitmapButtonStyle {
+    fn bitor_assign(&mut self, rhs: Self) {
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
+    }
+}
+
 /// Represents a wxBitmapButton widget.
 /// This is a button that displays a bitmap instead of a text label.
 pub struct BitmapButton {
@@ -27,21 +75,8 @@ pub struct BitmapButton {
 
 impl BitmapButton {
     /// Creates a new BitmapButton builder.
-    /// Requires a bitmap to be set using `with_bitmap`.
-    pub fn builder<W: WxWidget>(parent: &W) -> BitmapButtonBuilder {
-        BitmapButtonBuilder {
-            parent_ptr: parent.handle_ptr(),
-            label: CString::new("").unwrap(), // Default empty label
-            id: ID_ANY,
-            pos: DEFAULT_POSITION, // Use constant
-            size: DEFAULT_SIZE,    // Use constant
-            style: 0i64,           // Use 0 as default style
-            bitmap: None,
-            bitmap_disabled: None,
-            bitmap_focus: None,
-            bitmap_hover: None,
-            name: CString::new("BitmapButton").unwrap(), // Default name
-        }
+    pub fn builder(parent: &dyn WxWidget) -> BitmapButtonBuilder {
+        BitmapButtonBuilder::new(parent)
     }
 
     /// Creates a new BitmapButton wrapper from a raw pointer.
@@ -53,128 +88,35 @@ impl BitmapButton {
         }
     }
 
-    // TODO: Add methods like SetBitmapLabel, SetBitmapHover etc. if needed
-}
-
-// --- Builder Pattern ---
-
-/// Builder for creating `BitmapButton` widgets.
-#[derive(Clone)]
-pub struct BitmapButtonBuilder {
-    parent_ptr: *mut ffi::wxd_Window_t,
-    label: CString, // Retained for consistency, though wxBitmapButton doesn't directly use text label
-    id: i32,
-    pos: Point,
-    size: Size,
-    style: i64,
-    bitmap: Option<Bitmap>,          // To hold the main bitmap
-    bitmap_disabled: Option<Bitmap>, // Optional: disabled bitmap
-    bitmap_focus: Option<Bitmap>,    // Optional: focus bitmap
-    bitmap_hover: Option<Bitmap>,    // Optional: hover bitmap
-    name: CString,
-}
-
-impl BitmapButtonBuilder {
-    /// Sets the window ID.
-    pub fn with_id(mut self, id: i32) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the bitmap for the normal (default) state. This is mandatory.
-    pub fn with_bitmap(mut self, bitmap: &Bitmap) -> Self {
-        self.bitmap = Some(bitmap.clone());
-        self
-    }
-
-    /// Sets the bitmap for the disabled state.
-    pub fn with_bitmap_disabled(mut self, bitmap: &Bitmap) -> Self {
-        self.bitmap_disabled = Some(bitmap.clone());
-        self
-    }
-
-    /// Sets the bitmap for when the button has keyboard focus.
-    pub fn with_bitmap_focus(mut self, bitmap: &Bitmap) -> Self {
-        self.bitmap_focus = Some(bitmap.clone());
-        self
-    }
-
-    /// Sets the bitmap for when the mouse is hovering over the button.
-    pub fn with_bitmap_hover(mut self, bitmap: &Bitmap) -> Self {
-        self.bitmap_hover = Some(bitmap.clone());
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    /// By default, the button sizes itself to fit the bitmap.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Sets the label for the button.
-    pub fn with_label(mut self, label: &str) -> Self {
-        self.label = CString::new(label).unwrap_or_default();
-        self
-    }
-
-    /// Sets the name for the button.
-    pub fn with_name(mut self, name: &str) -> Self {
-        self.name = CString::new(name).unwrap_or_default();
-        self
-    }
-
-    /// Creates the `BitmapButton`.
-    /// Panics if `with_bitmap` was not called or parent not set.
-    pub fn build(self) -> BitmapButton {
-        let main_bitmap = self.bitmap.expect("BitmapButton requires a main bitmap.");
-        let bitmap_ptr = main_bitmap.as_ptr();
-
-        let bmp_disabled_ptr = self
-            .bitmap_disabled
-            .as_ref()
-            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
-        let bmp_focus_ptr = self
-            .bitmap_focus
-            .as_ref()
-            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
-        let bmp_hover_ptr = self
-            .bitmap_hover
-            .as_ref()
-            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
-
-        // For BitmapButton, size is often best derived from the bitmap if not explicitly set.
-        let final_size = if self.size.width == -1 && self.size.height == -1 {
-            Size::new(main_bitmap.get_width(), main_bitmap.get_height())
-        } else {
-            self.size
-        };
-
+    /// Low-level constructor used by the builder.
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
+        id: Id,
+        bitmap_ptr: *mut ffi::wxd_Bitmap_t,
+        pos: Point,
+        size: Size,
+        style: i64,
+        name: &str,
+        bmp_disabled_ptr: *mut ffi::wxd_Bitmap_t,
+        bmp_focus_ptr: *mut ffi::wxd_Bitmap_t, 
+        bmp_hover_ptr: *mut ffi::wxd_Bitmap_t,
+    ) -> Self {
+        let c_name = CString::new(name).unwrap_or_default();
+        
         unsafe {
             let ptr = ffi::wxd_BitmapButton_Create(
-                self.parent_ptr,
-                self.id as c_int,
+                parent_ptr,
+                id as c_int,
                 bitmap_ptr,
-                self.pos.into(),
-                final_size.into(),
-                self.style as ffi::wxd_Style_t,
-                self.name.as_ptr(),
+                pos.into(),
+                size.into(),
+                style as ffi::wxd_Style_t,
+                c_name.as_ptr(),
                 bmp_disabled_ptr,
                 bmp_focus_ptr,
                 bmp_hover_ptr,
             );
+            
             if ptr.is_null() {
                 panic!("Failed to create BitmapButton widget");
             } else {
@@ -183,6 +125,62 @@ impl BitmapButtonBuilder {
         }
     }
 }
+
+widget_builder!(
+    name: BitmapButton,
+    parent_type: &'a dyn WxWidget,
+    style_type: BitmapButtonStyle,
+    fields: {
+        bitmap: Option<Bitmap> = None,
+        bitmap_disabled: Option<Bitmap> = None,
+        bitmap_focus: Option<Bitmap> = None,
+        bitmap_hover: Option<Bitmap> = None,
+        name: String = "BitmapButton".to_string()
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        let bitmap_ptr = match &slf.bitmap {
+            Some(bitmap) => bitmap.as_ptr(),
+            None => panic!("BitmapButton requires a bitmap to be set"),
+        };
+        
+        let bmp_disabled_ptr = slf.bitmap_disabled
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
+        let bmp_focus_ptr = slf.bitmap_focus
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
+        let bmp_hover_ptr = slf.bitmap_hover
+            .as_ref()
+            .map_or(std::ptr::null_mut(), |b| b.as_ptr());
+
+        // For BitmapButton, size is often best derived from the bitmap if not explicitly set
+        // and if a bitmap is provided
+        let final_size = if slf.size.width == -1 && slf.size.height == -1 {
+            if let Some(bmp) = &slf.bitmap {
+                Size::new(bmp.get_width(), bmp.get_height())
+            } else {
+                slf.size
+            }
+        } else {
+            slf.size
+        };
+
+        BitmapButton::new_impl(
+            parent_ptr,
+            slf.id,
+            bitmap_ptr,
+            slf.pos,
+            final_size,
+            slf.style.bits(),
+            &slf.name,
+            bmp_disabled_ptr,
+            bmp_focus_ptr,
+            bmp_hover_ptr,
+        )
+    }
+);
+
 
 // --- Trait Implementations ---
 
@@ -207,8 +205,13 @@ impl DerefMut for BitmapButton {
 
 impl WxEvtHandler for BitmapButton {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.handle_ptr() as *mut ffi::wxd_EvtHandler_t
+        self.window.get_event_handler_ptr()
     }
 }
 
-// No Drop needed, wxBitmapButton is a Window managed by its parent.
+// No explicit Drop implementation needed - child widget managed by parent
+impl Drop for BitmapButton {
+    fn drop(&mut self) {
+        // Child widgets are managed by their parent in wxWidgets
+    }
+}

@@ -2,7 +2,8 @@
 //! Safe wrapper for wxStaticLine.
 //!
 
-use crate::base::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE, ID_ANY};
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::id::ID_ANY;
 use crate::window::{Window, WxWidget};
 use std::default::Default;
 use std::ffi::CString;
@@ -70,7 +71,7 @@ impl<'a, P: WxWidget> Default for StaticLineBuilder<'a, P> {
     fn default() -> Self {
         StaticLineBuilder {
             parent_ptr: std::ptr::null_mut(), // Will be set by StaticLine::builder
-            id: ID_ANY,
+            id: ID_ANY as i32,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE, // wxStaticLine will size itself by default
             style: StaticLineStyle::Default, // Defaults to LI_HORIZONTAL in wxWidgets if 0

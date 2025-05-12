@@ -1,10 +1,11 @@
-use crate::base::{Point, Size, ID_ANY};
-// use crate::defs::Style; // Removed unused import
+use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
@@ -24,11 +25,11 @@ pub struct RadioBox {
 
 impl RadioBox {
     /// Creates a new `RadioBoxBuilder`.
-    pub fn builder<'a>(
-        parent: Option<&'a dyn WxWidget>,
-        choices: &'a [&'a str],
-    ) -> RadioBoxBuilder<'a> {
-        RadioBoxBuilder::new(parent, choices)
+    pub fn builder<'a>(parent: &'a dyn WxWidget, choices: &'a [&'a str]) -> RadioBoxBuilder<'a> {
+        // Create a new builder with the parent and convert choices to Strings
+        let mut builder = RadioBoxBuilder::new(parent);
+        builder.choices = choices.iter().map(|&s| s.to_string()).collect();
+        builder
     }
 
     /// Creates a `RadioBox` from a raw pointer.
@@ -38,6 +39,45 @@ impl RadioBox {
         RadioBox {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
         }
+    }
+
+    /// Low-level constructor used by the builder.
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
+        id: Id,
+        label: &str,
+        choices: &[&str],
+        major_dimension: i32,
+        pos: Point,
+        size: Size,
+        style: i64,
+    ) -> Self {
+        assert!(!parent_ptr.is_null(), "RadioBox requires a parent");
+        let c_label = CString::new(label).expect("CString::new failed for label");
+
+        let c_choices: Vec<CString> = choices
+            .iter()
+            .map(|&s| CString::new(s).expect("CString::new failed for choice"))
+            .collect();
+        let c_choices_ptrs: Vec<*const c_char> = c_choices.iter().map(|cs| cs.as_ptr()).collect();
+
+        let ptr = unsafe {
+            ffi::wxd_RadioBox_Create(
+                parent_ptr,
+                id,
+                c_label.as_ptr(),
+                pos.into(),
+                size.into(),
+                choices.len() as i32,
+                c_choices_ptrs.as_ptr(),
+                major_dimension,
+                style as ffi::wxd_Style_t,
+            )
+        };
+        if ptr.is_null() {
+            panic!("Failed to create wxRadioBox");
+        }
+        unsafe { RadioBox::from_ptr(ptr) }
     }
 
     pub fn get_selection(&self) -> i32 {
@@ -99,155 +139,43 @@ impl RadioBox {
     }
 }
 
-// --- Builder ---
+// Apply common trait implementations
+implement_widget_traits!(RadioBox, window);
 
-pub struct RadioBoxBuilder<'a> {
-    parent: Option<&'a dyn WxWidget>,
-    id: Id,
-    label: &'a str,
-    choices: &'a [&'a str],
-    pos: Point,
-    size: Size,
-    major_dimension: i32,
-    style: RadioBoxStyle,
-}
-
-impl<'a> RadioBoxBuilder<'a> {
-    pub fn new(parent: Option<&'a dyn WxWidget>, choices: &'a [&'a str]) -> Self {
-        RadioBoxBuilder {
-            parent,
-            id: ID_ANY,
-            label: "",
-            choices,
-            pos: Point { x: -1, y: -1 },
-            size: Size {
-                width: -1,
-                height: -1,
-            },
-            major_dimension: 0,
-            style: RadioBoxStyle::default(),
-        }
+// Use the widget_builder macro for RadioBox
+widget_builder!(
+    name: RadioBox,
+    parent_type: &'a dyn WxWidget,
+    style_type: RadioBoxStyle,
+    fields: {
+        choices: Vec<String> = Vec::new(),
+        major_dimension: i32 = 0
+    },
+    build_impl: |slf| {
+        // Convert Vec<String> to Vec<&str> for the new_impl function
+        let choices_refs: Vec<&str> = slf.choices.iter().map(|s| s.as_str()).collect();
+        
+        RadioBox::new_impl(
+            slf.parent.handle_ptr(),
+            slf.id,
+            &slf.label,
+            &choices_refs,
+            slf.major_dimension,
+            slf.pos,
+            slf.size,
+            slf.style.bits(),
+        )
     }
+);
 
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    pub fn with_label(mut self, label: &'a str) -> Self {
-        self.label = label;
-        self
-    }
-
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_major_dimension(mut self, dim: i32) -> Self {
-        self.major_dimension = dim;
-        self
-    }
-
-    pub fn with_style(mut self, style: RadioBoxStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn build(self) -> RadioBox {
-        let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
-        let c_label = CString::new(self.label).expect("CString::new failed for label");
-
-        let c_choices: Vec<CString> = self
-            .choices
-            .iter()
-            .map(|&s| CString::new(s).expect("CString::new failed for choice"))
-            .collect();
-        let c_choices_ptrs: Vec<*const c_char> = c_choices.iter().map(|cs| cs.as_ptr()).collect();
-
-        let ptr = unsafe {
-            ffi::wxd_RadioBox_Create(
-                parent_ptr,
-                self.id,
-                c_label.as_ptr(),
-                self.pos.into(),
-                self.size.into(),
-                self.choices.len() as i32,
-                c_choices_ptrs.as_ptr(),
-                self.major_dimension,
-                self.style.bits() as ffi::wxd_Style_t,
-            )
-        };
-        if ptr.is_null() {
-            panic!("Failed to create wxRadioBox");
-        }
-        unsafe { RadioBox::from_ptr(ptr) }
-    }
-}
-
-// --- Trait Implementations ---
-
-impl WxWidget for RadioBox {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.as_ptr()
-    }
-}
-
-impl WxEvtHandler for RadioBox {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.as_ptr() as *mut _
-    }
-
-    // The WxEvtHandler trait already provides a generic `bind` method:
-    // fn bind<F>(&self, event_type: EventType, callback: F)
-    // where
-    //     F: FnMut(Event) + 'static, <--- This is what it should be using
-    //
-    // So, no specific `bind_radiobox` is needed here if widgets directly implement WxEvtHandler
-    // or if they deref to a Window that implements it. Widgets usually call the trait method.
-}
-
-// No explicit Drop needed.
-
-// --- RadioBoxStyle Enum ---
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum RadioBoxStyle {
-    /// Default layout (wxWidgets decides based on major dimension).
-    Default = 0,
-    /// Arrange items in columns primarily.
-    SpecifyCols = ffi::WXD_RA_SPECIFY_COLS,
-    /// Arrange items in rows primarily.
-    SpecifyRows = ffi::WXD_RA_SPECIFY_ROWS,
-}
-
-impl RadioBoxStyle {
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl Default for RadioBoxStyle {
-    fn default() -> Self {
-        RadioBoxStyle::Default
-    }
-}
-
-// RadioBox styles are typically not combined, but BitOr/Assign might be useful if other flags emerge.
-impl BitOr for RadioBoxStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for RadioBoxStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
-    }
-}
+// Define the RadioBoxStyle enum using the widget_style_enum macro
+widget_style_enum!(
+    name: RadioBoxStyle,
+    doc: "Style flags for RadioBox widgets.",
+    variants: {
+        Default: 0, "Default layout (wxWidgets decides based on major dimension).",
+        SpecifyCols: ffi::WXD_RA_SPECIFY_COLS, "Arrange items in columns primarily.",
+        SpecifyRows: ffi::WXD_RA_SPECIFY_ROWS, "Arrange items in rows primarily."
+    },
+    default_variant: Default
+);

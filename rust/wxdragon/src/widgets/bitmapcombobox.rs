@@ -1,9 +1,11 @@
 //! Safe wrapper for wxBitmapComboBox.
 
-use crate::base::{Point, Size};
+use crate::geometry::{Point, Size};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
+use crate::implement_widget_traits;
+use crate::widget_builder;
 use crate::widgets::combobox::ComboBoxStyle;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
@@ -19,7 +21,7 @@ pub struct BitmapComboBox {
 
 impl BitmapComboBox {
     /// Creates a new `BitmapComboBoxBuilder`.
-    pub fn builder<'a>(parent: Option<&'a dyn WxWidget>) -> BitmapComboBoxBuilder<'a> {
+    pub fn builder(parent: &dyn WxWidget) -> BitmapComboBoxBuilder {
         BitmapComboBoxBuilder::new(parent)
     }
 
@@ -30,6 +32,34 @@ impl BitmapComboBox {
         BitmapComboBox {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
         }
+    }
+
+    /// Low-level constructor used by the builder.
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
+        id: Id,
+        value: &str,
+        pos: Point,
+        size: Size,
+        style: i64,
+    ) -> Self {
+        assert!(!parent_ptr.is_null(), "BitmapComboBox requires a parent");
+        let c_value = CString::new(value).expect("CString::new failed for value");
+
+        let ptr = unsafe {
+            ffi::wxd_BitmapComboBox_Create(
+                parent_ptr,
+                id,
+                c_value.as_ptr(),
+                pos.into(),
+                size.into(),
+                style as ffi::wxd_Style_t,
+            )
+        };
+        if ptr.is_null() {
+            panic!("Failed to create wxBitmapComboBox");
+        }
+        unsafe { BitmapComboBox::from_ptr(ptr) }
     }
 
     /// Appends an item with an optional bitmap.
@@ -139,89 +169,25 @@ impl BitmapComboBox {
     }
 }
 
-// --- Builder ---
-
-pub struct BitmapComboBoxBuilder<'a> {
-    parent: Option<&'a dyn WxWidget>,
-    id: Id,
-    value: &'a str,
-    pos: Point,
-    size: Size,
-    style: ComboBoxStyle,
-}
-
-impl<'a> BitmapComboBoxBuilder<'a> {
-    pub fn new(parent: Option<&'a dyn WxWidget>) -> Self {
-        BitmapComboBoxBuilder {
-            parent,
-            id: ffi::WXD_ID_ANY as i32,
-            value: "",
-            pos: Point::default(),
-            size: Size::default(),
-            style: ComboBoxStyle::Default,
-        }
+// Use the widget_builder macro for BitmapComboBox
+widget_builder!(
+    name: BitmapComboBox,
+    parent_type: &'a dyn WxWidget,
+    style_type: ComboBoxStyle,
+    fields: {
+        value: String = String::new()
+    },
+    build_impl: |slf| {
+        BitmapComboBox::new_impl(
+            slf.parent.handle_ptr(),
+            slf.id,
+            &slf.value,
+            slf.pos,
+            slf.size,
+            slf.style.bits(),
+        )
     }
+);
 
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    pub fn with_value(mut self, value: &'a str) -> Self {
-        self.value = value;
-        self
-    }
-
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: ComboBoxStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn build(self) -> BitmapComboBox {
-        let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
-        let c_value = CString::new(self.value).expect("CString::new failed for value");
-
-        let ptr = unsafe {
-            ffi::wxd_BitmapComboBox_Create(
-                parent_ptr,
-                self.id,
-                c_value.as_ptr(),
-                self.pos.into(),
-                self.size.into(),
-                self.style.bits() as ffi::wxd_Style_t,
-            )
-        };
-        if ptr.is_null() {
-            panic!("Failed to create wxBitmapComboBox");
-        }
-        unsafe { BitmapComboBox::from_ptr(ptr) }
-    }
-}
-
-// --- Trait Implementations ---
-
-impl WxWidget for BitmapComboBox {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.as_ptr()
-    }
-}
-
-impl WxEvtHandler for BitmapComboBox {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
-
-// No explicit Drop needed for the main struct; Window handles destruction.
-// However, Bitmaps returned by GetItemBitmap *are* owned by Rust and need dropping.
-// The `Bitmap` struct already implements Drop using wxd_Bitmap_Destroy.
+// Apply common trait implementations for this widget
+implement_widget_traits!(BitmapComboBox, window);
