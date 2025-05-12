@@ -52,7 +52,7 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_range(100)
         // .with_style(GA_HORIZONTAL | GA_SMOOTH) // Old - Commenting out for now
         .with_style(GaugeStyle::Default | GaugeStyle::Smooth)
-        .with_size(200, 25)
+        .with_size(Size::new(200, 25))
         .build();
     gauge.set_value(25);
     let gauge_increase_btn = Button::builder(&controls_panel)

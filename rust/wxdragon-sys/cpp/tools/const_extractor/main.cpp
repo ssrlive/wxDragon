@@ -131,6 +131,11 @@ int main(int argc, char **argv) {
     // Styles (Common)
     constants_to_extract.push_back({"wxDEFAULT_FRAME_STYLE", wxDEFAULT_FRAME_STYLE});
     constants_to_extract.push_back({"wxDEFAULT_DIALOG_STYLE", wxDEFAULT_DIALOG_STYLE});
+    constants_to_extract.push_back({"wxFRAME_TOOL_WINDOW", wxFRAME_TOOL_WINDOW});
+    constants_to_extract.push_back({"wxFRAME_NO_TASKBAR", wxFRAME_NO_TASKBAR});
+    constants_to_extract.push_back({"wxFRAME_FLOAT_ON_PARENT", wxFRAME_FLOAT_ON_PARENT});
+    constants_to_extract.push_back({"wxCLIP_CHILDREN", wxCLIP_CHILDREN});
+
     constants_to_extract.push_back({"wxCAPTION", wxCAPTION});
     constants_to_extract.push_back({"wxRESIZE_BORDER", wxRESIZE_BORDER});
     constants_to_extract.push_back({"wxSYSTEM_MENU", wxSYSTEM_MENU});

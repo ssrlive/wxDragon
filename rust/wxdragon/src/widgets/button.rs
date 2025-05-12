@@ -116,7 +116,9 @@ widget_builder!(
     name: Button,
     parent_type: &'a dyn WxWidget,
     style_type: ButtonStyle,
-    fields: {},
+    fields: {
+        label: String = String::new()
+    },
     build_impl: |slf| {
         let parent_ptr = slf.parent.handle_ptr();
         Button::new_impl(

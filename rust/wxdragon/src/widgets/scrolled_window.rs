@@ -4,17 +4,24 @@
 use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
-use crate::id::ID_ANY;
 use crate::widgets::panel::Panel; // Inherits from Panel (used for Deref)
 use crate::window::WxWidget; // Used for builder parent type constraint
-use std::ops::{Deref, DerefMut};
 use wxdragon_sys as ffi;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 
-// --- Constants (Styles) ---
-// Add relevant wxScrolledWindow styles here if needed, e.g.:
-// pub const HSCROLL: i64 = wxdragon_sys::WXD_HSCROLL;
-// pub const VSCROLL: i64 = wxdragon_sys::WXD_VSCROLL;
-// Need to add WXD_HSCROLL, WXD_VSCROLL to const_extractor if used.
+// --- Style enum using macro ---
+widget_style_enum!(
+    name: ScrolledWindowStyle,
+    doc: "Style flags for ScrolledWindow",
+    variants: {
+        Default: 0, "Default style.",
+        HScroll: ffi::WXD_HSCROLL, "Includes horizontal scrollbar.",
+        VScroll: ffi::WXD_VSCROLL, "Includes vertical scrollbar."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxScrolledWindow widget.
 /// A window that can scroll its contents.
@@ -24,7 +31,7 @@ pub struct ScrolledWindow {
 
 impl ScrolledWindow {
     /// Creates a new builder for a ScrolledWindow.
-    pub fn builder<W: WxWidget>(parent: &W) -> ScrolledWindowBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ScrolledWindowBuilder {
         ScrolledWindowBuilder::new(parent)
     }
 
@@ -110,119 +117,34 @@ impl ScrolledWindow {
     }
 }
 
-// --- Builder Pattern ---
+// Apply common trait implementations
+implement_widget_traits_with_target!(ScrolledWindow, panel, Panel);
 
-/// Builder for creating a `ScrolledWindow`.
-pub struct ScrolledWindowBuilder {
-    parent_ptr: *mut ffi::wxd_Window_t, // Store raw parent pointer
-    id: Id,
-    pos: Point,
-    size: Size,
-    style: i64,
-}
-
-impl ScrolledWindowBuilder {
-    /// Creates a new ScrolledWindow builder.
-    pub fn new(parent: &impl WxWidget) -> Self {
-        Self {
-            parent_ptr: parent.handle_ptr(),
-            id: ID_ANY as i32,
-            pos: Point { x: -1, y: -1 }, // Default position
-            size: Size {
-                width: -1,
-                height: -1,
-            }, // Default size
-            style: 0, // Default style (consider adding HSCROLL/VSCROLL flags here?)
-        }
-    }
-
-    /// Sets the window ID.
-    pub fn with_id(mut self, id: Id) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the position.
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    /// Sets the size.
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    /// Sets the style flags.
-    pub fn with_style(mut self, style: i64) -> Self {
-        self.style = style;
-        self
-    }
-
-    /// Creates the `ScrolledWindow`.
-    /// Panics if creation fails (FFI returns null).
-    pub fn build(self) -> ScrolledWindow {
-        if self.parent_ptr.is_null() {
+// Use widget_builder macro for the builder implementation
+widget_builder!(
+    name: ScrolledWindow,
+    parent_type: &'a dyn WxWidget,
+    style_type: ScrolledWindowStyle,
+    fields: {},
+    build_impl: |slf| {
+        if slf.parent.handle_ptr().is_null() {
             panic!("Cannot create ScrolledWindow with a null parent");
         }
 
-        let c_pos = ffi::wxd_Point {
-            x: self.pos.x,
-            y: self.pos.y,
-        };
-        let c_size = ffi::wxd_Size {
-            width: self.size.width,
-            height: self.size.height,
-        };
-
         let ptr = unsafe {
             ffi::wxd_ScrolledWindow_Create(
-                self.parent_ptr,
-                self.id,
-                c_pos,
-                c_size,
-                self.style as ffi::wxd_Style_t,
+                slf.parent.handle_ptr(),
+                slf.id,
+                slf.pos.into(),
+                slf.size.into(),
+                slf.style.bits() as ffi::wxd_Style_t,
             )
         };
 
         if ptr.is_null() {
             panic!("Failed to create wxScrolledWindow");
-        } else {
-            unsafe { ScrolledWindow::from_ptr(ptr) }
         }
+        
+        unsafe { ScrolledWindow::from_ptr(ptr) }
     }
-}
-
-// --- Trait Implementations ---
-
-impl WxWidget for ScrolledWindow {
-    /// Returns the underlying window pointer.
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.panel.handle_ptr()
-    }
-}
-
-impl Deref for ScrolledWindow {
-    type Target = Panel;
-    fn deref(&self) -> &Self::Target {
-        &self.panel
-    }
-}
-
-impl DerefMut for ScrolledWindow {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.panel
-    }
-}
-
-// ScrolledWindow handles events like any other Window/Panel derivative
-impl WxEvtHandler for ScrolledWindow {
-    /// # Safety
-    /// Inherits safety requirements from `Window::get_event_handler_ptr`.
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.panel.get_event_handler_ptr()
-    }
-}
-
-// No Drop needed, Panel's base (Window) handles cleanup notifier attachment
+); 

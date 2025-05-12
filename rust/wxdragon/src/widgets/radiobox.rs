@@ -148,6 +148,7 @@ widget_builder!(
     parent_type: &'a dyn WxWidget,
     style_type: RadioBoxStyle,
     fields: {
+        label: String = String::new(),
         choices: Vec<String> = Vec::new(),
         major_dimension: i32 = 0
     },

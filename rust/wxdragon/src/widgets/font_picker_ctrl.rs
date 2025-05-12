@@ -1,67 +1,31 @@
 /* This is a new file */
 //! Safe wrapper for wxFontPickerCtrl.
 
-use crate::geometry::{Point, Size};
-use crate::event::WxEvtHandler;
-use crate::font::Font; // Import the safe Font wrapper
-use crate::window::Window;
-use crate::WxWidget;
 use std::ffi::c_long;
-use std::ptr;
 use wxdragon_sys as ffi;
-use std::ops::{BitOr, BitOrAssign};
-use std::default::Default;
 
-/// Window style flags for `FontPickerCtrl`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum FontPickerCtrlStyle {
-    /// Default style, includes `UseTextCtrl`.
-    Default = ffi::WXD_FNTP_DEFAULT_STYLE,
-    /// Use a text control to display the font description.
-    UseTextCtrl = ffi::WXD_FNTP_USE_TEXTCTRL,
-    /// Show the font description (e.g., "Times New Roman Bold 10") as the label.
-    FontDescAsLabel = ffi::WXD_FNTP_FONTDESC_AS_LABEL,
-    /// Use the selected font itself to draw the label.
-    UseFontForLabel = ffi::WXD_FNTP_USEFONT_FOR_LABEL,
-}
+use crate::event::WxEvtHandler;
+use crate::font::Font;
+use crate::implement_widget_traits_with_target;
+use crate::prelude::*;
+use crate::widget_builder;
+use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
 
-impl FontPickerCtrlStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-
-    /// The default style for `FontPickerCtrl`.
-    pub const DEFAULT: FontPickerCtrlStyle = FontPickerCtrlStyle::Default;
-}
-
-impl Default for FontPickerCtrlStyle {
-    fn default() -> Self {
-        FontPickerCtrlStyle::DEFAULT
-    }
-}
-
-impl BitOr for FontPickerCtrlStyle {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for FontPickerCtrlStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+// --- Style enum using macro ---
+widget_style_enum!(
+    name: FontPickerCtrlStyle,
+    doc: "Style flags for FontPickerCtrl widgets.",
+    variants: {
+        Default: ffi::WXD_FNTP_DEFAULT_STYLE, "Default style, includes `UseTextCtrl`.",
+        UseTextCtrl: ffi::WXD_FNTP_USE_TEXTCTRL, "Use a text control to display the font description.",
+        FontDescAsLabel: ffi::WXD_FNTP_FONTDESC_AS_LABEL, "Show the font description (e.g., \"Times New Roman Bold 10\") as the label.",
+        UseFontForLabel: ffi::WXD_FNTP_USEFONT_FOR_LABEL, "Use the selected font itself to draw the label."
+    },
+    default_variant: Default
+);
 
 // --- FontPickerCtrl ---
-
 #[derive(Clone)]
 pub struct FontPickerCtrl {
     window: Window, // Embed Window
@@ -69,10 +33,8 @@ pub struct FontPickerCtrl {
 
 impl FontPickerCtrl {
     /// Creates a new FontPickerCtrlBuilder.
-    pub fn builder<'a>(parent: &'a impl WxWidget) -> FontPickerCtrlBuilder<'a> {
-        let mut builder = FontPickerCtrlBuilder::default();
-        builder.parent_ptr = parent.handle_ptr();
-        builder
+    pub fn builder(parent: &dyn WxWidget) -> FontPickerCtrlBuilder {
+        FontPickerCtrlBuilder::new(parent)
     }
 
     /// Gets the currently selected font.
@@ -104,101 +66,37 @@ impl FontPickerCtrl {
     /// Creates a FontPickerCtrl from a raw pointer.
     /// # Safety
     /// The pointer must be a valid `wxd_FontPickerCtrl_t`.
-    unsafe fn from_ptr(ptr: *mut ffi::wxd_FontPickerCtrl_t) -> Self {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_FontPickerCtrl_t) -> Self {
         FontPickerCtrl {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
         }
     }
 }
 
-impl WxWidget for FontPickerCtrl {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
+// Use the widget_builder macro to generate the FontPickerCtrlBuilder implementation
+widget_builder!(
+    name: FontPickerCtrl,
+    parent_type: &'a dyn WxWidget,
+    style_type: FontPickerCtrlStyle,
+    fields: {
+        initial_font: Option<Font> = None
+    },
+    build_impl: |slf| {
+        assert!(!slf.parent.handle_ptr().is_null(), "FontPickerCtrl requires a parent");
 
-impl WxEvtHandler for FontPickerCtrl {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
-
-// Drop is handled by the embedded Window or parentage.
-
-// --- FontPickerCtrlBuilder ---
-
-pub struct FontPickerCtrlBuilder<'a> {
-    parent_ptr: *mut ffi::wxd_Window_t,
-    id: i32,
-    initial_font: Option<Font>, // Store Option<Font> and get its ptr in build()
-    pos: Point,
-    size: Size,
-    style: FontPickerCtrlStyle,
-    _phantom: std::marker::PhantomData<&'a ()>,
-}
-
-impl<'a> Default for FontPickerCtrlBuilder<'a> {
-    fn default() -> Self {
-        Self {
-            parent_ptr: ptr::null_mut(),
-            id: ffi::WXD_ID_ANY as i32,
-            initial_font: None,
-            pos: Point::default(),
-            size: Size::default(),
-            style: FontPickerCtrlStyle::DEFAULT,
-            _phantom: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<'a> FontPickerCtrlBuilder<'a> {
-    pub fn with_id(mut self, id: i32) -> Self {
-        self.id = id;
-        self
-    }
-
-    pub fn with_initial_font(mut self, font: Font) -> Self {
-        self.initial_font = Some(font);
-        self
-    }
-
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: FontPickerCtrlStyle) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn build(self) -> FontPickerCtrl {
-        assert!(
-            !self.parent_ptr.is_null(),
-            "FontPickerCtrl requires a parent"
-        );
-
-        let initial_font_ptr = self
+        let initial_font_ptr = slf
             .initial_font
             .as_ref()
-            .map_or(ptr::null(), |f| f.as_ptr());
-
-        let ffi_pos: ffi::wxd_Point = self.pos.into();
-        let ffi_size: ffi::wxd_Size = self.size.into();
+            .map_or(std::ptr::null(), |f| f.as_ptr());
 
         let ptr = unsafe {
             ffi::wxd_FontPickerCtrl_Create(
-                self.parent_ptr,
-                self.id,
+                slf.parent.handle_ptr(),
+                slf.id,
                 initial_font_ptr,
-                ffi_pos,
-                ffi_size,
-                self.style.bits() as c_long,
+                slf.pos.into(),
+                slf.size.into(),
+                slf.style.bits() as c_long,
             )
         };
         if ptr.is_null() {
@@ -207,4 +105,7 @@ impl<'a> FontPickerCtrlBuilder<'a> {
             unsafe { FontPickerCtrl::from_ptr(ptr) }
         }
     }
-}
+);
+
+// Use the implement_widget_traits_with_target macro to implement traits
+implement_widget_traits_with_target!(FontPickerCtrl, window, Window);

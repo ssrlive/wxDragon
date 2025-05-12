@@ -225,7 +225,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
     let initial_font_for_picker = Font::new(); // Use default font for now
     let font_picker_ctrl = FontPickerCtrl::builder(&dialog_panel)
-        .with_initial_font(initial_font_for_picker)
+        .with_initial_font(Some(initial_font_for_picker))
         .with_style(FontPickerCtrlStyle::Default | FontPickerCtrlStyle::UseFontForLabel)
         .build();
     let font_picker_status_label = StaticText::builder(&dialog_panel)
@@ -542,22 +542,20 @@ impl DialogTabControls {
                 }
             });
 
-        // Event handler for DirPickerCtrl
-        let dpc_status_label_clone = self.dir_picker_status_label.clone();
-        let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone(); // Clone for the closure
-        self.dir_picker_ctrl
-            .bind(EventType::DIR_PICKER_CHANGED, move |_event: Event| {
-                let path_string: String = dir_picker_ctrl_clone.get_path();
-                if !path_string.is_empty() {
-                    let status = format!("Selected Dir: {}", path_string);
-                    dpc_status_label_clone.set_label(&status);
-                    println!("DirPickerCtrl Path Changed: {}", path_string);
-                } else {
-                    dpc_status_label_clone
-                        .set_label("DirPickerCtrl: No directory selected or path is empty.");
-                    println!("DirPickerCtrl Path Changed: No directory selected or path is empty.");
-                }
-            });
+        // Event handlers for DirPickerCtrl
+        let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone();
+        let dir_picker_status_label_clone = self.dir_picker_status_label.clone();
+        self.dir_picker_ctrl.bind(EventType::DIR_PICKER_CHANGED, move |_event| {
+            let selected_path = dir_picker_ctrl_clone.get_path();
+            if !selected_path.is_empty() {
+                let status = format!("DirPicker: Selected directory: {}", selected_path);
+                dir_picker_status_label_clone.set_label(&status);
+                println!("{}", status);
+            } else {
+                dir_picker_status_label_clone.set_label("DirPicker: No directory selected.");
+                println!("DirPicker: No directory selected.");
+            }
+        });
 
         // Event handler for FontPickerCtrl
         let font_pc_status_label_clone = self.font_picker_status_label.clone();

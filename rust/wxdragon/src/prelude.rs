@@ -141,7 +141,7 @@ pub use crate::font_data::FontData;
 pub use crate::dialogs::progress_dialog::ProgressDialog;
 
 // ADDED: File/Dir Picker Controls, their builders, and style enums
-pub use crate::widgets::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
+pub use crate::widgets::dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
 pub use crate::widgets::file_picker_ctrl::{FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrlStyle};
 
 // REPLACE OLD FontPickerCtrl exports with new enum export

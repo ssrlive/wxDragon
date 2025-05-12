@@ -32,7 +32,6 @@ widget_builder!(
         Button::new_impl(
             parent_ptr,
             slf.id,
-            &slf.label,
             slf.pos,
             slf.size,
             slf.style.bits(),
@@ -42,9 +41,9 @@ widget_builder!(
 ```
 
 The macro automatically generates:
-- Builder struct with standard fields (id, label, position, size, style)
+- Builder struct with standard fields (id, position, size, style)
 - Constructor that initializes with sensible defaults
-- Standard setter methods (with_id, with_label, with_pos, with_size, with_style)
+- Standard setter methods (with_id, with_pos, with_size, with_style)
 - Additional setter methods for custom fields
 - Build method that calls the provided implementation
 

@@ -2,23 +2,45 @@ use crate::geometry::{Point, Size, DEFAULT_POSITION};
 use crate::id::Id;
 use crate::id::ID_ANY;
 use crate::menus::MenuBar; // ADDED: Import MenuBar
+use crate::widget_style_enum;
 use crate::widgets::statusbar::StatusBar; // ADDED Import
 use crate::widgets::toolbar::{ToolBar, ToolBarStyle}; // Added ToolBarStyle
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::ptr;
 use wxdragon_sys as ffi;
-// REMOVED: use std::ops::Deref;
 use std::default::Default;
 use std::marker::PhantomData;
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int; // Import c_long and c_int // ADDED for enum bitwise operations
+use crate::event::WxEvtHandler;
+
+// --- Style enum using macro ---
+widget_style_enum!(
+    name: FrameStyle,
+    doc: "Window style flags for Frame.",
+    variants: {
+        Default: ffi::WXD_DEFAULT_FRAME_STYLE, "Includes `wxCAPTION`, `wxRESIZE_BORDER`, `wxSYSTEM_MENU`, `wxMINIMIZE_BOX`, `wxMAXIMIZE_BOX`, `wxCLOSE_BOX`. This is the default style.",
+        Caption: ffi::WXD_CAPTION, "Displays a title bar.",
+        ResizeBorder: ffi::WXD_RESIZE_BORDER, "Displays a resizeable border.",
+        SystemMenu: ffi::WXD_SYSTEM_MENU, "Displays a system menu.",
+        CloseBox: ffi::WXD_CLOSE_BOX, "Displays a close box.",
+        MaximizeBox: ffi::WXD_MAXIMIZE_BOX, "Displays a maximize box.",
+        MinimizeBox: ffi::WXD_MINIMIZE_BOX, "Displays a minimize box.",
+        StayOnTop: ffi::WXD_STAY_ON_TOP, "Stays on top of other windows.",
+        ToolWindow: ffi::WXD_FRAME_TOOL_WINDOW, "Tool window style (typically a thin border and title bar).",
+        NoTaskbar: ffi::WXD_FRAME_NO_TASKBAR, "No taskbar button (Windows only).",
+        FloatOnParent: ffi::WXD_FRAME_FLOAT_ON_PARENT, "Equivalent to StayOnTop for frames.",
+        ClipChildren: ffi::WXD_CLIP_CHILDREN, "Clip children to the frame."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxFrame.
 #[derive(Clone)]
 pub struct Frame {
     window: Window, // Composition: Frame uses a Window internally
     // Store parent pointer to manage drop behavior
+    #[allow(dead_code)]
     parent_ptr: *mut ffi::wxd_Window_t,
     _marker: PhantomData<()>,
 }
@@ -50,7 +72,7 @@ impl Default for FrameBuilder {
                 width: 500,
                 height: 400,
             }, // Specific default size for Frame
-            style: FrameStyle::DEFAULT,
+            style: FrameStyle::Default,
             // name: String::new(),
         }
     }
@@ -184,7 +206,7 @@ impl Frame {
 
     /// Sets the frame's status bar.
     pub fn set_existing_status_bar(&self, status_bar: Option<&StatusBar>) {
-        let sb_ptr = status_bar.map_or(std::ptr::null_mut(), |sb| sb.as_ptr() as *mut _);
+        let sb_ptr = status_bar.map_or(ptr::null_mut(), |sb| sb.as_ptr() as *mut _);
         unsafe {
             ffi::wxd_Frame_SetStatusBar(self.window.as_ptr() as *mut ffi::wxd_Frame_t, sb_ptr);
         }
@@ -269,124 +291,4 @@ impl Frame {
     }
 }
 
-// Implement WxWidget for Frame.
-impl WxWidget for Frame {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.as_ptr()
-    }
-    // get_id is provided by Deref<Target=Window> -> Window::get_id
-    // show, set_sizer, etc. are handled directly or via Deref
-}
-
-/// Implement Drop to manage *Rust* resources.
-/// The underlying C++ window is managed by wxWidgets itself.
-impl Drop for Frame {
-    fn drop(&mut self) {
-        // For top-level windows, wxWidgets handles destruction.
-        // Our previous cleanup_handlers_recursive call is now unnecessary
-        // because wxWidgets will destroy the client data (WxdBindingMapClientData)
-        // which will trigger its destructor to drop Rust closures.
-        // If this Frame instance represents a child window, its C++ object
-        // will be deleted by its parent anyway.
-        // Therefore, this Drop implementation might become empty unless
-        // the Frame struct itself holds other Rust resources that need dropping.
-        if self.parent_ptr.is_null() {
-            // println!("Top-level Frame wrapper dropped (C++ cleanup by wxWidgets)");
-        } else {
-            // println!("Child Frame wrapper dropped (C++ cleanup by parent)");
-        }
-    }
-}
-
-// Allow Frame to be used where a Window is expected (e.g., as a parent)
-// This also provides WxEvtHandler implementation via Window.
-impl std::ops::Deref for Frame {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-// --- FrameStyle Enum ---
-
-/// Window style flags for `Frame`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum FrameStyle {
-    /// Includes `wxCAPTION`, `wxRESIZE_BORDER`, `wxSYSTEM_MENU`, `wxMINIMIZE_BOX`, `wxMAXIMIZE_BOX`, `wxCLOSE_BOX`.
-    /// This is the default style.
-    Default = ffi::WXD_DEFAULT_FRAME_STYLE,
-    /// Displays a title bar.
-    Caption = ffi::WXD_CAPTION,
-    /// Displays a resizeable border.
-    ResizeBorder = ffi::WXD_RESIZE_BORDER,
-    /// Displays a system menu.
-    SystemMenu = ffi::WXD_SYSTEM_MENU,
-    /// Displays a close box.
-    CloseBox = ffi::WXD_CLOSE_BOX,
-    /// Displays a maximize box.
-    MaximizeBox = ffi::WXD_MAXIMIZE_BOX,
-    /// Displays a minimize box.
-    MinimizeBox = ffi::WXD_MINIMIZE_BOX,
-    /// Stays on top of other windows.
-    StayOnTop = ffi::WXD_STAY_ON_TOP,
-    // /// Tool window style (typically a thin border and title bar).
-    // ToolWindow = ffi::WXD_FRAME_TOOL_WINDOW, // Not yet available in generated constants
-    // /// No taskbar button (Windows only).
-    // NoTaskbar = ffi::WXD_FRAME_NO_TASKBAR, // Not yet available in generated constants
-    // /// Equivalent to StayOnTop for frames.
-    // FloatOnParent = ffi::WXD_FRAME_FLOAT_ON_PARENT, // Not yet available in generated constants
-    // /// Clip children to the frame.
-    // ClipChildren = ffi::WXD_CLIP_CHILDREN, // Not yet available in generated constants
-}
-
-impl FrameStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-
-    /// A commonly used default set of styles.
-    /// Combines `Caption`, `ResizeBorder`, `SystemMenu`, `MinimizeBox`, `MaximizeBox`, `CloseBox`.
-    pub const DEFAULT: FrameStyle = FrameStyle::Default; // Keep for clarity if Default is complex
-}
-
-impl BitOr for FrameStyle {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        // Safety: We are combining valid i64 repr flags. The resulting i64 is still a valid style combination.
-        // It's possible to create a combination not directly represented by an enum variant,
-        // which is standard for bitflags.
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for FrameStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        // Safety: Similar to BitOr.
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
-
-// Ensure FrameBuilder uses the new enum
-// Modify FrameBuilder struct definition
-// ... search for FrameBuilder struct { ... style: i64 ...
-// ... replace with style: FrameStyle ...
-
-// Modify FrameBuilder::default()
-// ... search for style: ffi::WXD_DEFAULT_FRAME_STYLE
-// ... replace with style: FrameStyle::DEFAULT
-
-// Modify FrameBuilder::with_style()
-// ... search for pub fn with_style(mut self, style: i64)
-// ... replace with pub fn with_style(mut self, style: FrameStyle)
-
-// Modify FrameBuilder::build()
-// ... search for self.style as ffi::wxd_Style_t
-// ... replace with self.style.bits() as ffi::wxd_Style_t
-// Ensure to add `use std::ops::{BitOr, BitOrAssign};` at the top of the file.
+implement_widget_traits_with_target!(Frame, window, Window);

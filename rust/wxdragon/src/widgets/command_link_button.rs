@@ -26,13 +26,14 @@ widget_builder!(
     parent_type: &'a dyn WxWidget,
     style_type: CommandLinkButtonStyle,
     fields: {
+        label: String = String::new(),
         note: String = String::new()
     },
     build_impl: |slf| {
         assert!(!slf.parent.handle_ptr().is_null(), "CommandLinkButton requires a parent");
         
-        let c_main_label = CString::new(slf.label).expect("CString::new for main_label failed");
-        let c_note = CString::new(slf.note).expect("CString::new for note failed");
+        let c_main_label = CString::new(&slf.label[..]).expect("CString::new for main_label failed");
+        let c_note = CString::new(&slf.note[..]).expect("CString::new for note failed");
 
         let ptr = unsafe {
             ffi::wxd_CommandLinkButton_Create(

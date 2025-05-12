@@ -35,9 +35,9 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let _sizer = BoxSizer::builder(VERTICAL).build();
 
     // --- Create controls, parenting them to the *inner_list_panel* ---
-    let list_box_items = ["Apple", "Banana", "Cherry", "Date", "Elderberry"];
+    let list_box_items = vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string(), "Date".to_string(), "Elderberry".to_string()];
     let list_box = ListBox::builder(&panel)
-        .with_choices(&list_box_items)
+        .with_choices(list_box_items)
         // .with_style(ListBoxStyle::Default | ListBoxStyle::Sort | ListBoxStyle::AlwaysScrollbar | ListBoxStyle::HorizontalScrollbar) // Old complex
         .with_style(ListBoxStyle::Sort) // Simplified to test
         .build();

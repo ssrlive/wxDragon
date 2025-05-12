@@ -50,7 +50,11 @@ pub mod aui_toolbar;
 
 pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
-pub use dir_picker_ctrl::*;
+pub use dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
+
+pub use file_ctrl::{FileCtrl, FileCtrlBuilder, FileCtrlStyle};
+
+pub use file_picker_ctrl::{FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrlStyle};
 
 pub use notification_message::*;
 

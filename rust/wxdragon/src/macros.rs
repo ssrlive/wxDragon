@@ -10,7 +10,7 @@
 /// * `name` - The name of the widget (e.g., `Button`, `CheckBox`)
 /// * `parent_type` - The type of the parent parameter (e.g., `&'a dyn WxWidget`)
 /// * `style_type` - The type of the style parameter (e.g., `ButtonStyle`)
-/// * `fields` - Additional fields for the builder
+/// * `fields` - Additional fields for the builder, including label if needed
 /// * `build_impl` - A closure that implements the build logic
 ///
 /// # Example
@@ -20,7 +20,9 @@
 ///     name: Button,
 ///     parent_type: &'a dyn WxWidget,
 ///     style_type: ButtonStyle,
-///     fields: {},
+///     fields: {
+///         label: String = String::new()
+///     },
 ///     build_impl: |slf| {
 ///         let parent_ptr = slf.parent.handle_ptr();
 ///         Button::new_impl(
@@ -52,7 +54,6 @@ macro_rules! widget_builder {
             pub struct [<$name Builder>]<'a> {
                 parent: &'a dyn WxWidget,
                 id: Id,
-                label: String,
                 pos: Point,
                 size: Size,
                 style: $style_type,
@@ -66,7 +67,6 @@ macro_rules! widget_builder {
                     Self {
                         parent,
                         id: crate::id::ID_ANY as Id,
-                        label: String::new(),
                         pos: crate::geometry::DEFAULT_POSITION,
                         size: crate::geometry::DEFAULT_SIZE,
                         style: <$style_type>::Default,
@@ -79,12 +79,6 @@ macro_rules! widget_builder {
                 /// Sets the window identifier.
                 pub fn with_id(mut self, id: Id) -> Self {
                     self.id = id;
-                    self
-                }
-
-                /// Sets the widget label.
-                pub fn with_label(mut self, label: &str) -> Self {
-                    self.label = label.to_string();
                     self
                 }
 
@@ -235,6 +229,10 @@ macro_rules! widget_style_enum {
             pub fn bits(self) -> i64 {
                 self as i64
             }
+            
+            // Add constant for compatibility with existing code
+            #[allow(non_upper_case_globals)]
+            pub const Default: $name = $name::$default;
         }
 
         impl Default for $name {
@@ -264,7 +262,19 @@ macro_rules! widget_style_enum {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __widget_builder_field_method {
-    // Default case for all fields - generate a method that takes the same type as the field
+    // Special case for String fields - allow &str parameters and convert to String
+    // This applies to any field with type String, regardless of name
+    ($field_name:ident: String) => {
+        paste::paste! {
+            /// Sets the $field_name.
+            #[allow(non_snake_case)]
+            pub fn [<with_ $field_name>](mut self, $field_name: &str) -> Self {
+                self.$field_name = $field_name.to_string();
+                self
+            }
+        }
+    };
+    // Default case for all other fields - generate a method that takes the same type as the field
     ($field_name:ident: $field_type:ty) => {
         paste::paste! {
             /// Sets the $field_name.

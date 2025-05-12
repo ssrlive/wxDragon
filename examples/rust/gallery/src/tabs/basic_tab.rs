@@ -60,8 +60,6 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Spin Button:")
         .build();
     let spin_button = SpinButton::builder(&basic_panel)
-        .with_range(0, 100)
-        .with_initial_value(0)
         .build();
     spin_button.set_tooltip("Click arrows or use keys to change the value (wraps around).");
     let spinctrl_double_label_widget = StaticText::builder(&basic_panel)
@@ -128,7 +126,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .build();
     let cmd_link_button = CommandLinkButton::builder(&basic_panel)
         .with_label("Open System Settings")
-        .with_note("Configure your display, network, and other system preferences.".to_string())
+        .with_note("Configure your display, network, and other system preferences.")
         .build();
     cmd_link_button.set_tooltip("Click to open system settings (simulated).");
 
@@ -235,7 +233,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let new_bmp = ArtProvider::get_bitmap(ArtId::New, ArtClient::Menu, None).expect("Failed art");
     let bitmap_combo_box = BitmapComboBox::builder(&basic_panel)
         .with_size(Size::new(200, -1))
-        .with_value("Default Value".to_string())
+        .with_value("Default Value")
         .build();
     bitmap_combo_box.append("Open", Some(&open_bmp));
     bitmap_combo_box.append("Save", Some(&save_bmp));

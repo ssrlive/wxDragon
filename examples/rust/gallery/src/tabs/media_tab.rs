@@ -40,7 +40,7 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
     };
 
     let animation_ctrl = AnimationCtrl::builder(&panel)
-        .with_animation_file("".to_string()) // Pass empty string for file as we load from bytes
+        .with_animation_file("") // Pass empty string for file as we load from bytes
         .with_size(animation_size) // Use determined or fallback size
         .build();
 
