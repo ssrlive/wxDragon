@@ -9,6 +9,9 @@
 static wxd_OnInitCallback g_OnInitCallback = nullptr;
 static void* g_OnInitUserData = nullptr;
 
+// Function to process Rust callbacks, implemented in Rust
+extern "C" void process_rust_callbacks();
+
 // --- Internal C++ App Class --- 
 
 class WxdApp : public wxApp {
@@ -16,6 +19,9 @@ public:
     // Called by wxWidgets framework on application startup.
     virtual bool OnInit() override;
 
+    // Idle event handler to process callbacks
+    void OnIdle(wxIdleEvent& event);
+    
     // Optional: Override OnExit for cleanup if needed
     // virtual int OnExit() override;
 };
@@ -26,6 +32,9 @@ bool WxdApp::OnInit() {
     if (!wxApp::OnInit()) {
         return false;
     }
+
+    // Bind idle event to process callbacks
+    Bind(wxEVT_IDLE, &WxdApp::OnIdle, this);
 
     // Call the stored C callback function
     if (g_OnInitCallback) {
@@ -38,6 +47,16 @@ bool WxdApp::OnInit() {
         wxLogError("wxDragon: No OnInit callback provided to wxd_Main.");
         return false;
     }
+}
+
+// Process callbacks on idle
+void WxdApp::OnIdle(wxIdleEvent& event) {
+    // Process any pending Rust callbacks
+    process_rust_callbacks();
+    
+    // Request more idle events if there are more callbacks
+    // This ensures the event loop keeps processing our callbacks
+    event.RequestMore();
 }
 
 // --- C API Implementation --- 
@@ -105,21 +124,9 @@ void wxd_App_SetTopWindow(wxd_App_t* app, wxd_Window_t* window) {
     wx_app->SetTopWindow(wx_window);
 }
 
-// Exits the application's main event loop.
-void wxd_App_ExitMainLoop(wxd_App_t* app) {
-     if (!app) return;
-     // wxApp::ExitMainLoop is protected, need a way to call it.
-     // Often done via wxWindow::Close() on the top window, or posting wxEVT_EXIT.
-     // Closing the top window is the standard way to initiate application exit.
-     // The wxEVT_CLOSE_WINDOW handler should then call Destroy() or similar.
-     wxWindow* topWindow = wxTheApp->GetTopWindow();
-     if (topWindow) { 
-         topWindow->Close(true); // true = force close, bypasses veto
-     } else {
-         // If there's no top window, maybe we can exit directly?
-         // This is less common. For now, log a warning.
-         wxLogWarning("wxd_App_ExitMainLoop called but no top window is set.");
-     }
+// Manual callback processing for cases where we need to trigger it
+void wxd_App_ProcessCallbacks() {
+    process_rust_callbacks();
 }
 
 // Implementation for wxd_free_string
@@ -130,5 +137,16 @@ void wxd_free_string(char* str) {
 }
 
 #ifdef __cplusplus
-// ... existing code ...
+extern "C" {
+#endif
+
+    // Dummy implementations to avoid linker errors in case Rust doesn't define them
+    #pragma weak process_rust_callbacks
+    void process_rust_callbacks() {
+        // This is a weak symbol that will be replaced by the actual Rust implementation
+        // If the Rust implementation is not available, this will be used instead
+    }
+
+#ifdef __cplusplus
+}
 #endif

@@ -24,6 +24,8 @@ pub mod window;
 // Re-export the main entry point and handle
 pub use app::main;
 pub use app::WxdAppHandle;
+// Re-export call_after function for async support
+pub use app::call_after;
 
 // Re-export common types from their new module locations
 pub use color::{Colour, colours};

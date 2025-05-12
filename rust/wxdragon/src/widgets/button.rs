@@ -67,6 +67,17 @@ impl Button {
         }
     }
 
+    /// Sets the button's label.
+    pub fn set_label(&self, label: &str) {
+        let c_label = CString::new(label).expect("CString::new failed");
+        unsafe {
+            ffi::wxd_Button_SetLabel(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                c_label.as_ptr(),
+            );
+        }
+    }
+
     /// Gets the button's label.
     pub fn get_label(&self) -> String {
         let mut buffer: [c_char; 256] = [0; 256]; // Reasonable buffer size

@@ -561,6 +561,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_ACTION, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_IDLE:
+            wx_handler->Bind(wxEVT_IDLE, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -758,6 +762,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK: return wxEVT_NOTIFICATION_MESSAGE_CLICK;
         case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED: return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
         case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION: return wxEVT_NOTIFICATION_MESSAGE_ACTION;
+        case WXD_EVENT_TYPE_IDLE: return wxEVT_IDLE;
 
         default:
             // Optionally log an error or return a specific wxEventType to indicate failure

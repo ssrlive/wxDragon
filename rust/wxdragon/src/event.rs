@@ -157,6 +157,8 @@ impl EventType {
 
     pub const EVT_DATE_CHANGED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
 
+    pub const IDLE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_IDLE);
+
     // Add others as needed
 
     /// Get the underlying stable C enum value.
