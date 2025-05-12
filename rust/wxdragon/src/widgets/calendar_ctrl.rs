@@ -2,7 +2,7 @@ use crate::geometry::{Point, Size};
 use crate::datetime::DateTime;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
-use crate::implement_widget_traits;
+use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
@@ -108,4 +108,4 @@ widget_builder!(
 );
 
 // Apply common trait implementations for this widget
-implement_widget_traits!(CalendarCtrl, window);
+implement_widget_traits_with_target!(CalendarCtrl, window, Window);

@@ -120,49 +120,54 @@ macro_rules! widget_builder {
     };
 }
 
-/// Implements common widget traits for a widget that wraps a Window
+/// Implements common widget traits with a custom target type for Deref
 ///
 /// This macro generates implementations for:
 /// - WxWidget trait 
-/// - Deref/DerefMut to Window
+/// - Deref/DerefMut to the specified target type
 /// - WxEvtHandler trait
 /// - Drop implementation with empty body (for child widgets)
 ///
 /// # Parameters
 /// 
 /// * `name` - The name of the widget struct
-/// * `window_field` - The name of the Window field within the struct
+/// * `field` - The name of the field within the struct that implements WxWidget
+/// * `target_type` - The target type for Deref/DerefMut implementations
 ///
 /// # Example
 ///
 /// ```ignore
-/// implement_widget_traits!(Button, window);
+/// // For a widget that wraps a Window:
+/// implement_widget_traits_with_target!(MyWidget, window, Window);
+///
+/// // For a widget that wraps another widget type:
+/// implement_widget_traits_with_target!(MyCompositeWidget, inner_widget, OtherWidgetType);
 /// ```
 #[macro_export]
-macro_rules! implement_widget_traits {
-    ($widget_name:ident, $window_field:ident) => {
+macro_rules! implement_widget_traits_with_target {
+    ($widget_name:ident, $field:ident, $target_type:ty) => {
         impl WxWidget for $widget_name {
             fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-                self.$window_field.handle_ptr()
+                self.$field.handle_ptr()
             }
         }
 
         impl std::ops::Deref for $widget_name {
-            type Target = Window;
+            type Target = $target_type;
             fn deref(&self) -> &Self::Target {
-                &self.$window_field
+                &self.$field
             }
         }
 
         impl std::ops::DerefMut for $widget_name {
             fn deref_mut(&mut self) -> &mut Self::Target {
-                &mut self.$window_field
+                &mut self.$field
             }
         }
 
         impl WxEvtHandler for $widget_name {
             unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-                self.$window_field.get_event_handler_ptr()
+                self.$field.get_event_handler_ptr()
             }
         }
 
@@ -170,7 +175,7 @@ macro_rules! implement_widget_traits {
         impl Drop for $widget_name {
             fn drop(&mut self) {
                 // Child widgets are typically managed by their parent in wxWidgets
-                // The Window's Drop implementation handles event unbinding
+                // The field's Drop implementation handles event unbinding
             }
         }
     };

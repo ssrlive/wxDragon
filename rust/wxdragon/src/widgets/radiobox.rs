@@ -1,7 +1,7 @@
 use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
-use crate::implement_widget_traits;
+use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
@@ -140,7 +140,7 @@ impl RadioBox {
 }
 
 // Apply common trait implementations
-implement_widget_traits!(RadioBox, window);
+implement_widget_traits_with_target!(RadioBox, window, Window);
 
 // Use the widget_builder macro for RadioBox
 widget_builder!(

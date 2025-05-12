@@ -1,5 +1,5 @@
 use crate::event::WxEvtHandler;
-use crate::implement_widget_traits;
+use crate::implement_widget_traits_with_target;
 use crate::prelude::*; // Use prelude
 use crate::widget_builder;
 use crate::widget_style_enum;
@@ -131,7 +131,7 @@ widget_builder!(
 );
 
 // Apply common trait implementations for Button
-implement_widget_traits!(Button, window);
+implement_widget_traits_with_target!(Button, window, Window);
 
 // Define the ButtonStyle enum using the widget_style_enum macro
 widget_style_enum!(

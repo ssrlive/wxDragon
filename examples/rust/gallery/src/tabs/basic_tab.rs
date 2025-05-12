@@ -127,8 +127,8 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label("Cmd Link Btn:")
         .build();
     let cmd_link_button = CommandLinkButton::builder(&basic_panel)
-        .with_main_label("Open System Settings")
-        .with_note("Configure your display, network, and other system preferences.")
+        .with_label("Open System Settings")
+        .with_note("Configure your display, network, and other system preferences.".to_string())
         .build();
     cmd_link_button.set_tooltip("Click to open system settings (simulated).");
 
@@ -195,9 +195,9 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let date_picker_status_label = StaticText::builder(&basic_panel)
         .with_label(&format!(
             "{:04}-{:02}-{:02}",
-            initial_selected_date.year,
-            initial_selected_date.month + 1,
-            initial_selected_date.day
+            initial_selected_date.year(),
+            initial_selected_date.month(),
+            initial_selected_date.day()
         ))
         .build();
     let calendar_label_widget = StaticText::builder(&basic_panel)
@@ -437,9 +437,9 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         let date_str = if selected_date.is_valid() {
             format!(
                 "{:04}-{:02}-{:02}",
-                selected_date.year,
-                selected_date.month + 1,
-                selected_date.day
+                selected_date.year(),
+                selected_date.month(),
+                selected_date.day()
             )
         } else {
             "(none)".to_string()

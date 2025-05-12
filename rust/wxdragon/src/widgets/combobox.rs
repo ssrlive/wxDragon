@@ -166,7 +166,7 @@ impl<'a> ComboBoxBuilder<'a> {
 }
 
 // --- Widget traits implementation using macro ---
-implement_widget_traits!(ComboBox, window);
+implement_widget_traits_with_target!(ComboBox, window, Window);
 
 // --- Helper Function --- (Consider moving to a common utils module)
 

@@ -1,6 +1,7 @@
 // --- Core Types & Traits ---
 pub use crate::app::{main, WxdAppHandle};
 pub use crate::color::{Colour, colours};
+pub use crate::datetime::DateTime;
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use crate::id::{Id, ID_ANY};
 pub use crate::types::{Style, RawWxProps};
@@ -93,8 +94,8 @@ pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder};
 // ADDED: Re-export ColourPickerCtrl and related items
 pub use crate::widgets::colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 
-// ADDED: Re-export DatePickerCtrl, DatePickerCtrlBuilder, and DateTime
-pub use crate::widgets::datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder, DateTime};
+// ADDED: Re-export DatePickerCtrl, DatePickerCtrlBuilder
+pub use crate::widgets::datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
 // ADDED: Re-export Treebook
 pub use crate::widgets::treebook::{Treebook, TreebookBuilder};

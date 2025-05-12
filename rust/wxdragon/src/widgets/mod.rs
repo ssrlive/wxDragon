@@ -48,7 +48,7 @@ pub mod aui_mdi_child_frame;
 pub mod aui_notebook;
 pub mod aui_toolbar;
 
-pub use datepickerctrl::*;
+pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
 pub use dir_picker_ctrl::*;
 
@@ -67,7 +67,6 @@ pub use choice::{Choice, ChoiceBuilder};
 pub use colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 pub use combobox::{ComboBox, ComboBoxBuilder};
 pub use command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
-pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder, DateTime};
 pub use font_picker_ctrl::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlStyle};
 pub use frame::{Frame, FrameBuilder};
 pub use gauge::{Gauge, GaugeBuilder};

@@ -1,7 +1,7 @@
 use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
-use crate::implement_widget_traits;
+use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
@@ -188,4 +188,4 @@ widget_builder!(
     }
 );
 
-implement_widget_traits!(Choice, window); 
+implement_widget_traits_with_target!(Choice, window, Window); 

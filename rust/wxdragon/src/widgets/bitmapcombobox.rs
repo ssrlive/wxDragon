@@ -4,7 +4,7 @@ use crate::geometry::{Point, Size};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
 use crate::id::Id;
-use crate::implement_widget_traits;
+use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widgets::combobox::ComboBoxStyle;
 use crate::window::{Window, WxWidget};
@@ -190,4 +190,4 @@ widget_builder!(
 );
 
 // Apply common trait implementations for this widget
-implement_widget_traits!(BitmapComboBox, window);
+implement_widget_traits_with_target!(BitmapComboBox, window, Window);
