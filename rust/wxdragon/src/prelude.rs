@@ -4,7 +4,7 @@ pub use crate::color::{Colour, colours};
 pub use crate::datetime::DateTime;
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use crate::id::{Id, ID_ANY};
-pub use crate::types::{Style, RawWxProps};
+pub use crate::types::Style;
 pub use crate::event::{Event, EventType, WxEvtHandler};
 pub use crate::sizers::WxSizer;
 pub use crate::window::{WindowUserData, WxWidget};

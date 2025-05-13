@@ -1,205 +1,139 @@
 use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::window::WxWidget;
-use crate::id::ID_ANY;
-use crate::types::RawWxProps;
+use crate::window::{Window, WxWidget};
+use crate::id::Id;
 use wxdragon_sys as ffi;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 
 use std::ffi::CString;
 use std::os::raw::c_long;
-use std::ptr;
+
+// --- Style enum using macro ---
+widget_style_enum!(
+    name: SpinCtrlDoubleStyle,
+    doc: "Style flags for SpinCtrlDouble.",
+    variants: {
+        Default: ffi::WXD_SP_VERTICAL | ffi::WXD_SP_ARROW_KEYS, "Default style (vertical, arrow keys enabled).",
+        Horizontal: ffi::WXD_SP_HORIZONTAL, "Horizontal spin control.",
+        Vertical: ffi::WXD_SP_VERTICAL, "Vertical spin control.",
+        ArrowKeys: ffi::WXD_SP_ARROW_KEYS, "Allow using arrow keys to change the value.",
+        Wrap: ffi::WXD_SP_WRAP, "The value wraps around when incrementing/decrementing past max/min.",
+        ProcessEnter: ffi::WXD_TE_PROCESS_ENTER, "Process the Enter key press event (generates a command event)."
+    },
+    default_variant: Default
+);
 
 // --- SpinCtrlDouble --- //
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SpinCtrlDouble {
-    ptr: *mut ffi::wxd_SpinCtrlDouble_t,
+    window: Window,
 }
 
 impl SpinCtrlDouble {
-    pub fn builder(parent: &impl WxWidget) -> SpinCtrlDoubleBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SpinCtrlDoubleBuilder {
         SpinCtrlDoubleBuilder::new(parent)
     }
 
-    fn from_ptr(ptr: *mut ffi::wxd_SpinCtrlDouble_t) -> Self {
-        SpinCtrlDouble { ptr }
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_SpinCtrlDouble_t) -> Self {
+        SpinCtrlDouble {
+            window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+
+    /// Get the raw underlying spin control double pointer.
+    pub fn as_ptr(&self) -> *mut ffi::wxd_SpinCtrlDouble_t {
+        self.window.handle_ptr() as *mut ffi::wxd_SpinCtrlDouble_t
     }
 
     pub fn get_value(&self) -> f64 {
-        unsafe { ffi::wxd_SpinCtrlDouble_GetValue(self.ptr) }
+        unsafe { ffi::wxd_SpinCtrlDouble_GetValue(self.as_ptr()) }
     }
 
     pub fn set_value(&self, value: f64) {
-        unsafe { ffi::wxd_SpinCtrlDouble_SetValue(self.ptr, value) }
+        unsafe { ffi::wxd_SpinCtrlDouble_SetValue(self.as_ptr(), value) }
     }
 
     pub fn set_range(&self, min_val: f64, max_val: f64) {
-        unsafe { ffi::wxd_SpinCtrlDouble_SetRange(self.ptr, min_val, max_val) }
+        unsafe { ffi::wxd_SpinCtrlDouble_SetRange(self.as_ptr(), min_val, max_val) }
     }
 
     pub fn get_min(&self) -> f64 {
-        unsafe { ffi::wxd_SpinCtrlDouble_GetMin(self.ptr) }
+        unsafe { ffi::wxd_SpinCtrlDouble_GetMin(self.as_ptr()) }
     }
 
     pub fn get_max(&self) -> f64 {
-        unsafe { ffi::wxd_SpinCtrlDouble_GetMax(self.ptr) }
+        unsafe { ffi::wxd_SpinCtrlDouble_GetMax(self.as_ptr()) }
     }
 
     pub fn set_increment(&self, inc: f64) {
-        unsafe { ffi::wxd_SpinCtrlDouble_SetIncrements(self.ptr, inc) } // C API is SetIncrements
+        unsafe { ffi::wxd_SpinCtrlDouble_SetIncrements(self.as_ptr(), inc) }
     }
 
     pub fn get_increment(&self) -> f64 {
-        unsafe { ffi::wxd_SpinCtrlDouble_GetIncrement(self.ptr) }
+        unsafe { ffi::wxd_SpinCtrlDouble_GetIncrement(self.as_ptr()) }
     }
 
     pub fn set_digits(&self, digits: u32) {
-        unsafe { ffi::wxd_SpinCtrlDouble_SetDigits(self.ptr, digits) }
+        unsafe { ffi::wxd_SpinCtrlDouble_SetDigits(self.as_ptr(), digits) }
     }
 
     pub fn get_digits(&self) -> u32 {
-        unsafe { ffi::wxd_SpinCtrlDouble_GetDigits(self.ptr) }
+        unsafe { ffi::wxd_SpinCtrlDouble_GetDigits(self.as_ptr()) }
     }
 }
 
-impl WxWidget for SpinCtrlDouble {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.ptr as *mut ffi::wxd_Window_t
-    }
-}
+// Apply common trait implementations
+implement_widget_traits_with_target!(SpinCtrlDouble, window, Window);
 
-impl WxEvtHandler for SpinCtrlDouble {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.ptr as *mut ffi::wxd_EvtHandler_t
-    }
-}
-
-impl RawWxProps for SpinCtrlDouble {
-    type RawWxPtr = ffi::wxd_SpinCtrlDouble_t;
-    fn raw_wx_ptr(&self) -> *mut Self::RawWxPtr {
-        self.ptr
-    }
-}
-
-impl Drop for SpinCtrlDouble {
-    fn drop(&mut self) {
-        if !self.ptr.is_null() {
-            self.ptr = ptr::null_mut();
-        }
-    }
-}
-
-// --- SpinCtrlDoubleBuilder --- //
-
-pub struct SpinCtrlDoubleBuilder {
-    parent_ptr: *mut ffi::wxd_Window_t,
-    id: i32,
-    value_str: String, // Initial text value
-    pos: Point,
-    size: Size,
-    style: i64,
-    min_val: f64,
-    max_val: f64,
-    initial_val: f64, // Initial numeric value
-    increment: f64,
-}
-
-impl SpinCtrlDoubleBuilder {
-    fn new(parent: &impl WxWidget) -> Self {
-        SpinCtrlDoubleBuilder {
-            parent_ptr: parent.handle_ptr(),
-            id: ID_ANY as i32,
-            value_str: String::new(),
-            pos: Point { x: -1, y: -1 },
-            size: Size {
-                width: -1,
-                height: -1,
-            },
-            style: 0, // Default will be wxSP_ARROW_KEYS in C++ if 0
-            min_val: 0.0,
-            max_val: 100.0,
-            initial_val: 0.0,
-            increment: 1.0,
-        }
-    }
-
-    pub fn with_id(mut self, id: i32) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the initial string value in the text part of the control.
-    pub fn with_value_str(mut self, value_str: &str) -> Self {
-        self.value_str = value_str.to_string();
-        self
-    }
-
-    pub fn with_pos(mut self, x: i32, y: i32) -> Self {
-        self.pos = Point { x, y };
-        self
-    }
-
-    pub fn with_pos_point(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, w: i32, h: i32) -> Self {
-        self.size = Size {
-            width: w,
-            height: h,
-        };
-        self
-    }
-
-    pub fn with_size_obj(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: i64) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn with_range(mut self, min_val: f64, max_val: f64) -> Self {
-        self.min_val = min_val;
-        self.max_val = max_val;
-        self
-    }
-
-    /// Sets the initial numeric value of the control.
-    pub fn with_initial_value(mut self, initial_val: f64) -> Self {
-        self.initial_val = initial_val;
-        self
-    }
-
-    pub fn with_increment(mut self, increment: f64) -> Self {
-        self.increment = increment;
-        self
-    }
-
-    pub fn build(self) -> SpinCtrlDouble {
-        let c_value_str = CString::new(self.value_str).expect("CString::new failed for value_str");
+// Use the widget_builder macro to generate the SpinCtrlDoubleBuilder implementation
+widget_builder!(
+    name: SpinCtrlDouble,
+    parent_type: &'a dyn WxWidget,
+    style_type: SpinCtrlDoubleStyle,
+    fields: {
+        value_str: String = String::new(),
+        min_value: f64 = 0.0,
+        max_value: f64 = 100.0,
+        initial_value: f64 = 0.0,
+        increment: f64 = 1.0
+    },
+    build_impl: |slf| {
+        let c_value_str = CString::new(slf.value_str.clone()).expect("CString::new failed for value_str");
         let raw_ptr = unsafe {
             ffi::wxd_SpinCtrlDouble_Create(
-                self.parent_ptr,
-                self.id,
+                slf.parent.handle_ptr(),
+                slf.id,
                 c_value_str.as_ptr(),
-                self.pos.x,
-                self.pos.y,
-                self.size.width,
-                self.size.height,
-                self.style as c_long,
-                self.min_val,
-                self.max_val,
-                self.initial_val,
-                self.increment,
+                slf.pos.x,
+                slf.pos.y,
+                slf.size.width,
+                slf.size.height,
+                slf.style.bits() as c_long,
+                slf.min_value,
+                slf.max_value,
+                slf.initial_value,
+                slf.increment,
             )
         };
         if raw_ptr.is_null() {
             panic!("Failed to create wxSpinCtrlDouble");
         }
-        SpinCtrlDouble::from_ptr(raw_ptr)
+        unsafe { SpinCtrlDouble::from_ptr(raw_ptr) }
+    }
+);
+
+// Extension to SpinCtrlBuilder to add specialized methods
+impl<'a> SpinCtrlDoubleBuilder<'a> {
+    /// Sets the allowed range.
+    pub fn with_range(mut self, min_value: f64, max_value: f64) -> Self {
+        self.min_value = min_value;
+        self.max_value = max_value;
+        // Adjust initial value if it's outside the new range
+        self.initial_value = self.initial_value.clamp(min_value, max_value);
+        self.value_str = self.initial_value.to_string();
+        self
     }
 }

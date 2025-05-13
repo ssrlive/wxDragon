@@ -2,7 +2,6 @@ use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
-use crate::types::RawWxProps;
 use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -100,14 +99,6 @@ impl SearchCtrl {
 
 // Apply common trait implementations
 implement_widget_traits_with_target!(SearchCtrl, window, Window);
-
-// Implement RawWxProps separately since it's not covered by the macro
-impl RawWxProps for SearchCtrl {
-    type RawWxPtr = ffi::wxd_SearchCtrl_t;
-    fn raw_wx_ptr(&self) -> *mut Self::RawWxPtr {
-        self.as_ptr()
-    }
-}
 
 // Use the widget_builder macro to generate the SearchCtrlBuilder implementation
 widget_builder!(

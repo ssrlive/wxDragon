@@ -31,7 +31,7 @@ pub use app::call_after;
 pub use color::{Colour, colours};
 pub use geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use id::{Id, ID_ANY, ID_HIGHEST};
-pub use types::{Style, RawWxProps};
+pub use types::Style;
 
 // Re-export core types
 // pub use app::{App, WxApp}; // REMOVED - Not exported from app.rs
