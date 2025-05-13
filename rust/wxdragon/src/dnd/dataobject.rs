@@ -90,17 +90,38 @@ impl FileDataObject {
         };
 
         let count = unsafe { ffi::wxd_FileDataObject_GetFilenames(self.ptr, &mut array_string) };
-
-        // TODO: Properly implement array string extraction once that functionality is available
-        // For now, this is just a placeholder that returns an empty vector
-        let _filenames = Vec::new();
+        
+        // Convert the ArrayString to a Vec<String>
+        let mut filenames = Vec::with_capacity(count as usize);
+        
+        unsafe {
+            for i in 0..count {
+                let mut buffer = vec![0u8; 2048]; // Buffer for path
+                let len = ffi::wxd_ArrayString_GetString(
+                    &mut array_string,
+                    i,
+                    buffer.as_mut_ptr() as *mut std::os::raw::c_char,
+                    buffer.len() as i32
+                );
+                
+                if len > 0 {
+                    buffer.truncate(len as usize);
+                    // Convert to UTF-8 String
+                    if let Ok(s) = String::from_utf8(buffer) {
+                        filenames.push(s);
+                    }
+                }
+            }
+        }
 
         // Clean up the array string
         if !array_string.internal_data.is_null() {
-            // TODO: Properly free the array string once that functionality is available
+            unsafe {
+                ffi::wxd_ArrayString_Free(&mut array_string);
+            }
         }
 
-        _filenames
+        filenames
     }
 
     /// Adds a file to this data object.
