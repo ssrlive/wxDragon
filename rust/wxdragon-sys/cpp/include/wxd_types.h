@@ -100,6 +100,11 @@ typedef enum {
     WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED = 65,
     WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION = 66,
     WXD_EVENT_TYPE_IDLE = 67,
+    // Drag and drop events
+    WXD_EVENT_TYPE_BEGIN_DRAG = 68,
+    WXD_EVENT_TYPE_DROP_FILES = 69,
+    WXD_EVENT_TYPE_DROP_TEXT = 70,
+    WXD_EVENT_TYPE_END_DRAG = 71,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -188,6 +193,15 @@ typedef struct wxd_AuiNotebookEvent_t wxd_AuiNotebookEvent_t;
 
 // wxAuiToolBar
 typedef struct wxd_AuiToolBar_t wxd_AuiToolBar_t;
+
+// Drag and drop related typedefs (opaque pointers)
+typedef struct wxd_DataObject_t wxd_DataObject_t;
+typedef struct wxd_TextDataObject_t wxd_TextDataObject_t;
+typedef struct wxd_FileDataObject_t wxd_FileDataObject_t;
+typedef struct wxd_DropSource_t wxd_DropSource_t;
+typedef struct wxd_DropTarget_t wxd_DropTarget_t;
+typedef struct wxd_TextDropTarget_t wxd_TextDropTarget_t;
+typedef struct wxd_FileDropTarget_t wxd_FileDropTarget_t;
 
 // wxBitmap (placeholder for future use)
 typedef struct wxd_Bitmap_t wxd_Bitmap_t;

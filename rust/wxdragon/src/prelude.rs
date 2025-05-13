@@ -164,3 +164,8 @@ pub use crate::widgets::notification_message::{
 // Re-export other common constants or types if needed
 // pub use crate::base::ID_ANY; // Example if needed directly
 pub use crate::id::ID_HIGHEST; // ADDED ID_HIGHEST
+
+// --- Drag and Drop ---
+pub use crate::dnd::{
+    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject, TextDropTarget,
+};

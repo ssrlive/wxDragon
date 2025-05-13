@@ -39,6 +39,7 @@ extern "C" {
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"
 #include "widgets/wxd_aui.h"
+#include "dnd/wxd_dnd.h" // Drag and drop functionality
 
 #ifdef __cplusplus
 } // extern "C"

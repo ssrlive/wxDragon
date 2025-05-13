@@ -10,6 +10,7 @@ pub mod geometry;
 pub mod bitmap;
 pub mod datetime;
 pub mod dialogs;
+pub mod dnd;
 pub mod event;
 pub mod font;
 pub mod font_data;
@@ -126,3 +127,8 @@ pub use font::Font;
 pub use font_data::FontData;
 
 pub use sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
+
+// Re-export drag and drop functionality
+pub use dnd::{
+    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject, TextDropTarget,
+};

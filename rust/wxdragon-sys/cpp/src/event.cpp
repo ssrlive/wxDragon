@@ -23,6 +23,7 @@
 #include <wx/filepicker.h> // ADDED: For wxEVT_FILEPICKER_CHANGED and wxEVT_DIRPICKER_CHANGED
 #include <wx/fontpicker.h> // ADDED: For wxEVT_FONTPICKER_CHANGED
 #include <wx/notifmsg.h> // For wxNotificationMessage events
+#include <wx/dnd.h> // ADDED: For drag and drop events (wxEVT_BEGIN_DRAG, wxEVT_DROP_TEXT, etc.)
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -564,6 +565,23 @@ extern "C" void wxd_EvtHandler_Bind(
         case WXD_EVENT_TYPE_IDLE:
             wx_handler->Bind(wxEVT_IDLE, functor);
             bound = true;
+            break;
+        // Drag and drop events
+        case WXD_EVENT_TYPE_BEGIN_DRAG:
+            wxLogWarning("wxEVT_BEGIN_DRAG not available in wxWidgets 3.2.8");
+            bound = false;
+            break;
+        case WXD_EVENT_TYPE_DROP_FILES:
+            wx_handler->Bind(wxEVT_DROP_FILES, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DROP_TEXT:
+            wxLogWarning("wxEVT_DROP_TEXT not available in wxWidgets 3.2.8");
+            bound = false;
+            break;
+        case WXD_EVENT_TYPE_END_DRAG:
+            wxLogWarning("wxEVT_END_DRAG not available in wxWidgets 3.2.8");
+            bound = false;
             break;
 
         // Default case for unhandled/unknown event types
