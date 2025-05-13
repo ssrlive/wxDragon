@@ -2,6 +2,7 @@
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
+use crate::utils::WxdArrayString;
 use wxdragon_sys as ffi;
 
 /// Trait that all data objects used in drag and drop must implement.
@@ -81,43 +82,15 @@ impl FileDataObject {
 
     /// Gets the filenames contained in this data object.
     pub fn get_filenames(&self) -> Vec<String> {
-        let mut array_string = ffi::wxd_ArrayString_t {
-            internal_data: std::ptr::null_mut(),
+        // Create a WxdArrayString to hold the filenames
+        let array_string = WxdArrayString::new();
+        
+        let _count = unsafe { 
+            ffi::wxd_FileDataObject_GetFilenames(self.ptr, array_string.as_ptr()) 
         };
-
-        let count = unsafe { ffi::wxd_FileDataObject_GetFilenames(self.ptr, &mut array_string) };
-
-        // Convert the ArrayString to a Vec<String>
-        let mut filenames = Vec::with_capacity(count as usize);
-
-        unsafe {
-            for i in 0..count {
-                let mut buffer = vec![0u8; 2048]; // Buffer for path
-                let len = ffi::wxd_ArrayString_GetString(
-                    &mut array_string,
-                    i,
-                    buffer.as_mut_ptr() as *mut std::os::raw::c_char,
-                    buffer.len() as i32,
-                );
-
-                if len > 0 {
-                    buffer.truncate(len as usize);
-                    // Convert to UTF-8 String
-                    if let Ok(s) = String::from_utf8(buffer) {
-                        filenames.push(s);
-                    }
-                }
-            }
-        }
-
-        // Clean up the array string
-        if !array_string.internal_data.is_null() {
-            unsafe {
-                ffi::wxd_ArrayString_Free(&mut array_string);
-            }
-        }
-
-        filenames
+        
+        // Convert the WxdArrayString to a Vec<String>
+        array_string.into_vec()
     }
 
     /// Adds a file to this data object.

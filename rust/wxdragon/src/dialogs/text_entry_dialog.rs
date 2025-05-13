@@ -6,19 +6,20 @@ use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
 
-// --- Constants ---
-// Style Flags
-// Combine general dialog styles (like CENTRE) with text entry specific ones.
-pub use ffi::WXD_CANCEL as CANCEL;
-pub use ffi::WXD_CENTRE as CENTRE;
-pub use ffi::WXD_OK as OK; // Style flag for OK button // Style flag for Cancel button
-
-// Text Entry Specific Styles
-pub use ffi::WXD_TE_PASSWORD as TE_PASSWORD;
-pub use ffi::WXD_TE_PROCESS_ENTER as TE_PROCESS_ENTER; // (Less common for dialogs, but possible)
-
-// Default styles often include OK | CANCEL | CENTRE
-pub const TEXT_ENTRY_DIALOG_STYLE: i64 = OK | CANCEL | CENTRE;
+// Define style enum using the macro
+crate::widget_style_enum!(
+    name: TextEntryDialogStyle,
+    doc: "Style flags for text entry dialog.",
+    variants: {
+        Default: ffi::WXD_OK | ffi::WXD_CANCEL | ffi::WXD_CENTRE, "Default style with OK, Cancel buttons and centered dialog.",
+        Ok: ffi::WXD_OK, "Style flag for OK button.",
+        Cancel: ffi::WXD_CANCEL, "Style flag for Cancel button.",
+        Centre: ffi::WXD_CENTRE, "Style flag to center the dialog.",
+        Password: ffi::WXD_TE_PASSWORD, "Style flag for password text entry.",
+        ProcessEnter: ffi::WXD_TE_PROCESS_ENTER, "Style flag to process Enter key in the text control."
+    },
+    default_variant: Default
+);
 
 // Opaque C pointer type
 pub type TextEntryDialogPtr = *mut ffi::wxd_TextEntryDialog_t;
@@ -118,7 +119,7 @@ pub struct TextEntryDialogBuilder<'a> {
     message: String,
     caption: String,
     default_value: String,
-    style: i64,
+    style: TextEntryDialogStyle,
     pos: Point,
     size: Size, // Often unused, but kept for consistency
 }
@@ -130,7 +131,7 @@ impl<'a> TextEntryDialogBuilder<'a> {
             message: message.to_string(),
             caption: caption.to_string(),
             default_value: String::new(),
-            style: TEXT_ENTRY_DIALOG_STYLE, // Default includes OK/Cancel/Centre
+            style: TextEntryDialogStyle::Default,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
         }
@@ -141,14 +142,14 @@ impl<'a> TextEntryDialogBuilder<'a> {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: TextEntryDialogStyle) -> Self {
         self.style = style;
         self
     }
 
     /// Convenience method to add password style flag.
     pub fn password(mut self) -> Self {
-        self.style |= TE_PASSWORD;
+        self.style = self.style | TextEntryDialogStyle::Password;
         self
     }
 
@@ -175,7 +176,7 @@ impl<'a> TextEntryDialogBuilder<'a> {
                 c_message.as_ptr(),
                 c_caption.as_ptr(),
                 c_default_value.as_ptr(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
                 self.pos.x,
                 self.pos.y,
                 self.size.width,

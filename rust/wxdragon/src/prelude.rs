@@ -121,7 +121,7 @@ pub use crate::dialogs::colour_dialog::ColourDialog;
 pub use crate::dialogs::file_dialog::{FileDialog, FileDialogStyle};
 pub use crate::dialogs::font_dialog::FontDialog;
 pub use crate::dialogs::message_dialog::{MessageDialog, MessageDialogBuilder, MessageDialogStyle};
-pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
+pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder, TextEntryDialogStyle};
 pub use crate::dialogs::Dialog;
 
 // ADDED: Font enums (FontFamily, FontStyle, FontWeight) and FontData

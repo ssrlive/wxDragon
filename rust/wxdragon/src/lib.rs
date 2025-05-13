@@ -19,8 +19,12 @@ pub mod menus;
 pub mod prelude;
 pub mod sizers;
 pub mod types;
+pub mod utils;
 pub mod widgets;
 pub mod window;
+
+// Re-export common utilities
+pub use utils::WxdArrayString;
 
 // Re-export the main entry point and handle
 pub use app::main;
