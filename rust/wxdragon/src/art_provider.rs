@@ -185,10 +185,8 @@ impl ArtProvider {
         if bitmap_ptr.is_null() {
             None
         } else {
-            // Safety: pointer is from our FFI, valid if not null.
-            // Bitmap::from_ptr is not public, so we construct it directly.
-            // This assumes Bitmap(ptr) is the correct way to take ownership.
-            Some(Bitmap(bitmap_ptr))
+            // The bitmap is created by wxWidgets and ownership is transferred to Rust
+            Some(Bitmap::from_ptr_owned(bitmap_ptr))
         }
     }
 }

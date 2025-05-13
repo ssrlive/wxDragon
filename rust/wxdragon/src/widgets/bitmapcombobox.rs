@@ -154,7 +154,7 @@ impl BitmapComboBox {
             None
         } else {
             // The C++ side created a `new wxBitmap`. We take ownership.
-            Some(Bitmap(bmp_ptr))
+            Some(Bitmap::from_ptr_owned(bmp_ptr))
         }
     }
 

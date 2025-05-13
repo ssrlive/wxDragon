@@ -6,7 +6,10 @@ use wxdragon_sys as ffi;
 
 /// Represents a platform-dependent bitmap image.
 #[derive(Debug)] // Keep Debug if useful, or remove if pointer isn't meaningful for debug
-pub struct Bitmap(pub(crate) *mut ffi::wxd_Bitmap_t);
+pub struct Bitmap {
+    ptr: *mut ffi::wxd_Bitmap_t,
+    is_owned: bool, // Tracks whether Rust owns this bitmap and should destroy it
+}
 
 impl Bitmap {
     /// Creates a new bitmap from raw RGBA pixel data.
@@ -38,70 +41,73 @@ impl Bitmap {
         if ptr.is_null() {
             None
         } else {
-            Some(Bitmap(ptr))
+            Some(Bitmap { ptr, is_owned: true }) // We own bitmaps created this way
         }
     }
 
-    // TODO: Add `from_dynamic_image` helper using the `image` crate?
+    /// Creates a bitmap wrapper around an existing bitmap pointer, transferring ownership to Rust.
+    /// The bitmap will be destroyed when the wrapper is dropped.
+    /// 
+    /// # Safety
+    /// 
+    /// The pointer must be a valid wxBitmap pointer, and no other code should destroy it.
+    pub(crate) fn from_ptr_owned(ptr: *mut ffi::wxd_Bitmap_t) -> Self {
+        Bitmap { ptr, is_owned: true }
+    }
 
     /// Returns the raw underlying bitmap pointer.
     /// Use with caution, primarily for internal FFI calls.
     pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_Bitmap_t {
-        self.0
+        self.ptr
     }
 
     /// Returns the width of the bitmap in pixels.
     pub fn get_width(&self) -> i32 {
-        if self.0.is_null() {
+        if self.ptr.is_null() {
             return 0;
         }
-        unsafe { ffi::wxd_Bitmap_GetWidth(self.0) as i32 }
+        unsafe { ffi::wxd_Bitmap_GetWidth(self.ptr) as i32 }
     }
 
     /// Returns the height of the bitmap in pixels.
     pub fn get_height(&self) -> i32 {
-        if self.0.is_null() {
+        if self.ptr.is_null() {
             return 0;
         }
-        unsafe { ffi::wxd_Bitmap_GetHeight(self.0) as i32 }
+        unsafe { ffi::wxd_Bitmap_GetHeight(self.ptr) as i32 }
     }
 
     /// Checks if the bitmap is valid.
     pub fn is_ok(&self) -> bool {
-        if self.0.is_null() {
+        if self.ptr.is_null() {
             return false;
         }
-        unsafe { ffi::wxd_Bitmap_IsOk(self.0) }
+        unsafe { ffi::wxd_Bitmap_IsOk(self.ptr) }
     }
 }
 
 impl Clone for Bitmap {
     fn clone(&self) -> Self {
         unsafe {
-            let cloned_ptr = ffi::wxd_Bitmap_Clone(self.0);
+            let cloned_ptr = ffi::wxd_Bitmap_Clone(self.ptr);
             if cloned_ptr.is_null() {
                 panic!(
                     "Failed to clone wxBitmap: wxd_Bitmap_Clone returned null. Original: {:?}",
-                    self.0
+                    self.ptr
                 );
             }
-            Bitmap(cloned_ptr)
+            // A cloned bitmap is always owned by Rust
+            Bitmap { ptr: cloned_ptr, is_owned: true }
         }
     }
 }
 
 impl Drop for Bitmap {
-    /// Destroys the associated C++ wxBitmap object.
-    /// Note: This should only be called if Rust has unique ownership.
-    /// If the bitmap is passed to a control (e.g., BitmapButton),
-    /// wxWidgets might take ownership, and dropping here could cause a double free.
-    /// Careful lifetime management is needed.
+    /// Destroys the associated C++ wxBitmap object if Rust owns the bitmap.
     fn drop(&mut self) {
-        // TODO: Implement proper ownership tracking. For now, assume Rust owns
-        //       bitmaps created via `from_rgba` unless explicitly given away.
-        if !self.0.is_null() {
+        if !self.ptr.is_null() && self.is_owned {
             unsafe {
-                ffi::wxd_Bitmap_Destroy(self.0);
+                ffi::wxd_Bitmap_Destroy(self.ptr);
             }
         }
     }
