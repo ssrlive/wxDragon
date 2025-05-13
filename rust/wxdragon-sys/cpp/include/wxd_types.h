@@ -136,6 +136,7 @@ typedef struct wxd_RadioBox_t wxd_RadioBox_t;
 typedef struct wxd_BitmapComboBox_t wxd_BitmapComboBox_t;
 typedef struct wxd_TreeCtrl_t wxd_TreeCtrl_t;
 typedef struct WXD_TreeItemId_t WXD_TreeItemId_t; 
+typedef struct WXD_TreeItemData_t WXD_TreeItemData_t;
 typedef struct wxd_StaticBox_t wxd_StaticBox_t;
 typedef struct wxd_Gauge_t wxd_Gauge_t;
 typedef struct wxd_Slider_t wxd_Slider_t;

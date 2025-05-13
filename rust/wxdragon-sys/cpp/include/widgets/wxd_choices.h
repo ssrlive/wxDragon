@@ -71,6 +71,13 @@ WXD_EXPORTED int wxd_BitmapComboBox_GetValue(wxd_BitmapComboBox_t* self, char* b
 WXD_EXPORTED wxd_Bitmap_t* wxd_BitmapComboBox_GetItemBitmap(wxd_BitmapComboBox_t* self, unsigned int n);
 WXD_EXPORTED void wxd_BitmapComboBox_SetItemBitmap(wxd_BitmapComboBox_t* self, unsigned int n, wxd_Bitmap_t* bitmap);
 
+// --- TreeItemData functions ---
+// Create and manage TreeItemData objects
+WXD_EXPORTED WXD_TreeItemData_t* wxd_TreeItemData_Create(void* client_data);
+WXD_EXPORTED void wxd_TreeItemData_Free(WXD_TreeItemData_t* data);
+WXD_EXPORTED void* wxd_TreeItemData_GetClientData(WXD_TreeItemData_t* data);
+WXD_EXPORTED void wxd_TreeItemData_SetClientData(WXD_TreeItemData_t* data, void* client_data);
+
 // --- TreeCtrl ---
 WXD_EXPORTED wxd_TreeCtrl_t* wxd_TreeCtrl_Create(wxd_Window_t* parent, wxd_Id id, wxd_Point pos, wxd_Size size, wxd_Style_t style);
 WXD_EXPORTED WXD_TreeItemId_t* wxd_TreeCtrl_AddRoot(wxd_TreeCtrl_t* self, const char* text, int image, int selImage, void* data);
@@ -78,6 +85,8 @@ WXD_EXPORTED WXD_TreeItemId_t* wxd_TreeCtrl_AppendItem(wxd_TreeCtrl_t* self, WXD
 WXD_EXPORTED void wxd_TreeCtrl_Delete(wxd_TreeCtrl_t* self, WXD_TreeItemId_t* item_id);
 WXD_EXPORTED WXD_TreeItemId_t* wxd_TreeCtrl_GetSelection(wxd_TreeCtrl_t* self);
 WXD_EXPORTED void wxd_TreeCtrl_SelectItem(wxd_TreeCtrl_t* self, WXD_TreeItemId_t* item_id);
+WXD_EXPORTED WXD_TreeItemData_t* wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, WXD_TreeItemId_t* item_id);
+WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, WXD_TreeItemId_t* item_id, WXD_TreeItemData_t* data);
 WXD_EXPORTED void wxd_TreeItemId_Free(WXD_TreeItemId_t* item_id);
 WXD_EXPORTED bool wxd_TreeItemId_IsOk(WXD_TreeItemId_t* item_id);
 
