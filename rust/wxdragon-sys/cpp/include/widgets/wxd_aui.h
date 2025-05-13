@@ -7,6 +7,53 @@
 extern "C" {
 #endif
 
+// --- wxAuiManager ---
+WXD_EXPORTED wxd_AuiManager_t* wxd_AuiManager_Create();
+WXD_EXPORTED void wxd_AuiManager_SetManagedWindow(wxd_AuiManager_t* self, wxd_Window_t* managed_window);
+WXD_EXPORTED wxd_Window_t* wxd_AuiManager_GetManagedWindow(wxd_AuiManager_t* self);
+WXD_EXPORTED void wxd_AuiManager_UnInit(wxd_AuiManager_t* self);
+WXD_EXPORTED bool wxd_AuiManager_AddPane(wxd_AuiManager_t* self, wxd_Window_t* window, int direction, const char* caption);
+WXD_EXPORTED bool wxd_AuiManager_AddPaneWithInfo(wxd_AuiManager_t* self, wxd_Window_t* window, wxd_AuiPaneInfo_t* pane_info);
+WXD_EXPORTED bool wxd_AuiManager_Update(wxd_AuiManager_t* self);
+WXD_EXPORTED void wxd_AuiManager_Delete(wxd_AuiManager_t* self);
+WXD_EXPORTED char* wxd_AuiManager_SavePerspective(wxd_AuiManager_t* self);
+WXD_EXPORTED bool wxd_AuiManager_LoadPerspective(wxd_AuiManager_t* self, const char* perspective, bool update);
+WXD_EXPORTED bool wxd_AuiManager_DetachPane(wxd_AuiManager_t* self, wxd_Window_t* window);
+
+// --- wxAuiPaneInfo ---
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Create();
+WXD_EXPORTED void wxd_AuiPaneInfo_Delete(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Name(wxd_AuiPaneInfo_t* self, const char* name);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Caption(wxd_AuiPaneInfo_t* self, const char* caption);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Left(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Right(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Top(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Bottom(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Center(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Floatable(wxd_AuiPaneInfo_t* self, bool floatable);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Dockable(wxd_AuiPaneInfo_t* self, bool dockable);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Movable(wxd_AuiPaneInfo_t* self, bool movable);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Resizable(wxd_AuiPaneInfo_t* self, bool resizable);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_CloseButton(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_MaximizeButton(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_MinimizeButton(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_PinButton(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_PaneBorder(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Gripper(wxd_AuiPaneInfo_t* self, bool visible);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_GripperTop(wxd_AuiPaneInfo_t* self, bool attop);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Layer(wxd_AuiPaneInfo_t* self, int layer);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_MinSize(wxd_AuiPaneInfo_t* self, int width, int height);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_MaxSize(wxd_AuiPaneInfo_t* self, int width, int height);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Position(wxd_AuiPaneInfo_t* self, int pos);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Row(wxd_AuiPaneInfo_t* self, int row);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_CenterPane(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_DefaultPane(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_ToolbarPane(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_BestSize(wxd_AuiPaneInfo_t* self, int width, int height);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Show(wxd_AuiPaneInfo_t* self, bool show);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Hide(wxd_AuiPaneInfo_t* self);
+WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_CaptionVisible(wxd_AuiPaneInfo_t* self, bool visible);
+
 WXD_EXPORTED wxd_AuiMDIParentFrame_t* wxd_AuiMDIParentFrame_Create(wxd_Window_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, long style, const char* name);
 
 WXD_EXPORTED wxd_AuiMDIChildFrame_t* wxd_AuiMDIChildFrame_Create(wxd_AuiMDIParentFrame_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, long style, const char* name);

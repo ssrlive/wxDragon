@@ -1,23 +1,9 @@
-// Minimal wxWidgets C++ example to test wxToolBar visibility and wxBitmapButton events
+// Clean wxWidgets C++ example demonstrating wxAUI functionality
 #include <wx/wx.h>
-#include <wx/toolbar.h>
-#include <wx/artprov.h>
-#include <wx/bmpbuttn.h> // Include header for wxBitmapButton
-#include <wx/sizer.h>    // Include header for wxBoxSizer
-#include <wx/notebook.h>   // For wxNotebook
-#include <wx/treebook.h>   // For wxTreebook
-#include <wx/panel.h>      // For pages
-#include <wx/stattext.h>   // For content in pages
-#include <wx/button.h>     // For content in pages
-#include <wx/notifmsg.h>   // Include for wxNotificationMessage
-
-// IDs for the controls and menu items
-enum
-{
-    ID_Quit = wxID_EXIT,
-    ID_About,
-    ID_ShowNotification // New ID for our button
-};
+#include <wx/aui/aui.h>
+#include <wx/textctrl.h>
+#include <wx/button.h>
+#include <wx/sizer.h>
 
 // Define a new application type
 class MyApp : public wxApp
@@ -31,22 +17,26 @@ class MyFrame : public wxFrame
 {
 public:
     MyFrame(const wxString& title);
+    virtual ~MyFrame();
 
 private:
-    void OnQuit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    void OnShowNotification(wxCommandEvent& event); // Declare new handler
+    wxAuiManager m_mgr;
+    
+    void OnExit(wxCommandEvent& event);
+    void OnSavePerspective(wxCommandEvent& event);
+    void OnLoadPerspective(wxCommandEvent& event);
+    
+    wxString m_savedPerspective;
+    
     wxDECLARE_EVENT_TABLE();
 };
 
 // Event table for MyFrame
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(ID_Quit, MyFrame::OnQuit)
-    EVT_MENU(ID_About, MyFrame::OnAbout)
-    EVT_BUTTON(ID_ShowNotification, MyFrame::OnShowNotification) // Add button event
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 wxEND_EVENT_TABLE()
 
-// `Main program` equivalent
+// Main program
 wxIMPLEMENT_APP(MyApp);
 
 // MyApp implementation
@@ -55,67 +45,131 @@ bool MyApp::OnInit()
     if (!wxApp::OnInit())
         return false;
 
-    MyFrame *frame = new MyFrame("C++ Notebook + Treebook Test");
+    MyFrame *frame = new MyFrame("AUI Manager Demo");
     frame->Show(true);
     return true;
 }
 
 // MyFrame implementation
 MyFrame::MyFrame(const wxString& title)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(600, 550)) // Adjusted size
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
 {
-    // --- Menu ---
+    // Initialize the AUI manager
+    m_mgr.SetManagedWindow(this);
+    
+    // Create menu
     wxMenu *fileMenu = new wxMenu;
-    fileMenu->Append(ID_Quit, "E&xit\tAlt-X", "Quit this program");
-    wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(ID_About, "&About\tF1", "Show about dialog");
+    fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
+    
     wxMenuBar *menuBar = new wxMenuBar;
     menuBar->Append(fileMenu, "&File");
-    menuBar->Append(helpMenu, "&Help");
     SetMenuBar(menuBar);
-
-    // --- Main Sizer for Frame (to hold the button and notebook) ---
-    wxBoxSizer* frameSizer = new wxBoxSizer(wxVERTICAL);
-
-    // --- Button to Show Notification ---
-    wxButton* notificationButton = new wxButton(this, ID_ShowNotification, "Show Notification");
-    frameSizer->Add(notificationButton, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
-
-    CreateStatusBar(1);
-    SetStatusText("C++ Notification Test Ready");
+    
+    // Create a panel with buttons for saving/loading perspective
+    wxPanel* toolPanel = new wxPanel(this, wxID_ANY);
+    wxBoxSizer* toolSizer = new wxBoxSizer(wxHORIZONTAL);
+    
+    wxButton* saveButton = new wxButton(toolPanel, wxID_ANY, "Save Perspective");
+    wxButton* loadButton = new wxButton(toolPanel, wxID_ANY, "Load Perspective");
+    
+    toolSizer->Add(saveButton, 1, wxEXPAND | wxALL, 5);
+    toolSizer->Add(loadButton, 1, wxEXPAND | wxALL, 5);
+    
+    toolPanel->SetSizer(toolSizer);
+    
+    // Connect event handlers for buttons
+    saveButton->Bind(wxEVT_BUTTON, &MyFrame::OnSavePerspective, this);
+    loadButton->Bind(wxEVT_BUTTON, &MyFrame::OnLoadPerspective, this);
+    
+    // Create some text controls for the panes
+    wxTextCtrl* text1 = new wxTextCtrl(this, wxID_ANY, "Text Control 1", 
+                                      wxDefaultPosition, wxSize(200, 150),
+                                      wxTE_MULTILINE);
+                                      
+    wxTextCtrl* text2 = new wxTextCtrl(this, wxID_ANY, "Text Control 2", 
+                                      wxDefaultPosition, wxSize(200, 150),
+                                      wxTE_MULTILINE);
+                                      
+    wxTextCtrl* text3 = new wxTextCtrl(this, wxID_ANY, "Text Control 3", 
+                                      wxDefaultPosition, wxSize(200, 150),
+                                      wxTE_MULTILINE);
+    
+    // Add the panes to the manager with different directions
+    m_mgr.AddPane(toolPanel, wxAuiPaneInfo()
+                 .Name("toolbar")
+                 .Caption("Toolbar")
+                 .CaptionVisible(true)
+                 .Top()
+                 .ToolbarPane());
+    
+    m_mgr.AddPane(text1, wxAuiPaneInfo()
+                 .Name("text1")
+                 .Caption("Left Pane")
+                 .CaptionVisible(true)
+                 .Left()
+                 .MinSize(wxSize(200, 200))
+                 .BestSize(wxSize(300, 300))
+                 .Floatable(true)
+                 .Movable(true)
+                 .CloseButton(true)
+                 .MaximizeButton(true));
+    
+    m_mgr.AddPane(text2, wxAuiPaneInfo()
+                 .Name("text2")
+                 .Caption("Bottom Pane")
+                 .CaptionVisible(true)
+                 .Bottom()
+                 .MinSize(wxSize(200, 200))
+                 .BestSize(wxSize(300, 300))
+                 .Floatable(true)
+                 .Movable(true)
+                 .CloseButton(true)
+                 .MaximizeButton(true));
+    
+    m_mgr.AddPane(text3, wxAuiPaneInfo()
+                 .Name("text3")
+                 .Caption("Center Pane")
+                 .CaptionVisible(true)
+                 .CenterPane()
+                 .MinSize(wxSize(200, 200))
+                 .Floatable(true)
+                 .Movable(true)
+                 .CloseButton(true)
+                 .MaximizeButton(true));
+    
+    // Commit all changes
+    m_mgr.Update();
+    
+    CreateStatusBar();
+    SetStatusText("Drag the caption bars to move panes around");
 }
 
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+MyFrame::~MyFrame()
+{
+    // Deinitialize the AUI manager
+    m_mgr.UnInit();
+}
+
+void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 {
     Close(true);
 }
 
-void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSavePerspective(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox("This is a wxWidgets Notification Test in C++",
-                 "About C++ Notification Test", wxOK | wxICON_INFORMATION, this);
+    m_savedPerspective = m_mgr.SavePerspective();
+    SetStatusText("Perspective saved");
 }
 
-void MyFrame::OnShowNotification(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnLoadPerspective(wxCommandEvent& WXUNUSED(event))
 {
-    wxNotificationMessage notif;
-    notif.SetTitle("C++ Test Notification");
-    notif.SetMessage("This notification is from the C++ example.");
-    notif.SetFlags(wxICON_INFORMATION);
-    // Optionally set parent to this frame
-    notif.SetParent(this);
-
-    // Add actions (optional)
-    if (notif.AddAction(101, "Action One C++")) {
-        // Action added
-    }
-    if (notif.AddAction(102, "Action Two C++")) {
-        // Action added
-    }
-
-    // Show the notification
-    if (!notif.Show(wxNotificationMessage::Timeout_Never)) // Use Timeout_Never
+    if (!m_savedPerspective.IsEmpty())
     {
-        wxLogError("Failed to show notification message from C++ example.");
+        m_mgr.LoadPerspective(m_savedPerspective);
+        SetStatusText("Perspective loaded");
+    }
+    else
+    {
+        SetStatusText("No perspective to load");
     }
 } 

@@ -313,6 +313,17 @@ pub trait WindowUserData: WxWidget {
         // but let's keep it simple and only attach if it wasn't there before.
     }
 
+    /// Gets a copy of the associated user data if it exists, matches type T, and T is Clone.
+    /// Returns `Some(T)` if the data exists and is of type T, `None` otherwise.
+    /// This is useful for types that are cheap to clone like Arc<T>.
+    fn get_user_data<T: Any + Clone + 'static>(&self) -> Option<T> {
+        let mut result = None;
+        self.with_borrowed_data::<T, _, _>(|data| {
+            result = Some(data.clone());
+        });
+        result
+    }
+
     /// Provides temporary immutable access to the associated user data if it exists and matches type T.
     /// Executes the provided closure `func` with a reference `&T` to the data.
     /// Returns `true` if the data existed, matched the type, and the closure was run, `false` otherwise.

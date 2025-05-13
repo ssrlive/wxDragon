@@ -1,131 +1,98 @@
 use crate::prelude::*;
+use crate::window::Window;
 use std::ffi::CString;
+use std::marker::PhantomData;
 use wxdragon_sys as ffi;
 
-// Constants for wxAuiMDIParentFrame (if any specific ones are needed beyond standard frame styles)
-// Example: pub const AUI_MDI_PARENT_FRAME_DEFAULT_STYLE: i64 = ffi::WXD_DEFAULT_FRAME_STYLE; // Assuming a generic one for now
+// Define style enum for AuiMdiParentFrame
+widget_style_enum!(
+    name: AuiMdiParentFrameStyle,
+    doc: "Style flags for AuiMdiParentFrame.",
+    variants: {
+        Default: ffi::WXD_DEFAULT_FRAME_STYLE, "Default frame style."
+        // Add any specific AuiMdiParentFrame styles here if needed
+    },
+    default_variant: Default
+);
 
 #[derive(Clone)]
 pub struct AuiMdiParentFrame {
-    ptr: *mut ffi::wxd_AuiMDIParentFrame_t,
+    window: Window, // Composition: AuiMdiParentFrame uses a Window internally
+    // Store parent pointer to manage drop behavior
+    #[allow(dead_code)]
+    parent_ptr: *mut ffi::wxd_Window_t,
+    _marker: PhantomData<()>,
 }
 
 impl AuiMdiParentFrame {
-    fn from_ptr(ptr: *mut ffi::wxd_AuiMDIParentFrame_t) -> Self {
-        AuiMdiParentFrame { ptr }
-    }
-
-    pub fn builder() -> AuiMdiParentFrameBuilder {
-        AuiMdiParentFrameBuilder::new()
-    }
-
-    // Common methods inherited from WxWindow can be implemented via WxWindowMethods trait
-    // or directly if specific overrides/behavior are needed.
-}
-
-impl WxWidget for AuiMdiParentFrame {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.ptr as *mut ffi::wxd_Window_t
-    }
-}
-
-impl WxEvtHandler for AuiMdiParentFrame {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.ptr as *mut ffi::wxd_EvtHandler_t // AuiMDIParentFrame is an EvtHandler
-    }
-}
-
-// wxAuiMDIParentFrame is a top-level window, so it owns itself until closed by user/system.
-// No specific Drop implementation is needed here if parent class (Frame/TopLevelWindow) handles it,
-// or if it's managed by wxWidgets' lifecycle.
-// If we were to call Destroy() in Drop, it would be for child widgets.
-// Top-level windows like Frame are typically destroyed by wxWidgets when closed.
-
-pub struct AuiMdiParentFrameBuilder {
-    parent: Option<*mut ffi::wxd_Window_t>,
-    id: i32,
-    title: String,
-    pos: Point,
-    size: Size,
-    style: i64,
-    name: String,
-}
-
-impl AuiMdiParentFrameBuilder {
-    pub fn new() -> Self {
-        AuiMdiParentFrameBuilder {
-            parent: None,
-            id: ID_ANY as i32,
-            title: String::new(),
-            pos: Point::default(),
-            size: Size::default(),
-            style: ffi::WXD_DEFAULT_FRAME_STYLE, // style field is i64, FFI const is i64. Cast occurs at ffi call site.
-            name: "wxDragon AUI Frame".to_string(),
+    fn from_ptr(ptr: *mut ffi::wxd_AuiMDIParentFrame_t, parent_ptr: *mut ffi::wxd_Window_t) -> Self {
+        AuiMdiParentFrame { 
+            window: unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) },
+            parent_ptr,
+            _marker: PhantomData,
         }
     }
 
-    pub fn with_parent(mut self, parent: &impl WxWidget) -> Self {
-        self.parent = Some(parent.handle_ptr());
-        self
+    pub fn builder<'a>(parent: &'a dyn WxWidget) -> AuiMdiParentFrameBuilder<'a> {
+        AuiMdiParentFrameBuilder::new(parent)
     }
 
-    pub fn with_id(mut self, id: i32) -> Self {
-        self.id = id;
-        self
-    }
-
-    pub fn with_title(mut self, title: &str) -> Self {
-        self.title = title.to_string();
-        self
-    }
-
-    pub fn with_pos(mut self, pos: Point) -> Self {
-        self.pos = pos;
-        self
-    }
-
-    pub fn with_size(mut self, size: Size) -> Self {
-        self.size = size;
-        self
-    }
-
-    pub fn with_style(mut self, style: i64) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    pub fn build(self) -> AuiMdiParentFrame {
-        let title_c = CString::new(self.title).expect("CString::new failed for title");
-        let name_c = CString::new(self.name).expect("CString::new failed for name");
-
-        let parent_ptr = self.parent.unwrap_or(std::ptr::null_mut());
+    // Implementation method called by the builder
+    fn new_impl(
+        parent_ptr: *mut ffi::wxd_Window_t,
+        id: Id,
+        title: &str,
+        pos: Point,
+        size: Size,
+        style: i64,
+        name: &str,
+    ) -> Self {
+        let title_c = CString::new(title).expect("CString::new failed for title");
+        let name_c = CString::new(name).expect("CString::new failed for name");
 
         let ptr = unsafe {
             ffi::wxd_AuiMDIParentFrame_Create(
                 parent_ptr,
-                self.id,
+                id,
                 title_c.as_ptr(),
-                self.pos.into(),
-                self.size.into(),
-                self.style as ffi::wxd_Style_t, // Corrected: Cast self.style to ffi::wxd_Style_t (long)
+                pos.into(),
+                size.into(),
+                style as ffi::wxd_Style_t,
                 name_c.as_ptr(),
             )
         };
         if ptr.is_null() {
             panic!("Failed to create wxAuiMDIParentFrame");
         }
-        AuiMdiParentFrame::from_ptr(ptr)
+        AuiMdiParentFrame::from_ptr(ptr, parent_ptr)
     }
+
+    // Common methods inherited from Window can be accessed via Deref to Window
+    // Add any AuiMdiParentFrame-specific methods here
 }
 
-// Default builder without a parent, as AuiMdiParentFrame is a top-level window.
-impl Default for AuiMdiParentFrameBuilder {
-    fn default() -> Self {
-        Self::new()
+// Use widget_builder macro to create the builder
+widget_builder!(
+    name: AuiMdiParentFrame,
+    parent_type: &'a dyn WxWidget,
+    style_type: AuiMdiParentFrameStyle,
+    fields: {
+        title: String = String::new(),
+        name: String = "wxDragon AUI Frame".to_string()
+    },
+    build_impl: |slf| {
+        let parent_ptr = slf.parent.handle_ptr();
+        AuiMdiParentFrame::new_impl(
+            parent_ptr,
+            slf.id,
+            &slf.title,
+            slf.pos,
+            slf.size,
+            slf.style.bits(),
+            &slf.name
+        )
     }
-}
+);
+
+// Implement all standard widget traits in one go
+implement_widget_traits_with_target!(AuiMdiParentFrame, window, Window);

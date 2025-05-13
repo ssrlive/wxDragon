@@ -4,3 +4,5 @@ target
 reference
 .DS_Store
 rust/wxdragon-sys/cpp/tools/const_extractor/const_extractor
+examples/cpp/minimal_cpp/minimal_cpp_notif_test.app/Contents
+examples/cpp/minimal_cpp/minimal_cpp_notif_test

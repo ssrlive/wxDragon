@@ -24,3 +24,6 @@ pub mod media_tab;
 
 /// TreeCtrl tab demonstrates TreeCtrl widgets and functionality.
 pub mod treectrl_tab;
+
+/// AUI tab demonstrates the Advanced User Interface docking windows functionality.
+pub mod aui_tab;

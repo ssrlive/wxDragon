@@ -1,5 +1,6 @@
 pub mod activity_indicator;
 pub mod animation_ctrl;
+pub mod aui_manager;
 pub mod aui_mdi_child_frame;
 pub mod aui_mdi_parent_frame;
 pub mod aui_notebook;
@@ -61,6 +62,7 @@ pub use notification_message::*;
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
 pub use animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder};
+pub use aui_manager::{AuiManager, AuiPaneInfo, DockDirection};
 pub use aui_mdi_child_frame::*;
 pub use aui_mdi_parent_frame::*;
 pub use aui_notebook::*;

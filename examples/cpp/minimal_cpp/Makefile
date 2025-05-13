@@ -6,7 +6,7 @@ WX_CONFIG = /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdr
 
 # Get compiler and linker flags from wx-config
 CXXFLAGS_CMD = $(WX_CONFIG) --cxxflags --unicode=yes --debug=yes
-LIBS_CMD = $(WX_CONFIG) --libs core,base,adv --unicode=yes --debug=yes
+LIBS_CMD = $(WX_CONFIG) --libs core,base,adv,aui --unicode=yes --debug=yes
 
 CXXFLAGS := $(shell $(CXXFLAGS_CMD))
 LIBS := $(shell $(LIBS_CMD))

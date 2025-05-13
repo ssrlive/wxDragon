@@ -236,7 +236,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxAuiMDIParentFrame`
         *   [x] `wxAuiMDIClientWindow`
         *   [x] `wxAuiNotebook`
-        *   [ ] `wxAuiToolBar`
+        *   [x] `wxAuiToolBar`
         *   [ ] `wxBannerWindow`
         *   [ ] `wxChoicebook`
         *   [ ] `wxCollapsiblePane`

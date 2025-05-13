@@ -191,6 +191,7 @@ typedef struct wxd_AuiManager_t wxd_AuiManager_t;
 typedef struct wxd_AuiManagerEvent_t wxd_AuiManagerEvent_t;
 typedef struct wxd_AuiNotebook_t wxd_AuiNotebook_t;
 typedef struct wxd_AuiNotebookEvent_t wxd_AuiNotebookEvent_t;
+typedef struct wxd_AuiPaneInfo_t wxd_AuiPaneInfo_t;
 
 // wxAuiToolBar
 typedef struct wxd_AuiToolBar_t wxd_AuiToolBar_t;

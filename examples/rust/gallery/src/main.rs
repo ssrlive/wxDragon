@@ -6,6 +6,7 @@ use std::cell::RefCell;
 
 mod tabs;
 use tabs::advanced_tab::create_advanced_tab;
+use tabs::aui_tab::create_aui_tab;
 use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
 use tabs::data_tab::{create_data_tab, FrameData};
@@ -71,6 +72,7 @@ fn main() {
         let dialog_controls = create_dialog_tab(&notebook, &frame);
         let media_controls = create_media_tab(&notebook);
         let tree_controls = create_treectrl_tab(&notebook);
+        let aui_controls = create_aui_tab(&notebook);
 
         // --- ToolBar Setup ---
         let tb_style = ToolBarStyle::Text | ToolBarStyle::Default;
@@ -112,6 +114,7 @@ fn main() {
         notebook.add_page(&dialog_controls.panel, "Dialogs", false);
         notebook.add_page(&media_controls.panel, "Media", false);
         notebook.add_page(&tree_controls.panel, "Tree Controls", false);
+        notebook.add_page(&aui_controls.panel, "AUI", false);
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(VERTICAL).build();
@@ -128,6 +131,7 @@ fn main() {
         dialog_controls.bind_events(&frame);
         media_controls.bind_events();
         tree_controls.bind_events();
+        aui_controls.bind_events();
 
         // Menu & Toolbar Event Handlers
         let frame_clone_for_menu = frame.clone();
