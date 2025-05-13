@@ -1,4 +1,4 @@
-//! 
+//!
 //! Safe wrapper for wxToggleButton.
 
 use crate::event::WxEvtHandler;
@@ -60,7 +60,7 @@ impl ToggleButton {
         style: i64,
     ) -> Self {
         let c_label = CString::new(label).unwrap_or_default();
-        
+
         let ptr = unsafe {
             ffi::wxd_ToggleButton_Create(
                 parent_ptr,
@@ -71,11 +71,11 @@ impl ToggleButton {
                 style as ffi::wxd_Style_t,
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create ToggleButton widget");
         }
-        
+
         unsafe { ToggleButton::from_ptr(ptr) }
     }
 
@@ -155,4 +155,4 @@ widget_builder!(
             slf.style.bits()
         )
     }
-); 
+);

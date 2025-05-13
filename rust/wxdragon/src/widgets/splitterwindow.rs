@@ -1,8 +1,8 @@
 //!
 //! Safe wrapper for wxSplitterWindow.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::WxWidget;
 use std::os::raw::c_int;
@@ -54,7 +54,7 @@ impl SplitterWindow {
     pub fn builder<W: WxWidget>(parent: &W) -> SplitterWindowBuilder {
         SplitterWindowBuilder::new(parent)
     }
-    
+
     // Internal constructor - Revert back to crate-public
     // SAFETY: Caller must ensure ptr is a valid wxd_SplitterWindow_t
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_SplitterWindow_t) -> Self {

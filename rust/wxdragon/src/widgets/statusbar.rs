@@ -190,7 +190,7 @@ impl<'a> StatusBarBuilder<'a> {
             ffi::wxd_StatusBar_Create(
                 self.parent.handle_ptr(),
                 self.id,
-                self.style.bits() as ffi::wxd_Style_t
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
 
@@ -217,7 +217,7 @@ impl<'a> StatusBarBuilder<'a> {
         unsafe {
             ffi::wxd_Frame_SetStatusBar(
                 self.parent.handle_ptr() as *mut ffi::wxd_Frame_t,
-                status_bar.as_ptr()
+                status_bar.as_ptr(),
             );
         }
 

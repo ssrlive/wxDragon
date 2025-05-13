@@ -2,16 +2,16 @@
 //! Safe wrapper for wxScrollBar.
 //!
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::window::{Window, WxWidget};
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use std::ffi::CString;
-use std::os::raw::c_int;
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use std::ffi::CString;
+use std::os::raw::c_int;
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -89,7 +89,7 @@ widget_builder!(
     },
     build_impl: |slf| {
         let c_name = CString::new(slf.name.as_str()).expect("CString::new failed for name");
-        
+
         // Call the FFI function
         let ptr = unsafe {
             ffi::wxd_ScrollBar_Create(
@@ -101,11 +101,11 @@ widget_builder!(
                 c_name.as_ptr(),
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create ScrollBar: FFI returned null pointer");
         }
-        
+
         unsafe { ScrollBar::from_ptr(ptr) }
     }
-); 
+);

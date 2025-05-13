@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::implement_widget_traits_with_target;
+use crate::prelude::*;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
@@ -46,8 +46,10 @@ impl FileCtrl {
         name: &str,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "FileCtrl requires a parent");
-        let c_default_dir = CString::new(default_directory).expect("CString::new failed for default_directory");
-        let c_default_filename = CString::new(default_filename).expect("CString::new failed for default_filename");
+        let c_default_dir =
+            CString::new(default_directory).expect("CString::new failed for default_directory");
+        let c_default_filename =
+            CString::new(default_filename).expect("CString::new failed for default_filename");
         let c_wild_card = CString::new(wild_card).expect("CString::new failed for wild_card");
         let c_name = CString::new(name).expect("CString::new failed for name");
 
@@ -71,9 +73,7 @@ impl FileCtrl {
         }
         // Cast the concrete FileCtrl pointer to the base Window pointer for the wrapper
         let window = unsafe { Window::from_ptr(raw_ptr as *mut ffi::wxd_Window_t) };
-        FileCtrl {
-            window,
-        }
+        FileCtrl { window }
     }
 }
 
@@ -104,4 +104,4 @@ widget_builder!(
 );
 
 // Use the implement_widget_traits_with_target macro to implement traits
-implement_widget_traits_with_target!(FileCtrl, window, Window); 
+implement_widget_traits_with_target!(FileCtrl, window, Window);

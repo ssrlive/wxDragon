@@ -43,7 +43,7 @@ impl Colour {
     pub fn as_u32(&self) -> u32 {
         ((self.r as u32) << 24) | ((self.g as u32) << 16) | ((self.b as u32) << 8) | (self.a as u32)
     }
-    
+
     /// Returns a darker version of this color
     pub fn darker(&self, factor: f32) -> Self {
         let factor = factor.max(0.0).min(1.0);
@@ -54,7 +54,7 @@ impl Colour {
             a: self.a,
         }
     }
-    
+
     /// Returns a lighter version of this color
     pub fn lighter(&self, factor: f32) -> Self {
         let factor = factor.max(0.0).min(1.0);
@@ -92,88 +92,88 @@ impl From<ffi::wxd_Colour_t> for Colour {
 /// Common color constants
 pub mod colours {
     use super::Colour;
-    
+
     pub const BLACK: Colour = Colour {
         r: 0,
         g: 0,
         b: 0,
         a: 255,
     };
-    
+
     pub const WHITE: Colour = Colour {
         r: 255,
         g: 255,
         b: 255,
         a: 255,
     };
-    
+
     pub const RED: Colour = Colour {
         r: 255,
         g: 0,
         b: 0,
         a: 255,
     };
-    
+
     pub const GREEN: Colour = Colour {
         r: 0,
         g: 255,
         b: 0,
         a: 255,
     };
-    
+
     pub const BLUE: Colour = Colour {
         r: 0,
         g: 0,
         b: 255,
         a: 255,
     };
-    
+
     pub const YELLOW: Colour = Colour {
         r: 255,
         g: 255,
         b: 0,
         a: 255,
     };
-    
+
     pub const CYAN: Colour = Colour {
         r: 0,
         g: 255,
         b: 255,
         a: 255,
     };
-    
+
     pub const MAGENTA: Colour = Colour {
         r: 255,
         g: 0,
         b: 255,
         a: 255,
     };
-    
+
     pub const TRANSPARENT: Colour = Colour {
         r: 0,
         g: 0,
         b: 0,
         a: 0,
     };
-    
+
     pub const GRAY: Colour = Colour {
         r: 128,
         g: 128,
         b: 128,
         a: 255,
     };
-    
+
     pub const LIGHT_GRAY: Colour = Colour {
         r: 192,
         g: 192,
         b: 192,
         a: 255,
     };
-    
+
     pub const DARK_GRAY: Colour = Colour {
         r: 64,
         g: 64,
         b: 64,
         a: 255,
     };
-} 
+}

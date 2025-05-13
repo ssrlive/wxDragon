@@ -1,6 +1,6 @@
-use crate::geometry::{Point, Size};
 use crate::datetime::DateTime;
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -48,7 +48,7 @@ impl CalendarCtrl {
         style: i64,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "CalendarCtrl requires a parent");
-        
+
         // Convert Option<&DateTime> to *const ffi::wxd_DateTime_t
         let c_date_ptr: *const ffi::wxd_DateTime_t = date.map_or(ptr::null(), |d| d.as_ptr());
 
@@ -62,11 +62,11 @@ impl CalendarCtrl {
                 style as ffi::wxd_Style_t,
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create CalendarCtrl widget");
         }
-        
+
         unsafe {
             let window = Window::from_ptr(ptr as *mut ffi::wxd_Window_t);
             CalendarCtrl { window }

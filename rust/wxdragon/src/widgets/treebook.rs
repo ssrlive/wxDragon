@@ -1,4 +1,4 @@
-//! 
+//!
 //! Safe wrapper for wxTreebook.
 
 use crate::event::WxEvtHandler;
@@ -55,7 +55,7 @@ impl Treebook {
         style: i64,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "Treebook parent cannot be null");
-        
+
         let ptr = unsafe {
             ffi::wxd_Treebook_new(
                 parent_ptr,
@@ -67,11 +67,11 @@ impl Treebook {
                 style as ffi::wxd_Style_t,
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create wxTreebook");
         }
-        
+
         unsafe { Treebook::from_ptr(ptr) }
     }
 

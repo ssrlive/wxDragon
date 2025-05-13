@@ -1,18 +1,25 @@
 use std::ffi::CString;
 use std::ptr;
 
-use crate::{dialogs::Dialog, window::WxWidget};
+use crate::{dialogs::Dialog, widget_style_enum, window::WxWidget};
 use wxdragon_sys as ffi;
 
-/// Style flags for ProgressDialog
-pub const PD_APP_MODAL: i64 = 0x00000001;
-pub const PD_AUTO_HIDE: i64 = 0x00000002;
-pub const PD_SMOOTH: i64 = 0x00000004;
-pub const PD_CAN_ABORT: i64 = 0x00000008;
-pub const PD_CAN_SKIP: i64 = 0x00000010;
-pub const PD_ELAPSED_TIME: i64 = 0x00000020;
-pub const PD_ESTIMATED_TIME: i64 = 0x00000040;
-pub const PD_REMAINING_TIME: i64 = 0x00000080;
+// Define ProgressDialogStyle enum using the widget_style_enum macro
+widget_style_enum!(
+    name: ProgressDialogStyle,
+    doc: "Style flags for ProgressDialog.",
+    variants: {
+        AppModal: ffi::WXD_PD_APP_MODAL, "Dialog is modal for the application (all windows are disabled while the progress dialog exists).",
+        AutoHide: ffi::WXD_PD_AUTO_HIDE, "Automatically hide the dialog when it reaches the maximum value.",
+        Smooth: ffi::WXD_PD_SMOOTH, "Display smooth progress bar (not supported by all platforms).",
+        CanAbort: ffi::WXD_PD_CAN_ABORT, "Display a Cancel button that allows aborting the operation.",
+        CanSkip: ffi::WXD_PD_CAN_SKIP, "Display a Skip button that allows skipping a part of the operation.",
+        ElapsedTime: ffi::WXD_PD_ELAPSED_TIME, "Display elapsed time.",
+        EstimatedTime: ffi::WXD_PD_ESTIMATED_TIME, "Display estimated time.",
+        RemainingTime: ffi::WXD_PD_REMAINING_TIME, "Display remaining time."
+    },
+    default_variant: AppModal
+);
 
 /// Wrapper for wxProgressDialog.
 /// A dialog that shows a progress bar and optional text.
@@ -27,7 +34,7 @@ pub struct ProgressDialogBuilder<'a, W: WxWidget> {
     title: String,
     message: String,
     maximum: i32,
-    style: i64,
+    style: ProgressDialogStyle,
 }
 
 impl ProgressDialog {
@@ -43,7 +50,7 @@ impl ProgressDialog {
             title: title.to_string(),
             message: message.to_string(),
             maximum,
-            style: PD_AUTO_HIDE | PD_APP_MODAL,
+            style: ProgressDialogStyle::AutoHide | ProgressDialogStyle::AppModal,
         }
     }
 
@@ -157,45 +164,45 @@ impl ProgressDialog {
 
 impl<'a, W: WxWidget> ProgressDialogBuilder<'a, W> {
     /// Set the style flags for the progress dialog
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: ProgressDialogStyle) -> Self {
         self.style = style;
         self
     }
 
     /// Add a style flag to the existing style flags
-    pub fn add_style(mut self, style_flag: i64) -> Self {
-        self.style |= style_flag;
+    pub fn add_style(mut self, style_flag: ProgressDialogStyle) -> Self {
+        self.style = self.style | style_flag;
         self
     }
 
-    /// Add the PD_CAN_ABORT flag to allow cancelling the operation
+    /// Add the CanAbort flag to allow cancelling the operation
     pub fn can_abort(self) -> Self {
-        self.add_style(PD_CAN_ABORT)
+        self.add_style(ProgressDialogStyle::CanAbort)
     }
 
-    /// Add the PD_CAN_SKIP flag to allow skipping parts of the operation
+    /// Add the CanSkip flag to allow skipping parts of the operation
     pub fn can_skip(self) -> Self {
-        self.add_style(PD_CAN_SKIP)
+        self.add_style(ProgressDialogStyle::CanSkip)
     }
 
-    /// Add the PD_ELAPSED_TIME flag to show elapsed time
+    /// Add the ElapsedTime flag to show elapsed time
     pub fn show_elapsed_time(self) -> Self {
-        self.add_style(PD_ELAPSED_TIME)
+        self.add_style(ProgressDialogStyle::ElapsedTime)
     }
 
-    /// Add the PD_ESTIMATED_TIME flag to show estimated time
+    /// Add the EstimatedTime flag to show estimated time
     pub fn show_estimated_time(self) -> Self {
-        self.add_style(PD_ESTIMATED_TIME)
+        self.add_style(ProgressDialogStyle::EstimatedTime)
     }
 
-    /// Add the PD_REMAINING_TIME flag to show remaining time
+    /// Add the RemainingTime flag to show remaining time
     pub fn show_remaining_time(self) -> Self {
-        self.add_style(PD_REMAINING_TIME)
+        self.add_style(ProgressDialogStyle::RemainingTime)
     }
 
-    /// Add the PD_SMOOTH flag for a smooth progress bar
+    /// Add the Smooth flag for a smooth progress bar
     pub fn smooth(self) -> Self {
-        self.add_style(PD_SMOOTH)
+        self.add_style(ProgressDialogStyle::Smooth)
     }
 
     /// Build the ProgressDialog
@@ -210,7 +217,7 @@ impl<'a, W: WxWidget> ProgressDialogBuilder<'a, W> {
                 c_title.as_ptr(),
                 c_message.as_ptr(),
                 self.maximum,
-                self.style,
+                self.style.bits(),
             )
         };
 

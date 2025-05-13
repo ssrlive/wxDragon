@@ -3,55 +3,55 @@
 // This module might later contain wrappers for App-specific functions if needed.
 
 use crate::window::WxWidget;
-use std::ffi::{c_char, c_void, CString};
-use wxdragon_sys as ffi; // Import Window and WxWidget trait
-use std::sync::{Arc, Mutex};
-use std::collections::VecDeque;
 use lazy_static::lazy_static;
+use std::collections::VecDeque;
+use std::ffi::{c_char, c_void, CString};
+use std::sync::{Arc, Mutex};
+use wxdragon_sys as ffi; // Import Window and WxWidget trait
 
 // Queue for storing callbacks to be executed on the main thread
 lazy_static! {
-    static ref MAIN_THREAD_QUEUE: Arc<Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>> = 
+    static ref MAIN_THREAD_QUEUE: Arc<Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>> =
         Arc::new(Mutex::new(VecDeque::new()));
 }
 
 /// Schedules a callback to be executed on the main thread.
-/// 
+///
 /// This is useful when you need to update UI elements from a background thread.
 /// The callback will be executed during the next event loop iteration.
-/// 
+///
 /// # Example
 /// ```
 /// use wxdragon::prelude::*;
-/// 
+///
 /// // In a background thread:
 /// wxdragon::call_after(Box::new(move || {
 ///     // Update UI elements here
 ///     my_label.set_label("Updated from background thread");
 /// }));
 /// ```
-pub fn call_after<F>(callback: Box<F>) 
-where 
-    F: FnOnce() + Send + 'static
+pub fn call_after<F>(callback: Box<F>)
+where
+    F: FnOnce() + Send + 'static,
 {
     let mut queue = MAIN_THREAD_QUEUE.lock().unwrap();
     queue.push_back(callback);
 }
 
 /// Processes pending callbacks queued via `call_after`.
-/// 
+///
 /// This function is called automatically by the event loop.
 /// You do not need to call this function manually.
 pub fn process_main_thread_queue() {
     let mut callbacks = Vec::new();
-    
+
     // Move callbacks from the queue to our local vector to minimize lock time
     {
         let mut queue = MAIN_THREAD_QUEUE.lock().unwrap();
         if queue.is_empty() {
             return;
         }
-        
+
         // Move up to 10 callbacks at a time to prevent UI freezes
         // if there are many callbacks pending
         for _ in 0..10 {
@@ -62,7 +62,7 @@ pub fn process_main_thread_queue() {
             }
         }
     }
-    
+
     // Execute callbacks outside of the lock
     for callback in callbacks {
         callback();
@@ -89,7 +89,7 @@ pub fn process_callbacks() {
 pub struct WxdAppHandle {
     /// Internal list of widgets to preserve.
     widgets_to_preserve: Vec<Box<dyn WxWidget>>,
-    
+
     /// Internal list of arbitrary objects to preserve
     objects_to_preserve: Vec<Box<dyn std::any::Any + Send + 'static>>,
 }
@@ -110,10 +110,10 @@ impl WxdAppHandle {
     {
         self.widgets_to_preserve.push(Box::new(widget));
     }
-    
+
     /// Preserves any Rust object in the application lifetime.
-    /// 
-    /// This is useful for objects like a Tokio runtime that need to 
+    ///
+    /// This is useful for objects like a Tokio runtime that need to
     /// survive beyond the initialization function.
     pub fn preserve_box<T>(&mut self, object: Box<T>)
     where

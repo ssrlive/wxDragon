@@ -5,15 +5,15 @@
 pub mod macros;
 pub mod app;
 pub mod art_provider;
-pub mod color;
-pub mod geometry;
 pub mod bitmap;
+pub mod color;
 pub mod datetime;
 pub mod dialogs;
 pub mod dnd;
 pub mod event;
 pub mod font;
 pub mod font_data;
+pub mod geometry;
 pub mod id;
 pub mod menus;
 pub mod prelude;
@@ -29,7 +29,7 @@ pub use app::WxdAppHandle;
 pub use app::call_after;
 
 // Re-export common types from their new module locations
-pub use color::{Colour, colours};
+pub use color::{colours, Colour};
 pub use geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use id::{Id, ID_ANY, ID_HIGHEST};
 pub use types::Style;
@@ -80,7 +80,9 @@ pub use widgets::toolbar::ToolBar;
 // ADDED: Re-export Bitmap
 pub use bitmap::Bitmap;
 // ADDED: Re-export ListCtrl
-pub use crate::widgets::list_ctrl::{ListCtrl, ListCtrlBuilder, ListCtrlStyle, ListItemState, ListNextItemFlag};
+pub use crate::widgets::list_ctrl::{
+    ListCtrl, ListCtrlBuilder, ListCtrlStyle, ListItemState, ListNextItemFlag,
+};
 
 // --- ADDED: Menus Module ---
 pub use menus::{ItemKind, Menu, MenuBar, MenuItem};
@@ -130,5 +132,6 @@ pub use sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
 
 // Re-export drag and drop functionality
 pub use dnd::{
-    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject, TextDropTarget,
+    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
+    TextDropTarget,
 };

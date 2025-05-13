@@ -64,9 +64,9 @@ widget_builder!(
             .bitmap
             .as_ref()
             .expect("Bitmap must be set for StaticBitmap using with_bitmap.");
-        
+
         let name_cstr = CString::new(&slf.name[..]).unwrap_or_default();
-        
+
         unsafe {
             let ptr = ffi::wxd_StaticBitmap_CreateWithBitmap(
                 slf.parent.handle_ptr(),

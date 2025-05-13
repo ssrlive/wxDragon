@@ -60,10 +60,7 @@ impl Button {
         } else {
             // Cast the concrete Button pointer to the base Window pointer for the wrapper
             let window = unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) };
-            Button {
-                window,
-                parent_ptr,
-            }
+            Button { window, parent_ptr }
         }
     }
 

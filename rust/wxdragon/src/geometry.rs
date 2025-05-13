@@ -1,12 +1,12 @@
 //! Geometry types for wxDragon (Point, Size, Rect)
-//! 
+//!
 //! This module contains the basic geometry types used throughout
 //! the wxDragon library, providing conversions to and from the FFI types.
 
 use wxdragon_sys as ffi;
 
 /// Standard window position type.
-/// 
+///
 /// Represents a point in 2D space with x, y coordinates.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -38,7 +38,7 @@ impl From<ffi::wxd_Point> for Point {
 pub const DEFAULT_POSITION: Point = Point { x: -1, y: -1 };
 
 /// Standard window size type.
-/// 
+///
 /// Represents a size in 2D space with width and height.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -79,7 +79,7 @@ pub const DEFAULT_SIZE: Size = Size {
 };
 
 /// Represents a rectangle with position (x, y) and dimensions (width, height).
-/// 
+///
 /// Combines Point and Size to define a rectangular area.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -100,7 +100,7 @@ impl Rect {
             height,
         }
     }
-    
+
     /// Creates a rectangle from a position and size.
     pub fn from_point_and_size(pos: Point, size: Size) -> Self {
         Self {
@@ -110,12 +110,12 @@ impl Rect {
             height: size.height,
         }
     }
-    
+
     /// Returns the position component of the rectangle.
     pub fn position(&self) -> Point {
         Point::new(self.x, self.y)
     }
-    
+
     /// Returns the size component of the rectangle.
     pub fn size(&self) -> Size {
         Size::new(self.width, self.height)
@@ -142,4 +142,4 @@ impl From<ffi::wxd_Rect> for Rect {
             height: wxd_rect.height,
         }
     }
-} 
+}

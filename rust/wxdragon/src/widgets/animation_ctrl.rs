@@ -1,5 +1,5 @@
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -49,7 +49,12 @@ impl AnimationCtrl {
     pub fn load_file(&self, animation_file: &str) -> bool {
         let c_animation_file =
             CString::new(animation_file).expect("CString::new failed for animation_file");
-        unsafe { ffi::wxd_AnimationCtrl_LoadFile(self.window.as_ptr() as *mut _, c_animation_file.as_ptr()) }
+        unsafe {
+            ffi::wxd_AnimationCtrl_LoadFile(
+                self.window.as_ptr() as *mut _,
+                c_animation_file.as_ptr(),
+            )
+        }
     }
 
     /// Load an animation from bytes.
@@ -59,9 +64,9 @@ impl AnimationCtrl {
         }
         unsafe {
             ffi::wxd_AnimationCtrl_LoadFromBytes(
-                self.window.as_ptr() as *mut _, 
-                data.as_ptr(), 
-                data.len() as usize
+                self.window.as_ptr() as *mut _,
+                data.as_ptr(),
+                data.len() as usize,
             )
         }
     }
@@ -108,4 +113,4 @@ widget_builder!(
 );
 
 // Implement common widget traits
-implement_widget_traits_with_target!(AnimationCtrl, window, Window); 
+implement_widget_traits_with_target!(AnimationCtrl, window, Window);

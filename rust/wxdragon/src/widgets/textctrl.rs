@@ -1,4 +1,4 @@
-//! 
+//!
 //! Safe wrapper for wxTextCtrl.
 
 use crate::event::WxEvtHandler;
@@ -60,7 +60,7 @@ impl TextCtrl {
         style: i64,
     ) -> Self {
         let c_value = CString::new(value).unwrap_or_default();
-        
+
         let ptr = unsafe {
             ffi::wxd_TextCtrl_Create(
                 parent_ptr,
@@ -71,11 +71,11 @@ impl TextCtrl {
                 style as ffi::wxd_Style_t,
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create TextCtrl widget");
         }
-        
+
         unsafe { TextCtrl::from_ptr(ptr) }
     }
 
@@ -131,4 +131,4 @@ widget_builder!(
             slf.style.bits()
         )
     }
-); 
+);

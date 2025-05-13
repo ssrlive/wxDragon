@@ -1,15 +1,15 @@
 //!
 //! Safe wrapper for wxScrolledWindow.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::widgets::panel::Panel; // Inherits from Panel (used for Deref)
-use crate::window::WxWidget; // Used for builder parent type constraint
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::widgets::panel::Panel; // Inherits from Panel (used for Deref)
+use crate::window::WxWidget; // Used for builder parent type constraint
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -144,7 +144,7 @@ widget_builder!(
         if ptr.is_null() {
             panic!("Failed to create wxScrolledWindow");
         }
-        
+
         unsafe { ScrolledWindow::from_ptr(ptr) }
     }
-); 
+);

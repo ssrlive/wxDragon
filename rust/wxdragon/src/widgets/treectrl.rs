@@ -135,34 +135,34 @@ impl Drop for TreeItemId {
 }
 
 /// TreeItemData allows associating arbitrary data with TreeCtrl items.
-/// 
+///
 /// This safe wrapper around wxTreeItemData enables storing any Rust type
 /// that implements `Any + Send` with tree items. The data can later be
 /// retrieved and downcast to the original type.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust,no_run
 /// use wxdragon::prelude::*;
 /// use wxdragon::widgets::treectrl::TreeCtrl;
-/// 
+///
 /// // Custom data type
 /// #[derive(Clone)]
 /// struct PersonData {
 ///     name: String,
 ///     age: u32,
 /// }
-/// 
+///
 /// // Create a tree and add items with data
 /// let tree = TreeCtrl::builder(&panel).build();
-/// 
+///
 /// // Add item with PersonData
 /// let person = PersonData {
 ///     name: "Alice".to_string(),
 ///     age: 30,
 /// };
 /// let item = tree.add_root_with_data("Alice", person).unwrap();
-/// 
+///
 /// // Later, retrieve and use the data
 /// if let Some(data) = tree.get_item_data(&item) {
 ///     // Check type and downcast
@@ -179,16 +179,16 @@ impl Drop for TreeItemId {
 ///     println!("Data type: {}", data.get_type_name());
 /// }
 /// ```
-/// 
+///
 /// # Data Type Support
-/// 
+///
 /// TreeItemData can store any Rust type that implements `Clone + Any + Send`.
 /// When retrieving data, the following happens:
-/// 
+///
 /// - Common types like String, integers, floats, bool, etc. can be directly accessed
 /// - Custom types that implement Clone can be accessed if they match the expected type
 /// - For types that can't be cloned or don't match, type information is still available
-/// 
+///
 /// Use `downcast_ref<T>()` to access the data with the correct type, and `is<T>()`
 /// to check if the data is of a specific type.
 pub struct TreeItemData {
@@ -205,21 +205,21 @@ impl TreeItemData {
     pub fn new<T: Clone + 'static + Send>(data: T) -> Self {
         let boxed_data: Box<dyn Any + Send> = Box::new(data);
         let data_ptr = Box::into_raw(Box::new(boxed_data));
-        
+
         let ptr = unsafe { ffi::wxd_TreeItemData_Create(data_ptr as *mut _) };
-        
+
         TreeItemData {
             ptr,
-            data: None, // We've moved the data into C++ land
+            data: None,     // We've moved the data into C++ land
             owns_ptr: true, // We created this pointer, so we own it
             raw_data_ptr: data_ptr,
         }
     }
-    
+
     /// Creates a new TreeItemData without any associated data.
     pub fn empty() -> Self {
         let ptr = unsafe { ffi::wxd_TreeItemData_Create(ptr::null_mut()) };
-        
+
         TreeItemData {
             ptr,
             data: None,
@@ -227,14 +227,14 @@ impl TreeItemData {
             raw_data_ptr: ptr::null(),
         }
     }
-    
+
     /// Returns the raw pointer to the underlying wxTreeItemData.
     pub(crate) fn as_ptr(&self) -> *mut ffi::WXD_TreeItemData_t {
         self.ptr
     }
-    
+
     /// Attempts to downcast the contained data to a specific type.
-    /// 
+    ///
     /// This method allows you to retrieve data stored in a tree item
     /// if you know the exact type. Returns None if the data is not
     /// of the expected type.
@@ -245,7 +245,7 @@ impl TreeItemData {
                 return Some(val);
             }
         }
-        
+
         // If we don't have local data, but we have a raw pointer to the original data,
         // try to access it directly (this is unsafe but necessary for complex types)
         if !self.raw_data_ptr.is_null() {
@@ -256,10 +256,10 @@ impl TreeItemData {
                 }
             }
         }
-        
+
         None
     }
-    
+
     /// Checks if the contained data is of type T.
     pub fn is<T: 'static>(&self) -> bool {
         // First check local data
@@ -268,7 +268,7 @@ impl TreeItemData {
                 return true;
             }
         }
-        
+
         // Then check raw pointer
         if !self.raw_data_ptr.is_null() {
             unsafe {
@@ -276,17 +276,19 @@ impl TreeItemData {
                 return orig_data.is::<T>();
             }
         }
-        
+
         false
     }
-    
+
     /// Gets the original type information if this is a retrieved tree item
     pub fn get_type_info(&self) -> Option<&TypeInfo> {
-        self.data.as_ref().and_then(|data| data.downcast_ref::<TypeInfo>())
+        self.data
+            .as_ref()
+            .and_then(|data| data.downcast_ref::<TypeInfo>())
     }
-    
+
     /// Gets a friendly type name of the contained data.
-    /// 
+    ///
     /// This method returns a simplified type name without namespace prefixes,
     /// making it more readable for display purposes.
     pub fn get_type_name(&self) -> String {
@@ -296,7 +298,7 @@ impl TreeItemData {
                 // Return the stored type name from TypeInfo
                 return simplify_type_name(&type_info.type_name);
             }
-            
+
             // For known types, return friendly names
             if data.is::<String>() {
                 return "String".to_string();
@@ -321,11 +323,11 @@ impl TreeItemData {
             } else if data.is::<Vec<i32>>() {
                 return "Vector of Integers".to_string();
             }
-            
+
             // Default case - get the type name from the type_id
             return simplify_type_name(&std::any::type_name_of_val(&**data));
         }
-        
+
         // If we don't have local data, but we have a raw pointer to the original data,
         // try to access it directly
         if !self.raw_data_ptr.is_null() {
@@ -334,12 +336,12 @@ impl TreeItemData {
                 return simplify_type_name(&std::any::type_name_of_val(orig_data));
             }
         }
-        
+
         "No data".to_string()
     }
-    
+
     /// Creates a TreeItemData from a raw pointer.
-    /// 
+    ///
     /// # Safety
     /// The pointer must be a valid WXD_TreeItemData_t pointer.
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::WXD_TreeItemData_t) -> Option<Self> {
@@ -348,19 +350,19 @@ impl TreeItemData {
         } else {
             // Retrieve the client data pointer from C++
             let data_ptr = ffi::wxd_TreeItemData_GetClientData(ptr);
-            
+
             // Store the original data pointer for direct access
             let raw_data_ptr = data_ptr as *const Box<dyn Any + Send>;
-            
+
             // Create the data to return
             let data: Option<Box<dyn Any + Send>> = if !data_ptr.is_null() {
                 // The pointer points to a Box<dyn Any + Send> that we stored
                 let boxed_data_ptr = data_ptr as *const Box<dyn Any + Send>;
-                
+
                 if !boxed_data_ptr.is_null() {
                     // For primitive types, we can clone them directly
                     let boxed_data = &**boxed_data_ptr;
-                    
+
                     // Clone primitive types for local access
                     if let Some(s) = boxed_data.downcast_ref::<String>() {
                         Some(Box::new(s.clone()))
@@ -391,7 +393,7 @@ impl TreeItemData {
                         // but we'll rely on raw_data_ptr for actual access
                         let type_id = boxed_data.type_id();
                         let type_name = std::any::type_name_of_val(boxed_data);
-                        
+
                         Some(Box::new(TypeInfo {
                             type_id,
                             type_name: type_name.to_string(),
@@ -407,9 +409,9 @@ impl TreeItemData {
                 let empty_box: Box<dyn Any + Send> = Box::new(());
                 Some(empty_box)
             };
-            
-            Some(TreeItemData { 
-                ptr, 
+
+            Some(TreeItemData {
+                ptr,
                 data,
                 owns_ptr: false, // We received this pointer from TreeCtrl, it owns it
                 raw_data_ptr,
@@ -419,11 +421,15 @@ impl TreeItemData {
 }
 
 /// Simplifies a Rust type name by removing module paths.
-/// 
+///
 /// Converts something like "alloc::string::String" to just "String"
 /// or "example::rust::gallery::tabs::treectrl_tab::PersonData" to just "PersonData".
 fn simplify_type_name(type_name: &str) -> String {
-    type_name.rsplit("::").next().unwrap_or(type_name).to_string()
+    type_name
+        .rsplit("::")
+        .next()
+        .unwrap_or(type_name)
+        .to_string()
 }
 
 /// Information about a type that was stored in a tree item
@@ -443,13 +449,14 @@ impl Drop for TreeItemData {
             unsafe {
                 // If we own the data, we need to retrieve and free it first
                 if self.data.is_none() {
-                    let data_ptr = ffi::wxd_TreeItemData_GetClientData(self.ptr) as *mut Box<dyn Any + Send>;
+                    let data_ptr =
+                        ffi::wxd_TreeItemData_GetClientData(self.ptr) as *mut Box<dyn Any + Send>;
                     if !data_ptr.is_null() {
                         // Take ownership of the Box and drop it
                         let _ = Box::from_raw(data_ptr);
                     }
                 }
-                
+
                 // Now free the TreeItemData itself
                 ffi::wxd_TreeItemData_Free(self.ptr);
             }
@@ -487,7 +494,7 @@ impl TreeCtrl {
         style: i64,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "TreeCtrl parent cannot be null");
-        
+
         let ctrl_ptr = unsafe {
             ffi::wxd_TreeCtrl_Create(
                 parent_ptr,
@@ -497,11 +504,11 @@ impl TreeCtrl {
                 style as ffi::wxd_Style_t,
             )
         };
-        
+
         if ctrl_ptr.is_null() {
             panic!("Failed to create wxTreeCtrl");
         }
-        
+
         unsafe { Self::from_ptr(ctrl_ptr) }
     }
 
@@ -520,53 +527,63 @@ impl TreeCtrl {
         };
         unsafe { TreeItemId::from_ptr(item_ptr) }
     }
-    
+
     /// Adds the root item to the tree control with associated data.
-    /// 
+    ///
     /// This method creates the root item and associates custom data with it.
     /// The data is stored in the tree control and can be retrieved later using
     /// `get_item_data()`.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `text` - The text label for the root item
     /// * `data` - Custom data to associate with the item. Can be any type that
     ///            implements `Clone + 'static + Send`
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// * `Some(TreeItemId)` - The ID of the newly created item
     /// * `None` - If item creation failed
-    /// 
+    ///
     /// # Ownership
-    /// 
+    ///
     /// The tree control takes ownership of the data. When the tree item is deleted,
     /// the associated data will be properly cleaned up.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```rust,no_run
     /// use wxdragon::prelude::*;
     /// use wxdragon::widgets::treectrl::TreeCtrl;
-    /// 
+    ///
     /// #[derive(Clone)]
     /// struct CompanyData { employees: u32, revenue: f64 }
-    /// 
+    ///
     /// let tree = TreeCtrl::builder(&panel).build();
     /// let company = CompanyData { employees: 500, revenue: 10000000.0 };
     /// let root = tree.add_root_with_data("ACME Corp", company).unwrap();
     /// ```
-    pub fn add_root_with_data<T: Clone + 'static + Send>(&self, text: &str, data: T) -> Option<TreeItemId> {
+    pub fn add_root_with_data<T: Clone + 'static + Send>(
+        &self,
+        text: &str,
+        data: T,
+    ) -> Option<TreeItemId> {
         let c_text = CString::new(text).unwrap_or_default();
         let item_data = TreeItemData::new(data);
-        
+
         let item_ptr = unsafe {
-            ffi::wxd_TreeCtrl_AddRoot(self.as_ptr(), c_text.as_ptr(), -1, -1, item_data.as_ptr() as *mut _)
+            ffi::wxd_TreeCtrl_AddRoot(
+                self.as_ptr(),
+                c_text.as_ptr(),
+                -1,
+                -1,
+                item_data.as_ptr() as *mut _,
+            )
         };
-        
+
         // Don't drop the TreeItemData, it's now owned by the tree control
         std::mem::forget(item_data);
-        
+
         unsafe { TreeItemId::from_ptr(item_ptr) }
     }
 
@@ -587,50 +604,55 @@ impl TreeCtrl {
         };
         unsafe { TreeItemId::from_ptr(item_ptr) }
     }
-    
+
     /// Appends an item to the given parent item with associated data.
-    /// 
+    ///
     /// This method creates a child item under the specified parent and associates
     /// custom data with it. The data is stored in the tree control and can be
     /// retrieved later using `get_item_data()`.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `parent` - The parent item to which this item will be added
     /// * `text` - The text label for the item
     /// * `data` - Custom data to associate with the item. Can be any type that
     ///            implements `Clone + 'static + Send`
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// * `Some(TreeItemId)` - The ID of the newly created item
     /// * `None` - If item creation failed
-    /// 
+    ///
     /// # Ownership
-    /// 
+    ///
     /// The tree control takes ownership of the data. When the tree item is deleted,
     /// the associated data will be properly cleaned up.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```rust,no_run
     /// use wxdragon::prelude::*;
     /// use wxdragon::widgets::treectrl::TreeCtrl;
-    /// 
+    ///
     /// let tree = TreeCtrl::builder(&panel).build();
     /// let root = tree.add_root("Departments").unwrap();
-    /// 
+    ///
     /// // Add child with integer data (budget)
     /// tree.append_item_with_data(&root, "Engineering", 500000).unwrap();
-    /// 
+    ///
     /// // Add child with string data (description)
-    /// tree.append_item_with_data(&root, "Marketing", 
+    /// tree.append_item_with_data(&root, "Marketing",
     ///     "Handles all promotional activities".to_string()).unwrap();
     /// ```
-    pub fn append_item_with_data<T: Clone + 'static + Send>(&self, parent: &TreeItemId, text: &str, data: T) -> Option<TreeItemId> {
+    pub fn append_item_with_data<T: Clone + 'static + Send>(
+        &self,
+        parent: &TreeItemId,
+        text: &str,
+        data: T,
+    ) -> Option<TreeItemId> {
         let c_text = CString::new(text).unwrap_or_default();
         let item_data = TreeItemData::new(data);
-        
+
         let item_ptr = unsafe {
             ffi::wxd_TreeCtrl_AppendItem(
                 self.as_ptr(),
@@ -641,10 +663,10 @@ impl TreeCtrl {
                 item_data.as_ptr() as *mut _,
             )
         };
-        
+
         // Don't drop the TreeItemData, it's now owned by the tree control
         std::mem::forget(item_data);
-        
+
         unsafe { TreeItemId::from_ptr(item_ptr) }
     }
 
@@ -671,32 +693,32 @@ impl TreeCtrl {
             ffi::wxd_TreeCtrl_SelectItem(self.as_ptr(), item.as_ptr());
         }
     }
-    
+
     /// Gets the data associated with an item.
-    /// 
+    ///
     /// This method retrieves any custom data that was previously associated with
     /// the tree item using `add_root_with_data`, `append_item_with_data`, or
     /// `set_item_data`.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `item` - The tree item to get data from
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// * `Some(TreeItemData)` - The data associated with the item, which can be
     ///                          downcast to the original type using `downcast_ref<T>()`
     /// * `None` - If the item has no associated data or on error
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```rust,no_run
     /// use wxdragon::prelude::*;
     /// use wxdragon::widgets::treectrl::TreeCtrl;
-    /// 
+    ///
     /// let tree = TreeCtrl::builder(&panel).build();
     /// let root = tree.add_root_with_data("Root", "Root data".to_string()).unwrap();
-    /// 
+    ///
     /// if let Some(data) = tree.get_item_data(&root) {
     ///     if let Some(text) = data.downcast_ref::<String>() {
     ///         println!("Item data: {}", text);
@@ -707,37 +729,37 @@ impl TreeCtrl {
         let data_ptr = unsafe { ffi::wxd_TreeCtrl_GetItemData(self.as_ptr(), item.as_ptr()) };
         unsafe { TreeItemData::from_ptr(data_ptr) }
     }
-    
+
     /// Sets data for an item.
-    /// 
+    ///
     /// This method associates custom data with an existing tree item. Any previously
     /// associated data will be properly cleaned up.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `item` - The tree item to set data for
     /// * `data` - Custom data to associate with the item. Can be any type that
     ///            implements `Clone + 'static + Send`
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// * `true` - If the data was successfully set
     /// * `false` - If setting the data failed
-    /// 
+    ///
     /// # Ownership
-    /// 
+    ///
     /// The tree control takes ownership of the data. When the tree item is deleted,
     /// or when new data is set, the associated data will be properly cleaned up.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```rust,no_run
     /// use wxdragon::prelude::*;
     /// use wxdragon::widgets::treectrl::TreeCtrl;
-    /// 
+    ///
     /// let tree = TreeCtrl::builder(&panel).build();
     /// let root = tree.add_root("Root").unwrap();
-    /// 
+    ///
     /// // Set data for an existing item
     /// tree.set_item_data(&root, "New root data".to_string());
     /// ```
@@ -746,12 +768,12 @@ impl TreeCtrl {
         let result = unsafe {
             ffi::wxd_TreeCtrl_SetItemData(self.as_ptr(), item.as_ptr(), item_data.as_ptr())
         };
-        
+
         // Don't drop the TreeItemData, it's now owned by the tree control
         if result {
             std::mem::forget(item_data);
         }
-        
+
         result
     }
 

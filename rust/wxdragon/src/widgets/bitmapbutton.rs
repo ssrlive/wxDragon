@@ -1,9 +1,9 @@
 //!
 //! Safe wrapper for wxBitmapButton.
 
-use crate::geometry::{Point, Size};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::widget_builder;
 use crate::window::{Window, WxWidget};
@@ -98,11 +98,11 @@ impl BitmapButton {
         style: i64,
         name: &str,
         bmp_disabled_ptr: *mut ffi::wxd_Bitmap_t,
-        bmp_focus_ptr: *mut ffi::wxd_Bitmap_t, 
+        bmp_focus_ptr: *mut ffi::wxd_Bitmap_t,
         bmp_hover_ptr: *mut ffi::wxd_Bitmap_t,
     ) -> Self {
         let c_name = CString::new(name).unwrap_or_default();
-        
+
         unsafe {
             let ptr = ffi::wxd_BitmapButton_Create(
                 parent_ptr,
@@ -116,7 +116,7 @@ impl BitmapButton {
                 bmp_focus_ptr,
                 bmp_hover_ptr,
             );
-            
+
             if ptr.is_null() {
                 panic!("Failed to create BitmapButton widget");
             } else {
@@ -143,7 +143,7 @@ widget_builder!(
             Some(bitmap) => bitmap.as_ptr(),
             None => panic!("BitmapButton requires a bitmap to be set"),
         };
-        
+
         let bmp_disabled_ptr = slf.bitmap_disabled
             .as_ref()
             .map_or(std::ptr::null_mut(), |b| b.as_ptr());
@@ -180,7 +180,6 @@ widget_builder!(
         )
     }
 );
-
 
 // --- Trait Implementations ---
 

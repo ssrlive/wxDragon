@@ -41,18 +41,24 @@ impl Bitmap {
         if ptr.is_null() {
             None
         } else {
-            Some(Bitmap { ptr, is_owned: true }) // We own bitmaps created this way
+            Some(Bitmap {
+                ptr,
+                is_owned: true,
+            }) // We own bitmaps created this way
         }
     }
 
     /// Creates a bitmap wrapper around an existing bitmap pointer, transferring ownership to Rust.
     /// The bitmap will be destroyed when the wrapper is dropped.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// The pointer must be a valid wxBitmap pointer, and no other code should destroy it.
     pub(crate) fn from_ptr_owned(ptr: *mut ffi::wxd_Bitmap_t) -> Self {
-        Bitmap { ptr, is_owned: true }
+        Bitmap {
+            ptr,
+            is_owned: true,
+        }
     }
 
     /// Returns the raw underlying bitmap pointer.
@@ -97,7 +103,10 @@ impl Clone for Bitmap {
                 );
             }
             // A cloned bitmap is always owned by Rust
-            Bitmap { ptr: cloned_ptr, is_owned: true }
+            Bitmap {
+                ptr: cloned_ptr,
+                is_owned: true,
+            }
         }
     }
 }

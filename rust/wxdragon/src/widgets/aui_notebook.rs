@@ -5,8 +5,9 @@ use wxdragon_sys as ffi;
 
 // Placeholder: This constant needs to be properly generated and available via ffi.
 // For now, assuming it will be an i64 value from the constants generation.
-pub const AUI_NOTEBOOK_DEFAULT_STYLE_I64: i64 = 0x00000001 | 0x00000002 | 0x00000004 | 0x00000010 | 0x00000040 | 0x00000200; // wxAUI_NB_DEFAULT_STYLE components
-// pub const AUI_NOTEBOOK_DEFAULT_STYLE: c_long = ffi::WXD_AUI_NB_DEFAULT_STYLE as c_long; // Ideal, if WXD_AUI_NB_DEFAULT_STYLE is i64
+pub const AUI_NOTEBOOK_DEFAULT_STYLE_I64: i64 =
+    0x00000001 | 0x00000002 | 0x00000004 | 0x00000010 | 0x00000040 | 0x00000200; // wxAUI_NB_DEFAULT_STYLE components
+                                                                                 // pub const AUI_NOTEBOOK_DEFAULT_STYLE: c_long = ffi::WXD_AUI_NB_DEFAULT_STYLE as c_long; // Ideal, if WXD_AUI_NB_DEFAULT_STYLE is i64
 
 #[derive(Clone)]
 pub struct AuiNotebook {
@@ -26,7 +27,13 @@ impl AuiNotebook {
         let caption_c = CString::new(caption).expect("CString::new failed for caption");
         unsafe {
             // Pass -1 for bitmap_id as a default, assuming no specific bitmap support yet in this wrapper
-            ffi::wxd_AuiNotebook_AddPage(self.ptr, page.handle_ptr(), caption_c.as_ptr(), select, -1)
+            ffi::wxd_AuiNotebook_AddPage(
+                self.ptr,
+                page.handle_ptr(),
+                caption_c.as_ptr(),
+                select,
+                -1,
+            )
         }
     }
 
@@ -38,7 +45,7 @@ impl AuiNotebook {
         // The FFI function wxd_AuiNotebook_SetSelection expects size_t, which bindgen maps to Rust's usize.
         unsafe { ffi::wxd_AuiNotebook_SetSelection(self.ptr, new_page) as usize }
     }
-    
+
     // Add other methods like get_page, insert_page, remove_page etc. as needed
 }
 
@@ -69,7 +76,7 @@ impl AuiNotebookBuilder {
     pub fn new(parent: &impl WxWidget) -> Self {
         // Assuming WXD_AUI_NB_DEFAULT_STYLE will be available from ffi as an i64 constant.
         // If it's not yet generated, use a placeholder value for now.
-        let default_style_val = if false { 
+        let default_style_val = if false {
             // This branch would be taken if ffi::WXD_AUI_NB_DEFAULT_STYLE exists
             // ffi::WXD_AUI_NB_DEFAULT_STYLE as c_long
             0 // temp placeholder
@@ -153,4 +160,4 @@ impl AuiNotebookBuilder {
 // And default style: AUI_NOTEBOOK_DEFAULT_STYLE_I64 as std::os::raw::c_long,
 // Or ensure AUI_NOTEBOOK_DEFAULT_STYLE_I64 is already a c_long.
 // The ffi::WXD_... constants are typically i64. So casting ffi constant to c_long for builder init is correct.
-// And using self.style (which would be c_long) directly in ffi call is correct. 
+// And using self.style (which would be c_long) directly in ffi call is correct.

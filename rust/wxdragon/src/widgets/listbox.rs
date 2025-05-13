@@ -1,15 +1,15 @@
 //! Safe wrapper for wxListBox.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
-use crate::implement_widget_traits_with_target;
-use crate::widget_builder;
-use crate::widget_style_enum;
 
 // --- Constants ---
 // Special value returned by GetSelection when nothing is selected
@@ -64,7 +64,8 @@ impl ListBox {
     /// Returns `None` if no item is selected (matches `NOT_FOUND`).
     /// Note: For multi-selection list boxes, this returns the *first* selected item.
     pub fn get_selection(&self) -> Option<u32> {
-        let selection = unsafe { ffi::wxd_ListBox_GetSelection(self.window.as_ptr() as *mut RawListBox) };
+        let selection =
+            unsafe { ffi::wxd_ListBox_GetSelection(self.window.as_ptr() as *mut RawListBox) };
         if selection == NOT_FOUND {
             None
         } else {
@@ -116,7 +117,11 @@ impl ListBox {
     /// For multi-selection list boxes, `select = true` toggles the selection.
     pub fn set_selection(&self, index: u32, select: bool) {
         unsafe {
-            ffi::wxd_ListBox_SetSelection(self.window.as_ptr() as *mut RawListBox, index as i32, select);
+            ffi::wxd_ListBox_SetSelection(
+                self.window.as_ptr() as *mut RawListBox,
+                index as i32,
+                select,
+            );
         }
     }
 

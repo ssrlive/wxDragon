@@ -25,7 +25,7 @@ impl TextDropTarget {
         F: FnMut(&str, i32, i32) -> bool + 'static,
     {
         // Box and get raw pointer to the callback closure
-        let boxed_callback: Box<Box<dyn FnMut(&str, i32, i32) -> bool + 'static>> = 
+        let boxed_callback: Box<Box<dyn FnMut(&str, i32, i32) -> bool + 'static>> =
             Box::new(Box::new(callback));
         let user_data = Box::into_raw(boxed_callback) as *mut c_void;
 
@@ -72,7 +72,7 @@ impl FileDropTarget {
         F: FnMut(Vec<String>, i32, i32) -> bool + 'static,
     {
         // Box and get raw pointer to the callback closure
-        let boxed_callback: Box<Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>> = 
+        let boxed_callback: Box<Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>> =
             Box::new(Box::new(callback));
         let user_data = Box::into_raw(boxed_callback) as *mut c_void;
 
@@ -114,14 +114,10 @@ extern "C" fn on_drop_text_trampoline(
         return false;
     }
 
-    let text_str = unsafe {
-        CStr::from_ptr(text).to_string_lossy().into_owned()
-    };
+    let text_str = unsafe { CStr::from_ptr(text).to_string_lossy().into_owned() };
 
     // Get the boxed callback and call it
-    let callback = unsafe {
-        &mut **(closure_ptr as *mut Box<dyn FnMut(&str, i32, i32) -> bool>)
-    };
+    let callback = unsafe { &mut **(closure_ptr as *mut Box<dyn FnMut(&str, i32, i32) -> bool>) };
 
     callback(&text_str, x, y)
 }
@@ -131,7 +127,7 @@ extern "C" fn on_drop_text_trampoline(
 extern "C" fn on_drop_files_trampoline(
     filenames_ptr: *const ffi::wxd_ArrayString_t,
     x: i32,
-    y: i32, 
+    y: i32,
     closure_ptr: *mut c_void,
 ) -> bool {
     if filenames_ptr.is_null() || closure_ptr.is_null() {
@@ -143,16 +139,16 @@ extern "C" fn on_drop_files_trampoline(
     unsafe {
         let count = ffi::wxd_ArrayString_GetCount(filenames_ptr as *mut _);
         filenames.reserve(count as usize);
-        
+
         for i in 0..count {
             let mut buffer = vec![0u8; 2048]; // Buffer for path
             let len = ffi::wxd_ArrayString_GetString(
-                filenames_ptr as *mut _, 
-                i, 
-                buffer.as_mut_ptr() as *mut i8, 
-                buffer.len() as i32
+                filenames_ptr as *mut _,
+                i,
+                buffer.as_mut_ptr() as *mut i8,
+                buffer.len() as i32,
             );
-            
+
             if len > 0 {
                 buffer.truncate(len as usize);
                 // Convert to UTF-8 String
@@ -164,9 +160,8 @@ extern "C" fn on_drop_files_trampoline(
     }
 
     // Get the boxed callback and call it
-    let callback = unsafe {
-        &mut **(closure_ptr as *mut Box<dyn FnMut(Vec<String>, i32, i32) -> bool>)
-    };
+    let callback =
+        unsafe { &mut **(closure_ptr as *mut Box<dyn FnMut(Vec<String>, i32, i32) -> bool>) };
 
     callback(filenames, x, y)
-} 
+}

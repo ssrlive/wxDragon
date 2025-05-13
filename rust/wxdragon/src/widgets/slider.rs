@@ -1,14 +1,14 @@
 //! Safe wrapper for wxSlider.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::window::{Window, WxWidget};
-use std::os::raw::c_int;
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use std::os::raw::c_int;
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -104,11 +104,11 @@ widget_builder!(
                 slf.style.bits() as ffi::wxd_Style_t,
             )
         };
-        
+
         if slider_ptr.is_null() {
             panic!("Failed to create Slider");
         }
-        
+
         unsafe { Slider::from_ptr(slider_ptr) }
     }
 );

@@ -1,12 +1,12 @@
 /// Macros to simplify implementation of common patterns in the codebase.
 
 /// Creates a builder pattern for widgets
-/// 
+///
 /// This macro generates a builder struct with standard fields and methods
 /// following the WxDragon convention.
 ///
 /// # Parameters
-/// 
+///
 /// * `name` - The name of the widget (e.g., `Button`, `CheckBox`)
 /// * `parent_type` - The type of the parent parameter (e.g., `&'a dyn WxWidget`)
 /// * `style_type` - The type of the style parameter (e.g., `ButtonStyle`)
@@ -117,13 +117,13 @@ macro_rules! widget_builder {
 /// Implements common widget traits with a custom target type for Deref
 ///
 /// This macro generates implementations for:
-/// - WxWidget trait 
+/// - WxWidget trait
 /// - Deref/DerefMut to the specified target type
 /// - WxEvtHandler trait
 /// - Drop implementation with empty body (for child widgets)
 ///
 /// # Parameters
-/// 
+///
 /// * `name` - The name of the widget struct
 /// * `field` - The name of the field within the struct that implements WxWidget
 /// * `target_type` - The target type for Deref/DerefMut implementations
@@ -181,7 +181,7 @@ macro_rules! implement_widget_traits_with_target {
 /// and implements common traits like Default, BitOr, BitOrAssign, and bits().
 ///
 /// # Parameters
-/// 
+///
 /// * `name` - The name of the style enum (e.g., `ButtonStyle`, `RadioBoxStyle`)
 /// * `doc` - Documentation for the enum (e.g., "Style flags for Button")
 /// * `variants` - A list of variants with their names, wxWidgets constants, and docs
@@ -229,7 +229,7 @@ macro_rules! widget_style_enum {
             pub fn bits(self) -> i64 {
                 self as i64
             }
-            
+
             // Add constant for compatibility with existing code
             #[allow(non_upper_case_globals)]
             pub const Default: $name = $name::$default;
@@ -297,4 +297,4 @@ macro_rules! __widget_builder_default {
     ($expr:expr) => {
         $expr
     };
-} 
+}

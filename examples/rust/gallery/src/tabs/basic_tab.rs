@@ -59,8 +59,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let spin_button_label = StaticText::builder(&basic_panel)
         .with_label("Spin Button:")
         .build();
-    let spin_button = SpinButton::builder(&basic_panel)
-        .build();
+    let spin_button = SpinButton::builder(&basic_panel).build();
     spin_button.set_tooltip("Click arrows or use keys to change the value (wraps around).");
     let spinctrl_double_label_widget = StaticText::builder(&basic_panel)
         .with_label("Spin Double:")

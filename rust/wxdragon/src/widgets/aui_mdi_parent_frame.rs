@@ -128,4 +128,4 @@ impl Default for AuiMdiParentFrameBuilder {
     fn default() -> Self {
         Self::new()
     }
-} 
+}

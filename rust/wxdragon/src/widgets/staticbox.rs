@@ -30,7 +30,7 @@ impl StaticBox {
     pub fn builder<W: WxWidget>(parent: &W) -> StaticBoxBuilder<'_> {
         StaticBoxBuilder::new(parent)
     }
-    
+
     /// Creates a new StaticBox from a raw pointer.
     /// Does NOT assume ownership.
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_StaticBox_t) -> Self {

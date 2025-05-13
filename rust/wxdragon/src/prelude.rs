@@ -1,12 +1,12 @@
 // --- Core Types & Traits ---
 pub use crate::app::{main, WxdAppHandle};
-pub use crate::color::{Colour, colours};
+pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
+pub use crate::event::{Event, EventType, WxEvtHandler};
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use crate::id::{Id, ID_ANY};
-pub use crate::types::Style;
-pub use crate::event::{Event, EventType, WxEvtHandler};
 pub use crate::sizers::WxSizer;
+pub use crate::types::Style;
 pub use crate::window::{WindowUserData, WxWidget};
 
 // --- Sizers ---
@@ -49,7 +49,9 @@ pub use crate::widgets::spinbutton::{SpinButton, SpinButtonBuilder, SpinButtonSt
 // ADDED: Notebook
 pub use crate::widgets::notebook::{Notebook, NotebookBuilder, NotebookStyle};
 // ADDED: SplitterWindow
-pub use crate::widgets::splitterwindow::{SplitterWindow, SplitterWindowBuilder, SplitterWindowStyle};
+pub use crate::widgets::splitterwindow::{
+    SplitterWindow, SplitterWindowBuilder, SplitterWindowStyle,
+};
 // ADDED: ScrolledWindow
 pub use crate::widgets::scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};
 // ADDED: StatusBar
@@ -58,8 +60,7 @@ pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
 pub use crate::widgets::toolbar::ToolBar;
 // ADDED: ListCtrl
 pub use crate::widgets::list_ctrl::{
-    ListCtrl, ListCtrlBuilder, ListCtrlStyle, 
-    ListColumnFormat, ListItemState, ListNextItemFlag
+    ListColumnFormat, ListCtrl, ListCtrlBuilder, ListCtrlStyle, ListItemState, ListNextItemFlag,
 };
 // ADDED: RadioBox
 pub use crate::widgets::radiobox::RadioBox;
@@ -117,11 +118,9 @@ pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder};
 
 // ADDED: Dialog and MessageDialog
 pub use crate::dialogs::colour_dialog::ColourDialog;
+pub use crate::dialogs::file_dialog::{FileDialog, FileDialogStyle};
 pub use crate::dialogs::font_dialog::FontDialog;
-pub use crate::dialogs::message_dialog::{
-    MessageDialog, MessageDialogBuilder, CANCEL, CENTRE, ICON_ERROR, ICON_EXCLAMATION, ICON_HAND,
-    ICON_INFORMATION, ICON_QUESTION, ICON_WARNING, NO, OK, YES,
-};
+pub use crate::dialogs::message_dialog::{MessageDialog, MessageDialogBuilder, MessageDialogStyle};
 pub use crate::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogBuilder};
 pub use crate::dialogs::Dialog;
 
@@ -132,17 +131,21 @@ pub use crate::font_data::FontData;
 // The old const exports like FONTFAMILY_DEFAULT, FONTSTYLE_NORMAL, FONTWEIGHT_BOLD are removed.
 // Example of what is being removed by not re-adding:
 // pub use crate::font::{
-//     FONTFAMILY_DECORATIVE, FONTFAMILY_DEFAULT, FONTFAMILY_MODERN, FONTFAMILY_ROMAN, 
-//     FONTFAMILY_SCRIPT, FONTFAMILY_SWISS, FONTFAMILY_TELETYPE, FONTSTYLE_ITALIC, 
+//     FONTFAMILY_DECORATIVE, FONTFAMILY_DEFAULT, FONTFAMILY_MODERN, FONTFAMILY_ROMAN,
+//     FONTFAMILY_SCRIPT, FONTFAMILY_SWISS, FONTFAMILY_TELETYPE, FONTSTYLE_ITALIC,
 //     FONTSTYLE_NORMAL, FONTSTYLE_SLANT, FONTWEIGHT_BOLD, FONTWEIGHT_LIGHT, FONTWEIGHT_NORMAL,
 // };
 
 // ADDED: ProgressDialog
-pub use crate::dialogs::progress_dialog::ProgressDialog;
+pub use crate::dialogs::progress_dialog::{ProgressDialog, ProgressDialogStyle};
 
 // ADDED: File/Dir Picker Controls, their builders, and style enums
-pub use crate::widgets::dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
-pub use crate::widgets::file_picker_ctrl::{FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrlStyle};
+pub use crate::widgets::dir_picker_ctrl::{
+    DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle,
+};
+pub use crate::widgets::file_picker_ctrl::{
+    FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrlStyle,
+};
 
 // REPLACE OLD FontPickerCtrl exports with new enum export
 pub use crate::widgets::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlStyle};
@@ -156,7 +159,8 @@ pub use crate::widgets::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlSt
 pub use crate::widgets::notification_message::{
     NotificationMessage,
     NotificationMessageBuilder,
-    // ICON_INFORMATION, ICON_WARNING, ICON_ERROR, ICON_QUESTION, // Removed to avoid conflict with message_dialog exports
+    NotificationStyle,
+    // Only export non-conflicting constants
     TIMEOUT_AUTO,
     TIMEOUT_NEVER,
 };
@@ -167,5 +171,6 @@ pub use crate::id::ID_HIGHEST; // ADDED ID_HIGHEST
 
 // --- Drag and Drop ---
 pub use crate::dnd::{
-    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject, TextDropTarget,
+    DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
+    TextDropTarget,
 };

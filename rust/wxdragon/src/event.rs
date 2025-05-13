@@ -1,8 +1,8 @@
 //! Safe wrappers for wxWidgets events.
 
-use crate::geometry::Point;
-use crate::datetime::DateTime;
 use crate::color::Colour;
+use crate::datetime::DateTime;
+use crate::geometry::Point;
 use crate::widgets::treectrl::TreeItemId;
 use crate::window::Window;
 use std::boxed::Box;
@@ -155,7 +155,8 @@ impl EventType {
     pub const NOTIFICATION_MESSAGE_ACTION: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION);
 
-    pub const EVT_DATE_CHANGED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
+    pub const EVT_DATE_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
 
     pub const IDLE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_IDLE);
 

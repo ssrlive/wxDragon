@@ -1,12 +1,12 @@
 //! wxListCtrl wrapper
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::window::{Window, WxWidget};
-use crate::widget_style_enum;
-use crate::widget_builder;
 use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::os::raw::{c_int, c_long};
 use wxdragon_sys as ffi;
@@ -90,7 +90,9 @@ impl std::ops::BitOr for ListItemState {
 
 impl std::ops::BitOrAssign for ListItemState {
     fn bitor_assign(&mut self, rhs: Self) {
-        unsafe { *self = std::mem::transmute(self.bits() | rhs.bits()); }
+        unsafe {
+            *self = std::mem::transmute(self.bits() | rhs.bits());
+        }
     }
 }
 
@@ -149,26 +151,19 @@ impl ListCtrl {
         style: i64,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "ListCtrl requires a parent");
-        
-        let ptr = unsafe {
-            ffi::wxd_ListCtrl_Create(
-                parent_ptr,
-                id,
-                pos.into(),
-                size.into(),
-                style,
-            )
-        };
-        
+
+        let ptr =
+            unsafe { ffi::wxd_ListCtrl_Create(parent_ptr, id, pos.into(), size.into(), style) };
+
         if ptr.is_null() {
             panic!("Failed to create ListCtrl: FFI returned null pointer.");
         }
-        
+
         unsafe { Self::from_ptr(ptr) }
     }
-    
+
     /// Creates a ListCtrl from a raw pointer.
-    /// 
+    ///
     /// # Safety
     /// The pointer must be a valid wxd_ListCtrl_t pointer.
     unsafe fn from_ptr(ptr: *mut ffi::wxd_ListCtrl_t) -> Self {
@@ -176,7 +171,7 @@ impl ListCtrl {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
         }
     }
-    
+
     /// Returns the ListCtrl pointer from the window pointer.
     #[inline]
     fn as_list_ctrl_ptr(&self) -> *mut ffi::wxd_ListCtrl_t {
@@ -184,7 +179,13 @@ impl ListCtrl {
     }
 
     /// Inserts a column at the specified position.
-    pub fn insert_column(&self, col: i64, heading: &str, format: ListColumnFormat, width: i32) -> i32 {
+    pub fn insert_column(
+        &self,
+        col: i64,
+        heading: &str,
+        format: ListColumnFormat,
+        width: i32,
+    ) -> i32 {
         let c_heading = CString::new(heading).unwrap_or_default();
         unsafe {
             ffi::wxd_ListCtrl_InsertColumn(
@@ -199,55 +200,36 @@ impl ListCtrl {
 
     /// Sets the width of the specified column.
     pub fn set_column_width(&self, col: i64, width: i32) -> bool {
-        unsafe { 
-            ffi::wxd_ListCtrl_SetColumnWidth(
-                self.as_list_ctrl_ptr(), 
-                col as c_long, 
-                width
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_SetColumnWidth(self.as_list_ctrl_ptr(), col as c_long, width) }
     }
 
     /// Gets the width of the specified column.
     pub fn get_column_width(&self, col: i64) -> i32 {
-        unsafe { 
-            ffi::wxd_ListCtrl_GetColumnWidth(
-                self.as_list_ctrl_ptr(), 
-                col as c_long
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_GetColumnWidth(self.as_list_ctrl_ptr(), col as c_long) }
     }
 
     /// Gets the number of columns in the list control.
     pub fn get_column_count(&self) -> i32 {
-        unsafe { 
-            ffi::wxd_ListCtrl_GetColumnCount(
-                self.as_list_ctrl_ptr()
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_GetColumnCount(self.as_list_ctrl_ptr()) }
     }
 
     /// Inserts a simple item (label only) at the specified index.
     pub fn insert_item(&self, index: i64, label: &str) -> i32 {
         let c_label = CString::new(label).unwrap_or_default();
-        unsafe { 
+        unsafe {
             ffi::wxd_ListCtrl_InsertItem_Simple(
-                self.as_list_ctrl_ptr(), 
-                index as c_long, 
-                c_label.as_ptr()
-            ) 
+                self.as_list_ctrl_ptr(),
+                index as c_long,
+                c_label.as_ptr(),
+            )
         }
     }
 
     /// Sets the text of an item (label in column 0).
     pub fn set_item_text(&self, index: i64, text: &str) {
         let c_text = CString::new(text).unwrap_or_default();
-        unsafe { 
-            ffi::wxd_ListCtrl_SetItemText(
-                self.as_list_ctrl_ptr(), 
-                index as c_long, 
-                c_text.as_ptr()
-            ) 
+        unsafe {
+            ffi::wxd_ListCtrl_SetItemText(self.as_list_ctrl_ptr(), index as c_long, c_text.as_ptr())
         }
     }
 
@@ -282,11 +264,7 @@ impl ListCtrl {
 
     /// Gets the number of items in the list control.
     pub fn get_item_count(&self) -> i32 {
-        unsafe { 
-            ffi::wxd_ListCtrl_GetItemCount(
-                self.as_list_ctrl_ptr()
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_GetItemCount(self.as_list_ctrl_ptr()) }
     }
 
     /// Sets the state of an item.
@@ -303,24 +281,29 @@ impl ListCtrl {
 
     /// Gets the state of an item.
     pub fn get_item_state(&self, item: i64, state_mask: i64) -> i32 {
-        unsafe { 
+        unsafe {
             ffi::wxd_ListCtrl_GetItemState(
-                self.as_list_ctrl_ptr(), 
-                item as c_long, 
-                state_mask as c_long
-            ) 
+                self.as_list_ctrl_ptr(),
+                item as c_long,
+                state_mask as c_long,
+            )
         }
     }
 
     /// Gets the next item based on geometry and state.
-    pub fn get_next_item(&self, item: i64, geometry: ListNextItemFlag, state: ListItemState) -> i32 {
-        unsafe { 
+    pub fn get_next_item(
+        &self,
+        item: i64,
+        geometry: ListNextItemFlag,
+        state: ListItemState,
+    ) -> i32 {
+        unsafe {
             ffi::wxd_ListCtrl_GetNextItem(
-                self.as_list_ctrl_ptr(), 
-                item as c_long, 
-                geometry as c_int, 
-                state as c_int
-            ) 
+                self.as_list_ctrl_ptr(),
+                item as c_long,
+                geometry as c_int,
+                state as c_int,
+            )
         }
     }
 
@@ -331,49 +314,27 @@ impl ListCtrl {
 
     /// Deletes the specified item.
     pub fn delete_item(&self, item: i64) -> bool {
-        unsafe { 
-            ffi::wxd_ListCtrl_DeleteItem(
-                self.as_list_ctrl_ptr(), 
-                item as c_long
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_DeleteItem(self.as_list_ctrl_ptr(), item as c_long) }
     }
 
     /// Deletes all items from the list control.
     pub fn delete_all_items(&self) -> bool {
-        unsafe { 
-            ffi::wxd_ListCtrl_DeleteAllItems(
-                self.as_list_ctrl_ptr()
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_DeleteAllItems(self.as_list_ctrl_ptr()) }
     }
 
     /// Deletes all items and columns from the list control.
     pub fn clear_all(&self) -> bool {
-        unsafe { 
-            ffi::wxd_ListCtrl_ClearAll(
-                self.as_list_ctrl_ptr()
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_ClearAll(self.as_list_ctrl_ptr()) }
     }
 
     /// Gets the number of selected items.
     pub fn get_selected_item_count(&self) -> i32 {
-        unsafe { 
-            ffi::wxd_ListCtrl_GetSelectedItemCount(
-                self.as_list_ctrl_ptr()
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_GetSelectedItemCount(self.as_list_ctrl_ptr()) }
     }
 
     /// Ensures that the specified item is visible.
     pub fn ensure_visible(&self, item: i64) -> bool {
-        unsafe { 
-            ffi::wxd_ListCtrl_EnsureVisible(
-                self.as_list_ctrl_ptr(), 
-                item as c_long
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_EnsureVisible(self.as_list_ctrl_ptr(), item as c_long) }
     }
 
     /// Determines which item, if any, is at the specified point.
@@ -394,12 +355,7 @@ impl ListCtrl {
 
     /// Starts editing the label of the specified item.
     pub fn edit_label(&self, item: i64) {
-        unsafe { 
-            ffi::wxd_ListCtrl_EditLabel(
-                self.as_list_ctrl_ptr(), 
-                item as c_long
-            ) 
-        }
+        unsafe { ffi::wxd_ListCtrl_EditLabel(self.as_list_ctrl_ptr(), item as c_long) }
     }
 }
 

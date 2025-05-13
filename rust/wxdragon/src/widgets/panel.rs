@@ -1,13 +1,13 @@
 //! Safe wrapper for wxPanel.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::window::{Window, WxWidget};
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -72,11 +72,11 @@ widget_builder!(
                 slf.style.bits() as ffi::wxd_Style_t,
             )
         };
-        
+
         if panel_ptr.is_null() {
             panic!("Failed to create Panel: FFI returned null pointer.");
         }
-        
+
         unsafe { Panel::from_ptr(panel_ptr) }
     }
 );

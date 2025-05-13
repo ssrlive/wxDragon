@@ -1,11 +1,33 @@
 use super::DialogPtr; // Import DialogPtr from parent module
 use crate::dialogs::Dialog; // Use the Dialog from the parent module
+use crate::widget_style_enum;
 use crate::window::WxWidget; // Keep this
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
 // Opaque C pointer for wxMessageDialog
 pub type MessageDialogPtr = *mut ffi::wxd_MessageDialog;
+
+// Define MessageDialogStyle enum using the widget_style_enum macro
+widget_style_enum!(
+    name: MessageDialogStyle,
+    doc: "Style flags for MessageDialog.",
+    variants: {
+        OK: ffi::WXD_OK, "Default button is 'OK'.",
+        Cancel: ffi::WXD_CANCEL, "Include 'Cancel' button.",
+        YesNo: ffi::WXD_YES_NO, "Use 'Yes' and 'No' buttons instead of 'OK' and 'Cancel'.",
+        Yes: ffi::WXD_YES, "Include 'Yes' button.",
+        No: ffi::WXD_NO, "Include 'No' button.",
+        IconNone: ffi::WXD_ICON_NONE, "No icon.",
+        IconWarning: ffi::WXD_ICON_WARNING, "Same as IconExclamation.",
+        IconError: ffi::WXD_ICON_ERROR, "Same as IconHand.",
+        IconQuestion: ffi::WXD_ICON_QUESTION, "Show a question mark icon.",
+        IconInformation: ffi::WXD_ICON_INFORMATION, "Show an information symbol.",
+        IconAuthNeeded: ffi::WXD_ICON_AUTH_NEEDED, "Show an authentication needed symbol.",
+        Centre: ffi::WXD_CENTRE, "Center the dialog on its parent."
+    },
+    default_variant: OK
+);
 
 // --- MessageDialog ---
 #[derive(Clone)]
@@ -77,7 +99,7 @@ pub struct MessageDialogBuilder<'a> {
     parent: Option<&'a dyn WxWidget>,
     message: String,
     caption: String,
-    style: i64, // wxDialogStyle flags
+    style: MessageDialogStyle, // Using the enum instead of i64
 }
 
 impl<'a> MessageDialogBuilder<'a> {
@@ -86,18 +108,18 @@ impl<'a> MessageDialogBuilder<'a> {
             parent,
             message: message.to_string(),
             caption: caption.to_string(),
-            style: 0, // Default: wxOK. TODO: Add actual wxOK constant.
+            style: MessageDialogStyle::OK, // Default style
         }
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: MessageDialogStyle) -> Self {
         self.style = style;
         self
     }
 
     // Convenience methods for common styles might be added later, e.g.:
-    // pub fn ok(mut self) -> Self { self.style |= wxOK; self }
-    // pub fn yes_no(mut self) -> Self { self.style = wxYES_NO; self }
+    // pub fn ok(mut self) -> Self { self.style = MessageDialogStyle::OK; self }
+    // pub fn yes_no(mut self) -> Self { self.style = MessageDialogStyle::YesNo; self }
 
     pub fn build(self) -> MessageDialog {
         let c_message = CString::new(self.message).expect("CString::new failed for message");
@@ -109,7 +131,7 @@ impl<'a> MessageDialogBuilder<'a> {
                 parent_ptr,
                 c_message.as_ptr(),
                 c_caption.as_ptr(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
             )
         };
         if ptr.is_null() {
@@ -118,31 +140,3 @@ impl<'a> MessageDialogBuilder<'a> {
         unsafe { MessageDialog::from_ptr(ptr) }
     }
 }
-
-// Dialog Style Constants (subset for common wxMessageDialog styles)
-// These should map to the WXD_ style constants from wxdragon_sys
-// which are generated from wxWidgets constants.
-
-pub const OK: i64 = ffi::WXD_OK;
-pub const CANCEL: i64 = ffi::WXD_CANCEL;
-pub const YES_NO: i64 = ffi::WXD_YES_NO;
-pub const YES: i64 = ffi::WXD_YES;
-pub const NO: i64 = ffi::WXD_NO;
-
-pub const ICON_NONE: i64 = ffi::WXD_ICON_NONE;
-pub const ICON_EXCLAMATION: i64 = ffi::WXD_ICON_EXCLAMATION;
-pub const ICON_WARNING: i64 = ffi::WXD_ICON_WARNING; // Same as ICON_EXCLAMATION
-pub const ICON_HAND: i64 = ffi::WXD_ICON_HAND;
-pub const ICON_ERROR: i64 = ffi::WXD_ICON_ERROR; // Same as ICON_HAND
-pub const ICON_QUESTION: i64 = ffi::WXD_ICON_QUESTION;
-pub const ICON_INFORMATION: i64 = ffi::WXD_ICON_INFORMATION;
-pub const ICON_AUTH_NEEDED: i64 = ffi::WXD_ICON_AUTH_NEEDED;
-
-// Dialog positioning/behavior (though MessageDialog often centers by default)
-pub const CENTRE: i64 = ffi::WXD_CENTRE;
-
-// Standard Dialog Return IDs (already available via id.rs, but useful context here)
-// pub const ID_OK: i32 = ffi::WXD_ID_OK;
-// pub const ID_CANCEL: i32 = ffi::WXD_ID_CANCEL;
-// pub const ID_YES: i32 = ffi::WXD_ID_YES;
-// pub const ID_NO: i32 = ffi::WXD_ID_NO;

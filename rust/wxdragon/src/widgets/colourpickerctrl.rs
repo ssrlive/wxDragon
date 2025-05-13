@@ -1,6 +1,6 @@
-use crate::color::{Colour, colours};
-use crate::geometry::{Point, Size};
+use crate::color::{colours, Colour};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -39,13 +39,16 @@ impl ColourPickerCtrl {
 
     /// Gets the currently selected colour.
     pub fn get_colour(&self) -> Colour {
-        let c_colour = unsafe { ffi::wxd_ColourPickerCtrl_GetColour(self.window.as_ptr() as *mut _) };
+        let c_colour =
+            unsafe { ffi::wxd_ColourPickerCtrl_GetColour(self.window.as_ptr() as *mut _) };
         Colour::from(c_colour)
     }
 
     /// Sets the currently selected colour.
     pub fn set_colour(&self, colour: Colour) {
-        unsafe { ffi::wxd_ColourPickerCtrl_SetColour(self.window.as_ptr() as *mut _, colour.into()) };
+        unsafe {
+            ffi::wxd_ColourPickerCtrl_SetColour(self.window.as_ptr() as *mut _, colour.into())
+        };
     }
 }
 
@@ -61,7 +64,7 @@ widget_builder!(
         let pos = slf.pos.into();
         let size = slf.size.into();
         let colour = slf.initial_colour.into();
-        
+
         let ptr = unsafe {
             ffi::wxd_ColourPickerCtrl_Create(
                 parent_ptr,
@@ -72,15 +75,15 @@ widget_builder!(
                 slf.style.bits(),
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create wxColourPickerCtrl");
         }
-        
+
         ColourPickerCtrl {
             window: unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) },
         }
     }
 );
 
-implement_widget_traits_with_target!(ColourPickerCtrl, window, Window); 
+implement_widget_traits_with_target!(ColourPickerCtrl, window, Window);

@@ -1,14 +1,14 @@
 //! Safe wrapper for wxSpinButton.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::window::{Window, WxWidget};
-use std::os::raw::c_int;
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use std::os::raw::c_int;
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -61,7 +61,9 @@ impl SpinButton {
 
     /// Sets the allowed range.
     pub fn set_range(&self, min_value: i32, max_value: i32) {
-        unsafe { ffi::wxd_SpinButton_SetRange(self.as_ptr(), min_value as c_int, max_value as c_int) };
+        unsafe {
+            ffi::wxd_SpinButton_SetRange(self.as_ptr(), min_value as c_int, max_value as c_int)
+        };
     }
 
     /// Gets the minimum allowed value.
@@ -108,19 +110,19 @@ widget_builder!(
                 slf.style.bits() as ffi::wxd_Style_t,
             )
         };
-        
+
         if spin_button_ptr.is_null() {
             panic!("Failed to create SpinButton");
         }
-        
+
         let spin_button = unsafe { SpinButton::from_ptr(spin_button_ptr) };
 
-        
+
         spin_button.set_range(slf.min_value, slf.max_value);
-        
+
         // Clamp initial value to range
         spin_button.set_value(slf.initial_value.clamp(slf.min_value, slf.max_value));
 
         spin_button
     }
-); 
+);

@@ -49,9 +49,9 @@ impl AuiMdiChildFrameBuilder {
             parent: parent.handle_ptr() as *mut ffi::wxd_AuiMDIParentFrame_t, // Store parent ptr
             id: ID_ANY as i32,
             title: String::new(),
-            pos: Point::default(),   // wxDefaultPosition
-            size: Size::default(),   // wxDefaultSize
-            style: ffi::WXD_DEFAULT_FRAME_STYLE, // Standard frame style
+            pos: Point::default(),                  // wxDefaultPosition
+            size: Size::default(),                  // wxDefaultSize
+            style: ffi::WXD_DEFAULT_FRAME_STYLE,    // Standard frame style
             name: "wxAuiMDIChildFrame".to_string(), // Default name
         }
     }
@@ -98,7 +98,7 @@ impl AuiMdiChildFrameBuilder {
                 self.pos.into(),
                 self.size.into(),
                 self.style,
-                name_c.as_ptr()
+                name_c.as_ptr(),
             )
         };
 
@@ -119,4 +119,4 @@ impl Drop for AuiMdiChildFrame {
         // If issues arise, uncomment and test:
         // unsafe { ffi::wxd_Window_Destroy(self.handle_ptr()) }
     }
-} 
+}

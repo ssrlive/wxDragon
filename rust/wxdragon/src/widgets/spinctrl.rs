@@ -1,15 +1,15 @@
 //! Safe wrapper for wxSpinCtrl.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use crate::implement_widget_traits_with_target;
-use crate::widget_builder;
-use crate::widget_style_enum;
 
 // Re-export constants from wxdragon-sys
 
@@ -97,7 +97,7 @@ widget_builder!(
     build_impl: |slf| {
         let initial_c_string =
             CString::new(slf.value_str.clone()).expect("CString::new failed for SpinCtrl initial value");
-        
+
         let spin_ctrl_ptr = unsafe {
             ffi::wxd_SpinCtrl_Create(
                 slf.parent.handle_ptr(),
@@ -111,11 +111,11 @@ widget_builder!(
                 slf.initial_value as c_int,
             )
         };
-        
+
         if spin_ctrl_ptr.is_null() {
             panic!("Failed to create SpinCtrl");
         }
-        
+
         unsafe { SpinCtrl::from_ptr(spin_ctrl_ptr) }
     }
 );

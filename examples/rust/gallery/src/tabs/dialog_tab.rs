@@ -4,10 +4,12 @@ use wxdragon::prelude::*;
 use std::thread;
 use std::time::Duration;
 use wxdragon::dialogs::colour_dialog::ColourDialog;
-use wxdragon::dialogs::file_dialog::{self as fd_const, FileDialog};
+use wxdragon::dialogs::file_dialog::{FileDialog, FileDialogStyle};
 use wxdragon::dialogs::font_dialog::FontDialog;
+use wxdragon::dialogs::message_dialog::{MessageDialog, MessageDialogStyle};
 use wxdragon::dialogs::progress_dialog::ProgressDialog;
 use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+use wxdragon::widgets::notification_message::{NotificationMessage, NotificationStyle};
 use wxdragon::widgets::panel::PanelStyle;
 
 #[allow(dead_code)]
@@ -305,7 +307,7 @@ impl DialogTabControls {
                     "This is an informational message from wxDragon!",
                     "Info",
                 )
-                .with_style(OK | ICON_INFORMATION)
+                .with_style(MessageDialogStyle::OK | MessageDialogStyle::IconInformation)
                 .build();
                 dialog.show_modal();
                 println!("Message Dialog Closed.");
@@ -323,7 +325,9 @@ impl DialogTabControls {
                 let dialog = FileDialog::builder(Some(&frame_parent_open_ctx))
                     .with_message("Choose a file")
                     .with_style(
-                        fd_const::FD_OPEN | fd_const::FD_FILE_MUST_EXIST | fd_const::FD_MULTIPLE,
+                        FileDialogStyle::Open
+                            | FileDialogStyle::FileMustExist
+                            | FileDialogStyle::Multiple,
                     )
                     .with_wildcard(
                         "Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
@@ -348,7 +352,7 @@ impl DialogTabControls {
                 println!("Save File button clicked.");
                 let dialog = FileDialog::builder(Some(&frame_parent_save_ctx))
                     .with_message("Save file as")
-                    .with_style(fd_const::FD_SAVE | fd_const::FD_OVERWRITE_PROMPT)
+                    .with_style(FileDialogStyle::Save | FileDialogStyle::OverwritePrompt)
                     .with_default_file("my_document.txt")
                     .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
                     .build();
@@ -545,17 +549,18 @@ impl DialogTabControls {
         // Event handlers for DirPickerCtrl
         let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone();
         let dir_picker_status_label_clone = self.dir_picker_status_label.clone();
-        self.dir_picker_ctrl.bind(EventType::DIR_PICKER_CHANGED, move |_event| {
-            let selected_path = dir_picker_ctrl_clone.get_path();
-            if !selected_path.is_empty() {
-                let status = format!("DirPicker: Selected directory: {}", selected_path);
-                dir_picker_status_label_clone.set_label(&status);
-                println!("{}", status);
-            } else {
-                dir_picker_status_label_clone.set_label("DirPicker: No directory selected.");
-                println!("DirPicker: No directory selected.");
-            }
-        });
+        self.dir_picker_ctrl
+            .bind(EventType::DIR_PICKER_CHANGED, move |_event| {
+                let selected_path = dir_picker_ctrl_clone.get_path();
+                if !selected_path.is_empty() {
+                    let status = format!("DirPicker: Selected directory: {}", selected_path);
+                    dir_picker_status_label_clone.set_label(&status);
+                    println!("{}", status);
+                } else {
+                    dir_picker_status_label_clone.set_label("DirPicker: No directory selected.");
+                    println!("DirPicker: No directory selected.");
+                }
+            });
 
         // Event handler for FontPickerCtrl
         let font_pc_status_label_clone = self.font_picker_status_label.clone();
@@ -593,7 +598,7 @@ impl DialogTabControls {
                 let notif_builder = NotificationMessage::builder()
                     .with_title("Hello from wxDragon!")
                     .with_message("This is a notification with actions.")
-                    .with_flags(ICON_INFORMATION); // Use one of the imported constants
+                    .with_style(NotificationStyle::Information);
 
                 match notif_builder.build() {
                     Ok(notif_msg) => {

@@ -1,7 +1,7 @@
 //! Safe wrapper for wxComboBox.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
 use std::ffi::{CStr, CString};
@@ -126,9 +126,9 @@ widget_builder!(
     build_impl: |slf| {
         let parent_ptr = slf.parent.handle_ptr();
         assert!(!parent_ptr.is_null(), "ComboBox requires a parent");
-        
+
         let c_value = CString::new(slf.value.as_str()).expect("Invalid CString for ComboBox value");
-        
+
         unsafe {
             let ctrl_ptr = ffi::wxd_ComboBox_Create(
                 parent_ptr,
@@ -138,18 +138,18 @@ widget_builder!(
                 slf.size.into(),
                 slf.style.bits() as ffi::wxd_Style_t,
             );
-            
+
             if ctrl_ptr.is_null() {
                 panic!("Failed to create ComboBox widget");
             } else {
                 let window = Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t);
                 let combo = ComboBox { window };
-                
+
                 // Append initial choices
                 for item in &slf.choices {
                     combo.append(item);
                 }
-                
+
                 combo
             }
         }

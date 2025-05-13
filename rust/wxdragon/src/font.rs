@@ -1,7 +1,7 @@
- // Point, Size, etc. may not be needed directly here but good for consistency
+// Point, Size, etc. may not be needed directly here but good for consistency
+use std::default::Default;
 use std::ffi::{c_int, CStr};
 use wxdragon_sys as ffi;
-use std::default::Default;
 
 /// Specifies the general appearance of the font.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -110,7 +110,7 @@ impl Font {
     ) -> Option<Self> {
         let c_face_name = match std::ffi::CString::new(face_name) {
             Ok(s) => s,
-            Err(_) => return None, 
+            Err(_) => return None,
         };
         let ptr = unsafe {
             // This FFI function seems to be available based on lack of lint errors for it.
@@ -258,7 +258,11 @@ impl FontBuilder {
     }
 
     pub fn build(self) -> Option<Font> {
-        let point_size = if self.point_size == 0 { 10 } else { self.point_size }; 
+        let point_size = if self.point_size == 0 {
+            10
+        } else {
+            self.point_size
+        };
 
         Font::new_with_details(
             point_size as c_int,

@@ -1,16 +1,16 @@
 //!
 //! Safe wrapper for wxNotebook.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
+use crate::implement_widget_traits_with_target;
+use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
-use crate::implement_widget_traits_with_target;
-use crate::widget_builder;
-use crate::widget_style_enum;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -77,7 +77,12 @@ impl Notebook {
     /// Sets the selection to the given page index.
     /// Returns the index of the previously selected page.
     pub fn set_selection(&self, page: usize) -> i32 {
-        unsafe { ffi::wxd_Notebook_SetSelection(self.window.as_ptr() as *mut ffi::wxd_Notebook_t, page as c_int) }
+        unsafe {
+            ffi::wxd_Notebook_SetSelection(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                page as c_int,
+            )
+        }
     }
 
     // Add other methods like GetPageCount, GetPageText, ChangeSelection, etc. if needed.

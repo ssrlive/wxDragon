@@ -1,7 +1,7 @@
 // ! Safe wrapper for wxCheckListBox.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -180,7 +180,7 @@ widget_builder!(
         let parent_ptr = slf.parent.handle_ptr();
         let pos = slf.pos.into();
         let size = slf.size.into();
-        
+
         // Create the control
         let ctrl_ptr = unsafe {
             ffi::wxd_CheckListBox_Create(
@@ -191,11 +191,11 @@ widget_builder!(
                 slf.style.bits(),
             )
         };
-        
+
         if ctrl_ptr.is_null() {
             panic!("Failed to create CheckListBox widget");
         }
-        
+
         let clbox = CheckListBox {
             window: unsafe { Window::from_ptr(ctrl_ptr as *mut ffi::wxd_Window_t) },
         };
@@ -204,7 +204,7 @@ widget_builder!(
         for choice_str in &slf.choices {
             clbox.append(choice_str);
         }
-        
+
         clbox
     }
 );

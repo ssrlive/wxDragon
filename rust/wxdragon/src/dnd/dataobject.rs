@@ -27,11 +27,7 @@ impl TextDataObject {
     pub fn get_text(&self) -> String {
         let mut buffer = [0 as c_char; 2048];
         let len = unsafe {
-            ffi::wxd_TextDataObject_GetText(
-                self.ptr,
-                buffer.as_mut_ptr(),
-                buffer.len() as i32,
-            )
+            ffi::wxd_TextDataObject_GetText(self.ptr, buffer.as_mut_ptr(), buffer.len() as i32)
         };
 
         if len <= 0 {
@@ -90,10 +86,10 @@ impl FileDataObject {
         };
 
         let count = unsafe { ffi::wxd_FileDataObject_GetFilenames(self.ptr, &mut array_string) };
-        
+
         // Convert the ArrayString to a Vec<String>
         let mut filenames = Vec::with_capacity(count as usize);
-        
+
         unsafe {
             for i in 0..count {
                 let mut buffer = vec![0u8; 2048]; // Buffer for path
@@ -101,9 +97,9 @@ impl FileDataObject {
                     &mut array_string,
                     i,
                     buffer.as_mut_ptr() as *mut std::os::raw::c_char,
-                    buffer.len() as i32
+                    buffer.len() as i32,
                 );
-                
+
                 if len > 0 {
                     buffer.truncate(len as usize);
                     // Convert to UTF-8 String
@@ -154,4 +150,4 @@ impl Default for FileDataObject {
     fn default() -> Self {
         Self::new()
     }
-} 
+}

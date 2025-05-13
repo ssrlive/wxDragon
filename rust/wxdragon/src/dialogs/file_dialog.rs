@@ -1,21 +1,27 @@
-use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::dialogs::Dialog;
+use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::widget_style_enum;
 use crate::window::WxWidget;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
 
-// --- Constants ---
-// Style Flags (from wxFileDialog documentation)
-pub const FD_DEFAULT_STYLE: i64 = ffi::WXD_FD_DEFAULT_STYLE;
-pub const FD_OPEN: i64 = ffi::WXD_FD_OPEN;
-pub const FD_SAVE: i64 = ffi::WXD_FD_SAVE;
-pub const FD_OVERWRITE_PROMPT: i64 = ffi::WXD_FD_OVERWRITE_PROMPT;
-pub const FD_FILE_MUST_EXIST: i64 = ffi::WXD_FD_FILE_MUST_EXIST;
-pub const FD_MULTIPLE: i64 = ffi::WXD_FD_MULTIPLE;
-pub const FD_CHANGE_DIR: i64 = ffi::WXD_FD_CHANGE_DIR;
-pub const FD_PREVIEW: i64 = ffi::WXD_FD_PREVIEW;
+// Define FileDialogStyle enum using the widget_style_enum macro
+widget_style_enum!(
+    name: FileDialogStyle,
+    doc: "Style flags for FileDialog.",
+    variants: {
+        Open: ffi::WXD_FD_OPEN, "Creates an open file dialog (cannot be combined with Save).",
+        Save: ffi::WXD_FD_SAVE, "Creates a save file dialog (cannot be combined with Open).",
+        OverwritePrompt: ffi::WXD_FD_OVERWRITE_PROMPT, "For save dialog only: prompt for a confirmation if a file with the same name already exists.",
+        FileMustExist: ffi::WXD_FD_FILE_MUST_EXIST, "For open dialog only: the user may only select files that actually exist.",
+        Multiple: ffi::WXD_FD_MULTIPLE, "For open dialog only: allows selecting multiple files.",
+        ChangeDir: ffi::WXD_FD_CHANGE_DIR, "Change the current working directory to the directory where the file(s) chosen by the user are.",
+        Preview: ffi::WXD_FD_PREVIEW, "Show the preview of the selected files (currently only supported by wxGTK)."
+    },
+    default_variant: Open
+);
 
 // Opaque C pointer type
 pub type FileDialogPtr = *mut ffi::wxd_FileDialog_t;
@@ -298,7 +304,7 @@ pub struct FileDialogBuilder<'a> {
     default_dir: String,
     default_file: String,
     wildcard: String,
-    style: i64,
+    style: FileDialogStyle,
     pos: Point,
     size: Size, // Often unused for FileDialog, but kept for consistency
 }
@@ -311,7 +317,7 @@ impl<'a> FileDialogBuilder<'a> {
             default_dir: String::new(),
             default_file: String::new(),
             wildcard: "*.*".to_string(), // Default wildcard
-            style: FD_DEFAULT_STYLE,     // Default style
+            style: FileDialogStyle::Open,
             pos: DEFAULT_POSITION,
             size: DEFAULT_SIZE,
         }
@@ -337,7 +343,7 @@ impl<'a> FileDialogBuilder<'a> {
         self
     }
 
-    pub fn with_style(mut self, style: i64) -> Self {
+    pub fn with_style(mut self, style: FileDialogStyle) -> Self {
         self.style = style;
         self
     }
@@ -368,7 +374,7 @@ impl<'a> FileDialogBuilder<'a> {
                 c_default_dir.as_ptr(),
                 c_default_file.as_ptr(),
                 c_wildcard.as_ptr(),
-                self.style as ffi::wxd_Style_t,
+                self.style.bits() as ffi::wxd_Style_t,
                 self.pos.x,
                 self.pos.y, // Pass position components
                 self.size.width,

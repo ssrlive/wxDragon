@@ -1,10 +1,10 @@
 use wxdragon::id;
 use wxdragon::prelude::*;
+use wxdragon::widgets::checklistbox::CheckListBoxStyle;
+use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::listbox::ListBoxStyle;
 use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::checklistbox::CheckListBoxStyle;
-use wxdragon::widgets::choice::ChoiceStyle;
 // use wxdragon::widgets::choice; // For CB_SORT if it were available directly
 
 #[allow(dead_code)]
@@ -35,7 +35,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let _sizer = BoxSizer::builder(VERTICAL).build();
 
     // --- Create controls, parenting them to the *inner_list_panel* ---
-    let list_box_items = vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string(), "Date".to_string(), "Elderberry".to_string()];
+    let list_box_items = vec![
+        "Apple".to_string(),
+        "Banana".to_string(),
+        "Cherry".to_string(),
+        "Date".to_string(),
+        "Elderberry".to_string(),
+    ];
     let list_box = ListBox::builder(&panel)
         .with_choices(list_box_items)
         // .with_style(ListBoxStyle::Default | ListBoxStyle::Sort | ListBoxStyle::AlwaysScrollbar | ListBoxStyle::HorizontalScrollbar) // Old complex
@@ -47,13 +53,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let checklistbox = CheckListBox::builder(&panel)
         .with_id(109)
         .with_choices(vec![
-            "Option A".to_string(), 
-            "Option B".to_string(), 
-            "Option C".to_string(), 
-            "Option D".to_string(), 
-            "Option E".to_string(), 
-            "Option F".to_string(), 
-            "Option G".to_string()
+            "Option A".to_string(),
+            "Option B".to_string(),
+            "Option C".to_string(),
+            "Option D".to_string(),
+            "Option E".to_string(),
+            "Option F".to_string(),
+            "Option G".to_string(),
         ])
         // .with_style(LB_SORT) // Old
         .with_style(CheckListBoxStyle::Sort) // Correct type
@@ -88,7 +94,12 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // --- ADDED: ListCtrl Example ---
     let list_ctrl = ListCtrl::builder(&panel)
         .with_id(id::ID_HIGHEST + 7) // ID_LIST_CTRL
-        .with_style(ListCtrlStyle::Report | ListCtrlStyle::SingleSel | ListCtrlStyle::HRules | ListCtrlStyle::VRules) // Report style, single selection, rules
+        .with_style(
+            ListCtrlStyle::Report
+                | ListCtrlStyle::SingleSel
+                | ListCtrlStyle::HRules
+                | ListCtrlStyle::VRules,
+        ) // Report style, single selection, rules
         .build();
 
     // Add columns

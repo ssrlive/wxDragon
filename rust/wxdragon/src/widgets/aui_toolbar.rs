@@ -1,8 +1,8 @@
-use std::os::raw::{c_int, c_long};
 use std::ffi::CString;
+use std::os::raw::{c_int, c_long};
 
-use wxdragon_sys as ffi;
 use crate::prelude::*;
+use wxdragon_sys as ffi;
 
 // wxAuiToolBar styles (to be sourced from wxdragon_sys once generated)
 pub const AUI_TB_TEXT: i64 = ffi::WXD_AUI_TB_TEXT; // wxAUI_TB_TEXT
@@ -20,10 +20,10 @@ pub const AUI_TB_DEFAULT_STYLE: i64 = AUI_TB_GRIPPER | AUI_TB_OVERFLOW;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum ItemKind {
-    Normal = 0,   // WXD_ITEM_NORMAL
-    Check = 1,    // WXD_ITEM_CHECK
-    Radio = 2,    // WXD_ITEM_RADIO
-    Separator = 3 // WXD_ITEM_SEPARATOR
+    Normal = 0,    // WXD_ITEM_NORMAL
+    Check = 1,     // WXD_ITEM_CHECK
+    Radio = 2,     // WXD_ITEM_RADIO
+    Separator = 3, // WXD_ITEM_SEPARATOR
 }
 impl Default for ItemKind {
     fn default() -> Self {
@@ -56,7 +56,7 @@ impl AuiToolBar {
                 c_label.as_ptr(),
                 // Bitmaps are currently omitted in C API
                 c_short_help.as_ptr(),
-                kind as ffi::WXDItemKindCEnum
+                kind as ffi::WXDItemKindCEnum,
             );
         }
     }
@@ -64,35 +64,54 @@ impl AuiToolBar {
     pub fn add_label(&self, tool_id: i32, label: &str, width: i32) {
         let c_label = CString::new(label).unwrap_or_default();
         unsafe {
-            ffi::wxd_AuiToolBar_AddLabel(self.ptr, tool_id as c_int, c_label.as_ptr(), width as c_int);
+            ffi::wxd_AuiToolBar_AddLabel(
+                self.ptr,
+                tool_id as c_int,
+                c_label.as_ptr(),
+                width as c_int,
+            );
         }
     }
 
     pub fn add_control<C: WxWidget>(&self, control: &C, label: &str) {
         let c_label = CString::new(label).unwrap_or_default();
         unsafe {
-            ffi::wxd_AuiToolBar_AddControl(self.ptr, control.handle_ptr() as *mut ffi::wxd_Control_t, c_label.as_ptr());
+            ffi::wxd_AuiToolBar_AddControl(
+                self.ptr,
+                control.handle_ptr() as *mut ffi::wxd_Control_t,
+                c_label.as_ptr(),
+            );
         }
     }
 
     pub fn add_separator(&self) {
-        unsafe { ffi::wxd_AuiToolBar_AddSeparator(self.ptr); }
+        unsafe {
+            ffi::wxd_AuiToolBar_AddSeparator(self.ptr);
+        }
     }
 
     pub fn add_spacer(&self, pixels: i32) {
-        unsafe { ffi::wxd_AuiToolBar_AddSpacer(self.ptr, pixels as c_int); }
+        unsafe {
+            ffi::wxd_AuiToolBar_AddSpacer(self.ptr, pixels as c_int);
+        }
     }
 
     pub fn add_stretch_spacer(&self, proportion: i32) {
-        unsafe { ffi::wxd_AuiToolBar_AddStretchSpacer(self.ptr, proportion as c_int); }
+        unsafe {
+            ffi::wxd_AuiToolBar_AddStretchSpacer(self.ptr, proportion as c_int);
+        }
     }
 
     pub fn realize(&self) {
-        unsafe { ffi::wxd_AuiToolBar_Realize(self.ptr); }
+        unsafe {
+            ffi::wxd_AuiToolBar_Realize(self.ptr);
+        }
     }
 
     pub fn set_tool_bitmap_size(&self, size: Size) {
-        unsafe { ffi::wxd_AuiToolBar_SetToolBitmapSize(self.ptr, size.into()); }
+        unsafe {
+            ffi::wxd_AuiToolBar_SetToolBitmapSize(self.ptr, size.into());
+        }
     }
 
     pub fn get_tool_bitmap_size(&self) -> Size {
@@ -101,7 +120,9 @@ impl AuiToolBar {
     }
 
     pub fn set_overflow_visible(&self, visible: bool) {
-        unsafe { ffi::wxd_AuiToolBar_SetOverflowVisible(self.ptr, visible); }
+        unsafe {
+            ffi::wxd_AuiToolBar_SetOverflowVisible(self.ptr, visible);
+        }
     }
 
     pub fn get_overflow_visible(&self) -> bool {
@@ -109,7 +130,9 @@ impl AuiToolBar {
     }
 
     pub fn set_gripper_visible(&self, visible: bool) {
-        unsafe { ffi::wxd_AuiToolBar_SetGripperVisible(self.ptr, visible); }
+        unsafe {
+            ffi::wxd_AuiToolBar_SetGripperVisible(self.ptr, visible);
+        }
     }
 
     pub fn get_gripper_visible(&self) -> bool {
@@ -117,7 +140,9 @@ impl AuiToolBar {
     }
 
     pub fn set_tool_drop_down(&self, tool_id: i32, dropdown: bool) {
-        unsafe { ffi::wxd_AuiToolBar_SetToolDropDown(self.ptr, tool_id as c_int, dropdown); }
+        unsafe {
+            ffi::wxd_AuiToolBar_SetToolDropDown(self.ptr, tool_id as c_int, dropdown);
+        }
     }
 
     pub fn get_tool_drop_down(&self, tool_id: i32) -> bool {
@@ -125,7 +150,9 @@ impl AuiToolBar {
     }
 
     pub fn enable_tool(&self, tool_id: i32, enable: bool) {
-        unsafe { ffi::wxd_AuiToolBar_EnableTool(self.ptr, tool_id as c_int, enable); }
+        unsafe {
+            ffi::wxd_AuiToolBar_EnableTool(self.ptr, tool_id as c_int, enable);
+        }
     }
 
     pub fn get_tool_enabled(&self, tool_id: i32) -> bool {
@@ -137,7 +164,9 @@ impl AuiToolBar {
     }
 
     pub fn clear_tools(&self) {
-        unsafe { ffi::wxd_AuiToolBar_ClearTools(self.ptr); }
+        unsafe {
+            ffi::wxd_AuiToolBar_ClearTools(self.ptr);
+        }
     }
 
     pub fn delete_tool(&self, tool_id: i32) -> bool {
@@ -212,4 +241,4 @@ impl AuiToolBarBuilder {
             AuiToolBar::from_ptr(ptr)
         }
     }
-} 
+}

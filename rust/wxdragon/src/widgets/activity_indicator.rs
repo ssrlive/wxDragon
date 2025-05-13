@@ -1,5 +1,5 @@
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -17,7 +17,7 @@ widget_style_enum!(
     default_variant: Default
 );
 
-/// Represents a `wxActivityIndicator`, an animated control that shows 
+/// Represents a `wxActivityIndicator`, an animated control that shows
 /// an animation to indicate a long-running process is occurring.
 #[derive(Clone)]
 pub struct ActivityIndicator {
@@ -39,7 +39,7 @@ impl ActivityIndicator {
         style: i64,
     ) -> Self {
         assert!(!parent_ptr.is_null(), "ActivityIndicator requires a parent");
-        
+
         let ptr = unsafe {
             ffi::wxd_ActivityIndicator_Create(
                 parent_ptr,
@@ -51,11 +51,11 @@ impl ActivityIndicator {
                 style,
             )
         };
-        
+
         if ptr.is_null() {
             panic!("Failed to create wxActivityIndicator");
         }
-        
+
         unsafe {
             let window = Window::from_ptr(ptr as *mut ffi::wxd_Window_t);
             ActivityIndicator { window }

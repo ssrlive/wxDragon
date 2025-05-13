@@ -1,5 +1,5 @@
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
@@ -155,7 +155,7 @@ widget_builder!(
     build_impl: |slf| {
         // Convert Vec<String> to Vec<&str> for the new_impl function
         let choices_refs: Vec<&str> = slf.choices.iter().map(|s| s.as_str()).collect();
-        
+
         RadioBox::new_impl(
             slf.parent.handle_ptr(),
             slf.id,

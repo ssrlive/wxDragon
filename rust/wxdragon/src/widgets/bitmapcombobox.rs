@@ -1,8 +1,8 @@
 //! Safe wrapper for wxBitmapComboBox.
 
-use crate::geometry::{Point, Size};
 use crate::bitmap::Bitmap;
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;

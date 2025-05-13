@@ -1,11 +1,11 @@
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
-use crate::window::{Window, WxWidget};
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use wxdragon_sys as ffi;
 
 use std::ffi::CString;
 use std::os::raw::c_long;

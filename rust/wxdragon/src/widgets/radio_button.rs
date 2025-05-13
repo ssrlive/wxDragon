@@ -1,14 +1,14 @@
 //! Safe wrapper for wxRadioButton.
 
-use crate::geometry::{Point, Size};
 use crate::event::WxEvtHandler;
+use crate::geometry::{Point, Size};
 use crate::id::Id;
-use crate::window::{Window, WxWidget};
-use std::ffi::CString;
-use wxdragon_sys as ffi;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
+use crate::window::{Window, WxWidget};
+use std::ffi::CString;
+use wxdragon_sys as ffi;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -43,14 +43,19 @@ impl RadioButton {
 
     /// Gets the state of the radio button.
     pub fn get_value(&self) -> bool {
-        unsafe { ffi::wxd_RadioButton_GetValue(self.window.handle_ptr() as *mut ffi::wxd_RadioButton_t) }
+        unsafe {
+            ffi::wxd_RadioButton_GetValue(self.window.handle_ptr() as *mut ffi::wxd_RadioButton_t)
+        }
     }
 
     /// Sets the state of the radio button.
     /// Note: Setting a radio button to `true` will implicitly set others in the same group to `false`.
     pub fn set_value(&self, value: bool) {
         unsafe {
-            ffi::wxd_RadioButton_SetValue(self.window.handle_ptr() as *mut ffi::wxd_RadioButton_t, value);
+            ffi::wxd_RadioButton_SetValue(
+                self.window.handle_ptr() as *mut ffi::wxd_RadioButton_t,
+                value,
+            );
         }
     }
 }
@@ -78,11 +83,11 @@ widget_builder!(
                 slf.style.bits() as ffi::wxd_Style_t,
             )
         };
-        
+
         if ctrl_ptr.is_null() {
             panic!("Failed to create RadioButton: FFI returned null pointer");
         }
-        
+
         unsafe { RadioButton::from_ptr(ctrl_ptr) }
     }
 );

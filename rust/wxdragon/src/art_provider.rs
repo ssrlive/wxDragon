@@ -1,8 +1,8 @@
 //!
 //! Provides access to wxArtProvider for stock art (icons, bitmaps).
 
-use crate::geometry::Size;
 use crate::bitmap::Bitmap;
+use crate::geometry::Size;
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
