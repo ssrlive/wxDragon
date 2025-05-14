@@ -106,6 +106,7 @@ typedef enum {
     WXD_EVENT_TYPE_DROP_TEXT = 70,
     WXD_EVENT_TYPE_END_DRAG = 71,
     WXD_EVENT_TYPE_PAINT = 72,
+    WXD_EVENT_TYPE_TIME_CHANGED = 73,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -156,6 +157,7 @@ typedef struct wxd_MenuItem_t wxd_MenuItem_t;
 typedef struct wxd_ListCtrl_t wxd_ListCtrl_t;
 typedef struct wxd_ColourPickerCtrl_t wxd_ColourPickerCtrl_t;
 typedef struct wxd_DatePickerCtrl_t wxd_DatePickerCtrl_t;
+typedef struct wxd_TimePickerCtrl_t wxd_TimePickerCtrl_t;
 typedef struct wxd_Treebook wxd_Treebook_t;
 typedef struct wxd_SearchCtrl wxd_SearchCtrl_t;
 typedef struct wxd_HyperlinkCtrl wxd_HyperlinkCtrl_t;

@@ -44,6 +44,7 @@ pub mod static_text;
 pub mod staticbox;
 pub mod statusbar;
 pub mod textctrl;
+pub mod timepickerctrl;
 pub mod togglebutton;
 pub mod toolbar;
 pub mod treebook;
@@ -58,6 +59,8 @@ pub use file_ctrl::{FileCtrl, FileCtrlBuilder, FileCtrlStyle};
 pub use file_picker_ctrl::{FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrlStyle};
 
 pub use notification_message::*;
+
+pub use timepickerctrl::{TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle};
 
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};

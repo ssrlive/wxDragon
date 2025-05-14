@@ -15,6 +15,11 @@ WXD_EXPORTED void wxd_DatePickerCtrl_SetValue(wxd_DatePickerCtrl_t* self, const 
 WXD_EXPORTED bool wxd_DatePickerCtrl_GetRange(wxd_DatePickerCtrl_t* self, wxd_DateTime_t* dt1, wxd_DateTime_t* dt2);
 WXD_EXPORTED void wxd_DatePickerCtrl_SetRange(wxd_DatePickerCtrl_t* self, const wxd_DateTime_t* dt1, const wxd_DateTime_t* dt2);
 
+// --- TimePickerCtrl ---
+WXD_EXPORTED wxd_TimePickerCtrl_t* wxd_TimePickerCtrl_Create(wxd_Window_t* parent, wxd_Id id, const wxd_DateTime_t* dt, wxd_Point pos, wxd_Size size, wxd_Style_t style);
+WXD_EXPORTED wxd_DateTime_t wxd_TimePickerCtrl_GetValue(wxd_TimePickerCtrl_t* self);
+WXD_EXPORTED void wxd_TimePickerCtrl_SetValue(wxd_TimePickerCtrl_t* self, const wxd_DateTime_t* dt);
+
 // --- FilePickerCtrl ---
 WXD_EXPORTED wxd_FilePickerCtrl_t* wxd_FilePickerCtrl_Create(
     wxd_Window_t* parent, 

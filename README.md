@@ -226,6 +226,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxFilePickerCtrl`
         *   [x] `wxDirPickerCtrl`
         *   [x] `wxFontPickerCtrl`
+        *   [x] `wxTimePicker`
     *   **Containers:**
         *   [x] `wxPanel`
         *   [x] `wxScrolledWindow`

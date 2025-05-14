@@ -28,6 +28,8 @@ pub struct BasicTabControls {
     pub colour_label: StaticText,
     pub date_picker: DatePickerCtrl,
     pub date_picker_label: StaticText,
+    pub time_picker: TimePickerCtrl,
+    pub time_picker_label: StaticText,
     pub search_ctrl: SearchCtrl,
     pub hyperlink_ctrl: HyperlinkCtrl,
     pub activity_indicator: ActivityIndicator,
@@ -346,6 +348,29 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     date_sizer.add_spacer(5);
     date_sizer.add(&date_picker_status_label, 1, EXPAND, 0);
     grid_sizer_therest.add_sizer(&date_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    
+    // Add Time Picker
+    let time_picker_label_widget = StaticText::builder(&basic_panel)
+        .with_label("Time Picker:")
+        .build();
+    let time_picker = TimePickerCtrl::builder(&basic_panel).build();
+    time_picker.set_tooltip("Click to choose a time.");
+    let initial_time = time_picker.get_value();
+    let time_picker_status_label = StaticText::builder(&basic_panel)
+        .with_label(&format!(
+            "{:02}:{:02}:{:02}",
+            initial_time.hour(),
+            initial_time.minute(),
+            initial_time.second()
+        ))
+        .build();
+    grid_sizer_therest.add(&time_picker_label_widget, 0, label_flags, 0);
+    let time_sizer = BoxSizer::builder(HORIZONTAL).build();
+    time_sizer.add(&time_picker, 0, ALIGN_CENTER_VERTICAL, 0);
+    time_sizer.add_spacer(5);
+    time_sizer.add(&time_picker_status_label, 1, EXPAND, 0);
+    grid_sizer_therest.add_sizer(&time_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    
     grid_sizer_therest.add(&calendar_label_widget, 0, label_flags, 0);
     let calendar_sizer = BoxSizer::builder(HORIZONTAL).build();
     calendar_sizer.add(&calendar_ctrl, 1, EXPAND, 0);
@@ -518,10 +543,6 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         println!("Checkbox: {}", event.is_checked().unwrap_or(false));
     });
 
-    text_ctrl.bind(EventType::TEXT, |_event: Event| {
-        // println!("Text: {}", _event.get_string().unwrap_or_default());
-    });
-
     let tc_clone_for_enter = text_ctrl.clone();
     let sb_clone_for_enter = spin_button.clone();
     text_ctrl.bind(EventType::TEXT_ENTER, move |event: Event| {
@@ -600,6 +621,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         );
     });
 
+    // Return all the created controls
     BasicTabControls {
         panel: basic_panel,
         text_ctrl,
@@ -618,6 +640,8 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         colour_label: colour_status_label,
         date_picker,
         date_picker_label: date_picker_status_label,
+        time_picker,
+        time_picker_label: time_picker_status_label,
         search_ctrl,
         hyperlink_ctrl,
         activity_indicator,
@@ -720,6 +744,20 @@ impl BasicTabControls {
                 );
             });
 
+        // Add a new event handler for the TimePicker
+        let time_picker_clone = self.time_picker.clone();
+        let time_picker_label_clone = self.time_picker_label.clone();
+        self.time_picker.bind(EventType::TIME_CHANGED, move |_event| {
+            let selected_time = time_picker_clone.get_value();
+            time_picker_label_clone.set_label(&format!(
+                "{:02}:{:02}:{:02}",
+                selected_time.hour(),
+                selected_time.minute(),
+                selected_time.second()
+            ));
+            println!("Time picker value changed!");
+        });
+
         // BitmapComboBox Event
         let bitmap_combo_box_clone = self.bitmap_combo_box.clone();
         self.bitmap_combo_box
@@ -791,5 +829,46 @@ impl BasicTabControls {
                     event.get_string().unwrap_or_default()
                 );
             });
+
+        // Event handler for date picker - update the text when date changes
+        let date_picker_clone = self.date_picker.clone();
+        let date_picker_label_clone = self.date_picker_label.clone();
+        self.date_picker.bind(EventType::DATE_CHANGED, move |_event| {
+            let selected_date = date_picker_clone.get_value();
+            date_picker_label_clone.set_label(&format!(
+                "{:04}-{:02}-{:02}",
+                selected_date.year(),
+                selected_date.month(),
+                selected_date.day()
+            ));
+        });
+
+        // Event handler for time picker - update the text when time changes
+        let time_picker_clone = self.time_picker.clone();
+        let time_picker_label_clone = self.time_picker_label.clone();
+        self.time_picker.bind(EventType::TIME_CHANGED, move |_event| {
+            let selected_time = time_picker_clone.get_value();
+            time_picker_label_clone.set_label(&format!(
+                "{:02}:{:02}:{:02}",
+                selected_time.hour(),
+                selected_time.minute(),
+                selected_time.second()
+            ));
+        });
+
+        // Event handler for calendar control - update the text when date changes
+        let calendar_ctrl_clone = self.calendar_ctrl.clone();
+        let calendar_label_clone = self.calendar_label.clone();
+        self.calendar_ctrl.bind(EventType::CALENDAR_SEL_CHANGED, move |_event: Event| {
+            let selected_date = calendar_ctrl_clone.get_date();
+            let date_str = format!(
+                "{:04}-{:02}-{:02}",
+                selected_date.year(),
+                selected_date.month(),
+                selected_date.day()
+            );
+            calendar_label_clone.set_label(&date_str);
+            println!("CALENDAR_SEL_CHANGED: Date: {}", date_str);
+        });
     }
 }

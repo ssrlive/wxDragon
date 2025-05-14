@@ -98,6 +98,9 @@ pub use crate::widgets::colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBui
 // ADDED: Re-export DatePickerCtrl, DatePickerCtrlBuilder
 pub use crate::widgets::datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
+// ADDED: Re-export TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle
+pub use crate::widgets::timepickerctrl::{TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle};
+
 // ADDED: Re-export Treebook
 pub use crate::widgets::treebook::{Treebook, TreebookBuilder};
 

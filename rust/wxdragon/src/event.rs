@@ -102,6 +102,9 @@ impl EventType {
     // DatePicker Event
     pub const DATE_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
+    // TimePicker Event
+    pub const TIME_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TIME_CHANGED);
     // Treebook Events (match WXDEventTypeCEnum values)
     pub const TREEBOOK_PAGE_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED);

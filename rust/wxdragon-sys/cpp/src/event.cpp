@@ -24,6 +24,7 @@
 #include <wx/fontpicker.h> // ADDED: For wxEVT_FONTPICKER_CHANGED
 #include <wx/notifmsg.h> // For wxNotificationMessage events
 #include <wx/dnd.h> // ADDED: For drag and drop events (wxEVT_BEGIN_DRAG, wxEVT_DROP_TEXT, etc.)
+#include <wx/timectrl.h> // ADDED: For wxTimePickerCtrl and wxEVT_TIME_CHANGED
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -575,6 +576,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_PAINT, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_TIME_CHANGED:
+            wx_handler->Bind(wxEVT_TIME_CHANGED, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -839,6 +844,8 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
             return wxEVT_DROP_FILES;
         case WXD_EVENT_TYPE_PAINT:
             return wxEVT_PAINT;
+        case WXD_EVENT_TYPE_TIME_CHANGED:
+            return wxEVT_TIME_CHANGED;
         default:
             // Unknown event type - should we handle this differently?
             // For now let's use a null/placeholder value
