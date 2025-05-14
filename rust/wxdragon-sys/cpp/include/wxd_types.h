@@ -240,4 +240,14 @@ typedef struct {
 typedef bool (*wxd_OnInitCallback)(void* userData);
 typedef void (*wxd_ClosureCallback)(wxd_Event_t* event, void* closure_ptr);
 
+// wxDragResult C Enum (for drag and drop operations)
+typedef enum {
+    WXD_DRAG_NONE = 0,      // wxDragNone - No drag operation
+    WXD_DRAG_COPY = 1,      // wxDragCopy - Copy the data
+    WXD_DRAG_MOVE = 2,      // wxDragMove - Move the data
+    WXD_DRAG_LINK = 3,      // wxDragLink - Link to the data
+    WXD_DRAG_CANCEL = 4,    // wxDragCancel - Cancel the drag
+    WXD_DRAG_ERROR = 5      // wxDragError - Error in drag operation
+} wxd_DragResult;
+
 #endif // WXD_TYPES_H 

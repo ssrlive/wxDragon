@@ -274,15 +274,17 @@ fn add_dnd_demo(panel: &Panel, sizer: &BoxSizer) {
         }
     });
 
-    // Set up the drop target
-    let _text_drop_target = TextDropTarget::new(&target_panel, {
-        let dropped_text = dropped_text.clone();
-        move |text, x, y| {
-            println!("Text dropped at ({}, {}): {}", x, y, text);
-            dropped_text.set_value(text);
-            true // Accept the drop
-        }
-    });
+    // Set up the text drop target using the builder pattern
+    let _text_drop_target = TextDropTarget::builder(&target_panel)
+        .with_on_drop_text({
+            let dropped_text = dropped_text.clone();
+            move |text, x, y| {
+                println!("Text dropped at ({}, {}): {}", x, y, text);
+                dropped_text.set_value(text);
+                true // Accept the drop
+            }
+        })
+        .build();
 
     // Add the panels to the horizontal sizer
     h_sizer.add(&source_panel, 1, EXPAND | ALL, 10);
@@ -329,28 +331,30 @@ fn add_dnd_demo(panel: &Panel, sizer: &BoxSizer) {
     file_sizer.add(&file_list, 1, EXPAND | LEFT | RIGHT, 20); // Add expand and larger margins
     file_target_panel.set_sizer(file_sizer, true);
 
-    // Set up the file drop target
-    let _file_drop_target = FileDropTarget::new(&file_target_panel, {
-        let file_list = file_list.clone();
-        move |files, x, y| {
-            println!("Files dropped at ({}, {}): {} files", x, y, files.len());
+    // Set up the file drop target using the builder pattern
+    let _file_drop_target = FileDropTarget::builder(&file_target_panel)
+        .with_on_drop_files({
+            let file_list = file_list.clone();
+            move |files, x, y| {
+                println!("Files dropped at ({}, {}): {} files", x, y, files.len());
 
-            // Clear the text field
-            file_list.set_value("");
+                // Clear the text field
+                file_list.set_value("");
 
-            // Add each file path to the text field
-            for file in files {
-                let current_text = file_list.get_value();
-                let new_text = if current_text.is_empty() {
-                    file
-                } else {
-                    format!("{}\n{}", current_text, file)
-                };
-                file_list.set_value(&new_text);
+                // Add each file path to the text field
+                for file in files {
+                    let current_text = file_list.get_value();
+                    let new_text = if current_text.is_empty() {
+                        file
+                    } else {
+                        format!("{}\n{}", current_text, file)
+                    };
+                    file_list.set_value(&new_text);
+                }
+                true // Accept the drop
             }
-            true // Accept the drop
-        }
-    });
+        })
+        .build();
 
     // Add the file drop target panel to the main sizer
     sizer.add(&file_target_panel, 0, EXPAND | ALL, 10);

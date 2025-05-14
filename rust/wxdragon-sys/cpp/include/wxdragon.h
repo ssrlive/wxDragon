@@ -28,6 +28,7 @@ extern "C" {
 #include "core/wxd_app.h"
 #include "core/wxd_window_base.h"
 #include "events/wxd_event_api.h"
+#include "events/wxd_droptarget_api.h" // Extended drop target callbacks
 #include "widgets/wxd_controls.h"
 #include "widgets/wxd_choices.h"
 #include "widgets/wxd_containers.h"

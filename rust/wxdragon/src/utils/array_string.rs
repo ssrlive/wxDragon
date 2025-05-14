@@ -16,7 +16,7 @@ impl WxdArrayString {
     pub fn new() -> Self {
         let ptr = unsafe { ffi::wxd_ArrayString_Create() };
         assert!(!ptr.is_null(), "Failed to create wxd_ArrayString");
-        WxdArrayString { 
+        WxdArrayString {
             ptr,
             owns_ptr: true,
         }
@@ -29,7 +29,7 @@ impl WxdArrayString {
     /// this struct will free the pointer when dropped. If false, the caller is responsible
     /// for freeing the pointer.
     pub unsafe fn from_ptr(ptr: *mut ffi::wxd_ArrayString_t, take_ownership: bool) -> Self {
-        WxdArrayString { 
+        WxdArrayString {
             ptr,
             owns_ptr: take_ownership,
         }
@@ -98,10 +98,8 @@ impl WxdArrayString {
             Ok(cs) => cs,
             Err(_) => return false,
         };
-        
-        unsafe { 
-            ffi::wxd_ArrayString_Add(self.ptr, c_str.as_ptr()) 
-        }
+
+        unsafe { ffi::wxd_ArrayString_Add(self.ptr, c_str.as_ptr()) }
     }
 
     /// Adds multiple strings to the array.
@@ -128,7 +126,7 @@ impl WxdArrayString {
     pub fn into_vec(self) -> Vec<String> {
         let count = self.get_count();
         let mut vec = Vec::with_capacity(count);
-        
+
         for i in 0..count {
             if let Some(s) = self.get_string(i) {
                 vec.push(s);
@@ -138,10 +136,10 @@ impl WxdArrayString {
                 vec.push(String::new());
             }
         }
-        
+
         // Only leak the pointer if we're not taking ownership
         let _ = std::mem::ManuallyDrop::new(self);
-        
+
         vec
     }
 
@@ -149,7 +147,7 @@ impl WxdArrayString {
     pub fn get_strings(&self) -> Vec<String> {
         let count = self.get_count();
         let mut vec = Vec::with_capacity(count);
-        
+
         for i in 0..count {
             if let Some(s) = self.get_string(i) {
                 vec.push(s);
@@ -157,7 +155,7 @@ impl WxdArrayString {
                 vec.push(String::new());
             }
         }
-        
+
         vec
     }
 
@@ -226,4 +224,4 @@ impl From<&[&str]> for WxdArrayString {
         array.add_many(strings);
         array
     }
-} 
+}

@@ -305,17 +305,17 @@ impl<'a> AuiManagerBuilder<'a> {
         if ptr.is_null() {
             panic!("Failed to create AuiManager");
         }
-        
+
         let mgr = AuiManager {
             ptr,
             _marker: PhantomData,
         };
-        
+
         // Immediately set the managed window to ensure proper lifecycle management
         unsafe {
             ffi::wxd_AuiManager_SetManagedWindow(mgr.ptr, self.parent_ptr);
         }
-        
+
         mgr
     }
 }
@@ -334,7 +334,7 @@ pub struct AuiManager {
 impl AuiManager {
     /// Create a new AuiManager builder, which requires a parent window to build
     pub fn builder(parent: &impl WxWidget) -> AuiManagerBuilder {
-        AuiManagerBuilder { 
+        AuiManagerBuilder {
             parent_ptr: parent.handle_ptr(),
             _marker: PhantomData,
         }
@@ -365,10 +365,20 @@ impl AuiManager {
     }
 
     /// Add a pane to the manager with a simple direction
-    pub fn add_pane(&self, window: &impl WxWidget, direction: DockDirection, caption: &str) -> bool {
+    pub fn add_pane(
+        &self,
+        window: &impl WxWidget,
+        direction: DockDirection,
+        caption: &str,
+    ) -> bool {
         let c_caption = CString::new(caption).expect("CString::new failed for caption");
         unsafe {
-            ffi::wxd_AuiManager_AddPane(self.ptr, window.handle_ptr(), direction as i32, c_caption.as_ptr())
+            ffi::wxd_AuiManager_AddPane(
+                self.ptr,
+                window.handle_ptr(),
+                direction as i32,
+                c_caption.as_ptr(),
+            )
         }
     }
 
@@ -392,7 +402,7 @@ impl AuiManager {
         if c_str.is_null() {
             return String::new();
         }
-        
+
         // Create a Rust string from the C string
         let result = unsafe {
             let c_string = std::ffi::CStr::from_ptr(c_str);
@@ -400,23 +410,19 @@ impl AuiManager {
             libc::free(c_str as *mut libc::c_void);
             string
         };
-        
+
         result
     }
 
     /// Load a perspective from a string
     pub fn load_perspective(&self, perspective: &str, update: bool) -> bool {
         let c_perspective = CString::new(perspective).expect("CString::new failed for perspective");
-        unsafe {
-            ffi::wxd_AuiManager_LoadPerspective(self.ptr, c_perspective.as_ptr(), update)
-        }
+        unsafe { ffi::wxd_AuiManager_LoadPerspective(self.ptr, c_perspective.as_ptr(), update) }
     }
 
     /// Detach a pane from the manager
     pub fn detach_pane(&self, window: &impl WxWidget) -> bool {
-        unsafe {
-            ffi::wxd_AuiManager_DetachPane(self.ptr, window.handle_ptr())
-        }
+        unsafe { ffi::wxd_AuiManager_DetachPane(self.ptr, window.handle_ptr()) }
     }
 }
 
@@ -426,7 +432,7 @@ impl Drop for AuiManager {
         // Do not call delete directly as it can cause issues with dragging
         // This is intentionally left empty to prevent premature cleanup
         // wxWidgets will handle resource cleanup when the managed window is destroyed
-        
+
         // Note: The original implementation was:
         // unsafe { ffi::wxd_AuiManager_Delete(self.ptr); }
         // But this caused issues with pane dragging
@@ -434,4 +440,4 @@ impl Drop for AuiManager {
 }
 
 // Re-export PaneInfo to make it easier to use
-pub use PaneInfo as AuiPaneInfo; 
+pub use PaneInfo as AuiPaneInfo;

@@ -1,8 +1,8 @@
 //! Data objects for drag and drop operations.
 
+use crate::utils::WxdArrayString;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
-use crate::utils::WxdArrayString;
 use wxdragon_sys as ffi;
 
 /// Trait that all data objects used in drag and drop must implement.
@@ -84,11 +84,10 @@ impl FileDataObject {
     pub fn get_filenames(&self) -> Vec<String> {
         // Create a WxdArrayString to hold the filenames
         let array_string = WxdArrayString::new();
-        
-        let _count = unsafe { 
-            ffi::wxd_FileDataObject_GetFilenames(self.ptr, array_string.as_ptr()) 
-        };
-        
+
+        let _count =
+            unsafe { ffi::wxd_FileDataObject_GetFilenames(self.ptr, array_string.as_ptr()) };
+
         // Convert the WxdArrayString to a Vec<String>
         array_string.into_vec()
     }

@@ -25,8 +25,11 @@ pub struct AuiMdiParentFrame {
 }
 
 impl AuiMdiParentFrame {
-    fn from_ptr(ptr: *mut ffi::wxd_AuiMDIParentFrame_t, parent_ptr: *mut ffi::wxd_Window_t) -> Self {
-        AuiMdiParentFrame { 
+    fn from_ptr(
+        ptr: *mut ffi::wxd_AuiMDIParentFrame_t,
+        parent_ptr: *mut ffi::wxd_Window_t,
+    ) -> Self {
+        AuiMdiParentFrame {
             window: unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) },
             parent_ptr,
             _marker: PhantomData,

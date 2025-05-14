@@ -1,8 +1,8 @@
 use crate::dialogs::Dialog;
 use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
+use crate::utils::WxdArrayString;
 use crate::widget_style_enum;
 use crate::window::WxWidget;
-use crate::utils::WxdArrayString;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr;

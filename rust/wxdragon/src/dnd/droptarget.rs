@@ -1,136 +1,497 @@
 //! Target for drop operations.
 
+use crate::dnd::DragResult;
 use crate::prelude::WxWidget;
 use std::boxed::Box;
 use std::ffi::{c_void, CStr};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
-/// A drop target handles text data dropped via drag and drop.
-pub struct TextDropTarget {
-    ptr: *mut ffi::wxd_TextDropTarget_t,
+/// Callback handlers for a text drop target.
+struct TextDropTargetCallbacks {
+    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_leave: Option<Box<dyn FnMut() + 'static>>,
+    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
+    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drop_text: Box<dyn FnMut(&str, i32, i32) -> bool + 'static>,
 }
 
-impl TextDropTarget {
-    /// Creates a new TextDropTarget and associates it with the given window.
-    ///
-    /// # Parameters
-    ///
-    /// * `window` - The window that will receive dropped text data.
-    /// * `callback` - A closure that will be called when text is dropped.
-    ///   The closure receives the text, x and y coordinates, and returns
-    ///   whether the drop was accepted.
-    pub fn new<W: WxWidget, F>(window: &W, callback: F) -> Self
+/// A drop target handles text data dropped via drag and drop.
+pub struct TextDropTarget {}
+
+/// Builder for TextDropTarget with full callback support
+pub struct TextDropTargetBuilder<'a, W: WxWidget> {
+    window: &'a W,
+    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_leave: Option<Box<dyn FnMut() + 'static>>,
+    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
+    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drop_text: Option<Box<dyn FnMut(&str, i32, i32) -> bool + 'static>>,
+}
+
+impl<'a, W: WxWidget> TextDropTargetBuilder<'a, W> {
+    /// Create a new builder for TextDropTarget.
+    fn new(window: &'a W) -> Self {
+        Self {
+            window,
+            on_enter: None,
+            on_drag_over: None,
+            on_leave: None,
+            on_drop: None,
+            on_data: None,
+            on_drop_text: None,
+        }
+    }
+
+    /// Set the callback for when the cursor enters the drop target.
+    pub fn with_on_enter<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_enter = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the cursor is dragged over the drop target.
+    pub fn with_on_drag_over<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_drag_over = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the cursor leaves the drop target.
+    pub fn with_on_leave<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut() + 'static,
+    {
+        self.on_leave = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the user drops data on the drop target.
+    pub fn with_on_drop<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32) -> bool + 'static,
+    {
+        self.on_drop = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when data is available after a drop.
+    pub fn with_on_data<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_data = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when text is dropped on the drop target.
+    /// This callback is required.
+    pub fn with_on_drop_text<F>(mut self, callback: F) -> Self
     where
         F: FnMut(&str, i32, i32) -> bool + 'static,
     {
-        // Box and get raw pointer to the callback closure
-        let boxed_callback: Box<Box<dyn FnMut(&str, i32, i32) -> bool + 'static>> =
-            Box::new(Box::new(callback));
-        let user_data = Box::into_raw(boxed_callback) as *mut c_void;
+        self.on_drop_text = Some(Box::new(callback));
+        self
+    }
 
-        // Create the drop target with our callback trampoline
-        let ptr = unsafe {
-            ffi::wxd_TextDropTarget_Create(
-                window.handle_ptr(),
-                on_drop_text_trampoline as *mut c_void,
+    /// Create the TextDropTarget with the configured callbacks.
+    pub fn build(self) -> TextDropTarget {
+        // Ensure we have a text drop callback
+        let on_drop_text = self.on_drop_text.expect("on_drop_text callback is required");
+
+        // Create a struct to hold all our callbacks
+        let callbacks = TextDropTargetCallbacks {
+            on_enter: self.on_enter,
+            on_drag_over: self.on_drag_over,
+            on_leave: self.on_leave,
+            on_drop: self.on_drop,
+            on_data: self.on_data,
+            on_drop_text,
+        };
+
+        // Create boxed data with callbacks
+        let data = Box::new(callbacks);
+        let data_ptr = Box::into_raw(data);
+        let user_data = data_ptr as *mut c_void;
+
+        // Create the drop target with our callback trampolines
+        unsafe {
+            ffi::wxd_TextDropTarget_CreateFull(
+                self.window.handle_ptr(),
+                Some(text_on_enter_trampoline),
+                Some(text_on_drag_over_trampoline),
+                Some(text_on_leave_trampoline),
+                Some(text_on_drop_trampoline),
+                Some(text_on_data_trampoline),
+                Some(text_on_drop_text_trampoline),
                 user_data,
             )
         };
 
-        TextDropTarget { ptr }
+        // The C++ side now owns the drop target and callback data, so we don't need to keep track of them
+        TextDropTarget {}
     }
 }
 
-impl Drop for TextDropTarget {
-    fn drop(&mut self) {
-        if !self.ptr.is_null() {
-            unsafe {
-                ffi::wxd_TextDropTarget_Destroy(self.ptr);
-            }
-            self.ptr = std::ptr::null_mut();
-        }
+impl TextDropTarget {
+    /// Creates a builder for a text drop target.
+    pub fn builder<W: WxWidget>(window: &W) -> TextDropTargetBuilder<W> {
+        TextDropTargetBuilder::new(window)
     }
+}
+
+/// Callback handlers for a file drop target.
+struct FileDropTargetCallbacks {
+    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_leave: Option<Box<dyn FnMut() + 'static>>,
+    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
+    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drop_files: Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>,
 }
 
 /// A drop target handles file data dropped via drag and drop.
-pub struct FileDropTarget {
-    ptr: *mut ffi::wxd_FileDropTarget_t,
+pub struct FileDropTarget {}
+
+/// Builder for FileDropTarget to allow setting optional callbacks.
+pub struct FileDropTargetBuilder<'a, W: WxWidget> {
+    window: &'a W,
+    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_leave: Option<Box<dyn FnMut() + 'static>>,
+    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
+    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
+    on_drop_files: Option<Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>>,
 }
 
-impl FileDropTarget {
-    /// Creates a new FileDropTarget and associates it with the given window.
-    ///
-    /// # Parameters
-    ///
-    /// * `window` - The window that will receive dropped file data.
-    /// * `callback` - A closure that will be called when files are dropped.
-    ///   The closure receives the filenames, x and y coordinates, and returns
-    ///   whether the drop was accepted.
-    pub fn new<W: WxWidget, F>(window: &W, callback: F) -> Self
+impl<'a, W: WxWidget> FileDropTargetBuilder<'a, W> {
+    /// Create a new builder for FileDropTarget.
+    fn new(window: &'a W) -> Self {
+        Self {
+            window,
+            on_enter: None,
+            on_drag_over: None,
+            on_leave: None,
+            on_drop: None,
+            on_data: None,
+            on_drop_files: None,
+        }
+    }
+
+    /// Set the callback for when the cursor enters the drop target.
+    pub fn with_on_enter<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_enter = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the cursor is dragged over the drop target.
+    pub fn with_on_drag_over<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_drag_over = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the cursor leaves the drop target.
+    pub fn with_on_leave<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut() + 'static,
+    {
+        self.on_leave = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when the user drops data on the drop target.
+    pub fn with_on_drop<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32) -> bool + 'static,
+    {
+        self.on_drop = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when data is available after a drop.
+    pub fn with_on_data<F>(mut self, callback: F) -> Self
+    where
+        F: FnMut(i32, i32, DragResult) -> DragResult + 'static,
+    {
+        self.on_data = Some(Box::new(callback));
+        self
+    }
+
+    /// Set the callback for when files are dropped on the drop target.
+    /// This callback is required.
+    pub fn with_on_drop_files<F>(mut self, callback: F) -> Self
     where
         F: FnMut(Vec<String>, i32, i32) -> bool + 'static,
     {
-        // Box and get raw pointer to the callback closure
-        let boxed_callback: Box<Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>> =
-            Box::new(Box::new(callback));
-        let user_data = Box::into_raw(boxed_callback) as *mut c_void;
+        self.on_drop_files = Some(Box::new(callback));
+        self
+    }
 
-        // Create the drop target with our callback trampoline
-        let ptr = unsafe {
-            ffi::wxd_FileDropTarget_Create(
-                window.handle_ptr(),
-                on_drop_files_trampoline as *mut c_void,
+    /// Create the FileDropTarget with the configured callbacks.
+    pub fn build(self) -> FileDropTarget {
+        // Ensure we have a files drop callback
+        let on_drop_files = self.on_drop_files.expect("on_drop_files callback is required");
+
+        // Create a struct to hold all our callbacks
+        let callbacks = FileDropTargetCallbacks {
+            on_enter: self.on_enter,
+            on_drag_over: self.on_drag_over,
+            on_leave: self.on_leave,
+            on_drop: self.on_drop,
+            on_data: self.on_data,
+            on_drop_files,
+        };
+
+        // Create boxed data with callbacks
+        let data = Box::new(callbacks);
+        let data_ptr = Box::into_raw(data);
+        let user_data = data_ptr as *mut c_void;
+
+        // Create the drop target with our callback trampolines
+        unsafe {
+            ffi::wxd_FileDropTarget_CreateFull(
+                self.window.handle_ptr(),
+                Some(file_on_enter_trampoline),
+                Some(file_on_drag_over_trampoline),
+                Some(file_on_leave_trampoline),
+                Some(file_on_drop_trampoline),
+                Some(file_on_data_trampoline),
+                Some(file_on_drop_files_trampoline),
                 user_data,
             )
         };
 
-        FileDropTarget { ptr }
+        // The C++ side now owns the drop target and callback data, so we don't need to keep track of them
+        FileDropTarget {}
     }
 }
 
-impl Drop for FileDropTarget {
-    fn drop(&mut self) {
-        if !self.ptr.is_null() {
-            unsafe {
-                ffi::wxd_FileDropTarget_Destroy(self.ptr);
-            }
-            self.ptr = std::ptr::null_mut();
-        }
+impl FileDropTarget {
+    /// Creates a builder for a file drop target.
+    pub fn builder<W: WxWidget>(window: &W) -> FileDropTargetBuilder<W> {
+        FileDropTargetBuilder::new(window)
     }
 }
 
-// --- Callback trampolines ---
+// --- Callback trampolines for TextDropTarget ---
 
-// Called by wxWidgets when text is dropped
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-extern "C" fn on_drop_text_trampoline(
+extern "C" fn text_on_enter_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_enter {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn text_on_drag_over_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_drag_over {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn text_on_leave_trampoline(data_ptr: *mut c_void) {
+    if data_ptr.is_null() {
+        return;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_leave {
+        callback();
+    }
+}
+
+extern "C" fn text_on_drop_trampoline(
+    x: i32,
+    y: i32,
+    data_ptr: *mut c_void,
+) -> bool {
+    if data_ptr.is_null() {
+        return false;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_drop {
+        callback(x, y)
+    } else {
+        true // Default to accepting the drop
+    }
+}
+
+extern "C" fn text_on_data_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_data {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn text_on_drop_text_trampoline(
     text: *const c_char,
     x: i32,
     y: i32,
-    closure_ptr: *mut c_void,
+    data_ptr: *mut c_void,
 ) -> bool {
-    if text.is_null() || closure_ptr.is_null() {
+    if text.is_null() || data_ptr.is_null() {
         return false;
     }
 
     let text_str = unsafe { CStr::from_ptr(text).to_string_lossy().into_owned() };
-
-    // Get the boxed callback and call it
-    let callback = unsafe { &mut **(closure_ptr as *mut Box<dyn FnMut(&str, i32, i32) -> bool>) };
-
-    callback(&text_str, x, y)
+    let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
+    
+    (callbacks.on_drop_text)(&text_str, x, y)
 }
 
-// Called by wxWidgets when files are dropped
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-extern "C" fn on_drop_files_trampoline(
+// --- Callback trampolines for FileDropTarget ---
+
+extern "C" fn file_on_enter_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_enter {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn file_on_drag_over_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_drag_over {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn file_on_leave_trampoline(data_ptr: *mut c_void) {
+    if data_ptr.is_null() {
+        return;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_leave {
+        callback();
+    }
+}
+
+extern "C" fn file_on_drop_trampoline(
+    x: i32,
+    y: i32,
+    data_ptr: *mut c_void,
+) -> bool {
+    if data_ptr.is_null() {
+        return false;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_drop {
+        callback(x, y)
+    } else {
+        true // Default to accepting the drop
+    }
+}
+
+extern "C" fn file_on_data_trampoline(
+    x: i32,
+    y: i32,
+    def_result: ffi::wxd_DragResult,
+    data_ptr: *mut c_void,
+) -> ffi::wxd_DragResult {
+    if data_ptr.is_null() {
+        return def_result;
+    }
+
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    if let Some(ref mut callback) = callbacks.on_data {
+        let rust_result = callback(x, y, DragResult::from(def_result as i32));
+        rust_result as i32 as ffi::wxd_DragResult
+    } else {
+        def_result
+    }
+}
+
+extern "C" fn file_on_drop_files_trampoline(
     filenames_ptr: *const ffi::wxd_ArrayString_t,
     x: i32,
     y: i32,
-    closure_ptr: *mut c_void,
+    data_ptr: *mut c_void,
 ) -> bool {
-    if filenames_ptr.is_null() || closure_ptr.is_null() {
+    if filenames_ptr.is_null() || data_ptr.is_null() {
         return false;
     }
 
@@ -159,9 +520,7 @@ extern "C" fn on_drop_files_trampoline(
         }
     }
 
-    // Get the boxed callback and call it
-    let callback =
-        unsafe { &mut **(closure_ptr as *mut Box<dyn FnMut(Vec<String>, i32, i32) -> bool>) };
-
-    callback(filenames, x, y)
+    let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
+    
+    (callbacks.on_drop_files)(filenames, x, y)
 }

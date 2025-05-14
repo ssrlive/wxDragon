@@ -12,15 +12,8 @@ typedef struct wxd_DropTarget_t wxd_DropTarget_t;
 typedef struct wxd_TextDropTarget_t wxd_TextDropTarget_t;
 typedef struct wxd_FileDropTarget_t wxd_FileDropTarget_t;
 
-// --- Enum for wxDragResult --- 
-typedef enum {
-    WXD_DRAG_NONE = 0,    // wxDragNone
-    WXD_DRAG_COPY = 1,    // wxDragCopy
-    WXD_DRAG_MOVE = 2,    // wxDragMove
-    WXD_DRAG_LINK = 3,    // wxDragLink
-    WXD_DRAG_CANCEL = 4,  // wxDragCancel
-    WXD_DRAG_ERROR = 5    // wxDragError
-} WXDDragResultCEnum;
+// Use the wxd_DragResult enum from wxd_types.h instead of redefining
+typedef wxd_DragResult WXDDragResultCEnum;
 
 // --- Event types for drag and drop --- 
 // (to be added to WXDEventTypeCEnum in wxd_types.h)

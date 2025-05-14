@@ -54,20 +54,20 @@ impl AuiNotebook {
 
     /// Returns the number of pages in the notebook
     pub fn page_count(&self) -> usize {
-        unsafe { 
+        unsafe {
             ffi::wxd_AuiNotebook_GetPageCount(
                 self.window.handle_ptr() as *mut ffi::wxd_AuiNotebook_t
-            ) as usize 
+            ) as usize
         }
     }
 
     /// Sets the currently selected page
     pub fn set_selection(&self, new_page: usize) -> usize {
-        unsafe { 
+        unsafe {
             ffi::wxd_AuiNotebook_SetSelection(
-                self.window.handle_ptr() as *mut ffi::wxd_AuiNotebook_t, 
-                new_page
-            ) as usize 
+                self.window.handle_ptr() as *mut ffi::wxd_AuiNotebook_t,
+                new_page,
+            ) as usize
         }
     }
 

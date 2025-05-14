@@ -3,44 +3,57 @@
 //! This module provides classes for implementing drag and drop operations
 //! in wxDragon applications, following the wxWidgets drag and drop pattern.
 
-mod dataobject;
-mod dropsource;
-mod droptarget;
+pub mod droptarget;
+pub mod dropsource;
+pub mod dataobject;
 
-pub use dataobject::*;
-pub use dropsource::*;
-pub use droptarget::*;
+pub use droptarget::{TextDropTarget, FileDropTarget};
+pub use dropsource::DropSource;
+pub use dataobject::{DataObject, TextDataObject, FileDataObject};
 
 use std::fmt;
 
-/// Represents the result of a drag and drop operation.
+/// The result of a drag and drop operation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum DragResult {
-    /// Nothing happened (drag target didn't accept data).
-    None,
-    /// The data was copied.
-    Copy,
-    /// The data was moved (source should delete it).
-    Move,
-    /// A link to the data was created.
-    Link,
-    /// The operation was cancelled by the user.
-    Cancel,
-    /// An error occurred during drag and drop.
-    Error,
+    /// No drag operation.
+    None = 0,
+    /// Copy the data.
+    Copy = 1,
+    /// Move the data.
+    Move = 2,
+    /// Link to the data.
+    Link = 3,
+    /// Cancel the drag.
+    Cancel = 4,
+    /// Error in drag operation.
+    Error = 5
 }
 
-impl DragResult {
-    /// Creates a `DragResult` from the C enum value.
-    pub(crate) fn from_c_enum(result: wxdragon_sys::WXDDragResultCEnum) -> Self {
+impl Default for DragResult {
+    fn default() -> Self {
+        DragResult::None
+    }
+}
+
+impl From<i32> for DragResult {
+    fn from(result: i32) -> Self {
         match result {
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_NONE => DragResult::None,
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_COPY => DragResult::Copy,
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_MOVE => DragResult::Move,
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_LINK => DragResult::Link,
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_CANCEL => DragResult::Cancel,
-            wxdragon_sys::WXDDragResultCEnum_WXD_DRAG_ERROR | _ => DragResult::Error,
+            0 => DragResult::None,
+            1 => DragResult::Copy,
+            2 => DragResult::Move,
+            3 => DragResult::Link,
+            4 => DragResult::Cancel,
+            5 => DragResult::Error,
+            _ => DragResult::None,
         }
+    }
+}
+
+impl From<DragResult> for i32 {
+    fn from(result: DragResult) -> Self {
+        result as i32
     }
 }
 

@@ -1,6 +1,6 @@
 use wxdragon::prelude::*;
-use wxdragon::widgets::{AuiManager, AuiPaneInfo, Panel, TextCtrl, Notebook, AuiToolBar, ItemKind};
 use wxdragon::widgets::aui_toolbar::AuiToolBarStyle;
+use wxdragon::widgets::{AuiManager, AuiPaneInfo, AuiToolBar, ItemKind, Notebook, Panel, TextCtrl};
 
 /// AUI tab controls for the gallery example
 pub struct AuiTabControls {
@@ -12,7 +12,7 @@ impl AuiTabControls {
     pub fn bind_events(&self) -> () {
         // Use a simple approach for the demo that doesn't try to access self inside the closure
         let toolbar_ref = self.toolbar.clone();
-        
+
         toolbar_ref.bind(EventType::MENU, move |event| {
             let id = event.get_id();
             if id == 1001 {
@@ -41,17 +41,27 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
             AuiToolBarStyle::Text |  // Show text labels
             AuiToolBarStyle::Gripper | // Show gripper for dragging
             AuiToolBarStyle::HorzLayout | // Use horizontal layout
-            AuiToolBarStyle::Overflow  // Allow overflow for small windows
+            AuiToolBarStyle::Overflow, // Allow overflow for small windows
         )
         .with_size(Size::new(800, 40))
         .build();
-    
+
     // Add tools with IDs so we can identify them in the event handler
-    toolbar.add_tool(1001, "Save Perspective", "Save the current layout", ItemKind::Normal);
+    toolbar.add_tool(
+        1001,
+        "Save Perspective",
+        "Save the current layout",
+        ItemKind::Normal,
+    );
     toolbar.add_separator();
-    toolbar.add_tool(1002, "Load Perspective", "Restore a saved layout", ItemKind::Normal);
+    toolbar.add_tool(
+        1002,
+        "Load Perspective",
+        "Restore a saved layout",
+        ItemKind::Normal,
+    );
     toolbar.add_stretch_spacer(1); // Add stretch space to push tools to the left
-    
+
     // Realize the toolbar to finalize its layout
     toolbar.realize();
 
@@ -76,7 +86,7 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
 
     // Create the AuiManager using the builder pattern to ensure proper lifecycle management
     let mgr = AuiManager::builder(&panel).build();
-    
+
     // Add the panes to the manager with different directions
     // Add the toolbar as a proper toolbar
     mgr.add_pane_with_info(
@@ -86,20 +96,20 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
             .with_caption("Toolbar")
             .caption_visible(true)
             .top()
-            .layer(0)  // Layer 0 is topmost
-            .row(0)    // First row
+            .layer(0) // Layer 0 is topmost
+            .row(0) // First row
             .position(0) // First position in row
             .pane_border(true)
             .gripper(false)
             .gripper_top(false)
-            .resizable(false)  // Make it fixed height
+            .resizable(false) // Make it fixed height
             .dockable(true)
             .movable(true)
             .min_size(200, 40)
             .best_size(800, 40)
-            .toolbar_pane() // Use toolbar_pane() since this is actually a toolbar
+            .toolbar_pane(), // Use toolbar_pane() since this is actually a toolbar
     );
-    
+
     mgr.add_pane_with_info(
         &text1,
         AuiPaneInfo::new()
@@ -117,9 +127,9 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
             .min_size(200, 200)
             .best_size(300, 300)
             .close_button(true)
-            .maximize_button(true)
+            .maximize_button(true),
     );
-    
+
     mgr.add_pane_with_info(
         &text2,
         AuiPaneInfo::new()
@@ -137,9 +147,9 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
             .min_size(200, 200)
             .best_size(300, 300)
             .close_button(true)
-            .maximize_button(true)
+            .maximize_button(true),
     );
-    
+
     mgr.add_pane_with_info(
         &text3,
         AuiPaneInfo::new()
@@ -154,15 +164,12 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
             .min_size(200, 200)
             .best_size(300, 300)
             .close_button(false) // Center pane shouldn't be closable
-            .maximize_button(true)
+            .maximize_button(true),
     );
-    
+
     // Commit all changes
     mgr.update();
 
     // Create and return the controls structure
-    AuiTabControls {
-        panel,
-        toolbar,
-    }
-} 
+    AuiTabControls { panel, toolbar }
+}
