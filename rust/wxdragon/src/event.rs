@@ -96,6 +96,31 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT);
     pub const LIST_END_LABEL_EDIT: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_END_LABEL_EDIT);
+    // ADDED: Additional ListCtrl event types
+    pub const LIST_BEGIN_DRAG: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_BEGIN_DRAG);
+    pub const LIST_BEGIN_RDRAG: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_BEGIN_RDRAG);
+    pub const LIST_DELETE_ITEM: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_DELETE_ITEM);
+    pub const LIST_DELETE_ALL_ITEMS: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS);
+    pub const LIST_ITEM_DESELECTED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_ITEM_DESELECTED);
+    pub const LIST_ITEM_FOCUSED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_ITEM_FOCUSED);
+    pub const LIST_ITEM_MIDDLE_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK);
+    pub const LIST_ITEM_RIGHT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK);
+    pub const LIST_KEY_DOWN: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_KEY_DOWN);
+    pub const LIST_INSERT_ITEM: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_INSERT_ITEM);
+    pub const LIST_COL_RIGHT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK);
+    pub const LIST_COL_BEGIN_DRAG: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG);
     // ADDED: ColourPickerCtrl event type
     pub const COLOURPICKER_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COLOURPICKER_CHANGED);

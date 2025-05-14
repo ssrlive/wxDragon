@@ -5,8 +5,8 @@ use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
+use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat, ListItemState};
 use wxdragon::widgets::panel::PanelStyle;
-// use wxdragon::widgets::choice; // For CB_SORT if it were available directly
 
 #[allow(dead_code)]
 pub struct ListsTabControls {
@@ -111,14 +111,69 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl.insert_column(2, "Quantity", ListColumnFormat::Right, 100);
     list_ctrl.insert_column(3, "Notes", ListColumnFormat::Left, -1); // Fill remaining space
 
-    // Insert items and get their indices. This sets the text for column 0.
+    // Insert items (only sets the text for column 0)
     let _item1_idx = list_ctrl.insert_item(0, "P001");
     let _item2_idx = list_ctrl.insert_item(1, "P002");
     let _item3_idx = list_ctrl.insert_item(2, "P003");
-
+    let _item4_idx = list_ctrl.insert_item(3, "P004");
+    let _item5_idx = list_ctrl.insert_item(4, "P005");
+    
+    // We need a better column data setting API, but for now, we can use 
+    // the current API to manually set text for each column
+    
+    // Set up some colors - use valid RGB values
+    let blue_color = Colour::new(230, 240, 255, 255);  // Light blue
+    let yellow_color = Colour::new(255, 255, 230, 255); // Light yellow
+    let red_text = Colour::new(200, 0, 0, 255);        // Dark red
+    let green_text = Colour::new(0, 150, 0, 255);      // Dark green
+    
+    // Format specific rows
+    list_ctrl.set_item_background_colour(0, &blue_color);
+    list_ctrl.set_item_background_colour(2, &yellow_color);
+    list_ctrl.set_item_background_colour(4, &blue_color);
+    
+    // Format specific cell text
+    list_ctrl.set_item_text_colour(1, &red_text);
+    list_ctrl.set_item_text_colour(3, &green_text);
+    
+    // Set item data - allows storing arbitrary integer data with each row
+    list_ctrl.set_item_data(0, 1001);
+    list_ctrl.set_item_data(1, 2002);
+    list_ctrl.set_item_data(2, 3003);
+    list_ctrl.set_item_data(3, 4004);
+    list_ctrl.set_item_data(4, 5005);
+    
+    // Set up selection
+    list_ctrl.set_item_state(0, ListItemState::Selected, ListItemState::Selected);
+    
+    // Set up status display
     let list_ctrl_status_label = StaticText::builder(&panel)
         .with_label("ListCtrl Status: None")
         .build();
+        
+    // Add buttons to interact with the list control
+    let list_ctrl_button_sizer = BoxSizer::builder(HORIZONTAL).build();
+    
+    let add_button = Button::builder(&panel)
+        .with_label("Add Item")
+        .build();
+        
+    let remove_button = Button::builder(&panel)
+        .with_label("Remove Selected")
+        .build();
+        
+    let select_button = Button::builder(&panel)
+        .with_label("Select First")
+        .build();
+        
+    let edit_button = Button::builder(&panel)
+        .with_label("Edit Selected")
+        .build();
+        
+    list_ctrl_button_sizer.add(&add_button, 0, ALL, 5);
+    list_ctrl_button_sizer.add(&remove_button, 0, ALL, 5);
+    list_ctrl_button_sizer.add(&select_button, 0, ALL, 5);
+    list_ctrl_button_sizer.add(&edit_button, 0, ALL, 5);
 
     // --- ADDED: EditableListBox Example ---
     let editable_listbox = EditableListBox::builder(&panel)
@@ -175,6 +230,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // Add ListCtrl and its status label
     let list_ctrl_col_sizer = BoxSizer::builder(VERTICAL).build();
     list_ctrl_col_sizer.add(&list_ctrl, 1, EXPAND | ALL, 5); // ListCtrl takes available space
+    list_ctrl_col_sizer.add_sizer(&list_ctrl_button_sizer, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
     list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
     list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, EXPAND | ALL, 5); // Add ListCtrl sizer to main, taking space
 
@@ -212,18 +268,19 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl.bind(EventType::LIST_ITEM_SELECTED, move |event: Event| {
         let item_index = event.get_item_index();
         if item_index != -1 {
-            // -1 means no item or error
-            // Get text from columns using the item_index
+            // Get the item ID (the text in column 0)
             let id_text = list_ctrl_clone.get_item_text(item_index as i64, 0);
-            let desc_text = list_ctrl_clone.get_item_text(item_index as i64, 1);
-            let qty_text = list_ctrl_clone.get_item_text(item_index as i64, 2);
-
+            
+            // Get the item data (the integer we associated with this row)
+            let item_data = list_ctrl_clone.get_item_data(item_index as i64);
+            
+            // Format a status message
             list_ctrl_status_label_clone.set_label(&format!(
-                "ListCtrl Item Selected: Index {}, ID: '{}', Desc: '{}', Qty: '{}'",
-                item_index, id_text, desc_text, qty_text
+                "Selected: {} (index: {}, data: {})",
+                id_text, item_index, item_data
             ));
         } else {
-            list_ctrl_status_label_clone.set_label("ListCtrl Status: No item selected");
+            list_ctrl_status_label_clone.set_label("No item selected");
         }
     });
 
@@ -336,6 +393,91 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             status_label_clone3.set_label("Item edited");
         }
     );
+
+    // Edit button
+    let list_ctrl_clone = list_ctrl.clone();
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    edit_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        let selected_item = list_ctrl_clone.get_first_selected_item();
+        if selected_item >= 0 {
+            // Start editing the label of the selected item
+            let text_ctrl = list_ctrl_clone.edit_label(selected_item as i64);
+            text_ctrl.set_value("New Label");
+            // You can access the TextCtrl here if needed
+            list_ctrl_status_label_clone.set_label(&format!("Editing item {}", selected_item));
+        } else {
+            list_ctrl_status_label_clone.set_label("Please select an item to edit");
+        }
+    });
+    
+    // Add button
+    let list_ctrl_clone = list_ctrl.clone();
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    add_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        let count = list_ctrl_clone.get_item_count();
+        let item_idx = list_ctrl_clone.insert_item(count as i64, &format!("P{:03}", count + 1));
+        if item_idx >= 0 {
+            // Select the new item
+            list_ctrl_clone.set_item_state(
+                item_idx as i64, 
+                ListItemState::Selected, 
+                ListItemState::Selected
+            );
+            list_ctrl_status_label_clone.set_label(&format!("Added new item {}", item_idx));
+        }
+    });
+    
+    // Remove button
+    let list_ctrl_clone = list_ctrl.clone();
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    remove_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        let selected_item = list_ctrl_clone.get_first_selected_item();
+        if selected_item >= 0 {
+            // Delete the selected item
+            if list_ctrl_clone.delete_item(selected_item as i64) {
+                list_ctrl_status_label_clone.set_label(&format!("Removed item {}", selected_item));
+            } else {
+                list_ctrl_status_label_clone.set_label(&format!("Failed to remove item {}", selected_item));
+            }
+        } else {
+            list_ctrl_status_label_clone.set_label("Please select an item to remove");
+        }
+    });
+    
+    // Select first button
+    let list_ctrl_clone = list_ctrl.clone();
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    select_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        // Ensure first item exists
+        if list_ctrl_clone.get_item_count() > 0 {
+            // Select the first item
+            list_ctrl_clone.set_item_state(0, ListItemState::Selected, ListItemState::Selected);
+            // Ensure it's visible
+            list_ctrl_clone.ensure_visible(0);
+            list_ctrl_status_label_clone.set_label("Selected first item");
+        } else {
+            list_ctrl_status_label_clone.set_label("List is empty");
+        }
+    });
+    
+    // Bind events for item editing
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    list_ctrl.bind(EventType::LIST_BEGIN_LABEL_EDIT, move |_| {
+        list_ctrl_status_label_clone.set_label("Started editing label...");
+    });
+    
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    list_ctrl.bind(EventType::LIST_END_LABEL_EDIT, move |event: Event| {
+        // Check if edit was cancelled - note: we need to handle this correctly
+        let cancelled = event.is_edit_cancelled().unwrap_or(true);
+        if cancelled {
+            list_ctrl_status_label_clone.set_label("Label edit cancelled");
+        } else {
+            let _item_index = event.get_item_index();
+            let label = event.get_label().unwrap_or_else(|| String::from("<no label>"));
+            list_ctrl_status_label_clone.set_label(&format!("Label changed to: {}", label));
+        }
+    });
 
     // Return the controls struct
     ListsTabControls {

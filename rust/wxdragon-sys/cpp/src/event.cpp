@@ -402,6 +402,55 @@ extern "C" void wxd_EvtHandler_Bind(
              wx_handler->Bind(wxEVT_LIST_END_LABEL_EDIT, functor);
              bound = true;
              break;
+        // ADDED: Additional ListCtrl events
+        case WXD_EVENT_TYPE_LIST_BEGIN_DRAG:
+             wx_handler->Bind(wxEVT_LIST_BEGIN_DRAG, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_BEGIN_RDRAG:
+             wx_handler->Bind(wxEVT_LIST_BEGIN_RDRAG, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_DELETE_ITEM:
+             wx_handler->Bind(wxEVT_LIST_DELETE_ITEM, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS:
+             wx_handler->Bind(wxEVT_LIST_DELETE_ALL_ITEMS, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_ITEM_DESELECTED:
+             wx_handler->Bind(wxEVT_LIST_ITEM_DESELECTED, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_ITEM_FOCUSED:
+             wx_handler->Bind(wxEVT_LIST_ITEM_FOCUSED, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK:
+             wx_handler->Bind(wxEVT_LIST_ITEM_MIDDLE_CLICK, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK:
+             wx_handler->Bind(wxEVT_LIST_ITEM_RIGHT_CLICK, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_KEY_DOWN:
+             wx_handler->Bind(wxEVT_LIST_KEY_DOWN, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_INSERT_ITEM:
+             wx_handler->Bind(wxEVT_LIST_INSERT_ITEM, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK:
+             wx_handler->Bind(wxEVT_LIST_COL_RIGHT_CLICK, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG:
+             wx_handler->Bind(wxEVT_LIST_COL_BEGIN_DRAG, functor);
+             bound = true;
+             break;
 
         // --- ColourPicker Event ---
         case WXD_EVENT_TYPE_COLOURPICKER_CHANGED: {
@@ -786,6 +835,30 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
             return wxEVT_LIST_BEGIN_LABEL_EDIT;
         case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT:
             return wxEVT_LIST_END_LABEL_EDIT;
+        case WXD_EVENT_TYPE_LIST_BEGIN_DRAG:
+            return wxEVT_LIST_BEGIN_DRAG;
+        case WXD_EVENT_TYPE_LIST_BEGIN_RDRAG:
+            return wxEVT_LIST_BEGIN_RDRAG;
+        case WXD_EVENT_TYPE_LIST_DELETE_ITEM:
+            return wxEVT_LIST_DELETE_ITEM;
+        case WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS:
+            return wxEVT_LIST_DELETE_ALL_ITEMS;
+        case WXD_EVENT_TYPE_LIST_ITEM_DESELECTED:
+            return wxEVT_LIST_ITEM_DESELECTED;
+        case WXD_EVENT_TYPE_LIST_ITEM_FOCUSED:
+            return wxEVT_LIST_ITEM_FOCUSED;
+        case WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK:
+            return wxEVT_LIST_ITEM_MIDDLE_CLICK;
+        case WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK:
+            return wxEVT_LIST_ITEM_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_LIST_KEY_DOWN:
+            return wxEVT_LIST_KEY_DOWN;
+        case WXD_EVENT_TYPE_LIST_INSERT_ITEM:
+            return wxEVT_LIST_INSERT_ITEM;
+        case WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK:
+            return wxEVT_LIST_COL_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG:
+            return wxEVT_LIST_COL_BEGIN_DRAG;
         case WXD_EVENT_TYPE_COLOURPICKER_CHANGED:
             return wxEVT_COLOURPICKER_CHANGED;
         case WXD_EVENT_TYPE_DATE_CHANGED:

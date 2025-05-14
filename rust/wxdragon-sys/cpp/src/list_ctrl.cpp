@@ -121,9 +121,11 @@ WXD_EXPORTED int32_t wxd_ListCtrl_HitTest(wxd_ListCtrl_t* self, wxd_Point point,
     return static_cast<int32_t>(item);
 }
 
-WXD_EXPORTED void wxd_ListCtrl_EditLabel(wxd_ListCtrl_t* self, long item) {
-    if (!self) return;
-    reinterpret_cast<wxListCtrl*>(self)->EditLabel(item);
+WXD_EXPORTED wxd_TextCtrl_t* wxd_ListCtrl_EditLabel(wxd_ListCtrl_t* self, long item) {
+    if (!self) return nullptr;
+    wxListCtrl* list_ctrl = reinterpret_cast<wxListCtrl*>(self);
+    wxTextCtrl* text_ctrl = list_ctrl->EditLabel(item);
+    return reinterpret_cast<wxd_TextCtrl_t*>(text_ctrl);
 }
 
 // --- ListCtrl Event Data Accessors ---
@@ -157,25 +159,173 @@ WXD_EXPORTED bool wxd_ListEvent_IsEditCancelled(wxd_Event_t* event) {
     return evt->IsEditCancelled();
 }
 
-// --- wxListBox ---
-// WXD_EXPORTED wxd_ListBox_t* wxd_ListBox_Create( // REMOVE THIS FUNCTION DEFINITION
-//     wxd_Window_t* parent,
-//     wxd_Id id,
-//     wxd_Point pos,
-//     wxd_Size size,
-//     wxd_Style_t style
-// ) {
-//     if (!parent) return NULL;
-//     wxListBox* listbox = new wxListBox(
-//         reinterpret_cast<wxWindow*>(parent),
-//         id,
-//         wxPoint(pos.x, pos.y),
-//         wxSize(size.width, size.height),
-//         0, // n, initially empty
-//         NULL, // choices, initially empty
-//         style
-//     );
-//     return reinterpret_cast<wxd_ListBox_t*>(listbox);
-// }
+// --- Advanced ListCtrl Functions ---
+
+// Item Data Functions
+WXD_EXPORTED bool wxd_ListCtrl_SetItemData(wxd_ListCtrl_t* self, long item, long data) {
+    if (!self) return false;
+    return reinterpret_cast<wxListCtrl*>(self)->SetItemData(item, data);
+}
+
+WXD_EXPORTED bool wxd_ListCtrl_SetItemPtrData(wxd_ListCtrl_t* self, long item, void* data) {
+    if (!self) return false;
+    return reinterpret_cast<wxListCtrl*>(self)->SetItemPtrData(item, wxPtrToUInt(data));
+}
+
+WXD_EXPORTED long wxd_ListCtrl_GetItemData(wxd_ListCtrl_t* self, long item) {
+    if (!self) return 0;
+    return reinterpret_cast<wxListCtrl*>(self)->GetItemData(item);
+}
+
+WXD_EXPORTED void* wxd_ListCtrl_GetItemPtrData(wxd_ListCtrl_t* self, long item) {
+    if (!self) return nullptr;
+    wxUIntPtr data = reinterpret_cast<wxListCtrl*>(self)->GetItemData(item);
+    return wxUIntToPtr(data);
+}
+
+// Item Appearance
+WXD_EXPORTED void wxd_ListCtrl_SetItemBackgroundColour(wxd_ListCtrl_t* self, long item, wxd_Colour_t colour) {
+    if (!self) return;
+    wxColour wxColor(colour.r, colour.g, colour.b, colour.a);
+    reinterpret_cast<wxListCtrl*>(self)->SetItemBackgroundColour(item, wxColor);
+}
+
+WXD_EXPORTED void wxd_ListCtrl_SetItemTextColour(wxd_ListCtrl_t* self, long item, wxd_Colour_t colour) {
+    if (!self) return;
+    wxColour wxColor(colour.r, colour.g, colour.b, colour.a);
+    reinterpret_cast<wxListCtrl*>(self)->SetItemTextColour(item, wxColor);
+}
+
+WXD_EXPORTED wxd_Colour_t wxd_ListCtrl_GetItemBackgroundColour(wxd_ListCtrl_t* self, long item) {
+    wxd_Colour_t colour = {0, 0, 0, 255}; // Default black, fully opaque
+    if (!self) return colour;
+    
+    wxColour wxColor = reinterpret_cast<wxListCtrl*>(self)->GetItemBackgroundColour(item);
+    colour.r = wxColor.Red();
+    colour.g = wxColor.Green();
+    colour.b = wxColor.Blue();
+    colour.a = wxColor.Alpha();
+    return colour;
+}
+
+WXD_EXPORTED wxd_Colour_t wxd_ListCtrl_GetItemTextColour(wxd_ListCtrl_t* self, long item) {
+    wxd_Colour_t colour = {0, 0, 0, 255}; // Default black, fully opaque
+    if (!self) return colour;
+    
+    wxColour wxColor = reinterpret_cast<wxListCtrl*>(self)->GetItemTextColour(item);
+    colour.r = wxColor.Red();
+    colour.g = wxColor.Green();
+    colour.b = wxColor.Blue();
+    colour.a = wxColor.Alpha();
+    return colour;
+}
+
+// Column Management
+WXD_EXPORTED bool wxd_ListCtrl_SetColumnsOrder(wxd_ListCtrl_t* self, int count, int* orders) {
+    if (!self || !orders) return false;
+    
+    wxArrayInt orderArray;
+    for (int i = 0; i < count; i++) {
+        orderArray.Add(orders[i]);
+    }
+    
+    return reinterpret_cast<wxListCtrl*>(self)->SetColumnsOrder(orderArray);
+}
+
+WXD_EXPORTED int* wxd_ListCtrl_GetColumnsOrder(wxd_ListCtrl_t* self, int* count) {
+    if (!self || !count) return nullptr;
+    
+    wxArrayInt orderArray = reinterpret_cast<wxListCtrl*>(self)->GetColumnsOrder();
+    *count = orderArray.GetCount();
+    
+    if (*count == 0) return nullptr;
+    
+    int* result = (int*)malloc(*count * sizeof(int));
+    if (!result) return nullptr;
+    
+    for (int i = 0; i < *count; i++) {
+        result[i] = orderArray[i];
+    }
+    
+    return result;
+}
+
+WXD_EXPORTED int wxd_ListCtrl_GetColumnOrder(wxd_ListCtrl_t* self, int col) {
+    if (!self) return -1;
+    return reinterpret_cast<wxListCtrl*>(self)->GetColumnOrder(col);
+}
+
+WXD_EXPORTED int wxd_ListCtrl_GetColumnIndexFromOrder(wxd_ListCtrl_t* self, int pos) {
+    if (!self) return -1;
+    return reinterpret_cast<wxListCtrl*>(self)->GetColumnIndexFromOrder(pos);
+}
+
+// Virtual List Support
+WXD_EXPORTED void wxd_ListCtrl_SetItemCount(wxd_ListCtrl_t* self, long count) {
+    if (!self) return;
+    reinterpret_cast<wxListCtrl*>(self)->SetItemCount(count);
+}
+
+WXD_EXPORTED void wxd_ListCtrl_RefreshItem(wxd_ListCtrl_t* self, long item) {
+    if (!self) return;
+    reinterpret_cast<wxListCtrl*>(self)->RefreshItem(item);
+}
+
+WXD_EXPORTED void wxd_ListCtrl_RefreshItems(wxd_ListCtrl_t* self, long itemFrom, long itemTo) {
+    if (!self) return;
+    reinterpret_cast<wxListCtrl*>(self)->RefreshItems(itemFrom, itemTo);
+}
+
+// Sorting - This is a bit tricky because of the callback
+// We'll need a mapping system or to adapt this for Rust usage
+struct SortCallbackData {
+    int (*cmpFunc)(void*, void*, void*);
+    void* userData;
+};
+
+int WXDLLEXPORT wxListCompareFunction(wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) {
+    SortCallbackData* cbData = (SortCallbackData*)sortData;
+    if (!cbData || !cbData->cmpFunc) return 0;
+    
+    return cbData->cmpFunc((void*)item1, (void*)item2, cbData->userData);
+}
+
+WXD_EXPORTED bool wxd_ListCtrl_SortItems(wxd_ListCtrl_t* self, int (*cmpFunc)(void*, void*, void*), void* data) {
+    if (!self || !cmpFunc) return false;
+    
+    // Create a persistent callback data structure
+    SortCallbackData* cbData = new SortCallbackData();
+    cbData->cmpFunc = cmpFunc;
+    cbData->userData = data;
+    
+    bool result = reinterpret_cast<wxListCtrl*>(self)->SortItems(wxListCompareFunction, (wxIntPtr)cbData);
+    
+    // Clean up after sorting is done
+    delete cbData;
+    
+    return result;
+}
+
+WXD_EXPORTED void wxd_ListCtrl_ShowSortIndicator(wxd_ListCtrl_t* self, int col, bool ascending) {
+    if (!self) return;
+    reinterpret_cast<wxListCtrl*>(self)->ShowSortIndicator(col, ascending);
+}
+
+// Image List Support
+// Note: This will need proper integration with wxdragon's ImageList implementation
+WXD_EXPORTED void wxd_ListCtrl_SetImageList(wxd_ListCtrl_t* self, void* imageList, int which) {
+    if (!self || !imageList) return;
+    reinterpret_cast<wxListCtrl*>(self)->SetImageList(reinterpret_cast<wxImageList*>(imageList), which);
+}
+
+WXD_EXPORTED void wxd_ListCtrl_AssignImageList(wxd_ListCtrl_t* self, void* imageList, int which) {
+    if (!self || !imageList) return;
+    reinterpret_cast<wxListCtrl*>(self)->AssignImageList(reinterpret_cast<wxImageList*>(imageList), which);
+}
+
+WXD_EXPORTED void* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which) {
+    if (!self) return nullptr;
+    return reinterpret_cast<void*>(reinterpret_cast<wxListCtrl*>(self)->GetImageList(which));
+}
 
 } // extern "C" 
