@@ -70,7 +70,7 @@ impl std::ops::Deref for DrawingPanel {
 }
 
 fn main() {
-    wxdragon::main(|_app| {
+    wxdragon::main(|_| {
         let frame = Frame::builder()
             .with_title("wxDragon DC Example")
             .with_size(Size::new(800, 600))
@@ -83,7 +83,5 @@ fn main() {
         drawing_panel.refresh(true, None);
         
         frame.show(true);
-        
-        true
     });
 } 

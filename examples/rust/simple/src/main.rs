@@ -1,7 +1,7 @@
 use wxdragon::prelude::*;
 
 fn main() {
-    wxdragon::main(|handle: &mut WxdAppHandle| {
+    wxdragon::main(|_| {
         let frame = Frame::builder()
             .with_title("Hello, World!")
             .with_size(Size::new(300, 200))
@@ -27,8 +27,8 @@ fn main() {
         frame.show(true);
         frame.centre();
 
-        handle.preserve(frame.clone());
+        // No need to preserve the frame - wxWidgets manages it
 
-        true
+        // Frame is automatically managed after show()
     });
 }

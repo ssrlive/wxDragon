@@ -24,7 +24,7 @@ const ID_TOOL_SAVE: Id = ID_HIGHEST + 3;
 
 fn main() {
     // Initialize the wxWidgets application
-    wxdragon::main(|handle: &mut WxdAppHandle| {
+    wxdragon::main(|_| {
         // Create the main application frame
         let frame = Frame::builder()
             .with_title("wxDragon Notebook Example")
@@ -168,8 +168,5 @@ fn main() {
         // --- Final Setup ---
         frame.show(true);
         frame.centre();
-        handle.preserve(frame.clone());
-
-        true
     });
 }

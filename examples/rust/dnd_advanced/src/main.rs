@@ -219,7 +219,7 @@ impl DropTargetPanel {
 }
 
 fn main() {
-    wxdragon::main(|_app| {
+    wxdragon::main(|_| {
         let frame = Frame::builder()
             .with_title("Advanced Drag and Drop Example")
             .with_size(Size::new(600, 500))
@@ -232,7 +232,5 @@ fn main() {
         
         // Show the frame
         frame.show(true);
-
-        true
     });
 } 

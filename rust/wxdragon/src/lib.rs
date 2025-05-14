@@ -29,7 +29,7 @@ pub use utils::WxdArrayString;
 
 // Re-export the main entry point and handle
 pub use app::main;
-pub use app::WxdAppHandle;
+pub use app::set_top_window;
 // Re-export call_after function for async support
 pub use app::call_after;
 

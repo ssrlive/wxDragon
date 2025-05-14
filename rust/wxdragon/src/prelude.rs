@@ -1,5 +1,5 @@
 // --- Core Types & Traits ---
-pub use crate::app::{main, WxdAppHandle};
+pub use crate::app::main;
 pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
 pub use crate::event::{Event, EventType, WxEvtHandler};
