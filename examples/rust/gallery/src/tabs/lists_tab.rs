@@ -5,8 +5,23 @@ use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
-use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat, ListItemState};
+use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat};
 use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::HasItemData;
+use wxdragon::ListItemState;
+use wxdragon::widgets::{
+    Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText
+};
+
+// Define a custom data type for our list items
+#[derive(Clone)]
+#[allow(dead_code)]
+struct ProductInfo {
+    sku: String,
+    price: f64,
+    in_stock: bool,
+    reorder_level: i32,
+}
 
 #[allow(dead_code)]
 pub struct ListsTabControls {
@@ -118,8 +133,35 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let _item4_idx = list_ctrl.insert_item(3, "P004");
     let _item5_idx = list_ctrl.insert_item(4, "P005");
     
-    // We need a better column data setting API, but for now, we can use 
-    // the current API to manually set text for each column
+    // Create product info for each item
+    let product1 = ProductInfo {
+        sku: "ABC123".to_string(),
+        price: 19.99,
+        in_stock: true,
+        reorder_level: 5,
+    };
+    
+    let product2 = ProductInfo {
+        sku: "DEF456".to_string(),
+        price: 29.99,
+        in_stock: false,
+        reorder_level: 10,
+    };
+    
+    let product3 = ProductInfo {
+        sku: "GHI789".to_string(),
+        price: 39.99,
+        in_stock: true,
+        reorder_level: 15,
+    };
+    
+    // Attach the data to the items
+    println!("DEBUG: Setting data for item 0 (P001)");
+    list_ctrl.set_custom_data(0u64, product1);
+    println!("DEBUG: Setting data for item 1 (P002)");
+    list_ctrl.set_custom_data(1u64, product2);
+    println!("DEBUG: Setting data for item 2 (P003)");
+    list_ctrl.set_custom_data(2u64, product3);
     
     // Set up some colors - use valid RGB values
     let blue_color = Colour::new(230, 240, 255, 255);  // Light blue
@@ -137,11 +179,11 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl.set_item_text_colour(3, &green_text);
     
     // Set item data - allows storing arbitrary integer data with each row
-    list_ctrl.set_item_data(0, 1001);
-    list_ctrl.set_item_data(1, 2002);
-    list_ctrl.set_item_data(2, 3003);
-    list_ctrl.set_item_data(3, 4004);
-    list_ctrl.set_item_data(4, 5005);
+    list_ctrl.set_custom_data(0u64, 1001);
+    list_ctrl.set_custom_data(1u64, 2002);
+    list_ctrl.set_custom_data(2u64, 3003);
+    list_ctrl.set_custom_data(3u64, 4004);
+    list_ctrl.set_custom_data(4u64, 5005);
     
     // Set up selection
     list_ctrl.set_item_state(0, ListItemState::Selected, ListItemState::Selected);
@@ -149,6 +191,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // Set up status display
     let list_ctrl_status_label = StaticText::builder(&panel)
         .with_label("ListCtrl Status: None")
+        .with_size(Size::new(400, -1))  // Set wider width, auto height
         .build();
         
     // Add buttons to interact with the list control
@@ -170,10 +213,15 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .with_label("Edit Selected")
         .build();
         
+    let cleanup_button = Button::builder(&panel)
+        .with_label("Test Cleanup")
+        .build();
+        
     list_ctrl_button_sizer.add(&add_button, 0, ALL, 5);
     list_ctrl_button_sizer.add(&remove_button, 0, ALL, 5);
     list_ctrl_button_sizer.add(&select_button, 0, ALL, 5);
     list_ctrl_button_sizer.add(&edit_button, 0, ALL, 5);
+    list_ctrl_button_sizer.add(&cleanup_button, 0, ALL, 5);
 
     // --- ADDED: EditableListBox Example ---
     let editable_listbox = EditableListBox::builder(&panel)
@@ -231,7 +279,8 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let list_ctrl_col_sizer = BoxSizer::builder(VERTICAL).build();
     list_ctrl_col_sizer.add(&list_ctrl, 1, EXPAND | ALL, 5); // ListCtrl takes available space
     list_ctrl_col_sizer.add_sizer(&list_ctrl_button_sizer, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
-    list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
+    // Make sure status label has enough space and uses the full width
+    list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, EXPAND | ALL, 5);
     list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, EXPAND | ALL, 5); // Add ListCtrl sizer to main, taking space
 
     // Add EditableListBox and its status label
@@ -267,20 +316,39 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
     list_ctrl.bind(EventType::LIST_ITEM_SELECTED, move |event: Event| {
         let item_index = event.get_item_index();
+        println!("DEBUG: List item selected, index: {}", item_index);
+        
         if item_index != -1 {
             // Get the item ID (the text in column 0)
             let id_text = list_ctrl_clone.get_item_text(item_index as i64, 0);
+            println!("DEBUG: Item text for column 0: {}", id_text);
             
-            // Get the item data (the integer we associated with this row)
-            let item_data = list_ctrl_clone.get_item_data(item_index as i64);
+            // Get text for other columns
+            let description = list_ctrl_clone.get_item_text(item_index as i64, 1);
+            let quantity = list_ctrl_clone.get_item_text(item_index as i64, 2);
+            let notes = list_ctrl_clone.get_item_text(item_index as i64, 3);
+            println!("DEBUG: Description: {}, Quantity: {}, Notes: {}", 
+                    description, quantity, notes);
             
-            // Format a status message
-            list_ctrl_status_label_clone.set_label(&format!(
-                "Selected: {} (index: {}, data: {})",
-                id_text, item_index, item_data
-            ));
-        } else {
-            list_ctrl_status_label_clone.set_label("No item selected");
+            // Also check the integer item data (this works reliably)
+            if let Some(item_data) = list_ctrl_clone.get_custom_data(item_index as u64) {
+                if let Some(int_data) = item_data.downcast_ref::<i32>() {
+                    println!("DEBUG: Item integer data: {}", int_data);
+                    
+                    // Build a status message with the information we have
+                    let status = format!(
+                        "Item: {} | Description: {} | Quantity: {} | Notes: {} | Data ID: {}", 
+                        id_text, description, quantity, notes, int_data
+                    );
+                    
+                    println!("DEBUG: Setting label to: {}", status);
+                    list_ctrl_status_label_clone.set_label(&status);
+                }
+            }
+            
+            // Check if the item has any data attached
+            let has_data = list_ctrl_clone.has_custom_data(item_index as u64);
+            println!("DEBUG: Item has custom data: {}", has_data);
         }
     });
 
@@ -478,6 +546,35 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             list_ctrl_status_label_clone.set_label(&format!("Label changed to: {}", label));
         }
     });
+
+    // Cleanup button handler
+    let list_ctrl_clone = list_ctrl.clone();
+    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
+    cleanup_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        println!("Cleanup button clicked - calling explicit cleanup");
+        list_ctrl_clone.cleanup_custom_data();
+        list_ctrl_status_label_clone.set_label("Manual cleanup completed");
+    });
+
+    // Set column text for all items
+    for i in 0..5 {
+        let item_idx = i as i64;
+        
+        // Set the main item label (column 0)
+        let label = format!("P{:03}", i + 1);
+        list_ctrl.set_item_text(item_idx, &label);
+        
+        // Get in-stock status based on even/odd
+        let is_in_stock = i % 2 == 0;
+        
+        // Set colors based on availability
+        if is_in_stock {
+            list_ctrl.set_item_background_colour(item_idx, &blue_color);
+        } else {
+            list_ctrl.set_item_background_colour(item_idx, &yellow_color);
+            list_ctrl.set_item_text_colour(item_idx, &red_text);
+        }
+    }
 
     // Return the controls struct
     ListsTabControls {

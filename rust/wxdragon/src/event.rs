@@ -193,6 +193,8 @@ impl EventType {
 
     pub const PAINT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_PAINT);
 
+    pub const DESTROY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DESTROY);
+
     // Add others as needed
 
     /// Get the underlying stable C enum value.

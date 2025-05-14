@@ -98,6 +98,7 @@ WXD_EXPORTED int wxd_ListCtrl_GetColumnWidth(wxd_ListCtrl_t* self, long col);
 WXD_EXPORTED int wxd_ListCtrl_GetColumnCount(wxd_ListCtrl_t* self);
 WXD_EXPORTED int32_t wxd_ListCtrl_InsertItem_Simple(wxd_ListCtrl_t* self, long index, const char* label);
 WXD_EXPORTED void wxd_ListCtrl_SetItemText(wxd_ListCtrl_t* self, long index, const char* text); // Note: wxListCtrl uses SetItemText(itemId, col, text), this simplified version assumes col 0
+WXD_EXPORTED bool wxd_ListCtrl_SetItem(wxd_ListCtrl_t* self, long item, int col, const char* text, int image, int format, long state, long stateMask, long data, long mask);
 WXD_EXPORTED int wxd_ListCtrl_GetItemText(wxd_ListCtrl_t* self, long index, int col, char* buffer, int buffer_len);
 WXD_EXPORTED int wxd_ListCtrl_GetItemCount(wxd_ListCtrl_t* self);
 WXD_EXPORTED bool wxd_ListCtrl_SetItemState(wxd_ListCtrl_t* self, long item, long state, long stateMask);

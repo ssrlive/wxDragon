@@ -7,8 +7,11 @@ use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
+use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
 use std::ffi::CString;
 use std::os::raw::{c_int, c_long, c_void};
+use std::any::Any;
+use std::sync::Arc;
 use wxdragon_sys as ffi;
 
 // --- ListCtrl Styles ---
@@ -230,6 +233,49 @@ impl ListCtrl {
         }
     }
 
+    /// Sets the text of an item in the specified column.
+    /// 
+    /// # Arguments
+    /// * `index` - The index of the item.
+    /// * `col` - The column index (0-based).
+    /// * `text` - The text to set.
+    ///
+    /// # Example
+    /// ```
+    /// list_ctrl.set_item_text_by_column(0, 1, "Column 1 text");
+    /// ```
+    pub fn set_item_text_by_column(&self, index: i64, col: i32, text: &str) {
+        if col == 0 {
+            // Use the standard method for column 0
+            self.set_item_text(index, text);
+            return;
+        }
+        
+        // Use SetItem to set column text
+        let c_text = CString::new(text).unwrap_or_default();
+        let mask = ffi::WXD_LIST_MASK_TEXT as i64;
+        let state = 0;
+        let state_mask = 0;
+        let image = -1;
+        let data = 0;
+        let item_fmt = 0;
+        
+        unsafe {
+            ffi::wxd_ListCtrl_SetItem(
+                self.as_list_ctrl_ptr(),
+                index as c_long,
+                col as c_int,
+                c_text.as_ptr(),
+                image,
+                item_fmt,
+                state,
+                state_mask,
+                data,
+                mask
+            );
+        }
+    }
+
     /// Gets the text of an item in the specified column.
     pub fn get_item_text(&self, index: i64, col: i32) -> String {
         unsafe {
@@ -393,18 +439,6 @@ impl ListCtrl {
         unsafe { crate::widgets::textctrl::TextCtrl::from_ptr(ptr as *mut ffi::wxd_TextCtrl_t) }
     }
 
-    // --- Item Data Methods ---
-
-    /// Associates integer data with an item.
-    pub fn set_item_data(&self, item: i64, data: i64) -> bool {
-        unsafe { ffi::wxd_ListCtrl_SetItemData(self.as_list_ctrl_ptr(), item as c_long, data as c_long) }
-    }
-
-    /// Retrieves integer data associated with an item.
-    pub fn get_item_data(&self, item: i64) -> i64 {
-        unsafe { ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item as c_long) as i64 }
-    }
-
     // --- Item Appearance Methods ---
 
     /// Sets the background color of an item.
@@ -519,6 +553,105 @@ impl ListCtrl {
     }
 }
 
+// Implement the HasItemData trait for ListCtrl
+impl HasItemData for ListCtrl {
+    fn set_custom_data<T: Any + Send + Sync + 'static>(&self, item_id: impl Into<u64>, data: T) -> u64 {
+        let item_index = item_id.into() as i64;
+        
+        // First check if there's already data associated with this item
+        let existing_data_id = unsafe { 
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+        };
+        
+        // If we have existing data, remove it from the registry
+        if existing_data_id != 0 {
+            let _ = remove_item_data(existing_data_id);
+        }
+        
+        // Store the new data in the registry and get a unique ID
+        let data_id = store_item_data(data);
+        
+        // Store the ID as an integer in the list item using the native set_item_data
+        let result = unsafe { 
+            ffi::wxd_ListCtrl_SetItemData(
+                self.as_list_ctrl_ptr(), 
+                item_index as c_long, 
+                data_id as c_long
+            ) 
+        };
+        
+        // If setting failed, remove the data from the registry and return 0
+        if !result {
+            let _ = remove_item_data(data_id);
+            return 0;
+        }
+        
+        data_id
+    }
+    
+    fn get_custom_data(&self, item_id: impl Into<u64>) -> Option<Arc<dyn Any + Send + Sync>> {
+        let item_index = item_id.into() as i64;
+        
+        // Get the data ID using the native get_item_data
+        let data_id = unsafe { 
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+        };
+        
+        if data_id == 0 {
+            return None;
+        }
+        
+        // Look up the data in the registry
+        get_item_data(data_id)
+    }
+    
+    fn has_custom_data(&self, item_id: impl Into<u64>) -> bool {
+        let item_index = item_id.into() as i64;
+        
+        // Get the data ID using the native get_item_data
+        let data_id = unsafe { 
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+        };
+        
+        // If the ID is non-zero and exists in the registry, there is custom data
+        data_id != 0 && get_item_data(data_id).is_some()
+    }
+    
+    fn clear_custom_data(&self, item_id: impl Into<u64>) -> bool {
+        let item_index = item_id.into() as i64;
+        
+        // Get the data ID using the native get_item_data
+        let data_id = unsafe { 
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+        };
+        
+        // Only attempt to remove data if there's actually data to remove
+        if data_id != 0 {
+            // Remove the data from the registry
+            let _ = remove_item_data(data_id);
+        }
+        
+        // Clear the data in the list item by setting it to 0
+        unsafe { 
+            ffi::wxd_ListCtrl_SetItemData(
+                self.as_list_ctrl_ptr(), 
+                item_index as c_long, 
+                0
+            ) 
+        }
+    }
+    
+    fn cleanup_all_custom_data(&self) {
+        // Get the total number of items in the list control
+        let item_count = self.get_item_count();
+        
+        // Iterate through all items and clear their custom data
+        for i in 0..item_count {
+            self.clear_custom_data(i as u64);
+        }
+    }
+}
+
 // Implement common widget traits
 implement_widget_traits_with_target!(ListCtrl, window, Window);
 
@@ -529,12 +662,41 @@ widget_builder!(
     style_type: ListCtrlStyle,
     fields: {},
     build_impl: |slf| {
-        ListCtrl::new_impl(
+        let list_ctrl = ListCtrl::new_impl(
             slf.parent.handle_ptr(),
             slf.id,
             slf.pos,
             slf.size,
             slf.style.bits()
-        )
+        );
+        
+        // Set up cleanup for custom data
+        list_ctrl.setup_cleanup();
+        
+        list_ctrl
     }
 );
+
+// Register for destroy event to clean up custom data
+impl ListCtrl {
+    /// Sets up the ListCtrl to clean up all custom data when it's destroyed.
+    /// This is automatically called during construction.
+    fn setup_cleanup(&self) {
+        use crate::event::{EventType, WxEvtHandler};
+        
+        // Create a clone for the closure
+        let list_ctrl_clone = self.clone();
+        
+        // Bind to the DESTROY event for proper cleanup when the window is destroyed
+        self.bind(EventType::DESTROY, move |_event| {
+            // Clean up all custom data when the control is destroyed
+            list_ctrl_clone.cleanup_all_custom_data();
+        });
+    }
+    
+    /// Manually clean up all custom data associated with this ListCtrl.
+    /// This can be called explicitly when needed.
+    pub fn cleanup_custom_data(&self) {
+        self.cleanup_all_custom_data();
+    }
+}

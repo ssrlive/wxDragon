@@ -89,6 +89,9 @@ pub use crate::widgets::list_ctrl::{
     ListCtrl, ListCtrlBuilder, ListCtrlStyle, ListItemState, ListNextItemFlag,
 };
 
+// ADDED: Re-export ItemData functionality
+pub use crate::widgets::item_data::{ItemData, HasItemData};
+
 // --- ADDED: Menus Module ---
 pub use menus::{ItemKind, Menu, MenuBar, MenuItem};
 

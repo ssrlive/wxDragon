@@ -24,6 +24,7 @@ pub mod font_picker_ctrl;
 pub mod frame;
 pub mod gauge;
 pub mod hyperlink_ctrl;
+pub mod item_data;
 pub mod list_ctrl;
 pub mod listbox;
 pub mod notebook;

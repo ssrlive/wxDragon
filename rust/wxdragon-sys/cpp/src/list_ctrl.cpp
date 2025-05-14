@@ -328,4 +328,37 @@ WXD_EXPORTED void* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which) {
     return reinterpret_cast<void*>(reinterpret_cast<wxListCtrl*>(self)->GetImageList(which));
 }
 
+WXD_EXPORTED bool wxd_ListCtrl_SetItem(wxd_ListCtrl_t* self, long item, int col, const char* text, int image, int format, long state, long stateMask, long data, long mask) {
+    if (!self) return false;
+    
+    wxListItem listItem;
+    listItem.SetId(item);
+    listItem.SetColumn(col);
+    
+    if (mask & wxLIST_MASK_TEXT) {
+        listItem.SetText(wxString::FromUTF8(text ? text : ""));
+    }
+    
+    if (mask & wxLIST_MASK_IMAGE) {
+        listItem.SetImage(image);
+    }
+    
+    if (mask & wxLIST_MASK_FORMAT) {
+        listItem.SetAlign(static_cast<wxListColumnFormat>(format));
+    }
+    
+    if (mask & wxLIST_MASK_STATE) {
+        listItem.SetState(state);
+        listItem.SetStateMask(stateMask);
+    }
+    
+    if (mask & wxLIST_MASK_DATA) {
+        listItem.SetData(data);
+    }
+    
+    listItem.SetMask(mask);
+    
+    return reinterpret_cast<wxListCtrl*>(self)->SetItem(listItem);
+}
+
 } // extern "C" 

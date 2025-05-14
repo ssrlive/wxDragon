@@ -629,6 +629,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_TIME_CHANGED, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_DESTROY:
+            wx_handler->Bind(wxEVT_DESTROY, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -919,6 +923,8 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
             return wxEVT_PAINT;
         case WXD_EVENT_TYPE_TIME_CHANGED:
             return wxEVT_TIME_CHANGED;
+        case WXD_EVENT_TYPE_DESTROY:
+            return wxEVT_DESTROY;
         default:
             // Unknown event type - should we handle this differently?
             // For now let's use a null/placeholder value
