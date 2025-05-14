@@ -24,7 +24,15 @@ widget_style_enum!(
         Rich: ffi::WXD_TE_RICH, "For rich text content (implies multiline). Use with care, may require specific handling.",
         Rich2: ffi::WXD_TE_RICH2, "For more advanced rich text content (implies multiline). Use with care.",
         AutoUrl: ffi::WXD_TE_AUTO_URL, "Automatically detect and make URLs clickable.",
-        ProcessEnter: ffi::WXD_TE_PROCESS_ENTER, "Generate an event when Enter key is pressed."
+        ProcessEnter: ffi::WXD_TE_PROCESS_ENTER, "Generate an event when Enter key is pressed.",
+        ProcessTab: ffi::WXD_TE_PROCESS_TAB, "Process TAB key in the control instead of using it for navigation.",
+        NoHideSel: ffi::WXD_TE_NOHIDESEL, "Always show selection, even when control doesn't have focus (Windows only).",
+        Centre: ffi::WXD_TE_CENTRE, "Center-align text.",
+        Right: ffi::WXD_TE_RIGHT, "Right-align text.",
+        CharWrap: ffi::WXD_TE_CHARWRAP, "Wrap at any position, splitting words if necessary.",
+        WordWrap: ffi::WXD_TE_WORDWRAP, "Wrap at word boundaries.",
+        NoVScroll: ffi::WXD_TE_NO_VSCROLL, "No vertical scrollbar (multiline only).",
+        DontWrap: ffi::WXD_TE_DONTWRAP, "Don't wrap at all, show horizontal scrollbar instead."
     },
     default_variant: Default
 );
@@ -106,6 +114,124 @@ impl TextCtrl {
             } else {
                 String::new()
             }
+        }
+    }
+
+    /// Appends text to the end of the control.
+    pub fn append_text(&self, text: &str) {
+        let c_text = CString::new(text).unwrap_or_default();
+        unsafe {
+            ffi::wxd_TextCtrl_AppendText(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
+                c_text.as_ptr(),
+            );
+        }
+    }
+
+    /// Clears the text in the control.
+    pub fn clear(&self) {
+        unsafe {
+            ffi::wxd_TextCtrl_Clear(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            );
+        }
+    }
+
+    /// Returns whether the text control has been modified by the user since the last 
+    /// time MarkDirty() or DiscardEdits() was called.
+    pub fn is_modified(&self) -> bool {
+        unsafe {
+            ffi::wxd_TextCtrl_IsModified(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
+        }
+    }
+
+    /// Marks the control as modified or unmodified.
+    pub fn set_modified(&self, modified: bool) {
+        unsafe {
+            ffi::wxd_TextCtrl_SetModified(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
+                modified
+            );
+        }
+    }
+
+    /// Makes the text control editable or read-only, overriding the style setting.
+    pub fn set_editable(&self, editable: bool) {
+        unsafe {
+            ffi::wxd_TextCtrl_SetEditable(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
+                editable
+            );
+        }
+    }
+
+    /// Returns true if the control is editable.
+    pub fn is_editable(&self) -> bool {
+        unsafe {
+            ffi::wxd_TextCtrl_IsEditable(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
+        }
+    }
+
+    /// Gets the insertion point of the control.
+    /// The insertion point is the position at which the caret is currently positioned.
+    pub fn get_insertion_point(&self) -> i64 {
+        unsafe {
+            ffi::wxd_TextCtrl_GetInsertionPoint(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
+        }
+    }
+
+    /// Sets the insertion point of the control.
+    pub fn set_insertion_point(&self, pos: i64) {
+        unsafe {
+            ffi::wxd_TextCtrl_SetInsertionPoint(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
+                pos
+            );
+        }
+    }
+
+    /// Sets the maximum number of characters that may be entered in the control.
+    /// 
+    /// If `len` is 0, the maximum length limit is removed.
+    pub fn set_max_length(&self, len: usize) {
+        unsafe {
+            ffi::wxd_TextCtrl_SetMaxLength(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
+                len as i64
+            );
+        }
+    }
+
+    /// Returns the last position in the control.
+    pub fn get_last_position(&self) -> i64 {
+        unsafe {
+            ffi::wxd_TextCtrl_GetLastPosition(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
+        }
+    }
+
+    /// Returns true if this is a multi-line text control.
+    pub fn is_multiline(&self) -> bool {
+        unsafe {
+            ffi::wxd_TextCtrl_IsMultiLine(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
+        }
+    }
+
+    /// Returns true if this is a single-line text control.
+    pub fn is_single_line(&self) -> bool {
+        unsafe {
+            ffi::wxd_TextCtrl_IsSingleLine(
+                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
+            )
         }
     }
 }

@@ -54,4 +54,94 @@ WXD_EXPORTED int wxd_TextCtrl_GetValue(wxd_TextCtrl_t* textCtrl, char* buffer, i
     return (int)(needed_len_no_null + 1);
 }
 
+// Append text to the wxTextCtrl
+WXD_EXPORTED void wxd_TextCtrl_AppendText(wxd_TextCtrl_t* textCtrl, const char* text) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl && text) {
+        ctrl->AppendText(wxString::FromUTF8(text));
+    }
+}
+
+// Clear the wxTextCtrl contents
+WXD_EXPORTED void wxd_TextCtrl_Clear(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl) {
+        ctrl->Clear();
+    }
+}
+
+// Check if the wxTextCtrl has been modified
+WXD_EXPORTED bool wxd_TextCtrl_IsModified(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return false;
+    return ctrl->IsModified();
+}
+
+// Set the modified state of the wxTextCtrl
+WXD_EXPORTED void wxd_TextCtrl_SetModified(wxd_TextCtrl_t* textCtrl, bool modified) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl) {
+        ctrl->SetModified(modified);
+    }
+}
+
+// Make the wxTextCtrl editable or read-only
+WXD_EXPORTED void wxd_TextCtrl_SetEditable(wxd_TextCtrl_t* textCtrl, bool editable) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl) {
+        ctrl->SetEditable(editable);
+    }
+}
+
+// Check if the wxTextCtrl is editable
+WXD_EXPORTED bool wxd_TextCtrl_IsEditable(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return false;
+    return ctrl->IsEditable();
+}
+
+// Get the insertion point position
+WXD_EXPORTED wxd_Long_t wxd_TextCtrl_GetInsertionPoint(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return 0;
+    return ctrl->GetInsertionPoint();
+}
+
+// Set the insertion point position
+WXD_EXPORTED void wxd_TextCtrl_SetInsertionPoint(wxd_TextCtrl_t* textCtrl, wxd_Long_t pos) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl) {
+        ctrl->SetInsertionPoint(pos);
+    }
+}
+
+// Set the maximum length of text that can be entered
+WXD_EXPORTED void wxd_TextCtrl_SetMaxLength(wxd_TextCtrl_t* textCtrl, wxd_Long_t len) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (ctrl) {
+        ctrl->SetMaxLength(len);
+    }
+}
+
+// Get the last position in the control (text length)
+WXD_EXPORTED wxd_Long_t wxd_TextCtrl_GetLastPosition(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return 0;
+    return ctrl->GetLastPosition();
+}
+
+// Check if the control is a multiline text control
+WXD_EXPORTED bool wxd_TextCtrl_IsMultiLine(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return false;
+    return ctrl->IsMultiLine();
+}
+
+// Check if the control is a single-line text control
+WXD_EXPORTED bool wxd_TextCtrl_IsSingleLine(wxd_TextCtrl_t* textCtrl) {
+    wxTextCtrl* ctrl = (wxTextCtrl*)textCtrl;
+    if (!ctrl) return false;
+    return ctrl->IsSingleLine();
+}
+
 } // extern "C" 

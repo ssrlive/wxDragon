@@ -180,6 +180,18 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxTE_RICH", wxTE_RICH}); // Basic rich text
     constants_to_extract.push_back({"wxTE_RICH2", wxTE_RICH2}); // Advanced rich text
     constants_to_extract.push_back({"wxTE_AUTO_URL", wxTE_AUTO_URL});
+    constants_to_extract.push_back({"wxTE_PROCESS_TAB", wxTE_PROCESS_TAB}); // Process TAB key in the control
+    constants_to_extract.push_back({"wxTE_NOHIDESEL", wxTE_NOHIDESEL}); // Always show selection, even when not focused
+    constants_to_extract.push_back({"wxTE_LEFT", wxTE_LEFT}); // Left-align text (default)
+    constants_to_extract.push_back({"wxTE_CENTRE", wxTE_CENTRE}); // Center-align text
+    constants_to_extract.push_back({"wxTE_RIGHT", wxTE_RIGHT}); // Right-align text
+    constants_to_extract.push_back({"wxTE_DONTWRAP", wxTE_DONTWRAP}); // Don't wrap text, show horizontal scrollbar
+    constants_to_extract.push_back({"wxTE_CHARWRAP", wxTE_CHARWRAP}); // Wrap at any character
+    constants_to_extract.push_back({"wxTE_WORDWRAP", wxTE_WORDWRAP}); // Wrap at word boundaries
+    constants_to_extract.push_back({"wxTE_BESTWRAP", wxTE_BESTWRAP}); // Wrap at word boundaries or anywhere if word is too long
+    constants_to_extract.push_back({"wxTE_CAPITALIZE", wxTE_CAPITALIZE}); // Capitalize first letter (mobile platforms)
+    constants_to_extract.push_back({"wxTE_NO_VSCROLL", wxTE_NO_VSCROLL}); // Don't show vertical scrollbar for multiline
+    
     constants_to_extract.push_back({"wxHSCROLL", wxHSCROLL}); // Also common window style
     // CheckBox/CheckListBox Styles
     constants_to_extract.push_back({"wxCHK_2STATE", wxCHK_2STATE});

@@ -254,4 +254,7 @@ typedef enum {
 
 typedef struct wxd_EditableListBox_s* wxd_EditableListBox_t;
 
+// Define a long integer type for positions, lengths, etc.
+typedef long long wxd_Long_t;
+
 #endif // WXD_TYPES_H 
