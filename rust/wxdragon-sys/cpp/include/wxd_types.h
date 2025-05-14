@@ -105,6 +105,7 @@ typedef enum {
     WXD_EVENT_TYPE_DROP_FILES = 69,
     WXD_EVENT_TYPE_DROP_TEXT = 70,
     WXD_EVENT_TYPE_END_DRAG = 71,
+    WXD_EVENT_TYPE_PAINT = 72,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -204,6 +205,14 @@ typedef struct wxd_DropSource_t wxd_DropSource_t;
 typedef struct wxd_DropTarget_t wxd_DropTarget_t;
 typedef struct wxd_TextDropTarget_t wxd_TextDropTarget_t;
 typedef struct wxd_FileDropTarget_t wxd_FileDropTarget_t;
+
+// DC related typedefs (opaque pointers)
+typedef struct wxd_DC_t wxd_DC_t;
+typedef struct wxd_WindowDC_t wxd_WindowDC_t;
+typedef struct wxd_ClientDC_t wxd_ClientDC_t;
+typedef struct wxd_PaintDC_t wxd_PaintDC_t;
+typedef struct wxd_MemoryDC_t wxd_MemoryDC_t;
+typedef struct wxd_ScreenDC_t wxd_ScreenDC_t;
 
 // wxBitmap (placeholder for future use)
 typedef struct wxd_Bitmap_t wxd_Bitmap_t;

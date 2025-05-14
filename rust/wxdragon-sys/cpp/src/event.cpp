@@ -567,21 +567,13 @@ extern "C" void wxd_EvtHandler_Bind(
             bound = true;
             break;
         // Drag and drop events
-        case WXD_EVENT_TYPE_BEGIN_DRAG:
-            wxLogWarning("wxEVT_BEGIN_DRAG not available in wxWidgets 3.2.8");
-            bound = false;
-            break;
         case WXD_EVENT_TYPE_DROP_FILES:
             wx_handler->Bind(wxEVT_DROP_FILES, functor);
             bound = true;
             break;
-        case WXD_EVENT_TYPE_DROP_TEXT:
-            wxLogWarning("wxEVT_DROP_TEXT not available in wxWidgets 3.2.8");
-            bound = false;
-            break;
-        case WXD_EVENT_TYPE_END_DRAG:
-            wxLogWarning("wxEVT_END_DRAG not available in wxWidgets 3.2.8");
-            bound = false;
+        case WXD_EVENT_TYPE_PAINT:
+            wx_handler->Bind(wxEVT_PAINT, functor);
+            bound = true;
             break;
 
         // Default case for unhandled/unknown event types
@@ -706,86 +698,151 @@ WXD_EXPORTED int wxd_ScrollEvent_GetOrientation(wxd_Event_t* event) {
     return scrollEvent->GetOrientation();
 }
 
-// Function to map WXDEventTypeCEnum to wxEventType for Bind
-// This is called by wxd_EvtHandler_Bind
+// Maps our stable C enum value to wxWidgets' dynamic event types
 static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
     switch (c_enum_val) {
-        case WXD_EVENT_TYPE_NULL: return wxEVT_NULL;
-        case WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED: return wxEVT_BUTTON;
-        case WXD_EVENT_TYPE_CLOSE_WINDOW: return wxEVT_CLOSE_WINDOW;
-        case WXD_EVENT_TYPE_CHECKBOX: return wxEVT_CHECKBOX;
-        case WXD_EVENT_TYPE_TEXT: return wxEVT_TEXT;
-        case WXD_EVENT_TYPE_TEXT_ENTER: return wxEVT_TEXT_ENTER;
-        case WXD_EVENT_TYPE_SIZE: return wxEVT_SIZE;
-        case WXD_EVENT_TYPE_MENU: return wxEVT_MENU;
-        case WXD_EVENT_TYPE_LEFT_DOWN: return wxEVT_LEFT_DOWN;
-        case WXD_EVENT_TYPE_LEFT_UP: return wxEVT_LEFT_UP;
-        case WXD_EVENT_TYPE_MOTION: return wxEVT_MOTION;
-        case WXD_EVENT_TYPE_MOUSEWHEEL: return wxEVT_MOUSEWHEEL;
-        case WXD_EVENT_TYPE_KEY_DOWN: return wxEVT_KEY_DOWN;
-        case WXD_EVENT_TYPE_KEY_UP: return wxEVT_KEY_UP;
-        case WXD_EVENT_TYPE_CHAR: return wxEVT_CHAR;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBUTTON_SELECTED: return wxEVT_RADIOBUTTON;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBOX_SELECTED: return wxEVT_RADIOBOX;
-        case WXD_EVENT_TYPE_COMMAND_LISTBOX_SELECTED: return wxEVT_LISTBOX;
-        case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED: return wxEVT_CHOICE;
-        case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED: return wxEVT_COMBOBOX;
-        case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED: return wxEVT_CHECKLISTBOX; // wxEVT_CHECKLISTBOX uses wxEVT_COMMAND_LISTBOX_SELECTED under the hood for selection
-        case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED: return wxEVT_TOGGLEBUTTON;
-        case WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT: return wxEVT_TREE_BEGIN_LABEL_EDIT;
-        case WXD_EVENT_TYPE_TREE_END_LABEL_EDIT: return wxEVT_TREE_END_LABEL_EDIT;
-        case WXD_EVENT_TYPE_TREE_SEL_CHANGED: return wxEVT_TREE_SEL_CHANGED;
-        case WXD_EVENT_TYPE_TREE_ITEM_ACTIVATED: return wxEVT_TREE_ITEM_ACTIVATED;
-        case WXD_EVENT_TYPE_SLIDER: return wxEVT_SLIDER; // This is usually wxEVT_SCROLL_THUMBTRACK for sliders
-        case WXD_EVENT_TYPE_SPINCTRL: return wxEVT_SPINCTRL;
-        case WXD_EVENT_TYPE_SPIN_UP: return wxEVT_SPIN_UP;
-        case WXD_EVENT_TYPE_SPIN_DOWN: return wxEVT_SPIN_DOWN;
-        case WXD_EVENT_TYPE_SPIN: return wxEVT_SPIN;
-        case WXD_EVENT_TYPE_NOTEBOOK_PAGE_CHANGED: return wxEVT_NOTEBOOK_PAGE_CHANGED;
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGED: return wxEVT_SPLITTER_SASH_POS_CHANGED;
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGING: return wxEVT_SPLITTER_SASH_POS_CHANGING;
-        case WXD_EVENT_TYPE_SPLITTER_DOUBLECLICKED: return wxEVT_SPLITTER_DOUBLECLICKED;
-        case WXD_EVENT_TYPE_SPLITTER_UNSPLIT: return wxEVT_SPLITTER_UNSPLIT;
-        case WXD_EVENT_TYPE_LIST_ITEM_SELECTED: return wxEVT_LIST_ITEM_SELECTED;
-        case WXD_EVENT_TYPE_LIST_ITEM_ACTIVATED: return wxEVT_LIST_ITEM_ACTIVATED;
-        case WXD_EVENT_TYPE_LIST_COL_CLICK: return wxEVT_LIST_COL_CLICK;
-        case WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT: return wxEVT_LIST_BEGIN_LABEL_EDIT;
-        case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT: return wxEVT_LIST_END_LABEL_EDIT;
-        case WXD_EVENT_TYPE_COLOURPICKER_CHANGED: return wxEVT_COLOURPICKER_CHANGED;
-        case WXD_EVENT_TYPE_DATE_CHANGED: return wxEVT_DATE_CHANGED;
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED: return wxEVT_TREEBOOK_PAGE_CHANGED;
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGING: return wxEVT_TREEBOOK_PAGE_CHANGING;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED: return wxEVT_TREEBOOK_NODE_EXPANDED;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED: return wxEVT_TREEBOOK_NODE_COLLAPSED;
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_SEARCH_BTN: return wxEVT_SEARCHCTRL_SEARCH_BTN;
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_CANCEL_BTN: return wxEVT_SEARCHCTRL_CANCEL_BTN;
-        case WXD_EVENT_TYPE_COMMAND_HYPERLINK: return wxEVT_HYPERLINK;
-        case WXD_EVENT_TYPE_SPINCTRLDOUBLE: return wxEVT_SPINCTRLDOUBLE;
-        // ADDED: Calendar Control Event
-        case WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED: return wxEVT_CALENDAR_SEL_CHANGED;
-
-        // ADDED: ScrollBar Events
-        case WXD_EVENT_TYPE_SCROLL_TOP: return wxEVT_SCROLL_TOP;
-        case WXD_EVENT_TYPE_SCROLL_BOTTOM: return wxEVT_SCROLL_BOTTOM;
-        case WXD_EVENT_TYPE_SCROLL_LINEUP: return wxEVT_SCROLL_LINEUP;
-        case WXD_EVENT_TYPE_SCROLL_LINEDOWN: return wxEVT_SCROLL_LINEDOWN;
-        case WXD_EVENT_TYPE_SCROLL_PAGEUP: return wxEVT_SCROLL_PAGEUP;
-        case WXD_EVENT_TYPE_SCROLL_PAGEDOWN: return wxEVT_SCROLL_PAGEDOWN;
-        case WXD_EVENT_TYPE_SCROLL_THUMBTRACK: return wxEVT_SCROLL_THUMBTRACK;
-        case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE: return wxEVT_SCROLL_THUMBRELEASE;
-        case WXD_EVENT_TYPE_SCROLL_CHANGED: return wxEVT_SCROLL_CHANGED;
-        case WXD_EVENT_TYPE_FILEPICKER_CHANGED: return wxEVT_FILEPICKER_CHANGED;
-        case WXD_EVENT_TYPE_DIRPICKER_CHANGED: return wxEVT_DIRPICKER_CHANGED;
-        case WXD_EVENT_TYPE_FONTPICKER_CHANGED: return wxEVT_FONTPICKER_CHANGED;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK: return wxEVT_NOTIFICATION_MESSAGE_CLICK;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED: return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION: return wxEVT_NOTIFICATION_MESSAGE_ACTION;
-        case WXD_EVENT_TYPE_IDLE: return wxEVT_IDLE;
-
+        case WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED:
+            return wxEVT_BUTTON;
+        case WXD_EVENT_TYPE_CLOSE_WINDOW:
+            return wxEVT_CLOSE_WINDOW;
+        case WXD_EVENT_TYPE_CHECKBOX:
+            return wxEVT_CHECKBOX;
+        case WXD_EVENT_TYPE_TEXT:
+            return wxEVT_TEXT;
+        case WXD_EVENT_TYPE_TEXT_ENTER:
+            return wxEVT_TEXT_ENTER;
+        case WXD_EVENT_TYPE_SIZE:
+            return wxEVT_SIZE;
+        case WXD_EVENT_TYPE_MENU:
+            return wxEVT_MENU;
+        case WXD_EVENT_TYPE_LEFT_DOWN:
+            return wxEVT_LEFT_DOWN;
+        case WXD_EVENT_TYPE_LEFT_UP:
+            return wxEVT_LEFT_UP;
+        case WXD_EVENT_TYPE_MOTION:
+            return wxEVT_MOTION;
+        case WXD_EVENT_TYPE_MOUSEWHEEL:
+            return wxEVT_MOUSEWHEEL;
+        case WXD_EVENT_TYPE_KEY_DOWN:
+            return wxEVT_KEY_DOWN;
+        case WXD_EVENT_TYPE_KEY_UP:
+            return wxEVT_KEY_UP;
+        case WXD_EVENT_TYPE_CHAR:
+            return wxEVT_CHAR;
+        case WXD_EVENT_TYPE_COMMAND_RADIOBUTTON_SELECTED:
+            return wxEVT_RADIOBUTTON;
+        case WXD_EVENT_TYPE_COMMAND_RADIOBOX_SELECTED:
+            return wxEVT_RADIOBOX;
+        case WXD_EVENT_TYPE_COMMAND_LISTBOX_SELECTED:
+            return wxEVT_LISTBOX;
+        case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED:
+            return wxEVT_CHOICE;
+        case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED:
+            return wxEVT_COMBOBOX;
+        case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED:
+            return wxEVT_CHECKLISTBOX;
+        case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED:
+            return wxEVT_TOGGLEBUTTON;
+        case WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT:
+            return wxEVT_TREE_BEGIN_LABEL_EDIT;
+        case WXD_EVENT_TYPE_TREE_END_LABEL_EDIT:
+            return wxEVT_TREE_END_LABEL_EDIT;
+        case WXD_EVENT_TYPE_TREE_SEL_CHANGED:
+            return wxEVT_TREE_SEL_CHANGED;
+        case WXD_EVENT_TYPE_TREE_ITEM_ACTIVATED:
+            return wxEVT_TREE_ITEM_ACTIVATED;
+        case WXD_EVENT_TYPE_SLIDER:
+            return wxEVT_SLIDER;
+        case WXD_EVENT_TYPE_SPINCTRL:
+            return wxEVT_SPINCTRL;
+        case WXD_EVENT_TYPE_SPIN_UP:
+            return wxEVT_SPIN_UP;
+        case WXD_EVENT_TYPE_SPIN_DOWN:
+            return wxEVT_SPIN_DOWN;
+        case WXD_EVENT_TYPE_SPIN:
+            return wxEVT_SPIN;
+        case WXD_EVENT_TYPE_NOTEBOOK_PAGE_CHANGED:
+            return wxEVT_NOTEBOOK_PAGE_CHANGED;
+        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGED:
+            return wxEVT_SPLITTER_SASH_POS_CHANGED;
+        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGING:
+            return wxEVT_SPLITTER_SASH_POS_CHANGING;
+        case WXD_EVENT_TYPE_SPLITTER_DOUBLECLICKED:
+            return wxEVT_SPLITTER_DOUBLECLICKED;
+        case WXD_EVENT_TYPE_SPLITTER_UNSPLIT:
+            return wxEVT_SPLITTER_UNSPLIT;
+        case WXD_EVENT_TYPE_LIST_ITEM_SELECTED:
+            return wxEVT_LIST_ITEM_SELECTED;
+        case WXD_EVENT_TYPE_LIST_ITEM_ACTIVATED:
+            return wxEVT_LIST_ITEM_ACTIVATED;
+        case WXD_EVENT_TYPE_LIST_COL_CLICK:
+            return wxEVT_LIST_COL_CLICK;
+        case WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT:
+            return wxEVT_LIST_BEGIN_LABEL_EDIT;
+        case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT:
+            return wxEVT_LIST_END_LABEL_EDIT;
+        case WXD_EVENT_TYPE_COLOURPICKER_CHANGED:
+            return wxEVT_COLOURPICKER_CHANGED;
+        case WXD_EVENT_TYPE_DATE_CHANGED:
+            return wxEVT_DATE_CHANGED;
+        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED:
+            return wxEVT_TREEBOOK_PAGE_CHANGED;
+        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGING:
+            return wxEVT_TREEBOOK_PAGE_CHANGING;
+        case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED:
+            return wxEVT_TREEBOOK_NODE_COLLAPSED;
+        case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED:
+            return wxEVT_TREEBOOK_NODE_COLLAPSED;
+        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_SEARCH_BTN:
+            return wxEVT_SEARCHCTRL_SEARCH_BTN;
+        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_CANCEL_BTN:
+            return wxEVT_SEARCHCTRL_CANCEL_BTN;
+        case WXD_EVENT_TYPE_COMMAND_HYPERLINK:
+            return wxEVT_HYPERLINK;
+        case WXD_EVENT_TYPE_SPINCTRLDOUBLE:
+            return wxEVT_SPINCTRLDOUBLE;
+        case WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED:
+            return wxEVT_CALENDAR_SEL_CHANGED;
+        case WXD_EVENT_TYPE_SCROLL_TOP:
+            return wxEVT_SCROLL_TOP;
+        case WXD_EVENT_TYPE_SCROLL_BOTTOM:
+            return wxEVT_SCROLL_BOTTOM;
+        case WXD_EVENT_TYPE_SCROLL_LINEUP:
+            return wxEVT_SCROLL_LINEUP;
+        case WXD_EVENT_TYPE_SCROLL_LINEDOWN:
+            return wxEVT_SCROLL_LINEDOWN;
+        case WXD_EVENT_TYPE_SCROLL_PAGEUP:
+            return wxEVT_SCROLL_PAGEUP;
+        case WXD_EVENT_TYPE_SCROLL_PAGEDOWN:
+            return wxEVT_SCROLL_PAGEDOWN;
+        case WXD_EVENT_TYPE_SCROLL_THUMBTRACK:
+            return wxEVT_SCROLL_THUMBTRACK;
+        case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE:
+            return wxEVT_SCROLL_THUMBRELEASE;
+        case WXD_EVENT_TYPE_SCROLL_CHANGED:
+            return wxEVT_SCROLL_CHANGED;
+        case WXD_EVENT_TYPE_FILEPICKER_CHANGED:
+            return wxEVT_FILEPICKER_CHANGED;
+        case WXD_EVENT_TYPE_DIRPICKER_CHANGED:
+            return wxEVT_DIRPICKER_CHANGED;
+        case WXD_EVENT_TYPE_FONTPICKER_CHANGED:
+            return wxEVT_FONTPICKER_CHANGED;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK:
+            return wxEVT_NOTIFICATION_MESSAGE_CLICK;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED:
+            return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION:
+            return wxEVT_NOTIFICATION_MESSAGE_ACTION;
+        case WXD_EVENT_TYPE_IDLE:
+            return wxEVT_IDLE;
+        case WXD_EVENT_TYPE_DROP_FILES:
+            return wxEVT_DROP_FILES;
+        case WXD_EVENT_TYPE_PAINT:
+            return wxEVT_PAINT;
         default:
-            // Optionally log an error or return a specific wxEventType to indicate failure
-            // wxLogError("get_wx_event_type_for_c_enum: Unknown WXDEventTypeCEnum value: %d", c_enum_val);
-            return wxEVT_NULL; // Or handle error appropriately
+            // Unknown event type - should we handle this differently?
+            // For now let's use a null/placeholder value
+            return wxEVT_NULL;
     }
 }
 

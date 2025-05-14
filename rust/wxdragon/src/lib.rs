@@ -8,6 +8,7 @@ pub mod art_provider;
 pub mod bitmap;
 pub mod color;
 pub mod datetime;
+pub mod dc;
 pub mod dialogs;
 pub mod dnd;
 pub mod event;
@@ -138,4 +139,10 @@ pub use sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
 pub use dnd::{
     DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
     TextDropTarget,
+};
+
+// Re-export Device Context functionality
+pub use dc::{
+    BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
+    WindowDC,
 };

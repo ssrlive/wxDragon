@@ -161,10 +161,9 @@ impl EventType {
     pub const IDLE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_IDLE);
 
     // Drag and drop events
-    pub const BEGIN_DRAG: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_BEGIN_DRAG);
     pub const DROP_FILES: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DROP_FILES);
-    pub const DROP_TEXT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DROP_TEXT);
-    pub const END_DRAG: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_END_DRAG);
+
+    pub const PAINT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_PAINT);
 
     // Add others as needed
 

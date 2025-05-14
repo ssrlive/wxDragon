@@ -174,3 +174,9 @@ pub use crate::dnd::{
     DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
     TextDropTarget,
 };
+
+// Paint
+pub use crate::dc::{
+    BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
+    WindowDC,
+};
