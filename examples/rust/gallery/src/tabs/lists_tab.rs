@@ -3,6 +3,7 @@ use wxdragon::prelude::*;
 use wxdragon::widgets::checklistbox::CheckListBoxStyle;
 use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
+use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
 use wxdragon::widgets::panel::PanelStyle;
 // use wxdragon::widgets::choice; // For CB_SORT if it were available directly
@@ -20,6 +21,8 @@ pub struct ListsTabControls {
     pub combo_status_label: StaticText,
     pub list_ctrl: ListCtrl,
     pub list_ctrl_status_label: StaticText,
+    pub editable_listbox: EditableListBox,
+    pub editable_listbox_status_label: StaticText,
 }
 
 pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls {
@@ -117,6 +120,26 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .with_label("ListCtrl Status: None")
         .build();
 
+    // --- ADDED: EditableListBox Example ---
+    let editable_listbox = EditableListBox::builder(&panel)
+        .with_label("Editable List")
+        .with_style(EditableListBoxStyle::AllowNew|EditableListBoxStyle::AllowEdit|EditableListBoxStyle::AllowDelete)
+        .build();
+
+    // Add some initial items to the editable listbox
+    editable_listbox.set_strings(&[
+        "Task 1", 
+        "Task 2", 
+        "Task 3", 
+        "Click + to add more tasks",
+        "Select a task and click - to remove it",
+        "Use the up/down buttons to reorder tasks"
+    ]);
+
+    let editable_listbox_status_label = StaticText::builder(&panel)
+        .with_label("EditableListBox: Use buttons to modify list")
+        .build();
+
     // --- Sizer for *inner_list_panel* ---
     let list_sizer_main = BoxSizer::builder(VERTICAL).build();
     let list_row_sizer = BoxSizer::builder(HORIZONTAL).build();
@@ -154,6 +177,12 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl_col_sizer.add(&list_ctrl, 1, EXPAND | ALL, 5); // ListCtrl takes available space
     list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
     list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, EXPAND | ALL, 5); // Add ListCtrl sizer to main, taking space
+
+    // Add EditableListBox and its status label
+    let editable_listbox_sizer = BoxSizer::builder(VERTICAL).build();
+    editable_listbox_sizer.add(&editable_listbox, 1, EXPAND | ALL, 5);
+    editable_listbox_sizer.add(&editable_listbox_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
+    list_sizer_main.add_sizer(&editable_listbox_sizer, 1, EXPAND | ALL, 5);
 
     panel.set_sizer(list_sizer_main, true);
     // Fit the inner panel to its contents initially
@@ -283,6 +312,31 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         },
     );
 
+    // EditableListBox events - basic selection event
+    let status_label_clone1 = editable_listbox_status_label.clone();
+    editable_listbox.bind(EventType::COMMAND_LISTBOX_SELECTED, 
+        move |_event: Event| {
+            // Simple update without accessing complex methods
+            status_label_clone1.set_label("Item selected in EditableListBox");
+        }
+    );
+    
+    // Bind event for when editing begins
+    let status_label_clone2 = editable_listbox_status_label.clone();
+    editable_listbox.bind(EventType::LIST_BEGIN_LABEL_EDIT, 
+        move |_event: Event| {
+            status_label_clone2.set_label("Editing item...");
+        }
+    );
+    
+    // Bind event for when editing ends
+    let status_label_clone3 = editable_listbox_status_label.clone();
+    editable_listbox.bind(EventType::LIST_END_LABEL_EDIT, 
+        move |_event: Event| {
+            status_label_clone3.set_label("Item edited");
+        }
+    );
+
     // Return the controls struct
     ListsTabControls {
         panel: scrolled_list_window,
@@ -296,5 +350,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         combo_status_label,
         list_ctrl,
         list_ctrl_status_label,
+        editable_listbox,
+        editable_listbox_status_label,
     }
 }

@@ -42,6 +42,7 @@
 #include <wx/calctrl.h> // ADDED for wxCalendarCtrl constants
 #include <wx/aui/aui.h>
 #include <wx/clrpicker.h>
+#include <wx/editlbox.h>
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -538,6 +539,13 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxAUI_TB_HORZ_LAYOUT", wxAUI_TB_HORZ_LAYOUT});
     constants_to_extract.push_back({"wxAUI_TB_HORIZONTAL", wxAUI_TB_HORIZONTAL});
     constants_to_extract.push_back({"wxAUI_TB_DEFAULT_STYLE", wxAUI_TB_DEFAULT_STYLE});
+
+    // wxEditableListBox styles
+    constants_to_extract.push_back({"wxEL_ALLOW_NEW", wxEL_ALLOW_NEW});
+    constants_to_extract.push_back({"wxEL_ALLOW_EDIT", wxEL_ALLOW_EDIT});
+    constants_to_extract.push_back({"wxEL_ALLOW_DELETE", wxEL_ALLOW_DELETE});
+    constants_to_extract.push_back({"wxEL_NO_REORDER", wxEL_NO_REORDER});
+    constants_to_extract.push_back({"wxEL_DEFAULT_STYLE", wxEL_DEFAULT_STYLE});
 
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",

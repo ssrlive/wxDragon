@@ -37,6 +37,7 @@ extern "C" {
 #include "widgets/wxd_file_ctrl.h"
 #include "widgets/wxd_adv_ui.h" // For wxNotificationMessage etc.
 #include "widgets/wxd_misc_widgets.h"
+#include "widgets/wxd_editablelistbox.h" // For wxEditableListBox
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"
 #include "widgets/wxd_aui.h"

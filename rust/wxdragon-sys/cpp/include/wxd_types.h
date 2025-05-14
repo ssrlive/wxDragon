@@ -252,4 +252,6 @@ typedef enum {
     WXD_DRAG_ERROR = 5      // wxDragError - Error in drag operation
 } wxd_DragResult;
 
+typedef struct wxd_EditableListBox_s* wxd_EditableListBox_t;
+
 #endif // WXD_TYPES_H 

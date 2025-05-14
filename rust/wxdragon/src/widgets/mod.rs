@@ -17,6 +17,7 @@ pub mod combobox;
 pub mod command_link_button;
 pub mod datepickerctrl;
 pub mod dir_picker_ctrl;
+pub mod editablelistbox;
 pub mod file_ctrl;
 pub mod file_picker_ctrl;
 pub mod font_picker_ctrl;
@@ -53,6 +54,8 @@ pub mod treectrl;
 pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
 pub use dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
+
+pub use editablelistbox::{EditableListBox, EditableListBoxBuilder, EditableListBoxStyle};
 
 pub use file_ctrl::{FileCtrl, FileCtrlBuilder, FileCtrlStyle};
 
