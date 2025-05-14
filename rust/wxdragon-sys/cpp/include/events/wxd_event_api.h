@@ -31,7 +31,7 @@ WXD_EXPORTED int wxd_SplitterEvent_GetSashPosition(wxd_Event_t* event);
 
 WXD_EXPORTED wxd_Colour_t wxd_ColourPickerEvent_GetColour(wxd_Event_t* event);
 
-WXD_EXPORTED WXD_TreeItemId_t* wxd_TreeEvent_GetItem(wxd_Event_t* event);
+WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetItem(wxd_Event_t* event);
 WXD_EXPORTED int wxd_TreeEvent_GetLabel(wxd_Event_t* event, char* buffer, int buffer_len);
 
 WXD_EXPORTED int32_t wxd_ListEvent_GetItemIndex(wxd_Event_t* event);

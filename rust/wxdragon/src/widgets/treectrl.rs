@@ -1,13 +1,14 @@
 //! wxTreeCtrl wrapper
 //!
 //! The `TreeCtrl` widget provides a tree control for displaying hierarchical data.
-//! This module also includes `TreeItemData` for associating custom data with tree items.
+//! This module uses the `HasItemData` trait for associating custom data with tree items.
 //!
 //! # Examples
 //!
 //! ```rust,no_run
 //! use wxdragon::prelude::*;
 //! use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
+//! use wxdragon::HasItemData;
 //!
 //! // Create custom data to associate with tree items
 //! #[derive(Clone)]
@@ -43,15 +44,13 @@
 //!
 //!     // Later, when handling selection events:
 //!     // if let Some(item_id) = tree.get_selection() {
-//!     //     if let Some(item_data) = tree.get_item_data(&item_id) {
-//!     //         if let Some(person) = item_data.downcast_ref::<PersonData>() {
+//!     //     if let Some(data) = tree.get_custom_data(&item_id) {
+//!     //         if let Some(person) = data.downcast_ref::<PersonData>() {
 //!     //             println!("Selected person: {}", person.name);
-//!     //         } else if let Some(budget) = item_data.downcast_ref::<i32>() {
+//!     //         } else if let Some(budget) = data.downcast_ref::<i32>() {
 //!     //             println!("Selected budget: ${}", budget);
-//!     //         } else if let Some(text) = item_data.downcast_ref::<String>() {
+//!     //         } else if let Some(text) = data.downcast_ref::<String>() {
 //!     //             println!("Selected text: {}", text);
-//!     //         } else {
-//!     //             println!("Data type: {}", item_data.get_type_name());
 //!     //         }
 //!     //     }
 //!     // }
@@ -60,6 +59,11 @@
 //! }
 //! ```
 
+use std::any::Any;
+use std::ffi::CString;
+use std::ptr;
+use std::sync::Arc;
+
 use crate::event::WxEvtHandler;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
@@ -67,9 +71,7 @@ use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
-use std::any::Any;
-use std::ffi::CString;
-use std::ptr;
+use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
 use wxdragon_sys as ffi;
 
 // --- TreeCtrl Styles ---
@@ -95,15 +97,15 @@ widget_style_enum!(
 // Represents the opaque wxTreeItemId used by wxWidgets.
 // This struct owns the pointer returned by the C++ FFI functions
 // and is responsible for freeing it via wxd_TreeItemId_Free.
-#[derive(Debug)] // Add Debug for easier inspection
+#[derive(Debug, Clone)]
 pub struct TreeItemId {
-    ptr: *mut ffi::WXD_TreeItemId_t,
+    ptr: *mut ffi::wxd_TreeItemId_t,
 }
 
 impl TreeItemId {
     // Creates a new TreeItemId from a raw pointer.
     // Assumes ownership of the pointer.
-    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::WXD_TreeItemId_t) -> Option<Self> {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_TreeItemId_t) -> Option<Self> {
         if ptr.is_null() {
             None
         } else {
@@ -117,8 +119,16 @@ impl TreeItemId {
     }
 
     // Returns the raw pointer - use with caution.
-    pub(crate) fn as_ptr(&self) -> *mut ffi::WXD_TreeItemId_t {
+    pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_TreeItemId_t {
         self.ptr
+    }
+}
+
+// Implement conversion to u64 for TreeItemId
+impl From<&TreeItemId> for u64 {
+    fn from(tree_item: &TreeItemId) -> Self {
+        // We use the address of the TreeItemId itself as our value
+        tree_item as *const _ as usize as u64
     }
 }
 
@@ -134,342 +144,51 @@ impl Drop for TreeItemId {
     }
 }
 
-/// TreeItemData allows associating arbitrary data with TreeCtrl items.
-///
-/// This safe wrapper around wxTreeItemData enables storing any Rust type
-/// that implements `Any + Send` with tree items. The data can later be
-/// retrieved and downcast to the original type.
-///
-/// # Examples
-///
-/// ```rust,no_run
-/// use wxdragon::prelude::*;
-/// use wxdragon::widgets::treectrl::TreeCtrl;
-///
-/// // Custom data type
-/// #[derive(Clone)]
-/// struct PersonData {
-///     name: String,
-///     age: u32,
-/// }
-///
-/// // Create a tree and add items with data
-/// let tree = TreeCtrl::builder(&panel).build();
-///
-/// // Add item with PersonData
-/// let person = PersonData {
-///     name: "Alice".to_string(),
-///     age: 30,
-/// };
-/// let item = tree.add_root_with_data("Alice", person).unwrap();
-///
-/// // Later, retrieve and use the data
-/// if let Some(data) = tree.get_item_data(&item) {
-///     // Check type and downcast
-///     if let Some(person) = data.downcast_ref::<PersonData>() {
-///         println!("Name: {}, Age: {}", person.name, person.age);
-///     }
-///     
-///     // Or check type using is<T>()
-///     if data.is::<PersonData>() {
-///         println!("This is a person entry");
-///     }
-///     
-///     // Get friendly type name
-///     println!("Data type: {}", data.get_type_name());
-/// }
-/// ```
-///
-/// # Data Type Support
-///
-/// TreeItemData can store any Rust type that implements `Clone + Any + Send`.
-/// When retrieving data, the following happens:
-///
-/// - Common types like String, integers, floats, bool, etc. can be directly accessed
-/// - Custom types that implement Clone can be accessed if they match the expected type
-/// - For types that can't be cloned or don't match, type information is still available
-///
-/// Use `downcast_ref<T>()` to access the data with the correct type, and `is<T>()`
-/// to check if the data is of a specific type.
-pub struct TreeItemData {
-    ptr: *mut ffi::WXD_TreeItemData_t,
-    data: Option<Box<dyn Any + Send>>,
-    /// Flag indicating if the TreeItemData owns the C++ pointer and should free it
-    owns_ptr: bool,
-    /// Raw pointer to the original data for direct access (unsafe)
-    raw_data_ptr: *const Box<dyn Any + Send>,
+/// TreeIterationCookie is used to keep track of the state while iterating through children
+pub struct TreeIterationCookie {
+    cookie_ptr: *mut std::ffi::c_void,
 }
 
-impl TreeItemData {
-    /// Creates a new TreeItemData instance with the given data.
-    pub fn new<T: Clone + 'static + Send>(data: T) -> Self {
-        let boxed_data: Box<dyn Any + Send> = Box::new(data);
-        let data_ptr = Box::into_raw(Box::new(boxed_data));
-
-        let ptr = unsafe { ffi::wxd_TreeItemData_Create(data_ptr as *mut _) };
-
-        TreeItemData {
-            ptr,
-            data: None,     // We've moved the data into C++ land
-            owns_ptr: true, // We created this pointer, so we own it
-            raw_data_ptr: data_ptr,
-        }
+impl TreeIterationCookie {
+    /// Creates a new cookie
+    fn new(cookie_ptr: *mut std::ffi::c_void) -> Self {
+        Self { cookie_ptr }
     }
-
-    /// Creates a new TreeItemData without any associated data.
-    pub fn empty() -> Self {
-        let ptr = unsafe { ffi::wxd_TreeItemData_Create(ptr::null_mut()) };
-
-        TreeItemData {
-            ptr,
-            data: None,
-            owns_ptr: true,
-            raw_data_ptr: ptr::null(),
-        }
-    }
-
-    /// Returns the raw pointer to the underlying wxTreeItemData.
-    pub(crate) fn as_ptr(&self) -> *mut ffi::WXD_TreeItemData_t {
-        self.ptr
-    }
-
-    /// Attempts to downcast the contained data to a specific type.
-    ///
-    /// This method allows you to retrieve data stored in a tree item
-    /// if you know the exact type. Returns None if the data is not
-    /// of the expected type.
-    pub fn downcast_ref<T: 'static>(&self) -> Option<&T> {
-        // First try if we have local data
-        if let Some(data) = &self.data {
-            if let Some(val) = data.downcast_ref::<T>() {
-                return Some(val);
-            }
-        }
-
-        // If we don't have local data, but we have a raw pointer to the original data,
-        // try to access it directly (this is unsafe but necessary for complex types)
-        if !self.raw_data_ptr.is_null() {
-            unsafe {
-                let orig_data = &**self.raw_data_ptr;
-                if let Some(val) = orig_data.downcast_ref::<T>() {
-                    return Some(val);
-                }
-            }
-        }
-
-        None
-    }
-
-    /// Checks if the contained data is of type T.
-    pub fn is<T: 'static>(&self) -> bool {
-        // First check local data
-        if let Some(data) = &self.data {
-            if data.is::<T>() {
-                return true;
-            }
-        }
-
-        // Then check raw pointer
-        if !self.raw_data_ptr.is_null() {
-            unsafe {
-                let orig_data = &**self.raw_data_ptr;
-                return orig_data.is::<T>();
-            }
-        }
-
-        false
-    }
-
-    /// Gets the original type information if this is a retrieved tree item
-    pub fn get_type_info(&self) -> Option<&TypeInfo> {
-        self.data
-            .as_ref()
-            .and_then(|data| data.downcast_ref::<TypeInfo>())
-    }
-
-    /// Gets a friendly type name of the contained data.
-    ///
-    /// This method returns a simplified type name without namespace prefixes,
-    /// making it more readable for display purposes.
-    pub fn get_type_name(&self) -> String {
-        // First check if we have local data
-        if let Some(data) = &self.data {
-            if let Some(type_info) = data.downcast_ref::<TypeInfo>() {
-                // Return the stored type name from TypeInfo
-                return simplify_type_name(&type_info.type_name);
-            }
-
-            // For known types, return friendly names
-            if data.is::<String>() {
-                return "String".to_string();
-            } else if data.is::<i32>() {
-                return "Integer (i32)".to_string();
-            } else if data.is::<i64>() {
-                return "Integer (i64)".to_string();
-            } else if data.is::<u32>() {
-                return "Unsigned Integer (u32)".to_string();
-            } else if data.is::<u64>() {
-                return "Unsigned Integer (u64)".to_string();
-            } else if data.is::<f32>() {
-                return "Float (f32)".to_string();
-            } else if data.is::<f64>() {
-                return "Float (f64)".to_string();
-            } else if data.is::<bool>() {
-                return "Boolean".to_string();
-            } else if data.is::<()>() {
-                return "Unit (empty)".to_string();
-            } else if data.is::<Vec<String>>() {
-                return "Vector of Strings".to_string();
-            } else if data.is::<Vec<i32>>() {
-                return "Vector of Integers".to_string();
-            }
-
-            // Default case - get the type name from the type_id
-            return simplify_type_name(&std::any::type_name_of_val(&**data));
-        }
-
-        // If we don't have local data, but we have a raw pointer to the original data,
-        // try to access it directly
-        if !self.raw_data_ptr.is_null() {
-            unsafe {
-                let orig_data = &**self.raw_data_ptr;
-                return simplify_type_name(&std::any::type_name_of_val(orig_data));
-            }
-        }
-
-        "No data".to_string()
-    }
-
-    /// Creates a TreeItemData from a raw pointer.
-    ///
-    /// # Safety
-    /// The pointer must be a valid WXD_TreeItemData_t pointer.
-    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::WXD_TreeItemData_t) -> Option<Self> {
-        if ptr.is_null() {
-            None
-        } else {
-            // Retrieve the client data pointer from C++
-            let data_ptr = ffi::wxd_TreeItemData_GetClientData(ptr);
-
-            // Store the original data pointer for direct access
-            let raw_data_ptr = data_ptr as *const Box<dyn Any + Send>;
-
-            // Create the data to return
-            let data: Option<Box<dyn Any + Send>> = if !data_ptr.is_null() {
-                // The pointer points to a Box<dyn Any + Send> that we stored
-                let boxed_data_ptr = data_ptr as *const Box<dyn Any + Send>;
-
-                if !boxed_data_ptr.is_null() {
-                    // For primitive types, we can clone them directly
-                    let boxed_data = &**boxed_data_ptr;
-
-                    // Clone primitive types for local access
-                    if let Some(s) = boxed_data.downcast_ref::<String>() {
-                        Some(Box::new(s.clone()))
-                    } else if let Some(i) = boxed_data.downcast_ref::<i32>() {
-                        Some(Box::new(*i))
-                    } else if let Some(i) = boxed_data.downcast_ref::<i64>() {
-                        Some(Box::new(*i))
-                    } else if let Some(i) = boxed_data.downcast_ref::<u32>() {
-                        Some(Box::new(*i))
-                    } else if let Some(i) = boxed_data.downcast_ref::<u64>() {
-                        Some(Box::new(*i))
-                    } else if let Some(i) = boxed_data.downcast_ref::<usize>() {
-                        Some(Box::new(*i))
-                    } else if let Some(i) = boxed_data.downcast_ref::<isize>() {
-                        Some(Box::new(*i))
-                    } else if let Some(f) = boxed_data.downcast_ref::<f32>() {
-                        Some(Box::new(*f))
-                    } else if let Some(f) = boxed_data.downcast_ref::<f64>() {
-                        Some(Box::new(*f))
-                    } else if let Some(b) = boxed_data.downcast_ref::<bool>() {
-                        Some(Box::new(*b))
-                    } else if let Some(c) = boxed_data.downcast_ref::<char>() {
-                        Some(Box::new(*c))
-                    } else if let Some(_) = boxed_data.downcast_ref::<()>() {
-                        Some(Box::new(()))
-                    } else {
-                        // For complex types, we'll provide type info for debugging
-                        // but we'll rely on raw_data_ptr for actual access
-                        let type_id = boxed_data.type_id();
-                        let type_name = std::any::type_name_of_val(boxed_data);
-
-                        Some(Box::new(TypeInfo {
-                            type_id,
-                            type_name: type_name.to_string(),
-                        }))
-                    }
-                } else {
-                    // Null inner pointer, create a placeholder
-                    let empty_box: Box<dyn Any + Send> = Box::new(());
-                    Some(empty_box)
-                }
-            } else {
-                // No data attached
-                let empty_box: Box<dyn Any + Send> = Box::new(());
-                Some(empty_box)
-            };
-
-            Some(TreeItemData {
-                ptr,
-                data,
-                owns_ptr: false, // We received this pointer from TreeCtrl, it owns it
-                raw_data_ptr,
-            })
-        }
+    
+    /// Gets the raw pointer to the cookie
+    fn as_ptr_mut(&mut self) -> *mut *mut std::ffi::c_void {
+        &mut self.cookie_ptr as *mut *mut std::ffi::c_void
     }
 }
 
-/// Simplifies a Rust type name by removing module paths.
-///
-/// Converts something like "alloc::string::String" to just "String"
-/// or "example::rust::gallery::tabs::treectrl_tab::PersonData" to just "PersonData".
-fn simplify_type_name(type_name: &str) -> String {
-    type_name
-        .rsplit("::")
-        .next()
-        .unwrap_or(type_name)
-        .to_string()
-}
-
-/// Information about a type that was stored in a tree item
-#[derive(Debug)]
-pub struct TypeInfo {
-    /// Type ID of the original object
-    pub type_id: std::any::TypeId,
-    /// Name of the original object's type
-    pub type_name: String,
-    // We don't store the original pointer because it would make TypeInfo not Send-safe
-    // Instead, we just use the type information
-}
-
-impl Drop for TreeItemData {
+impl Drop for TreeIterationCookie {
     fn drop(&mut self) {
-        if !self.ptr.is_null() && self.owns_ptr {
+        // Free the cookie if it hasn't been cleaned up already
+        if !self.cookie_ptr.is_null() {
+            // The cookie is cleaned up in the C++ side when GetNextChild returns null
+            // But we'll add this as an extra safety measure
             unsafe {
-                // If we own the data, we need to retrieve and free it first
-                if self.data.is_none() {
-                    let data_ptr =
-                        ffi::wxd_TreeItemData_GetClientData(self.ptr) as *mut Box<dyn Any + Send>;
-                    if !data_ptr.is_null() {
-                        // Take ownership of the Box and drop it
-                        let _ = Box::from_raw(data_ptr);
-                    }
-                }
-
-                // Now free the TreeItemData itself
-                ffi::wxd_TreeItemData_Free(self.ptr);
+                // This assumes the cookie is a wxTreeItemIdValue* allocated with new
+                let _ = Box::from_raw(self.cookie_ptr);
             }
+            self.cookie_ptr = ptr::null_mut();
         }
     }
 }
 
-// Represents the wxTreeCtrl widget.
+/// Represents the wxTreeCtrl widget.
 #[derive(Clone)]
 pub struct TreeCtrl {
     window: Window,
 }
 
+/// TreeCtrl implementation with tree traversal capabilities.
+/// The following FFI functions are available for tree traversal:
+/// - `wxd_TreeCtrl_GetRootItem`: Get the root item
+/// - `wxd_TreeCtrl_GetFirstChild`: Get the first child of an item
+/// - `wxd_TreeCtrl_GetNextChild`: Get the next child of an item using the same cookie
+/// - `wxd_TreeCtrl_GetNextSibling`: Get the next sibling of an item
+/// - `wxd_TreeCtrl_GetChildrenCount`: Get the number of children of an item
 impl TreeCtrl {
     /// Creates a new TreeCtrl builder.
     pub fn builder(parent: &dyn WxWidget) -> TreeCtrlBuilder {
@@ -509,12 +228,17 @@ impl TreeCtrl {
             panic!("Failed to create wxTreeCtrl");
         }
 
-        unsafe { Self::from_ptr(ctrl_ptr) }
+        let tree_ctrl = unsafe { Self::from_ptr(ctrl_ptr) };
+        
+        // Set up cleanup for custom data
+        tree_ctrl.setup_cleanup();
+        
+        tree_ctrl
     }
 
     /// Returns the raw underlying TreeCtrl pointer.
     fn as_ptr(&self) -> *mut ffi::wxd_TreeCtrl_t {
-        self.window.as_ptr() as *mut ffi::wxd_TreeCtrl_t
+        self.window.handle_ptr() as *mut ffi::wxd_TreeCtrl_t
     }
 
     /// Adds the root item to the tree control.
@@ -531,24 +255,19 @@ impl TreeCtrl {
     /// Adds the root item to the tree control with associated data.
     ///
     /// This method creates the root item and associates custom data with it.
-    /// The data is stored in the tree control and can be retrieved later using
-    /// `get_item_data()`.
+    /// The data is stored using the HasItemData trait implementation and can be 
+    /// retrieved later using `get_custom_data()`.
     ///
     /// # Parameters
     ///
     /// * `text` - The text label for the root item
     /// * `data` - Custom data to associate with the item. Can be any type that
-    ///            implements `Clone + 'static + Send`
+    ///            implements `'static + Send + Sync`
     ///
     /// # Returns
     ///
     /// * `Some(TreeItemId)` - The ID of the newly created item
     /// * `None` - If item creation failed
-    ///
-    /// # Ownership
-    ///
-    /// The tree control takes ownership of the data. When the tree item is deleted,
-    /// the associated data will be properly cleaned up.
     ///
     /// # Examples
     ///
@@ -563,28 +282,18 @@ impl TreeCtrl {
     /// let company = CompanyData { employees: 500, revenue: 10000000.0 };
     /// let root = tree.add_root_with_data("ACME Corp", company).unwrap();
     /// ```
-    pub fn add_root_with_data<T: Clone + 'static + Send>(
+    pub fn add_root_with_data<T: Any + Send + Sync + 'static>(
         &self,
         text: &str,
         data: T,
     ) -> Option<TreeItemId> {
-        let c_text = CString::new(text).unwrap_or_default();
-        let item_data = TreeItemData::new(data);
-
-        let item_ptr = unsafe {
-            ffi::wxd_TreeCtrl_AddRoot(
-                self.as_ptr(),
-                c_text.as_ptr(),
-                -1,
-                -1,
-                item_data.as_ptr() as *mut _,
-            )
-        };
-
-        // Don't drop the TreeItemData, it's now owned by the tree control
-        std::mem::forget(item_data);
-
-        unsafe { TreeItemId::from_ptr(item_ptr) }
+        // First create the root item without data
+        let root_item = self.add_root(text)?;
+        
+        // Then associate data with it
+        self.set_custom_data(&root_item, data);
+        
+        Some(root_item)
     }
 
     /// Appends an item to the given parent item.
@@ -608,25 +317,20 @@ impl TreeCtrl {
     /// Appends an item to the given parent item with associated data.
     ///
     /// This method creates a child item under the specified parent and associates
-    /// custom data with it. The data is stored in the tree control and can be
-    /// retrieved later using `get_item_data()`.
+    /// custom data with it. The data is stored using the HasItemData trait implementation
+    /// and can be retrieved later using `get_custom_data()`.
     ///
     /// # Parameters
     ///
     /// * `parent` - The parent item to which this item will be added
     /// * `text` - The text label for the item
     /// * `data` - Custom data to associate with the item. Can be any type that
-    ///            implements `Clone + 'static + Send`
+    ///            implements `'static + Send + Sync`
     ///
     /// # Returns
     ///
     /// * `Some(TreeItemId)` - The ID of the newly created item
     /// * `None` - If item creation failed
-    ///
-    /// # Ownership
-    ///
-    /// The tree control takes ownership of the data. When the tree item is deleted,
-    /// the associated data will be properly cleaned up.
     ///
     /// # Examples
     ///
@@ -644,36 +348,28 @@ impl TreeCtrl {
     /// tree.append_item_with_data(&root, "Marketing",
     ///     "Handles all promotional activities".to_string()).unwrap();
     /// ```
-    pub fn append_item_with_data<T: Clone + 'static + Send>(
+    pub fn append_item_with_data<T: Any + Send + Sync + 'static>(
         &self,
         parent: &TreeItemId,
         text: &str,
         data: T,
     ) -> Option<TreeItemId> {
-        let c_text = CString::new(text).unwrap_or_default();
-        let item_data = TreeItemData::new(data);
-
-        let item_ptr = unsafe {
-            ffi::wxd_TreeCtrl_AppendItem(
-                self.as_ptr(),
-                parent.as_ptr(),
-                c_text.as_ptr(),
-                -1,
-                -1,
-                item_data.as_ptr() as *mut _,
-            )
-        };
-
-        // Don't drop the TreeItemData, it's now owned by the tree control
-        std::mem::forget(item_data);
-
-        unsafe { TreeItemId::from_ptr(item_ptr) }
+        // First create the item without data
+        let item = self.append_item(parent, text)?;
+        
+        // Then associate data with it
+        self.set_custom_data(&item, data);
+        
+        Some(item)
     }
 
     /// Deletes the specified item and all its children.
     /// Note: The passed TreeItemId becomes invalid after this call,
     /// but Rust's ownership rules mean it will still be dropped (calling Free).
     pub fn delete(&self, item: TreeItemId) {
+        // Clean up any attached data before deleting the item
+        let _ = self.clear_custom_data(&item);
+        
         unsafe {
             ffi::wxd_TreeCtrl_Delete(self.as_ptr(), item.as_ptr());
         }
@@ -694,90 +390,284 @@ impl TreeCtrl {
         }
     }
 
-    /// Gets the data associated with an item.
-    ///
-    /// This method retrieves any custom data that was previously associated with
-    /// the tree item using `add_root_with_data`, `append_item_with_data`, or
-    /// `set_item_data`.
-    ///
-    /// # Parameters
-    ///
-    /// * `item` - The tree item to get data from
-    ///
-    /// # Returns
-    ///
-    /// * `Some(TreeItemData)` - The data associated with the item, which can be
-    ///                          downcast to the original type using `downcast_ref<T>()`
-    /// * `None` - If the item has no associated data or on error
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use wxdragon::prelude::*;
-    /// use wxdragon::widgets::treectrl::TreeCtrl;
-    ///
-    /// let tree = TreeCtrl::builder(&panel).build();
-    /// let root = tree.add_root_with_data("Root", "Root data".to_string()).unwrap();
-    ///
-    /// if let Some(data) = tree.get_item_data(&root) {
-    ///     if let Some(text) = data.downcast_ref::<String>() {
-    ///         println!("Item data: {}", text);
-    ///     }
-    /// }
-    /// ```
-    pub fn get_item_data(&self, item: &TreeItemId) -> Option<TreeItemData> {
-        let data_ptr = unsafe { ffi::wxd_TreeCtrl_GetItemData(self.as_ptr(), item.as_ptr()) };
-        unsafe { TreeItemData::from_ptr(data_ptr) }
+    /// Sets up the TreeCtrl to clean up all custom data when it's destroyed.
+    /// This is automatically called during construction.
+    fn setup_cleanup(&self) {
+        use crate::event::EventType;
+        
+        // Create a clone for the closure
+        let tree_ctrl_clone = self.clone();
+        
+        // Bind to the DESTROY event for proper cleanup when the window is destroyed
+        self.bind(EventType::DESTROY, move |_event| {
+            // Clean up all custom data when the control is destroyed
+            tree_ctrl_clone.cleanup_all_custom_data();
+        });
+    }
+    
+    /// Manually clean up all custom data associated with this TreeCtrl.
+    /// This can be called explicitly when needed, but is automatically
+    /// called when the TreeCtrl is destroyed.
+    pub fn cleanup_custom_data(&self) {
+        self.cleanup_all_custom_data();
     }
 
-    /// Sets data for an item.
+    /// Gets the root item of the tree
+    pub fn get_root_item(&self) -> Option<TreeItemId> {
+        let item_ptr = unsafe { ffi::wxd_TreeCtrl_GetRootItem(self.as_ptr()) };
+        unsafe { TreeItemId::from_ptr(item_ptr) }
+    }
+    
+    /// Gets the first child of the specified item.
+    /// Returns None if the item has no children.
     ///
-    /// This method associates custom data with an existing tree item. Any previously
-    /// associated data will be properly cleaned up.
-    ///
-    /// # Parameters
-    ///
-    /// * `item` - The tree item to set data for
-    /// * `data` - Custom data to associate with the item. Can be any type that
-    ///            implements `Clone + 'static + Send`
-    ///
-    /// # Returns
-    ///
-    /// * `true` - If the data was successfully set
-    /// * `false` - If setting the data failed
-    ///
-    /// # Ownership
-    ///
-    /// The tree control takes ownership of the data. When the tree item is deleted,
-    /// or when new data is set, the associated data will be properly cleaned up.
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use wxdragon::prelude::*;
-    /// use wxdragon::widgets::treectrl::TreeCtrl;
-    ///
-    /// let tree = TreeCtrl::builder(&panel).build();
-    /// let root = tree.add_root("Root").unwrap();
-    ///
-    /// // Set data for an existing item
-    /// tree.set_item_data(&root, "New root data".to_string());
-    /// ```
-    pub fn set_item_data<T: Clone + 'static + Send>(&self, item: &TreeItemId, data: T) -> bool {
-        let item_data = TreeItemData::new(data);
-        let result = unsafe {
-            ffi::wxd_TreeCtrl_SetItemData(self.as_ptr(), item.as_ptr(), item_data.as_ptr())
+    /// This also returns a cookie that must be used for subsequent calls to get_next_child.
+    pub fn get_first_child(&self, item: &TreeItemId) -> Option<(TreeItemId, TreeIterationCookie)> {
+        let mut cookie_ptr = ptr::null_mut();
+        let child_ptr = unsafe {
+            ffi::wxd_TreeCtrl_GetFirstChild(
+                self.as_ptr(),
+                item.as_ptr(),
+                &mut cookie_ptr as *mut *mut std::ffi::c_void
+            )
         };
-
-        // Don't drop the TreeItemData, it's now owned by the tree control
-        if result {
-            std::mem::forget(item_data);
-        }
-
-        result
+        
+        let child = unsafe { TreeItemId::from_ptr(child_ptr) }?;
+        let cookie = TreeIterationCookie::new(cookie_ptr);
+        
+        Some((child, cookie))
     }
+    
+    /// Gets the next child of an item using a cookie from a previous call to get_first_child
+    /// or get_next_child.
+    ///
+    /// Returns None when there are no more children.
+    pub fn get_next_child(&self, item: &TreeItemId, cookie: &mut TreeIterationCookie) -> Option<TreeItemId> {
+        let child_ptr = unsafe {
+            ffi::wxd_TreeCtrl_GetNextChild(
+                self.as_ptr(),
+                item.as_ptr(),
+                cookie.as_ptr_mut()
+            )
+        };
+        
+        unsafe { TreeItemId::from_ptr(child_ptr) }
+    }
+    
+    /// Gets the next sibling of the specified item.
+    /// Returns None if the item has no next sibling.
+    pub fn get_next_sibling(&self, item: &TreeItemId) -> Option<TreeItemId> {
+        let sibling_ptr = unsafe {
+            ffi::wxd_TreeCtrl_GetNextSibling(self.as_ptr(), item.as_ptr())
+        };
+        
+        unsafe { TreeItemId::from_ptr(sibling_ptr) }
+    }
+    
+    /// Gets the number of children of the specified item.
+    ///
+    /// # Parameters
+    ///
+    /// * `item` - The item to check
+    /// * `recursively` - If true, count all descendants, not just immediate children
+    ///
+    /// # Returns
+    ///
+    /// The number of children (or descendants if recursively is true)
+    pub fn get_children_count(&self, item: &TreeItemId, recursively: bool) -> usize {
+        unsafe {
+            ffi::wxd_TreeCtrl_GetChildrenCount(self.as_ptr(), item.as_ptr(), recursively) as usize
+        }
+    }
+}
 
-    // Add other safe methods here, e.g., get_item_text, expand, etc.
+// Implement HasItemData trait for TreeCtrl
+impl HasItemData for TreeCtrl {
+    fn set_custom_data<T: Any + Send + Sync + 'static>(&self, item_id: impl Into<u64>, data: T) -> u64 {
+        // Convert from the generic item_id
+        let item_id = item_id.into();
+        
+        // For TreeCtrl, we need the actual TreeItemId, not just a u64 representation
+        // Get the concrete TreeItemId if that's what was passed
+        if let Some(tree_item) = self.get_concrete_tree_item_id(item_id) {
+            // Store the new data in the registry
+            let data_id = store_item_data(data);
+            
+            // Store the data_id in wxWidgets via the C++ FFI
+            unsafe {
+                ffi::wxd_TreeCtrl_SetItemData(
+                    self.as_ptr(),
+                    tree_item.as_ptr(),
+                    data_id as i64
+                );
+            }
+            
+            return data_id;
+        }
+        
+        // If we couldn't get a valid TreeItemId, return 0 (failure)
+        0
+    }
+    
+    fn get_custom_data(&self, item_id: impl Into<u64>) -> Option<Arc<dyn Any + Send + Sync>> {
+        // Convert from the generic item_id
+        let item_id = item_id.into();
+        
+        // Get the concrete TreeItemId if that's what was passed
+        let tree_item = self.get_concrete_tree_item_id(item_id)?;
+        
+        // Get the data ID from wxWidgets
+        let data_id = unsafe {
+            ffi::wxd_TreeCtrl_GetItemData(
+                self.as_ptr(),
+                tree_item.as_ptr()
+            ) as u64
+        };
+        
+        if data_id == 0 {
+            return None;
+        }
+        
+        // Look up the data in the registry
+        get_item_data(data_id)
+    }
+    
+    fn has_custom_data(&self, item_id: impl Into<u64>) -> bool {
+        // Convert from the generic item_id
+        let item_id = item_id.into();
+        
+        // Get the concrete TreeItemId if that's what was passed
+        if let Some(tree_item) = self.get_concrete_tree_item_id(item_id) {
+            // Check if this item has data via wxWidgets
+            let data_id = unsafe {
+                ffi::wxd_TreeCtrl_GetItemData(
+                    self.as_ptr(),
+                    tree_item.as_ptr()
+                ) as u64
+            };
+            
+            return data_id != 0 && get_item_data(data_id).is_some();
+        }
+        
+        false
+    }
+    
+    fn clear_custom_data(&self, item_id: impl Into<u64>) -> bool {
+        // Convert from the generic item_id
+        let item_id = item_id.into();
+        
+        // Get the concrete TreeItemId if that's what was passed
+        if let Some(tree_item) = self.get_concrete_tree_item_id(item_id) {
+            // Get the data ID from wxWidgets
+            let data_id = unsafe {
+                ffi::wxd_TreeCtrl_GetItemData(
+                    self.as_ptr(),
+                    tree_item.as_ptr()
+                ) as u64
+            };
+            
+            if data_id != 0 {
+                // Remove the data from the registry
+                let _ = remove_item_data(data_id);
+                
+                // Clear the association in wxWidgets
+                unsafe {
+                    ffi::wxd_TreeCtrl_SetItemData(
+                        self.as_ptr(),
+                        tree_item.as_ptr(),
+                        0
+                    );
+                }
+                
+                return true;
+            }
+        }
+        
+        false
+    }
+    
+    fn cleanup_all_custom_data(&self) {
+        println!("TreeCtrl: Starting tree cleanup...");
+        
+        // Get the root item
+        let root = match self.get_root_item() {
+            Some(root) => root,
+            None => {
+                println!("TreeCtrl: No root item found, nothing to clean up");
+                return;
+            }
+        };
+        
+        // Recursively clean up the root and all its children
+        self.clean_item_and_children(&root);
+        
+        println!("TreeCtrl: Tree cleanup completed successfully");
+    }
+}
+
+// Helper methods for TreeCtrl
+impl TreeCtrl {
+    // This is a special method to handle the case of getting a TreeItemId from something
+    // that implements Into<u64>. It handles different ways the item might be passed.
+    fn get_concrete_tree_item_id(&self, id: u64) -> Option<TreeItemId> {
+        // First handle the special cases where we're given a numeric ID
+        match id {
+            // Special case for getting root item
+            1 => self.get_root_item(),
+            // Special case for getting selection
+            2 => self.get_selection(),
+            // If it's a large number, it might be a raw pointer from a TreeItemId reference
+            _ if id > u32::MAX as u64 => {
+                // Try to interpret it as a reference to an existing TreeItemId
+                let ptr = id as usize as *mut ();
+                if !ptr.is_null() {
+                    // Check if this looks like a valid pointer that might be a &TreeItemId
+                    // This requires unsafe code since we're trying to interpret arbitrary memory
+                    unsafe {
+                        let possible_tree_item = &*(ptr as *const TreeItemId);
+                        
+                        // Validate that the TreeItemId seems legitimate
+                        if !possible_tree_item.ptr.is_null() && 
+                           ffi::wxd_TreeItemId_IsOk(possible_tree_item.ptr) {
+                            // Clone it to avoid lifetime issues
+                            let clone_ptr = ffi::wxd_TreeItemId_Clone(possible_tree_item.ptr);
+                            if !clone_ptr.is_null() {
+                                return Some(TreeItemId { ptr: clone_ptr });
+                            }
+                        }
+                    }
+                }
+                
+                None
+            },
+            _ => None,
+        }
+    }
+    
+    /// Recursively clean up the item and all its children
+    fn clean_item_and_children(&self, item: &TreeItemId) {
+        // First clean up this item
+        if self.clear_custom_data(item) {
+            println!("TreeCtrl: Cleaned up data for an item");
+        }
+        
+        // Check if this item has any children
+        if self.get_children_count(item, false) == 0 {
+            // No children, we're done with this branch
+            return;
+        }
+        
+        // Get the first child
+        if let Some((first_child, mut cookie)) = self.get_first_child(item) {
+            // Clean up the first child and its descendants
+            self.clean_item_and_children(&first_child);
+            
+            // Process all remaining children
+            while let Some(next_child) = self.get_next_child(item, &mut cookie) {
+                self.clean_item_and_children(&next_child);
+            }
+        }
+    }
 }
 
 // Apply common trait implementations for this widget

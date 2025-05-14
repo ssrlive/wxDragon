@@ -29,18 +29,65 @@ extern "C" {
 #include "core/wxd_window_base.h"
 #include "events/wxd_event_api.h"
 #include "events/wxd_droptarget_api.h" // Extended drop target callbacks
-#include "widgets/wxd_controls.h"
-#include "widgets/wxd_choices.h"
-#include "widgets/wxd_containers.h"
+
+// Button and control widgets
+#include "widgets/wxd_button.h"
+#include "widgets/wxd_statictext.h"
+#include "widgets/wxd_textctrl.h"
+#include "widgets/wxd_checkbox.h"
+#include "widgets/wxd_radiobutton.h"
+#include "widgets/wxd_togglebutton.h"
+#include "widgets/wxd_gauge.h"
+#include "widgets/wxd_slider.h"
+#include "widgets/wxd_spinctrl.h"
+#include "widgets/wxd_spinbutton.h"
+#include "widgets/wxd_searchctrl.h"
+#include "widgets/wxd_hyperlinkctrl.h"
+#include "widgets/wxd_activityindicator.h"
+#include "widgets/wxd_animationctrl.h"
+#include "widgets/wxd_commandlinkbutton.h"
+#include "widgets/wxd_staticbitmap.h"
+#include "widgets/wxd_staticline.h"
+#include "widgets/wxd_scrollbar.h"
+#include "widgets/wxd_bitmapbutton.h"
+
+// List and choice widgets
+#include "widgets/wxd_listbox.h"
+#include "widgets/wxd_choice.h"
+#include "widgets/wxd_combobox.h"
+#include "widgets/wxd_checklistbox.h"
+#include "widgets/wxd_radiobox.h"
+#include "widgets/wxd_bitmapcombobox.h"
+#include "widgets/wxd_treectrl.h"
+#include "widgets/wxd_listctrl.h"
+
+// Container widgets
+#include "widgets/wxd_panel.h"
+#include "widgets/wxd_staticbox.h"
+#include "widgets/wxd_splitterwindow.h"
+#include "widgets/wxd_scrolledwindow.h"
+#include "widgets/wxd_treebook.h"
 #include "widgets/wxd_notebook.h"
+
+// Window and UI elements
+#include "widgets/wxd_frame.h"
+#include "widgets/wxd_statusbar.h"
+#include "widgets/wxd_toolbar.h"
+#include "widgets/wxd_menu.h"
+#include "widgets/wxd_bitmap.h"
+#include "widgets/wxd_artprovider.h"
+#include "widgets/wxd_calendarctrl.h"
+
+// Other widgets
 #include "widgets/wxd_pickers.h"
 #include "widgets/wxd_file_ctrl.h"
 #include "widgets/wxd_adv_ui.h" // For wxNotificationMessage etc.
-#include "widgets/wxd_misc_widgets.h"
 #include "widgets/wxd_editablelistbox.h" // For wxEditableListBox
+#include "widgets/wxd_aui.h"
+
+// Other categories
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"
-#include "widgets/wxd_aui.h"
 #include "dnd/wxd_dnd.h" // Drag and drop functionality
 #include "graphics/wxd_dc.h" // Device context functionality
 

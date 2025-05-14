@@ -1,6 +1,9 @@
+use wxdragon::event::EventType;
 use wxdragon::prelude::*;
-use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::notebook::Notebook;
+use wxdragon::widgets::panel::{Panel, PanelStyle};
 use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
+use wxdragon::HasItemData;
 
 /// A custom data type to associate with tree items
 #[derive(Debug, Clone)]
@@ -57,8 +60,8 @@ impl TreeCtrlTabControls {
             .bind(EventType::TREE_SEL_CHANGED, move |event| {
                 if let Some(item_id) = event.get_item() {
                     // Get data from the selected item
-                    if let Some(item_data) = tree_ctrl.get_item_data(&item_id) {
-                        // Try to downcast to PersonData first - this should now work with our improved implementation
+                    if let Some(item_data) = tree_ctrl.get_custom_data(&item_id) {
+                        // Try to downcast to PersonData first
                         if let Some(person) = item_data.downcast_ref::<PersonData>() {
                             info_text.set_label(&person.to_display_string());
                         }
@@ -73,18 +76,9 @@ impl TreeCtrlTabControls {
                             info_text.set_label(&format!("Number: {}", number));
                         } else if let Some(_) = item_data.downcast_ref::<()>() {
                             info_text.set_label("This item has empty data (unit type)");
-                        }
-                        // Fall back to type info if no match
-                        else if let Some(type_info) = item_data.get_type_info() {
-                            info_text.set_label(&format!(
-                                "Item has data of type: {} (ID: {:?})",
-                                type_info.type_name, type_info.type_id
-                            ));
                         } else {
-                            info_text.set_label(&format!(
-                                "Item has data of type: {}",
-                                item_data.get_type_name()
-                            ));
+                            // If we can't determine the type specifically, show a generic message
+                            info_text.set_label("Item has data of an unknown type");
                         }
                     } else {
                         info_text.set_label("Item has no associated data");
@@ -99,11 +93,8 @@ impl TreeCtrlTabControls {
         self.tree_ctrl
             .bind(EventType::TREE_ITEM_ACTIVATED, move |event| {
                 if let Some(item_id) = event.get_item() {
-                    if let Some(item_data) = tree_ctrl.get_item_data(&item_id) {
-                        info_text.set_label(&format!(
-                            "Double-clicked on item with data of type: {}",
-                            item_data.get_type_name()
-                        ));
+                    if tree_ctrl.has_custom_data(&item_id) {
+                        info_text.set_label("Double-clicked on item with custom data");
                     } else {
                         info_text.set_label("Double-clicked on item with no data");
                     }
