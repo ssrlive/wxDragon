@@ -45,10 +45,15 @@ WXD_EXPORTED wxd_Font_t* wxd_Font_CreateEx(int point_size, int family, int style
 WXD_EXPORTED bool wxd_Font_AddPrivateFont(const char* font_file_path);
 WXD_EXPORTED void wxd_Font_Destroy(wxd_Font_t* font);
 WXD_EXPORTED int wxd_Font_GetPointSize(wxd_Font_t* self);
+WXD_EXPORTED void wxd_Font_SetPointSize(wxd_Font_t* self, int point_size);
 WXD_EXPORTED int wxd_Font_GetFamily(wxd_Font_t* self);
+WXD_EXPORTED void wxd_Font_SetFamily(wxd_Font_t* self, int family);
 WXD_EXPORTED int wxd_Font_GetStyle(wxd_Font_t* self);
+WXD_EXPORTED void wxd_Font_SetStyle(wxd_Font_t* self, int style);
 WXD_EXPORTED int wxd_Font_GetWeight(wxd_Font_t* self);
+WXD_EXPORTED void wxd_Font_SetWeight(wxd_Font_t* self, int weight);
 WXD_EXPORTED bool wxd_Font_GetUnderlined(wxd_Font_t* self);
+WXD_EXPORTED void wxd_Font_SetUnderlined(wxd_Font_t* self, bool underlined);
 WXD_EXPORTED int wxd_Font_GetFaceName(wxd_Font_t* self, char* buffer, int buffer_len);
 WXD_EXPORTED bool wxd_Font_IsOk(wxd_Font_t* self);
 

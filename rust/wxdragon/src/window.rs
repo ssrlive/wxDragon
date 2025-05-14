@@ -215,6 +215,24 @@ pub trait WxWidget {
         }
     }
 
+    /// Gets the font currently used for this widget.
+    ///
+    /// Returns `Some(Font)` if a valid font is found, or `None` if no font is set or the widget handle is invalid.
+    fn get_font(&self) -> Option<crate::font::Font> {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return None;
+        }
+        
+        let font_ptr = unsafe { ffi::wxd_Window_GetFont(handle) };
+        if font_ptr.is_null() {
+            return None;
+        }
+        
+        // Create a Font object that takes ownership of the returned font pointer
+        Some(unsafe { crate::font::Font::from_ptr(font_ptr, true) })
+    }
+
     /// Enables or disables the widget.
     ///
     /// A disabled widget does not receive user input and is usually visually distinct.

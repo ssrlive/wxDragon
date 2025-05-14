@@ -27,3 +27,6 @@ pub mod treectrl_tab;
 
 /// AUI tab demonstrates the Advanced User Interface docking windows functionality.
 pub mod aui_tab;
+
+/// Color tab demonstrates the Tailwind CSS color palette in wxDragon.
+pub mod color_tab;

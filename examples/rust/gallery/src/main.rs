@@ -9,6 +9,7 @@ use tabs::advanced_tab::create_advanced_tab;
 use tabs::aui_tab::create_aui_tab;
 use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
+use tabs::color_tab::create_color_tab;
 use tabs::data_tab::{create_data_tab, FrameData};
 use tabs::dialog_tab::create_dialog_tab;
 use tabs::lists_tab::create_lists_tab;
@@ -73,6 +74,7 @@ fn main() {
         let media_controls = create_media_tab(&notebook);
         let tree_controls = create_treectrl_tab(&notebook);
         let aui_controls = create_aui_tab(&notebook);
+        let color_controls = create_color_tab(&notebook, &frame);
 
         // --- ToolBar Setup ---
         let tb_style = ToolBarStyle::Text | ToolBarStyle::Default;
@@ -115,6 +117,7 @@ fn main() {
         notebook.add_page(&media_controls.panel, "Media", false);
         notebook.add_page(&tree_controls.panel, "Tree Controls", false);
         notebook.add_page(&aui_controls.panel, "AUI", false);
+        notebook.add_page(&color_controls.panel, "Color", false);
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(VERTICAL).build();

@@ -74,6 +74,12 @@ int wxd_Font_GetWeight(wxd_Font_t* self) {
     return font->GetWeight();
 }
 
+void wxd_Font_SetWeight(wxd_Font_t* self, int weight) {
+    if (!self) return;
+    wxFont* font = reinterpret_cast<wxFont*>(self);
+    font->SetWeight(static_cast<wxFontWeight>(weight));
+}
+
 bool wxd_Font_GetUnderlined(wxd_Font_t* self) {
     if (!self) return false;
     wxFont* font = reinterpret_cast<wxFont*>(self);
@@ -119,6 +125,30 @@ WXD_EXPORTED wxd_Font_t* wxd_Font_CreateEx(int point_size, int family, int style
         delete font; // Delete if not Ok
         return NULL;
     }
+}
+
+void wxd_Font_SetPointSize(wxd_Font_t* self, int point_size) {
+    if (!self) return;
+    wxFont* font = reinterpret_cast<wxFont*>(self);
+    font->SetPointSize(point_size);
+}
+
+void wxd_Font_SetFamily(wxd_Font_t* self, int family) {
+    if (!self) return;
+    wxFont* font = reinterpret_cast<wxFont*>(self);
+    font->SetFamily(static_cast<wxFontFamily>(family));
+}
+
+void wxd_Font_SetStyle(wxd_Font_t* self, int style) {
+    if (!self) return;
+    wxFont* font = reinterpret_cast<wxFont*>(self);
+    font->SetStyle(static_cast<wxFontStyle>(style));
+}
+
+void wxd_Font_SetUnderlined(wxd_Font_t* self, bool underlined) {
+    if (!self) return;
+    wxFont* font = reinterpret_cast<wxFont*>(self);
+    font->SetUnderlined(underlined);
 }
 
 // --- wxFontDialog Implementation ---

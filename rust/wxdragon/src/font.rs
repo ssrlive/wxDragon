@@ -54,10 +54,15 @@ impl Default for FontStyle {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i32)]
 pub enum FontWeight {
-    Normal = 0,
-    Light = 1,
-    Bold = 2,
-    // Max = 3, // wxFONTWEIGHT_MAX usually maps to this or similar
+    Thin = 100,
+    ExtraLight = 200,
+    Light = 300,
+    Normal = 400,
+    Medium = 500,
+    SemiBold = 600,
+    Bold = 700,
+    ExtraBold = 800,
+    Heavy = 900,
 }
 
 impl FontWeight {
@@ -192,6 +197,46 @@ impl Font {
     /// Check if the font is valid.
     pub fn is_ok(&self) -> bool {
         unsafe { ffi::wxd_Font_IsOk(self.ptr) }
+    }
+
+    /// Sets the weight of the font.
+    pub fn set_weight(&mut self, weight: FontWeight) {
+        unsafe {
+            ffi::wxd_Font_SetWeight(self.ptr, weight.as_i32());
+        }
+    }
+
+    /// Creates a bold version of this font
+    pub fn make_bold(&mut self) {
+        self.set_weight(FontWeight::Bold);
+    }
+
+    /// Sets the point size of the font.
+    pub fn set_point_size(&mut self, point_size: i32) {
+        unsafe {
+            ffi::wxd_Font_SetPointSize(self.ptr, point_size);
+        }
+    }
+
+    /// Sets the font family.
+    pub fn set_family(&mut self, family: FontFamily) {
+        unsafe {
+            ffi::wxd_Font_SetFamily(self.ptr, family.as_i32());
+        }
+    }
+
+    /// Sets the font style.
+    pub fn set_style(&mut self, style: FontStyle) {
+        unsafe {
+            ffi::wxd_Font_SetStyle(self.ptr, style.as_i32());
+        }
+    }
+
+    /// Sets whether the font is underlined.
+    pub fn set_underlined(&mut self, underlined: bool) {
+        unsafe {
+            ffi::wxd_Font_SetUnderlined(self.ptr, underlined);
+        }
     }
 
     pub fn builder() -> FontBuilder {

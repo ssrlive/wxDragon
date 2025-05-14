@@ -173,6 +173,21 @@ WXD_EXPORTED void wxd_Window_SetFont(wxd_Window_t* self, const wxd_Font_t* font)
     }
 }
 
+WXD_EXPORTED wxd_Font_t* wxd_Window_GetFont(wxd_Window_t* self) {
+    if (!self) return NULL;
+    
+    wxWindow* window = reinterpret_cast<wxWindow*>(self);
+    wxFont font = window->GetFont();
+    
+    // Only allocate and return a new wxFont if it's valid
+    if (font.IsOk()) {
+        wxFont* new_font = new wxFont(font);
+        return reinterpret_cast<wxd_Font_t*>(new_font);
+    }
+    
+    return NULL;
+}
+
 WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(self);
     if (!wx_window) {
