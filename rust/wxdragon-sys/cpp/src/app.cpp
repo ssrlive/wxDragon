@@ -33,6 +33,14 @@ bool WxdApp::OnInit() {
         return false;
     }
 
+#ifdef __WXMSW__
+    // Use best available visual (important for proper rendering, especially with transparency)
+    SetUseBestVisual(true);
+#endif
+
+    // Initialize all stock items (standard icons, etc.)
+    wxInitializeStockLists();
+
     // Bind idle event to process callbacks
     Bind(wxEVT_IDLE, &WxdApp::OnIdle, this);
 
