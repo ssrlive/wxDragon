@@ -129,6 +129,9 @@ pub use widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 // ADDED: Re-export ScrollBar
 pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 
+// ADDED: Re-export MediaCtrl
+pub use widgets::media_ctrl::{MediaCtrl, MediaCtrlBuilder, MediaState};
+
 // Dialogs exports
 pub use dialogs::{colour_dialog::ColourDialog, font_dialog::FontDialog};
 

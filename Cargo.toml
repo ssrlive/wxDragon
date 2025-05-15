@@ -6,6 +6,7 @@ members = [
     "examples/rust/simple",
     "examples/rust/dc_example",
     "examples/rust/dnd_advanced",
+    "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]
 

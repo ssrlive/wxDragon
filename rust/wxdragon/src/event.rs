@@ -183,6 +183,20 @@ impl EventType {
     pub const NOTIFICATION_MESSAGE_ACTION: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION);
 
+    // Media events
+    pub const MEDIA_LOADED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_LOADED);
+    pub const MEDIA_STOP: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STOP);
+    pub const MEDIA_FINISHED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_FINISHED);
+    pub const MEDIA_STATECHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STATECHANGED);
+    pub const MEDIA_PLAY: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PLAY);
+    pub const MEDIA_PAUSE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PAUSE);
+
     pub const EVT_DATE_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
 

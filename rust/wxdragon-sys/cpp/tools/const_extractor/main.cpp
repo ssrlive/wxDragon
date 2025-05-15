@@ -43,6 +43,7 @@
 #include <wx/aui/aui.h>
 #include <wx/clrpicker.h>
 #include <wx/editlbox.h>
+#include <wx/mediactrl.h>
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -561,6 +562,18 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxEL_NO_REORDER", wxEL_NO_REORDER});
     constants_to_extract.push_back({"wxEL_DEFAULT_STYLE", wxEL_DEFAULT_STYLE});
 
+    // wxMediaCtrl styles
+    constants_to_extract.push_back({"wxMC_NO_AUTORESIZE", wxMC_NO_AUTORESIZE});
+    constants_to_extract.push_back({"wxMEDIASTATE_STOPPED", wxMEDIASTATE_STOPPED});
+    constants_to_extract.push_back({"wxMEDIASTATE_PAUSED", wxMEDIASTATE_PAUSED});
+    constants_to_extract.push_back({"wxMEDIASTATE_PLAYING", wxMEDIASTATE_PLAYING});
+
+    // wxMediaCtrl Player Controls
+    constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_NONE", wxMEDIACTRLPLAYERCONTROLS_NONE});
+    constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_STEP", wxMEDIACTRLPLAYERCONTROLS_STEP});
+    constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_VOLUME", wxMEDIACTRLPLAYERCONTROLS_VOLUME});
+    constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_DEFAULT", wxMEDIACTRLPLAYERCONTROLS_DEFAULT});
+    
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",
 

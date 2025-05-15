@@ -121,6 +121,12 @@ typedef enum {
     WXD_EVENT_TYPE_LIST_INSERT_ITEM = 84,
     WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK = 85,
     WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG = 86,
+    WXD_EVENT_TYPE_MEDIA_LOADED = 87,
+    WXD_EVENT_TYPE_MEDIA_STOP = 88,
+    WXD_EVENT_TYPE_MEDIA_FINISHED = 89,
+    WXD_EVENT_TYPE_MEDIA_STATECHANGED = 90,
+    WXD_EVENT_TYPE_MEDIA_PLAY = 91,
+    WXD_EVENT_TYPE_MEDIA_PAUSE = 92,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -201,6 +207,7 @@ typedef struct wxd_DirPickerCtrl_t wxd_DirPickerCtrl_t;
 typedef struct wxd_FontPickerCtrl_t wxd_FontPickerCtrl_t;
 typedef struct wxd_NotificationMessage_t wxd_NotificationMessage_t;
 typedef struct wxd_FileCtrl_t wxd_FileCtrl_t;
+typedef struct wxd_MediaCtrl_t wxd_MediaCtrl_t;
 
 typedef struct wxd_AuiMDIParentFrame_t wxd_AuiMDIParentFrame_t;
 typedef struct wxd_AuiMDIChildFrame_t wxd_AuiMDIChildFrame_t;

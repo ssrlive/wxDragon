@@ -25,6 +25,7 @@
 #include <wx/notifmsg.h> // For wxNotificationMessage events
 #include <wx/dnd.h> // ADDED: For drag and drop events (wxEVT_BEGIN_DRAG, wxEVT_DROP_TEXT, etc.)
 #include <wx/timectrl.h> // ADDED: For wxTimePickerCtrl and wxEVT_TIME_CHANGED
+#include <wx/mediactrl.h> // ADDED: For MediaCtrl events
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -612,6 +613,33 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_ACTION, functor);
             bound = true;
             break;
+        // MediaCtrl events
+        #if wxUSE_MEDIACTRL
+        case WXD_EVENT_TYPE_MEDIA_LOADED:
+            wx_handler->Bind(wxEVT_MEDIA_LOADED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MEDIA_STOP:
+            wx_handler->Bind(wxEVT_MEDIA_STOP, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MEDIA_FINISHED:
+            wx_handler->Bind(wxEVT_MEDIA_FINISHED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MEDIA_STATECHANGED:
+            wx_handler->Bind(wxEVT_MEDIA_STATECHANGED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MEDIA_PLAY:
+            wx_handler->Bind(wxEVT_MEDIA_PLAY, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MEDIA_PAUSE:
+            wx_handler->Bind(wxEVT_MEDIA_PAUSE, functor);
+            bound = true;
+            break;
+        #endif // wxUSE_MEDIACTRL
         case WXD_EVENT_TYPE_IDLE:
             wx_handler->Bind(wxEVT_IDLE, functor);
             bound = true;
@@ -915,6 +943,18 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
             return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
         case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION:
             return wxEVT_NOTIFICATION_MESSAGE_ACTION;
+        case WXD_EVENT_TYPE_MEDIA_LOADED:
+            return wxEVT_MEDIA_LOADED;
+        case WXD_EVENT_TYPE_MEDIA_STOP:
+            return wxEVT_MEDIA_STOP;
+        case WXD_EVENT_TYPE_MEDIA_FINISHED:
+            return wxEVT_MEDIA_FINISHED;
+        case WXD_EVENT_TYPE_MEDIA_STATECHANGED:
+            return wxEVT_MEDIA_STATECHANGED;
+        case WXD_EVENT_TYPE_MEDIA_PLAY:
+            return wxEVT_MEDIA_PLAY;
+        case WXD_EVENT_TYPE_MEDIA_PAUSE:
+            return wxEVT_MEDIA_PAUSE;
         case WXD_EVENT_TYPE_IDLE:
             return wxEVT_IDLE;
         case WXD_EVENT_TYPE_DROP_FILES:

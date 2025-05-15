@@ -262,6 +262,9 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=CoreGraphics");
         println!("cargo:rustc-link-lib=framework=Foundation");
         println!("cargo:rustc-link-lib=framework=SystemConfiguration");
+        println!("cargo:rustc-link-lib=framework=AVFoundation");
+        println!("cargo:rustc-link-lib=framework=AVKit");
+        println!("cargo:rustc-link-lib=framework=CoreMedia");
     } else if target_os == "windows" && target_env == "gnu" {
         if is_debug {
             println!("info: Using DEBUG linking flags for Windows (GNU).");

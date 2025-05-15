@@ -45,6 +45,7 @@ extern "C" {
 #include "widgets/wxd_hyperlinkctrl.h"
 #include "widgets/wxd_activityindicator.h"
 #include "widgets/wxd_animationctrl.h"
+#include "widgets/wxd_mediactrl.h"
 #include "widgets/wxd_commandlinkbutton.h"
 #include "widgets/wxd_staticbitmap.h"
 #include "widgets/wxd_staticline.h"
