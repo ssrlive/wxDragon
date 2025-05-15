@@ -18,13 +18,6 @@ WXDRAGON_API wxd_StaticLine_t* wxd_StaticLine_Create(
     }
     wxWindow* wx_parent = reinterpret_cast<wxWindow*>(parent);
 
-    // wxStaticLine constructor:
-    // wxStaticLine(wxWindow* parent, wxWindowID id = wxID_ANY,
-    //              const wxPoint& pos = wxDefaultPosition,
-    //              const wxSize& size = wxDefaultSize,
-    //              long style = wxLI_HORIZONTAL,
-    //              const wxString& name = wxStaticLineNameStr);
-
     wxStaticLine* sline = new wxStaticLine(
         wx_parent,
         id,
@@ -33,9 +26,6 @@ WXDRAGON_API wxd_StaticLine_t* wxd_StaticLine_Create(
         style,
         wxString::FromUTF8(name ? name : wxStaticLineNameStr) // Use default name if NULL
     );
-
-    // Attach cleanup notifier as it's a wxWindow
-    wxd_Window_AttachCleanupNotifier(reinterpret_cast<wxd_Window_t*>(sline));
 
     return reinterpret_cast<wxd_StaticLine_t*>(sline);
 }

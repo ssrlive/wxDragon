@@ -2,15 +2,12 @@ use wxdragon::id::ID_ANY;
 use wxdragon::prelude::*;
 use wxdragon::widgets::toolbar::ToolBarStyle;
 
-use std::cell::RefCell;
-
 mod tabs;
 use tabs::advanced_tab::create_advanced_tab;
 use tabs::aui_tab::create_aui_tab;
 use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
 use tabs::color_tab::create_color_tab;
-use tabs::data_tab::{create_data_tab, FrameData};
 use tabs::dialog_tab::create_dialog_tab;
 use tabs::lists_tab::create_lists_tab;
 use tabs::media_tab::create_media_tab;
@@ -46,20 +43,13 @@ fn main() {
         frame.set_menu_bar(menubar);
 
         // --- Status Bar Setup ---
-        let status_bar = StatusBar::builder(&frame)
+        StatusBar::builder(&frame)
             .with_fields_count(3)
             .with_status_widths(vec![-1, 150, 100])
             .add_initial_text(0, "Ready")
             .add_initial_text(1, "Center Field")
             .add_initial_text(2, "Right Field")
             .build();
-
-        // --- User Data Setup ---
-        let frame_user_data = RefCell::new(FrameData {
-            click_count: 0,
-            message: "Initial Message".to_string(),
-        });
-        frame.set_user_data(Box::new(frame_user_data));
 
         // --- Create the Notebook ---
         let notebook = Notebook::builder(&frame).with_id(120).build();
@@ -68,7 +58,6 @@ fn main() {
         let (advanced_splitter, advanced_controls) = create_advanced_tab(&notebook);
         let basic_controls = create_basic_tab(&notebook, &frame);
         let list_controls = create_lists_tab(&notebook, &frame);
-        let data_controls = create_data_tab(&notebook, &frame);
         let book_controls = create_book_controls_tab(&notebook);
         let dialog_controls = create_dialog_tab(&notebook, &frame);
         let media_controls = create_media_tab(&notebook);
@@ -111,7 +100,6 @@ fn main() {
         notebook.add_page(&basic_controls.panel, "Basic Controls", true);
         notebook.add_page(&list_controls.panel, "Lists", false);
         notebook.add_page(&advanced_splitter, "Advanced", false);
-        notebook.add_page(&data_controls.panel, "Data", false);
         notebook.add_page(&book_controls.tab_panel, "Book Controls", false);
         notebook.add_page(&dialog_controls.panel, "Dialogs", false);
         notebook.add_page(&media_controls.panel, "Media", false);
@@ -129,7 +117,6 @@ fn main() {
         // Bind tab-specific events
         basic_controls.bind_events();
         advanced_controls.bind_events();
-        data_controls.bind_events(&frame, &status_bar);
         book_controls.bind_events();
         dialog_controls.bind_events(&frame);
         media_controls.bind_events();

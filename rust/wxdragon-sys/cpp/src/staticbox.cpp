@@ -32,9 +32,6 @@ WXD_EXPORTED wxd_StaticBox_t* wxd_StaticBox_Create(
         wxSize(size.width, size.height), 
         style
     );
-    
-    // Automatically attach the cleanup notifier (as it derives from wxWindow)
-    wxd_Window_AttachCleanupNotifier((wxd_Window_t*)box); 
 
     return (wxd_StaticBox_t*)box;
 }

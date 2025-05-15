@@ -137,6 +137,8 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxFRAME_FLOAT_ON_PARENT", wxFRAME_FLOAT_ON_PARENT});
     constants_to_extract.push_back({"wxCLIP_CHILDREN", wxCLIP_CHILDREN});
 
+    constants_to_extract.push_back({"wxSIZE_AUTO", wxSIZE_AUTO});
+
     constants_to_extract.push_back({"wxCAPTION", wxCAPTION});
     constants_to_extract.push_back({"wxRESIZE_BORDER", wxRESIZE_BORDER});
     constants_to_extract.push_back({"wxSYSTEM_MENU", wxSYSTEM_MENU});

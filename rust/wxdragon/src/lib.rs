@@ -58,7 +58,7 @@ pub use widgets::{Panel, PanelBuilder};
 pub use widgets::{RadioButton, RadioButtonBuilder};
 pub use widgets::{StaticText, StaticTextBuilder};
 pub use widgets::{TextCtrl, TextCtrlBuilder};
-pub use window::{Window, WindowUserData, WxWidget};
+pub use window::{Window, WxWidget};
 // ADDED: Re-export TreeCtrl
 pub use widgets::treectrl::{TreeCtrl, TreeCtrlBuilder};
 pub use widgets::{StaticBox, StaticBoxBuilder};

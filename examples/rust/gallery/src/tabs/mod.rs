@@ -10,9 +10,6 @@ pub mod lists_tab;
 /// Advanced tab demonstrates more complex widgets like TreeCtrl, Gauge, Slider, and SplitterWindow.
 pub mod advanced_tab;
 
-/// Data tab demonstrates how to use frame user data to share state between different parts of the application.
-pub mod data_tab;
-
 /// Book controls tab demonstrates book-type widgets like Treebook and StaticBitmap.
 pub mod book_controls_tab;
 

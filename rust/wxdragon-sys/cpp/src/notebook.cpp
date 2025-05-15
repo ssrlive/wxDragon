@@ -18,8 +18,7 @@ WXD_EXPORTED wxd_Notebook_t* wxd_Notebook_Create(
         wxSize(size.width, size.height),
         style
     );
-    // Attach cleanup notifier like other widgets if needed
-    // wxd_Window_AttachCleanupNotifier(reinterpret_cast<wxd_Window_t*>(notebook));
+    
     return reinterpret_cast<wxd_Notebook_t*>(notebook);
 }
 

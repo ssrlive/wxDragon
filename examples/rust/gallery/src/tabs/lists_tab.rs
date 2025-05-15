@@ -156,11 +156,8 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     };
     
     // Attach the data to the items
-    println!("DEBUG: Setting data for item 0 (P001)");
     list_ctrl.set_custom_data(0u64, product1);
-    println!("DEBUG: Setting data for item 1 (P002)");
     list_ctrl.set_custom_data(1u64, product2);
-    println!("DEBUG: Setting data for item 2 (P003)");
     list_ctrl.set_custom_data(2u64, product3);
     
     // Set up some colors - use valid RGB values

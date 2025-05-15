@@ -490,6 +490,19 @@ impl HasItemData for TreeCtrl {
         // For TreeCtrl, we need the actual TreeItemId, not just a u64 representation
         // Get the concrete TreeItemId if that's what was passed
         if let Some(tree_item) = self.get_concrete_tree_item_id(item_id) {
+            // First check if there's already data associated with this item
+            let existing_data_id = unsafe {
+                ffi::wxd_TreeCtrl_GetItemData(
+                    self.as_ptr(),
+                    tree_item.as_ptr()
+                ) as u64
+            };
+            
+            // If we have existing data, remove it from the registry
+            if existing_data_id != 0 {
+                let _ = remove_item_data(existing_data_id);
+            }
+            
             // Store the new data in the registry
             let data_id = store_item_data(data);
             
@@ -587,21 +600,16 @@ impl HasItemData for TreeCtrl {
     }
     
     fn cleanup_all_custom_data(&self) {
-        println!("TreeCtrl: Starting tree cleanup...");
-        
         // Get the root item
         let root = match self.get_root_item() {
             Some(root) => root,
             None => {
-                println!("TreeCtrl: No root item found, nothing to clean up");
                 return;
             }
         };
         
         // Recursively clean up the root and all its children
         self.clean_item_and_children(&root);
-        
-        println!("TreeCtrl: Tree cleanup completed successfully");
     }
 }
 
@@ -646,11 +654,6 @@ impl TreeCtrl {
     
     /// Recursively clean up the item and all its children
     fn clean_item_and_children(&self, item: &TreeItemId) {
-        // First clean up this item
-        if self.clear_custom_data(item) {
-            println!("TreeCtrl: Cleaned up data for an item");
-        }
-        
         // Check if this item has any children
         if self.get_children_count(item, false) == 0 {
             // No children, we're done with this branch

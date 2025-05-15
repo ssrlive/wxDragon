@@ -1,25 +1,8 @@
 use crate::event::WxEvtHandler;
 use crate::font::Font;
 use crate::sizers::WxSizer;
-use lazy_static::lazy_static;
-use std::any::Any;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::sync::Mutex;
 use wxdragon_sys as ffi;
-
-// Define a type alias for the window pointer used as a key in the map
-type WindowPtrKey = usize;
-
-// Static map to store user data associated with window pointers.
-// Key: Window pointer address (usize)
-// Value: Boxed RefCell containing the dynamic user data.
-lazy_static! {
-    static ref WINDOW_USER_DATA_MAP: Mutex<HashMap<WindowPtrKey, Box<RefCell<dyn Any + Send + Sync + 'static>>>> = Mutex::new(HashMap::new());
-    // Note: Using Send + Sync bounds on Any for Mutex compatibility.
-    // If data doesn't need to cross threads (likely for GUI), consider alternatives
-    // like a RefCell<HashMap<...>> in thread-local storage if Mutex becomes complex.
-}
+use crate::geometry::{Point, Size};
 
 /// Represents a pointer to any wxDragon window object.
 /// This is typically used as a base struct or in trait objects.
@@ -253,6 +236,126 @@ pub trait WxWidget {
         }
     }
 
+    /// Gets the window's position relative to its parent.
+    fn get_position(&self) -> Point {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            Point { x: -1, y: -1 }
+        } else {
+            let pos = unsafe { ffi::wxd_Window_GetPosition(handle) };
+            Point { x: pos.x, y: pos.y }
+        }
+    }
+
+    /// Gets the window's size.
+    fn get_size(&self) -> Size {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            Size { width: -1, height: -1 }
+        } else {
+            let size = unsafe { ffi::wxd_Window_GetSize(handle) };
+            Size { width: size.width, height: size.height }
+        }
+    }
+
+    /// Sets the window's size.
+    fn set_size(&self, size: Size) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_SetSize(handle, size.into()) }
+        }
+    }
+
+    /// Sets the window's position and size.
+    fn set_size_with_pos(&self, x: i32, y: i32, width: i32, height: i32) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { 
+                ffi::wxd_Window_SetSizeWithPos(
+                    handle, 
+                    x, 
+                    y, 
+                    width, 
+                    height, 
+                    ffi::WXD_SIZE_AUTO as i32
+                ) 
+            }
+        }
+    }
+
+    /// Sets the window's client area size (the area inside borders, scrollbars, etc).
+    fn set_client_size(&self, size: Size) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_SetClientSize(handle, size.into()) }
+        }
+    }
+
+    /// Gets the client area size.
+    fn get_client_size(&self) -> Size {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            Size { width: -1, height: -1 }
+        } else {
+            let size = unsafe { ffi::wxd_Window_GetClientSize(handle) };
+            Size { width: size.width, height: size.height }
+        }
+    }
+
+    /// Gets the window's minimum size.
+    fn get_min_size(&self) -> Size {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            Size { width: -1, height: -1 }
+        } else {
+            let size = unsafe { ffi::wxd_Window_GetMinSize(handle) };
+            Size { width: size.width, height: size.height }
+        }
+    }
+
+    /// Moves the window to the specified position.
+    fn move_window(&self, x: i32, y: i32) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Move(handle, x, y) }
+        }
+    }
+
+    /// Centers the window relative to its parent.
+    fn center(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Center(handle) }
+        }
+    }
+
+    /// UK spelling alias for center()
+    fn centre(&self) {
+        self.center()
+    }
+
+    /// Converts client coordinates to screen coordinates.
+    fn client_to_screen(&self, pt: Point) -> Point {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return pt; // Return the same point if the handle is null
+        }
+        
+        let result = unsafe { ffi::wxd_Window_ClientToScreen(handle, pt.into()) };
+        Point { x: result.x, y: result.y }
+    }
+
+    /// Converts screen coordinates to client coordinates.
+    fn screen_to_client(&self, pt: Point) -> Point {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return pt; // Return the same point if the handle is null
+        }
+        
+        let result = unsafe { ffi::wxd_Window_ScreenToClient(handle, pt.into()) };
+        Point { x: result.x, y: result.y }
+    }
+
     // Other common methods (SetSize, GetSize, etc.) can be added here
     // if corresponding wxd_Window_* functions are added to the C API.
 }
@@ -273,157 +376,3 @@ impl WxEvtHandler for Window {
         self.0 as *mut ffi::wxd_EvtHandler_t
     }
 }
-
-// --- Rust Cleanup Callback ---
-
-/// FFI-callable function notified by the C++ WxdCleanupNotifier destructor.
-/// Removes the associated user data from the Rust map.
-#[no_mangle]
-pub extern "C" fn notify_rust_of_cleanup(win_ptr: *mut ffi::wxd_Window_t) {
-    if win_ptr.is_null() {
-        return;
-    }
-    let key = win_ptr as WindowPtrKey;
-    // Lock the map and remove the entry. The returned Box is dropped here.
-    let mut map = WINDOW_USER_DATA_MAP
-        .lock()
-        .expect("Failed to lock user data map for cleanup");
-    if let Some(_removed_data) = map.remove(&key) {
-        // Optional: Log cleanup
-        // println!("Cleaned up user data for window {:?}", key);
-    } else {
-        // Optional: Log if notifier called but no data found (e.g., detached manually)
-        // println!("Cleanup notification received for window {:?}, but no data found in map.", key);
-    }
-}
-
-// --- Window User Data Trait ---
-
-/// Trait for associating arbitrary, type-erased Rust data with a window.
-pub trait WindowUserData: WxWidget {
-    /// Associates arbitrary Rust data with this widget.
-    /// Data must be `Send + Sync + 'static` due to the global Mutex.
-    /// Any previously associated data will be dropped.
-    fn set_user_data(&self, data: Box<RefCell<dyn Any + Send + Sync + 'static>>) {
-        let handle = self.handle_ptr();
-        if handle.is_null() {
-            return;
-        }
-        let key = handle as WindowPtrKey;
-
-        // Lock the map and insert the new data.
-        // This drops the previous Box<RefCell<...>> if one existed for this key.
-        let mut map = WINDOW_USER_DATA_MAP
-            .lock()
-            .expect("Failed to lock user data map for set");
-        let existed_before = map.insert(key, data).is_some();
-
-        // If data didn't exist before, attach the C++ notifier.
-        // If it did exist, the notifier should already be attached.
-        // Re-attaching might be safe if SetClientObject handles replacing correctly.
-        if !existed_before {
-            unsafe {
-                ffi::wxd_Window_AttachCleanupNotifier(handle);
-            }
-        }
-        // else: Consider if detaching/reattaching is needed on replacement?
-        // Current C++ SetClientObject replaces and deletes old, so re-attaching *might* be okay,
-        // but let's keep it simple and only attach if it wasn't there before.
-    }
-
-    /// Gets a copy of the associated user data if it exists, matches type T, and T is Clone.
-    /// Returns `Some(T)` if the data exists and is of type T, `None` otherwise.
-    /// This is useful for types that are cheap to clone like Arc<T>.
-    fn get_user_data<T: Any + Clone + 'static>(&self) -> Option<T> {
-        let mut result = None;
-        self.with_borrowed_data::<T, _, _>(|data| {
-            result = Some(data.clone());
-        });
-        result
-    }
-
-    /// Provides temporary immutable access to the associated user data if it exists and matches type T.
-    /// Executes the provided closure `func` with a reference `&T` to the data.
-    /// Returns `true` if the data existed, matched the type, and the closure was run, `false` otherwise.
-    /// The borrow and map lock are released after the closure finishes.
-    fn with_borrowed_data<T: Any + 'static, F, R>(&self, func: F) -> bool
-    where
-        F: FnOnce(&T) -> R,
-    {
-        let handle = self.handle_ptr();
-        if handle.is_null() {
-            return false;
-        }
-        let key = handle as WindowPtrKey;
-
-        let map = WINDOW_USER_DATA_MAP
-            .lock()
-            .expect("Failed to lock user data map");
-        if let Some(boxed_cell) = map.get(&key) {
-            if let Ok(borrowed_any) = boxed_cell.try_borrow() {
-                if let Some(data_t) = borrowed_any.downcast_ref::<T>() {
-                    func(data_t);
-                    return true; // Closure executed successfully
-                }
-            }
-        }
-        false // Data not found, type mismatch, or already borrowed mutably
-    }
-
-    /// Provides temporary mutable access to the associated user data if it exists and matches type T.
-    /// Executes the provided closure `func` with a mutable reference `&mut T` to the data.
-    /// Returns `true` if the data existed, matched the type, was not already borrowed, and the closure was run, `false` otherwise.
-    /// The borrow and map lock are released after the closure finishes.
-    fn with_borrowed_data_mut<T: Any + 'static, F, R>(&self, func: F) -> bool
-    where
-        F: FnOnce(&mut T) -> R,
-    {
-        let handle = self.handle_ptr();
-        if handle.is_null() {
-            return false;
-        }
-        let key = handle as WindowPtrKey;
-
-        let map = WINDOW_USER_DATA_MAP
-            .lock()
-            .expect("Failed to lock user data map");
-        if let Some(boxed_cell) = map.get(&key) {
-            if let Ok(mut borrowed_any_mut) = boxed_cell.try_borrow_mut() {
-                if let Some(data_t_mut) = borrowed_any_mut.downcast_mut::<T>() {
-                    func(data_t_mut);
-                    return true; // Closure executed successfully
-                }
-            }
-        }
-        false // Data not found, type mismatch, or already borrowed
-    }
-
-    /// Takes ownership of the associated user data, removing it from the widget.
-    /// Returns `None` if no data is associated.
-    fn take_user_data_dyn(&self) -> Option<Box<RefCell<dyn Any + Send + Sync + 'static>>> {
-        let handle = self.handle_ptr();
-        if handle.is_null() {
-            return None;
-        }
-        let key = handle as WindowPtrKey;
-
-        // Lock the map and remove the data.
-        let mut map = WINDOW_USER_DATA_MAP
-            .lock()
-            .expect("Failed to lock user data map for take");
-        let removed_data = map.remove(&key);
-
-        // If data was removed, detach the C++ cleanup notifier.
-        if removed_data.is_some() {
-            unsafe {
-                ffi::wxd_Window_DetachCleanupNotifier(handle);
-            }
-        }
-        removed_data
-    }
-}
-
-// Implement the trait for the base Window struct
-impl WindowUserData for Window {}
-
-// ... rest of window.rs ...

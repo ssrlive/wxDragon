@@ -29,9 +29,6 @@ WXDRAGON_API wxd_ScrollBar_t* wxd_ScrollBar_Create(
         wxString::FromUTF8(name ? name : wxScrollBarNameStr) // Use default name if NULL
     );
 
-    // Attach cleanup notifier as it's a wxWindow
-    wxd_Window_AttachCleanupNotifier(reinterpret_cast<wxd_Window_t*>(scrollBar));
-
     return reinterpret_cast<wxd_ScrollBar_t*>(scrollBar);
 }
 

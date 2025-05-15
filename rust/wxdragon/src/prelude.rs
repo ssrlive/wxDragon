@@ -7,7 +7,7 @@ pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use crate::id::{Id, ID_ANY};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
-pub use crate::window::{WindowUserData, WxWidget};
+pub use crate::window::WxWidget;
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder, Orientation, SizerFlags};

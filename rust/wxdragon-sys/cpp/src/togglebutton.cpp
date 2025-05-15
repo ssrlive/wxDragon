@@ -28,7 +28,6 @@ WXD_EXPORTED wxd_ToggleButton_t* wxd_ToggleButton_Create(
 
     wxToggleButton* tglbtn = new wxToggleButton(parentWin, id, wxLabel, wxPos, wxSize, style);
 
-    wxd_Window_AttachCleanupNotifier(reinterpret_cast<wxd_Window_t*>(tglbtn));
     return reinterpret_cast<wxd_ToggleButton_t*>(tglbtn);
 }
 

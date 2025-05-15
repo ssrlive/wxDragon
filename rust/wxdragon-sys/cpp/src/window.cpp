@@ -219,4 +219,88 @@ WXD_EXPORTED void wxd_Window_Enable(wxd_Window_t *self, bool enable) {
     reinterpret_cast<wxWindow*>(self)->Enable(enable);
 }
 
+// New size and position functions
+
+WXD_EXPORTED wxd_Size wxd_Window_GetSize(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return { -1, -1 }; // Default invalid size
+    }
+    wxSize wx_size = wx_window->GetSize();
+    return { wx_size.GetWidth(), wx_size.GetHeight() };
+}
+
+WXD_EXPORTED void wxd_Window_SetSize(wxd_Window_t* window, wxd_Size size) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetSize(wxSize(size.width, size.height));
+    }
+}
+
+WXD_EXPORTED void wxd_Window_SetSizeWithPos(wxd_Window_t* window, int x, int y, int width, int height, int sizeFlags) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetSize(x, y, width, height, sizeFlags);
+    }
+}
+
+WXD_EXPORTED wxd_Size wxd_Window_GetClientSize(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return { -1, -1 }; // Default invalid size
+    }
+    wxSize wx_size = wx_window->GetClientSize();
+    return { wx_size.GetWidth(), wx_size.GetHeight() };
+}
+
+WXD_EXPORTED void wxd_Window_SetClientSize(wxd_Window_t* window, wxd_Size size) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetClientSize(wxSize(size.width, size.height));
+    }
+}
+
+WXD_EXPORTED wxd_Size wxd_Window_GetMinSize(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return { -1, -1 }; // Default invalid size
+    }
+    wxSize wx_size = wx_window->GetMinSize();
+    return { wx_size.GetWidth(), wx_size.GetHeight() };
+}
+
+WXD_EXPORTED void wxd_Window_Move(wxd_Window_t* window, int x, int y) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Move(x, y);
+    }
+}
+
+WXD_EXPORTED void wxd_Window_Center(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Center();
+    }
+}
+
+WXD_EXPORTED wxd_Point wxd_Window_ClientToScreen(wxd_Window_t* window, wxd_Point pt) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return pt; // Return the input point if window is null
+    }
+    wxPoint wx_pt(pt.x, pt.y);
+    wxPoint wx_result = wx_window->ClientToScreen(wx_pt);
+    return { wx_result.x, wx_result.y };
+}
+
+WXD_EXPORTED wxd_Point wxd_Window_ScreenToClient(wxd_Window_t* window, wxd_Point pt) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return pt; // Return the input point if window is null
+    }
+    wxPoint wx_pt(pt.x, pt.y);
+    wxPoint wx_result = wx_window->ScreenToClient(wx_pt);
+    return { wx_result.x, wx_result.y };
+}
+
 } // extern "C"

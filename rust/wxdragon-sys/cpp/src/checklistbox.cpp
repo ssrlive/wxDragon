@@ -28,8 +28,6 @@ WXD_EXPORTED wxd_CheckListBox_t* wxd_CheckListBox_Create(
 
     wxCheckListBox* clbox = new wxCheckListBox(parentWin, id, wxPos, wxSize, emptyChoices, style);
     
-    // Attach cleanup notifier
-    wxd_Window_AttachCleanupNotifier(reinterpret_cast<wxd_Window_t*>(clbox));
     return reinterpret_cast<wxd_CheckListBox_t*>(clbox);
 }
 
