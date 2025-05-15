@@ -8,7 +8,7 @@ use crate::window::{Window, WxWidget};
 use wxdragon_sys as ffi;
 
 use std::ffi::CString;
-use std::os::raw::c_long;
+use std::os::raw::c_longlong;
 
 // --- Style enum using macro ---
 widget_style_enum!(
@@ -111,7 +111,7 @@ widget_builder!(
                 slf.pos.y,
                 slf.size.width,
                 slf.size.height,
-                slf.style.bits() as c_long,
+                slf.style.bits() as c_longlong,
                 slf.min_value,
                 slf.max_value,
                 slf.initial_value,

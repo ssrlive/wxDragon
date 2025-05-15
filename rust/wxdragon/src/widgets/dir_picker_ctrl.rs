@@ -1,7 +1,7 @@
 /* This is a new file */
 //! Safe wrapper for wxDirPickerCtrl.
 
-use std::ffi::{c_long, CString};
+use std::ffi::{c_longlong, CString};
 use wxdragon_sys as ffi;
 
 use crate::event::WxEvtHandler;
@@ -98,7 +98,7 @@ widget_builder!(
                 c_path.as_ptr(),
                 slf.pos.into(),
                 slf.size.into(),
-                slf.style.bits() as c_long,
+                slf.style.bits() as c_longlong,
             )
         };
         if ptr.is_null() {

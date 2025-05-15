@@ -10,7 +10,7 @@
 
 extern "C" {
 
-WXD_EXPORTED wxd_AuiToolBar_t* wxd_AuiToolBar_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, long style) {
+WXD_EXPORTED wxd_AuiToolBar_t* wxd_AuiToolBar_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, int64_t style) {
     wxWindow* wx_parent = (wxWindow*)parent;
     // wxID_ANY is -1, which is a common default for id.
     // wxDefaultPosition is wxPoint(-1, -1)

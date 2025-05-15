@@ -9,7 +9,7 @@ use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
 use std::ffi::CString;
-use std::os::raw::{c_int, c_long, c_void};
+use std::os::raw::{c_int, c_longlong, c_void};
 use std::any::Any;
 use std::sync::Arc;
 use wxdragon_sys as ffi;
@@ -190,7 +190,7 @@ impl ListCtrl {
         unsafe {
             ffi::wxd_ListCtrl_InsertColumn(
                 self.as_list_ctrl_ptr(),
-                col as c_long,
+                col as c_longlong,
                 c_heading.as_ptr(),
                 format as c_int,
                 width,
@@ -200,12 +200,12 @@ impl ListCtrl {
 
     /// Sets the width of the specified column.
     pub fn set_column_width(&self, col: i64, width: i32) -> bool {
-        unsafe { ffi::wxd_ListCtrl_SetColumnWidth(self.as_list_ctrl_ptr(), col as c_long, width) }
+        unsafe { ffi::wxd_ListCtrl_SetColumnWidth(self.as_list_ctrl_ptr(), col as c_longlong, width) }
     }
 
     /// Gets the width of the specified column.
     pub fn get_column_width(&self, col: i64) -> i32 {
-        unsafe { ffi::wxd_ListCtrl_GetColumnWidth(self.as_list_ctrl_ptr(), col as c_long) }
+        unsafe { ffi::wxd_ListCtrl_GetColumnWidth(self.as_list_ctrl_ptr(), col as c_longlong) }
     }
 
     /// Gets the number of columns in the list control.
@@ -219,7 +219,7 @@ impl ListCtrl {
         unsafe {
             ffi::wxd_ListCtrl_InsertItem_Simple(
                 self.as_list_ctrl_ptr(),
-                index as c_long,
+                index as c_longlong,
                 c_label.as_ptr(),
             )
         }
@@ -229,7 +229,7 @@ impl ListCtrl {
     pub fn set_item_text(&self, index: i64, text: &str) {
         let c_text = CString::new(text).unwrap_or_default();
         unsafe {
-            ffi::wxd_ListCtrl_SetItemText(self.as_list_ctrl_ptr(), index as c_long, c_text.as_ptr())
+            ffi::wxd_ListCtrl_SetItemText(self.as_list_ctrl_ptr(), index as c_longlong, c_text.as_ptr())
         }
     }
 
@@ -263,7 +263,7 @@ impl ListCtrl {
         unsafe {
             ffi::wxd_ListCtrl_SetItem(
                 self.as_list_ctrl_ptr(),
-                index as c_long,
+                index as c_longlong,
                 col as c_int,
                 c_text.as_ptr(),
                 image,
@@ -281,7 +281,7 @@ impl ListCtrl {
         unsafe {
             let needed_len = ffi::wxd_ListCtrl_GetItemText(
                 self.as_list_ctrl_ptr(),
-                index as c_long,
+                index as c_longlong,
                 col,
                 std::ptr::null_mut(),
                 0,
@@ -292,7 +292,7 @@ impl ListCtrl {
             let mut buffer: Vec<u8> = Vec::with_capacity(needed_len as usize);
             let actual_len = ffi::wxd_ListCtrl_GetItemText(
                 self.as_list_ctrl_ptr(),
-                index as c_long,
+                index as c_longlong,
                 col,
                 buffer.as_mut_ptr() as *mut i8,
                 needed_len as i32,
@@ -328,9 +328,9 @@ impl ListCtrl {
         unsafe {
             ffi::wxd_ListCtrl_SetItemState(
                 self.as_list_ctrl_ptr(),
-                item as c_long,
-                state.bits() as c_long,
-                state_mask.bits() as c_long,
+                item as c_longlong,
+                state.bits() as c_longlong,
+                state_mask.bits() as c_longlong,
             )
         }
     }
@@ -353,8 +353,8 @@ impl ListCtrl {
         let state = unsafe {
             ffi::wxd_ListCtrl_GetItemState(
                 self.as_list_ctrl_ptr(),
-                item as c_long,
-                state_mask.bits() as c_long,
+                item as c_longlong,
+                state_mask.bits() as c_longlong,
             )
         };
         state != 0
@@ -370,7 +370,7 @@ impl ListCtrl {
         unsafe {
             ffi::wxd_ListCtrl_GetNextItem(
                 self.as_list_ctrl_ptr(),
-                item as c_long,
+                item as c_longlong,
                 geometry as c_int,
                 state.bits() as c_int,
             )
@@ -384,7 +384,7 @@ impl ListCtrl {
 
     /// Deletes the specified item.
     pub fn delete_item(&self, item: i64) -> bool {
-        unsafe { ffi::wxd_ListCtrl_DeleteItem(self.as_list_ctrl_ptr(), item as c_long) }
+        unsafe { ffi::wxd_ListCtrl_DeleteItem(self.as_list_ctrl_ptr(), item as c_longlong) }
     }
 
     /// Deletes all items from the list control.
@@ -404,20 +404,20 @@ impl ListCtrl {
 
     /// Ensures that the specified item is visible.
     pub fn ensure_visible(&self, item: i64) -> bool {
-        unsafe { ffi::wxd_ListCtrl_EnsureVisible(self.as_list_ctrl_ptr(), item as c_long) }
+        unsafe { ffi::wxd_ListCtrl_EnsureVisible(self.as_list_ctrl_ptr(), item as c_longlong) }
     }
 
     /// Determines which item, if any, is at the specified point.
     /// Returns a tuple (item_index, flags, subitem_index).
     pub fn hit_test(&self, point: Point) -> (i32, i32, i32) {
         let mut flags: i32 = 0;
-        let mut subitem: c_long = 0;
+        let mut subitem: c_longlong = 0;
         let item = unsafe {
             ffi::wxd_ListCtrl_HitTest(
                 self.as_list_ctrl_ptr(),
                 point.into(),
                 &mut flags as *mut i32,
-                &mut subitem as *mut c_long,
+                &mut subitem as *mut c_longlong,
             )
         };
         (item, flags, subitem as i32)
@@ -430,7 +430,7 @@ impl ListCtrl {
     /// The caller does not own this TextCtrl; it will be deleted automatically
     /// when editing is finished.
     pub fn edit_label(&self, item: i64) -> crate::widgets::textctrl::TextCtrl {
-        let ptr = unsafe { ffi::wxd_ListCtrl_EditLabel(self.as_list_ctrl_ptr(), item as c_long) };
+        let ptr = unsafe { ffi::wxd_ListCtrl_EditLabel(self.as_list_ctrl_ptr(), item as c_longlong) };
         
         if ptr.is_null() {
             panic!("Failed to start editing item label: FFI returned null pointer.");
@@ -446,7 +446,7 @@ impl ListCtrl {
         unsafe { 
             ffi::wxd_ListCtrl_SetItemBackgroundColour(
                 self.as_list_ctrl_ptr(), 
-                item as c_long, 
+                item as c_longlong, 
                 (*colour).into()
             ) 
         }
@@ -457,7 +457,7 @@ impl ListCtrl {
         unsafe { 
             ffi::wxd_ListCtrl_SetItemTextColour(
                 self.as_list_ctrl_ptr(), 
-                item as c_long, 
+                item as c_longlong, 
                 (*colour).into()
             ) 
         }
@@ -466,7 +466,7 @@ impl ListCtrl {
     /// Gets the background color of an item.
     pub fn get_item_background_colour(&self, item: i64) -> crate::color::Colour {
         unsafe { 
-            let c_colour = ffi::wxd_ListCtrl_GetItemBackgroundColour(self.as_list_ctrl_ptr(), item as c_long);
+            let c_colour = ffi::wxd_ListCtrl_GetItemBackgroundColour(self.as_list_ctrl_ptr(), item as c_longlong);
             crate::color::Colour::from(c_colour)
         }
     }
@@ -474,7 +474,7 @@ impl ListCtrl {
     /// Gets the text color of an item.
     pub fn get_item_text_colour(&self, item: i64) -> crate::color::Colour {
         unsafe { 
-            let c_colour = ffi::wxd_ListCtrl_GetItemTextColour(self.as_list_ctrl_ptr(), item as c_long);
+            let c_colour = ffi::wxd_ListCtrl_GetItemTextColour(self.as_list_ctrl_ptr(), item as c_longlong);
             crate::color::Colour::from(c_colour)
         }
     }
@@ -539,17 +539,17 @@ impl ListCtrl {
     /// 
     /// Must be used with a list control created with the `ListCtrlStyle::Virtual` style.
     pub fn set_item_count(&self, count: i64) {
-        unsafe { ffi::wxd_ListCtrl_SetItemCount(self.as_list_ctrl_ptr(), count as c_long) }
+        unsafe { ffi::wxd_ListCtrl_SetItemCount(self.as_list_ctrl_ptr(), count as c_longlong) }
     }
 
     /// Refreshes a single item in a virtual list control.
     pub fn refresh_item(&self, item: i64) {
-        unsafe { ffi::wxd_ListCtrl_RefreshItem(self.as_list_ctrl_ptr(), item as c_long) }
+        unsafe { ffi::wxd_ListCtrl_RefreshItem(self.as_list_ctrl_ptr(), item as c_longlong) }
     }
 
     /// Refreshes a range of items in a virtual list control.
     pub fn refresh_items(&self, item_from: i64, item_to: i64) {
-        unsafe { ffi::wxd_ListCtrl_RefreshItems(self.as_list_ctrl_ptr(), item_from as c_long, item_to as c_long) }
+        unsafe { ffi::wxd_ListCtrl_RefreshItems(self.as_list_ctrl_ptr(), item_from as c_longlong, item_to as c_longlong) }
     }
 }
 
@@ -560,7 +560,7 @@ impl HasItemData for ListCtrl {
         
         // First check if there's already data associated with this item
         let existing_data_id = unsafe { 
-            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_longlong) as u64
         };
         
         // If we have existing data, remove it from the registry
@@ -575,8 +575,8 @@ impl HasItemData for ListCtrl {
         let result = unsafe { 
             ffi::wxd_ListCtrl_SetItemData(
                 self.as_list_ctrl_ptr(), 
-                item_index as c_long, 
-                data_id as c_long
+                item_index as c_longlong, 
+                data_id as c_longlong
             ) 
         };
         
@@ -594,7 +594,7 @@ impl HasItemData for ListCtrl {
         
         // Get the data ID using the native get_item_data
         let data_id = unsafe { 
-            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_longlong) as u64
         };
         
         if data_id == 0 {
@@ -610,7 +610,7 @@ impl HasItemData for ListCtrl {
         
         // Get the data ID using the native get_item_data
         let data_id = unsafe { 
-            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_longlong) as u64
         };
         
         // If the ID is non-zero and exists in the registry, there is custom data
@@ -622,7 +622,7 @@ impl HasItemData for ListCtrl {
         
         // Get the data ID using the native get_item_data
         let data_id = unsafe { 
-            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_long) as u64
+            ffi::wxd_ListCtrl_GetItemData(self.as_list_ctrl_ptr(), item_index as c_longlong) as u64
         };
         
         // Only attempt to remove data if there's actually data to remove
@@ -635,7 +635,7 @@ impl HasItemData for ListCtrl {
         unsafe { 
             ffi::wxd_ListCtrl_SetItemData(
                 self.as_list_ctrl_ptr(), 
-                item_index as c_long, 
+                item_index as c_longlong, 
                 0
             ) 
         }

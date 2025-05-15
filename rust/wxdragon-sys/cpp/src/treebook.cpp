@@ -6,7 +6,7 @@
 extern "C" {
 
 // Wrapper for wxTreebook::wxTreebook(wxWindow*, wxWindowID, wxPoint const&, wxSize const&, long)
-WXD_EXPORTED wxd_Treebook_t *wxd_Treebook_new(wxd_Window_t *parent, int id, int x, int y, int width, int height, long style) {
+WXD_EXPORTED wxd_Treebook_t *wxd_Treebook_new(wxd_Window_t *parent, int id, int x, int y, int width, int height, int64_t style) {
     wxTreebook* treebook = new wxTreebook((wxWindow*)parent, id, wxPoint(x, y), wxSize(width, height), style);
     return (wxd_Treebook_t*)treebook;
 }

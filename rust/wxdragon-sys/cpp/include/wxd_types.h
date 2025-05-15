@@ -130,7 +130,7 @@ typedef enum {
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
-typedef long wxd_Style_t;
+typedef int64_t wxd_Style_t;
 typedef int wxd_Direction_t;
 typedef int wxd_Orientation_t;
 typedef int wxd_SizerFlags_t;

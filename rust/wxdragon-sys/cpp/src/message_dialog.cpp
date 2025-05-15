@@ -8,7 +8,7 @@ wxd_MessageDialog* wxd_MessageDialog_Create(
     wxd_Window_t* parent, 
     const char* message, 
     const char* caption, 
-    long style
+    int64_t style
 ) {
     wxWindow* wx_parent = (wxWindow*)parent;
     wxString wx_message = wxString::FromUTF8(message ? message : "");

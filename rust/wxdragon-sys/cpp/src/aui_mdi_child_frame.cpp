@@ -13,7 +13,7 @@ WXD_EXPORTED wxd_AuiMDIChildFrame_t* wxd_AuiMDIChildFrame_Create(
     const char* title,
     wxd_Point pos,
     wxd_Size size,
-    long style,
+    int64_t style,
     const char* name) {
 
     wxAuiMDIParentFrame* parentPtr = (wxAuiMDIParentFrame*)parent;

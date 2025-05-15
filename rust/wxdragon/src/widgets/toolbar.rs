@@ -82,7 +82,7 @@ impl ToolBar {
     ) -> bool {
         let c_label = CString::new(label).unwrap_or_default();
         let c_short_help = CString::new(short_help).unwrap_or_default();
-        let c_long_help = CString::new(long_help).unwrap_or_default();
+        let c_longlong_help = CString::new(long_help).unwrap_or_default();
         let bmp_disabled_ptr = bitmap_disabled.map_or(std::ptr::null_mut(), |bmp| bmp.as_ptr());
 
         unsafe {
@@ -94,7 +94,7 @@ impl ToolBar {
                 bmp_disabled_ptr,
                 kind as c_int,
                 c_short_help.as_ptr(),
-                c_long_help.as_ptr(),
+                c_longlong_help.as_ptr(),
             );
             !tool_ptr.is_null()
         }

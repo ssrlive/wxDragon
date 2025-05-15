@@ -11,7 +11,7 @@ wxd_Window_t* wxd_EditableListBox_New(wxd_Window_t* parent,
                                    const char* label,
                                    int x, int y,
                                    int width, int height,
-                                   long style) {
+                                   int64_t style) {
     wxString wx_label = WXD_STR_TO_WX_STRING_UTF8_NULL_OK(label);
     
     wxEditableListBox* editablelistbox = new wxEditableListBox(

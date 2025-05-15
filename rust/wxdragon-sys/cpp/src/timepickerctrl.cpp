@@ -48,7 +48,7 @@ WXD_EXPORTED wxd_TimePickerCtrl_t* wxd_TimePickerCtrl_Create(wxd_Window_t* paren
                                                            const wxd_DateTime_t* dt,
                                                            wxd_Point pos,      // Pass by value
                                                            wxd_Size size,       // Pass by value
-                                                           long style) {
+                                                           int64_t style) {
     wxWindow* wx_parent = (wxWindow*)parent;
     wxPoint wx_pos = wxPoint(pos.x, pos.y); // Use directly
     wxSize wx_size = wxSize(size.width, size.height); // Use directly

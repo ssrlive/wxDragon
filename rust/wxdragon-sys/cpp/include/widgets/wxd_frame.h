@@ -14,7 +14,7 @@ WXD_EXPORTED void wxd_Frame_SetMenuBar(wxd_Frame_t* frame, wxd_MenuBar_t* menuba
 WXD_EXPORTED void wxd_Frame_SetStatusBar(wxd_Frame_t* frame, wxd_StatusBar_t* statusBar);
 WXD_EXPORTED void wxd_Frame_SetToolBar(wxd_Frame_t* frame, wxd_ToolBar_t* toolBar);
 WXD_EXPORTED wxd_ToolBar_t* wxd_Frame_CreateToolBar(wxd_Frame_t* frame, wxd_Style_t style, wxd_Id id);
-WXD_EXPORTED wxd_StatusBar_t* wxd_Frame_CreateStatusBar(wxd_Frame_t* frame, int number, long style, int id, const char* name);
+WXD_EXPORTED wxd_StatusBar_t* wxd_Frame_CreateStatusBar(wxd_Frame_t* frame, int number, int64_t style, int id, const char* name);
 WXD_EXPORTED void wxd_Frame_CenterOnScreen(wxd_Frame_t* frame);
 WXD_EXPORTED void wxd_Frame_SetStatusText(wxd_Frame_t* frame, const char* text, int number);
 WXD_EXPORTED char* wxd_Frame_GetTitle(wxd_Frame_t* frame);

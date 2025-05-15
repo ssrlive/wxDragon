@@ -4,48 +4,6 @@
 #include "../include/wxdragon.h"
 #include "wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK and GET_WX_STRING_RESULT
 
-// --- wxd_ArrayString ---
-
-WXD_EXPORTED wxd_ArrayString_t* wxd_ArrayString_Create() {
-    wxd_ArrayString_t* arr_str = new wxd_ArrayString_t();
-    arr_str->internal_data = new wxArrayString();
-    return arr_str;
-}
-
-WXD_EXPORTED void wxd_ArrayString_Free(wxd_ArrayString_t* self) {
-    if (self) {
-        if (self->internal_data) {
-            delete static_cast<wxArrayString*>(self->internal_data);
-        }
-        delete self;
-    }
-}
-
-WXD_EXPORTED int wxd_ArrayString_GetCount(wxd_ArrayString_t* self) {
-    if (!self || !self->internal_data) return 0;
-    return static_cast<wxArrayString*>(self->internal_data)->GetCount();
-}
-
-WXD_EXPORTED int wxd_ArrayString_GetString(wxd_ArrayString_t* self, int index, char* buffer, int bufLen) {
-    if (!self || !self->internal_data) return -1;
-    wxArrayString* wx_arr_str = static_cast<wxArrayString*>(self->internal_data);
-    if (index < 0 || static_cast<size_t>(index) >= wx_arr_str->GetCount()) return -1;
-
-    return GET_WX_STRING_RESULT((*wx_arr_str)[index], buffer, bufLen);
-}
-
-// Internal helper to populate a wxd_ArrayString_t from a wxArrayString
-// This is useful for functions like GetPaths/GetFilenames
-// The caller of GetPaths/GetFilenames will create a wxd_ArrayString_t and pass it in.
-// This function will then populate the internal wxArrayString.
-// (Alternatively, GetPaths could return a new wxd_ArrayString_t*, but wxWidgets API often uses output parameters)
-void wxd_ArrayString_AssignFromWxArrayString(wxd_ArrayString_t* target, const wxArrayString& source) {
-    if (!target || !target->internal_data) return;
-    wxArrayString* dest_wx_arr = static_cast<wxArrayString*>(target->internal_data);
-    *dest_wx_arr = source; // wxArrayString has an assignment operator
-}
-
-
 // --- wxFileDialog ---
 
 WXD_EXPORTED wxd_FileDialog_t* wxd_FileDialog_Create(

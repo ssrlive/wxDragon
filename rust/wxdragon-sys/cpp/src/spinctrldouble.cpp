@@ -6,7 +6,7 @@
 
 WXD_EXPORTED wxd_SpinCtrlDouble_t *wxd_SpinCtrlDouble_Create(
     wxd_Window_t *parent, int id, const char *value_str, 
-    int x, int y, int w, int h, long style, 
+    int x, int y, int w, int h, int64_t style, 
     double min_val, double max_val, double initial_val, double inc
 ) {
     wxWindow *p = (wxWindow *)parent;
@@ -19,7 +19,7 @@ WXD_EXPORTED wxd_SpinCtrlDouble_t *wxd_SpinCtrlDouble_Create(
     // We can set the string value after creation if needed, or rely on initial_val formatting.
     // Default style wxSP_ARROW_KEYS is usually implied by wxSpinCtrl/wxSpinCtrlDouble.
     // wxSP_WRAP is a common additional style.
-    long actual_style = style;
+    int64_t actual_style = style;
     if (style == 0) { // If no style provided, default to arrow keys.
         actual_style = wxSP_ARROW_KEYS;
     } // User can pass wxSP_ARROW_KEYS | wxSP_WRAP etc.

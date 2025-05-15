@@ -4,7 +4,7 @@
 #include "../wxd_types.h"
 
 // --- HyperlinkCtrl Functions ---
-WXD_EXPORTED wxd_HyperlinkCtrl_t *wxd_HyperlinkCtrl_Create(wxd_Window_t *parent, int id, const char *label, const char *url, int x, int y, int w, int h, long style);
+WXD_EXPORTED wxd_HyperlinkCtrl_t *wxd_HyperlinkCtrl_Create(wxd_Window_t *parent, int id, const char *label, const char *url, int x, int y, int w, int h, int64_t style);
 WXD_EXPORTED const char *wxd_HyperlinkCtrl_GetURL(wxd_HyperlinkCtrl_t *self);
 WXD_EXPORTED void wxd_HyperlinkCtrl_SetURL(wxd_HyperlinkCtrl_t *self, const char *url);
 WXD_EXPORTED bool wxd_HyperlinkCtrl_GetVisited(wxd_HyperlinkCtrl_t *self);

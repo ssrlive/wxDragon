@@ -3,7 +3,7 @@
 #include <wx/gdicmn.h> // For wxPoint, wxSize, wxDefaultPosition, wxDefaultSize
 #include <wx/window.h> // For wxWindow parent type
 
-WXD_EXPORTED wxd_ActivityIndicator_t *wxd_ActivityIndicator_Create(wxd_Window_t *parent, int id, int x, int y, int w, int h, long style) {
+WXD_EXPORTED wxd_ActivityIndicator_t *wxd_ActivityIndicator_Create(wxd_Window_t *parent, int id, int x, int y, int w, int h, int64_t style) {
     wxWindow *p = (wxWindow *)parent;
     wxPoint pos = (x == -1 && y == -1) ? wxDefaultPosition : wxPoint(x, y);
     wxSize size = (w == -1 && h == -1) ? wxDefaultSize : wxSize(w, h);

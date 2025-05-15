@@ -23,7 +23,7 @@ wxd_Window_t* wxd_EditableListBox_New(wxd_Window_t* parent,
                                    const char* label,
                                    int x, int y,
                                    int width, int height,
-                                   long style);
+                                   int64_t style);
 
 /**
  * @brief Get the string items in the listbox

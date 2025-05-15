@@ -54,21 +54,21 @@ WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Show(wxd_AuiPaneInfo_t* self, bo
 WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_Hide(wxd_AuiPaneInfo_t* self);
 WXD_EXPORTED wxd_AuiPaneInfo_t* wxd_AuiPaneInfo_CaptionVisible(wxd_AuiPaneInfo_t* self, bool visible);
 
-WXD_EXPORTED wxd_AuiMDIParentFrame_t* wxd_AuiMDIParentFrame_Create(wxd_Window_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, long style, const char* name);
+WXD_EXPORTED wxd_AuiMDIParentFrame_t* wxd_AuiMDIParentFrame_Create(wxd_Window_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, int64_t style, const char* name);
 
-WXD_EXPORTED wxd_AuiMDIChildFrame_t* wxd_AuiMDIChildFrame_Create(wxd_AuiMDIParentFrame_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, long style, const char* name);
+WXD_EXPORTED wxd_AuiMDIChildFrame_t* wxd_AuiMDIChildFrame_Create(wxd_AuiMDIParentFrame_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, int64_t style, const char* name);
 
 // Potentially other wxAuiMDIChildFrame specific functions will be added here.
 
 // --- wxAuiNotebook ---
-WXD_EXPORTED wxd_AuiNotebook_t* wxd_AuiNotebook_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, long style);
+WXD_EXPORTED wxd_AuiNotebook_t* wxd_AuiNotebook_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, int64_t style);
 WXD_EXPORTED bool wxd_AuiNotebook_AddPage(wxd_AuiNotebook_t* self, wxd_Window_t* page, const char* caption, bool select, int bitmap_id);
 WXD_EXPORTED size_t wxd_AuiNotebook_GetPageCount(wxd_AuiNotebook_t* self);
 WXD_EXPORTED size_t wxd_AuiNotebook_SetSelection(wxd_AuiNotebook_t* self, size_t new_page);
 // WXD_EXPORTED wxd_Window_t* wxd_AuiNotebook_GetPage(wxd_AuiNotebook_t* self, size_t page_idx); // TODO: decide if GetPage is needed and how to manage its lifecycle
 
 // --- wxAuiToolBar ---
-WXD_EXPORTED wxd_AuiToolBar_t* wxd_AuiToolBar_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, long style);
+WXD_EXPORTED wxd_AuiToolBar_t* wxd_AuiToolBar_Create(wxd_Window_t* parent, int id, wxd_Point pos, wxd_Size size, int64_t style);
 WXD_EXPORTED void wxd_AuiToolBar_AddTool(wxd_AuiToolBar_t* self, int tool_id, const char* label, /*wxd_Bitmap_t* bitmap, wxd_Bitmap_t* disabled_bitmap,*/ const char* short_help_string, WXDItemKindCEnum kind);
 WXD_EXPORTED void wxd_AuiToolBar_AddLabel(wxd_AuiToolBar_t* self, int tool_id, const char* label, int width);
 WXD_EXPORTED void wxd_AuiToolBar_AddControl(wxd_AuiToolBar_t* self, wxd_Control_t* control, const char* label);

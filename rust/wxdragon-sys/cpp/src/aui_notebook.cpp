@@ -12,7 +12,7 @@ WXD_EXPORTED wxd_AuiNotebook_t* wxd_AuiNotebook_Create(
     int id,
     wxd_Point pos,
     wxd_Size size,
-    long style) {
+    int64_t style) {
 
     wxWindow* parentPtr = (wxWindow*)parent;
     // Note: wxAuiNotebook parent can be null according to some docs, but safer to require for now.

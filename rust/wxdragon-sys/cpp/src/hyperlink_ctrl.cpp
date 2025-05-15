@@ -28,7 +28,7 @@
 // For now, we'll return `link->GetURL().ToUTF8().data()`. This is risky if not copied immediately.
 // A robust solution would be for Rust to allocate and pass a buffer.
 
-WXD_EXPORTED wxd_HyperlinkCtrl_t *wxd_HyperlinkCtrl_Create(wxd_Window_t *parent, int id, const char *label, const char *url, int x, int y, int w, int h, long style) {
+WXD_EXPORTED wxd_HyperlinkCtrl_t *wxd_HyperlinkCtrl_Create(wxd_Window_t *parent, int id, const char *label, const char *url, int x, int y, int w, int h, int64_t style) {
     wxWindow *p = (wxWindow *)parent;
     wxString wxLabel = wxString::FromUTF8(label);
     wxString wxUrl = wxString::FromUTF8(url);

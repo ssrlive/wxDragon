@@ -9,7 +9,7 @@
 
 extern "C" {
 
-wxd_AuiMDIParentFrame_t* wxd_AuiMDIParentFrame_Create(wxd_Window_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, long style, const char* name) {
+wxd_AuiMDIParentFrame_t* wxd_AuiMDIParentFrame_Create(wxd_Window_t* parent, int id, const char* title, wxd_Point pos, wxd_Size size, int64_t style, const char* name) {
     wxWindow* parentPtr = (wxWindow*)parent;
     wxPoint wxPos = wxPoint(pos.x, pos.y);
     wxSize wxSizeInstance = wxSize(size.width, size.height);

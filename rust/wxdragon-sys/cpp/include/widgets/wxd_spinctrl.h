@@ -12,7 +12,7 @@ WXD_EXPORTED int wxd_SpinCtrl_GetMin(wxd_SpinCtrl_t* self);
 WXD_EXPORTED int wxd_SpinCtrl_GetMax(wxd_SpinCtrl_t* self);
 
 // --- SpinCtrlDouble Functions ---
-WXD_EXPORTED wxd_SpinCtrlDouble_t *wxd_SpinCtrlDouble_Create(wxd_Window_t *parent, int id, const char *value, int x, int y, int w, int h, long style, double min_val, double max_val, double initial_val, double inc);
+WXD_EXPORTED wxd_SpinCtrlDouble_t *wxd_SpinCtrlDouble_Create(wxd_Window_t *parent, int id, const char *value, int x, int y, int w, int h, int64_t style, double min_val, double max_val, double initial_val, double inc);
 WXD_EXPORTED double wxd_SpinCtrlDouble_GetValue(wxd_SpinCtrlDouble_t *self);
 WXD_EXPORTED void wxd_SpinCtrlDouble_SetValue(wxd_SpinCtrlDouble_t *self, double value);
 WXD_EXPORTED void wxd_SpinCtrlDouble_SetRange(wxd_SpinCtrlDouble_t *self, double min_val, double max_val);

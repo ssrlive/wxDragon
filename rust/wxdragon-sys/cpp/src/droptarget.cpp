@@ -84,26 +84,6 @@ private:
     void* m_userData;
 };
 
-// Simple text drop target (legacy API support)
-class WxdTextDropTarget : public wxTextDropTarget {
-public:
-    WxdTextDropTarget(void* callback, void* userData)
-        : m_callback(reinterpret_cast<wxd_OnDropText_Callback>(callback)),
-          m_userData(userData) {}
-
-    virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text) override {
-        if (m_callback) {
-            wxScopedCharBuffer utf8 = text.utf8_str();
-            return m_callback(utf8.data(), x, y, m_userData);
-        }
-        return false;
-    }
-
-private:
-    wxd_OnDropText_Callback m_callback;
-    void* m_userData;
-};
-
 // Full-featured file drop target implementation
 class WxdFileDropTargetFull : public wxFileDropTarget {
 public:
@@ -194,35 +174,6 @@ private:
     void* m_userData;
 };
 
-// Simple file drop target (legacy API support)
-class WxdFileDropTarget : public wxFileDropTarget {
-public:
-    WxdFileDropTarget(void* callback, void* userData)
-        : m_callback(reinterpret_cast<wxd_OnDropFiles_Callback>(callback)),
-          m_userData(userData) {}
-
-    virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) override {
-        if (m_callback) {
-            // Create a wxd_ArrayString_t to pass to the callback
-            wxd_ArrayString_t* wxdArray = new wxd_ArrayString_t();
-            wxdArray->internal_data = new wxArrayString(filenames);
-            
-            bool result = m_callback(wxdArray, x, y, m_userData);
-            
-            // Clean up
-            delete static_cast<wxArrayString*>(wxdArray->internal_data);
-            delete wxdArray;
-            
-            return result;
-        }
-        return false;
-    }
-
-private:
-    wxd_OnDropFiles_Callback m_callback;
-    void* m_userData;
-};
-
 extern "C" {
     
 // Create text drop target with full callback set
@@ -269,81 +220,6 @@ WXD_EXPORTED wxd_FileDropTarget_t* wxd_FileDropTarget_CreateFull(
     wx_window->SetDropTarget(drop_target);
     
     return reinterpret_cast<wxd_FileDropTarget_t*>(drop_target);
-}
-
-// Create text drop target (simplified version)
-WXD_EXPORTED wxd_TextDropTarget_t* wxd_TextDropTarget_Create(
-    wxd_Window_t* window,
-    void* onDropTextCallback,
-    void* userData) {
-    
-    if (!window) return nullptr;
-
-    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
-    
-    WxdTextDropTarget* drop_target = new WxdTextDropTarget(onDropTextCallback, userData);
-    
-    wx_window->SetDropTarget(drop_target);
-    
-    return reinterpret_cast<wxd_TextDropTarget_t*>(drop_target);
-}
-
-// Create file drop target (simplified version)
-WXD_EXPORTED wxd_FileDropTarget_t* wxd_FileDropTarget_Create(
-    wxd_Window_t* window,
-    void* onDropFilesCallback,
-    void* userData) {
-    
-    if (!window) return nullptr;
-
-    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
-    
-    WxdFileDropTarget* drop_target = new WxdFileDropTarget(onDropFilesCallback, userData);
-    
-    wx_window->SetDropTarget(drop_target);
-    
-    return reinterpret_cast<wxd_FileDropTarget_t*>(drop_target);
-}
-
-// Destroy drop targets
-WXD_EXPORTED void wxd_TextDropTarget_Destroy(wxd_TextDropTarget_t* dropTarget) {
-    // We don't actually delete the drop target here, because wxWindow takes ownership.
-    // wxWidgets will delete it when the window is destroyed.
-    // This function is kept for API completeness.
-}
-
-WXD_EXPORTED void wxd_FileDropTarget_Destroy(wxd_FileDropTarget_t* dropTarget) {
-    // We don't actually delete the drop target here, because wxWindow takes ownership.
-    // wxWidgets will delete it when the window is destroyed.
-    // This function is kept for API completeness.
-}
-
-// ArrayString helper functions
-WXD_EXPORTED int wxd_ArrayString_GetCount(wxd_ArrayString_t* array) {
-    if (!array || !array->internal_data) return 0;
-    wxArrayString* wx_array = static_cast<wxArrayString*>(array->internal_data);
-    return wx_array->GetCount();
-}
-
-WXD_EXPORTED int wxd_ArrayString_GetString(wxd_ArrayString_t* array, int index, char* buffer, int bufferLen) {
-    if (!array || !array->internal_data || !buffer || bufferLen <= 0) return -1;
-    
-    wxArrayString* wx_array = static_cast<wxArrayString*>(array->internal_data);
-    if (index < 0 || index >= static_cast<int>(wx_array->GetCount())) return -1;
-    
-    wxString str = wx_array->Item(index);
-    wxScopedCharBuffer utf8 = str.utf8_str();
-    
-    size_t len = strlen(utf8.data());
-    if (len >= static_cast<size_t>(bufferLen)) {
-        // Buffer too small, truncate
-        len = bufferLen - 1;
-    }
-    
-    memcpy(buffer, utf8.data(), len);
-    buffer[len] = '\0';
-    
-    return len;
 }
 
 } // extern "C" 

@@ -12,7 +12,7 @@ WXD_EXPORTED wxd_AnimationCtrl_t* wxd_AnimationCtrl_Create(
     wxd_Id id, 
     const char* animation_file, 
     int x, int y, int width, int height, 
-    long style, 
+    int64_t style, 
     const char* name)
 {
     if (!parent) {

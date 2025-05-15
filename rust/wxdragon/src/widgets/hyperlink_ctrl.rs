@@ -1,5 +1,5 @@
 use std::ffi::{CStr, CString};
-use std::os::raw::c_long;
+use std::os::raw::c_longlong;
 use wxdragon_sys as ffi;
 
 use crate::color::Colour;
@@ -171,7 +171,7 @@ widget_builder!(
                 slf.pos.y,
                 slf.size.width,
                 slf.size.height,
-                slf.style.bits() as c_long,
+                slf.style.bits() as c_longlong,
             )
         };
         if raw_ptr.is_null() {

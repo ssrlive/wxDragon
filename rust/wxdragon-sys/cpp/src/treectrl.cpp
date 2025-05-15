@@ -8,9 +8,9 @@ class LongValueTreeItemData : public wxTreeItemData
 {
 public:
     LongValueTreeItemData(long value) : m_value(value) {}
-    long GetValue() const { return m_value; }
+    int64_t GetValue() const { return m_value; }
 private:
-    long m_value;
+    int64_t m_value;
 };
 
 extern "C" {
@@ -136,7 +136,7 @@ WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeItemId_Clone(wxd_TreeItemId_t* item_id)
 }
 
 // Set Item Data as a long value
-WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id, long data)
+WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id, int64_t data)
 {
     wxTreeCtrl* tree = WXD_UNWRAP_TREE_CTRL(self);
     wxTreeItemId* id = WXD_UNWRAP_TREE_ITEM_ID(item_id);
@@ -156,7 +156,7 @@ WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_
 }
 
 // Get Item Data as a long value
-WXD_EXPORTED long wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id)
+WXD_EXPORTED int64_t wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id)
 {
     wxTreeCtrl* tree = WXD_UNWRAP_TREE_CTRL(self);
     wxTreeItemId* id = WXD_UNWRAP_TREE_ITEM_ID(item_id);
@@ -174,7 +174,7 @@ WXD_EXPORTED long wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_
 
     // If it's not our wrapper class, return the pointer value as an integer
     // This is a fallback that shouldn't normally be needed
-    return reinterpret_cast<long>(data);
+    return reinterpret_cast<int64_t>(data);
 }
 
 // New tree traversal functions

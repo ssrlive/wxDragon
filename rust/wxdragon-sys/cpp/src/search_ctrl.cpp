@@ -5,7 +5,7 @@
 extern "C" {
 
 // wxSearchCtrl
-WXD_EXPORTED wxd_SearchCtrl_t* wxd_SearchCtrl_Create(wxd_Window_t* parent, int id, const char* value, int x, int y, int width, int height, long style) {
+WXD_EXPORTED wxd_SearchCtrl_t* wxd_SearchCtrl_Create(wxd_Window_t* parent, int id, const char* value, int x, int y, int width, int height, int64_t style) {
     wxWindow* wx_parent = (wxWindow*)parent;
     wxSearchCtrl* ctrl = new wxSearchCtrl(wx_parent, id, wxString::FromUTF8(value ? value : ""), wxPoint(x, y), wxSize(width, height), style);
     return (wxd_SearchCtrl_t*)ctrl;

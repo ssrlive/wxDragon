@@ -11,6 +11,7 @@
 
 // Include all fundamental types first
 #include "wxd_types.h" // Contains all basic C types and opaque struct typedefs
+#include "array_string.h" // ArrayString helper functions
 
 #ifdef __cplusplus
 // Include C++ specific utility functions and macros

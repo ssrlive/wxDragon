@@ -1,7 +1,7 @@
 /* This is a new file */
 //! Safe wrapper for wxFontPickerCtrl.
 
-use std::ffi::c_long;
+use std::ffi::c_longlong;
 use wxdragon_sys as ffi;
 
 use crate::event::WxEvtHandler;
@@ -96,7 +96,7 @@ widget_builder!(
                 initial_font_ptr,
                 slf.pos.into(),
                 slf.size.into(),
-                slf.style.bits() as c_long,
+                slf.style.bits() as c_longlong,
             )
         };
         if ptr.is_null() {

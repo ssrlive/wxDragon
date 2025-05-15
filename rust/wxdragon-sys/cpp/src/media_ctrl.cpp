@@ -10,7 +10,7 @@ WXD_EXPORTED wxd_MediaCtrl_t* wxd_MediaCtrl_Create(
     wxd_Id id,
     const char* fileName,
     int x, int y, int width, int height,
-    long style,
+    int64_t style,
     const char* backend_name)
 {
     if (!parent) {

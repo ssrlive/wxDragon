@@ -9,7 +9,7 @@ wxd_FileCtrl_t* wxd_FileCtrl_Create(
     const char* default_directory,
     const char* default_filename,
     const char* wild_card,
-    long style,
+    int64_t style,
     int pos_x,
     int pos_y,
     int size_w,

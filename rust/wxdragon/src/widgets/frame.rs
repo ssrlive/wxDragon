@@ -10,7 +10,7 @@ use crate::window::{Window, WxWidget};
 use std::default::Default;
 use std::ffi::CString;
 use std::marker::PhantomData;
-use std::os::raw::c_int; // Import c_long and c_int // ADDED for enum bitwise operations
+use std::os::raw::c_int; // Import c_longlong and c_int // ADDED for enum bitwise operations
 use std::ptr;
 use wxdragon_sys as ffi;
 

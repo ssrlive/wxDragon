@@ -1,6 +1,6 @@
 use std::ffi::CString;
 use std::marker::PhantomData;
-use std::os::raw::{c_int, c_long};
+use std::os::raw::{c_int, c_longlong};
 
 use crate::prelude::*;
 use crate::window::Window;
@@ -277,7 +277,7 @@ widget_builder!(
                 slf.id as c_int,
                 slf.pos.into(),
                 slf.size.into(),
-                slf.style.bits() as c_long,
+                slf.style.bits() as c_longlong,
             )
         };
         if ptr.is_null() {

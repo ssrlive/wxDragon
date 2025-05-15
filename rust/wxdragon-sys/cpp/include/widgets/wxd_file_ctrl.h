@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-wxd_FileCtrl_t* wxd_FileCtrl_Create(wxd_Window_t* parent, int id, const char* default_directory, const char* default_filename, const char* wild_card, long style, int pos_x, int pos_y, int size_w, int size_h, const char* name);
+wxd_FileCtrl_t* wxd_FileCtrl_Create(wxd_Window_t* parent, int id, const char* default_directory, const char* default_filename, const char* wild_card, int64_t style, int pos_x, int pos_y, int size_w, int size_h, const char* name);
 
 // Placeholder for other wxFileCtrl specific functions:
 // const char* wxd_FileCtrl_GetPath(wxd_FileCtrl_t* self); // Returns char* to be freed by wxd_free_string

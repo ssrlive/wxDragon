@@ -17,8 +17,8 @@ WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeCtrl_AppendItem(wxd_TreeCtrl_t* self, wxd
 WXD_EXPORTED void wxd_TreeCtrl_Delete(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id);
 WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeCtrl_GetSelection(wxd_TreeCtrl_t* self);
 WXD_EXPORTED void wxd_TreeCtrl_SelectItem(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id);
-WXD_EXPORTED long wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id);
-WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id, long data);
+WXD_EXPORTED int64_t wxd_TreeCtrl_GetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id);
+WXD_EXPORTED bool wxd_TreeCtrl_SetItemData(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* item_id, int64_t data);
 WXD_EXPORTED void wxd_TreeItemId_Free(wxd_TreeItemId_t* item_id);
 WXD_EXPORTED bool wxd_TreeItemId_IsOk(wxd_TreeItemId_t* item_id);
 WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeItemId_Clone(wxd_TreeItemId_t* item_id);
