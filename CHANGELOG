@@ -1,0 +1,61 @@
+# Changelog
+
+## 0.2.0
+
+### New Features
+- Added MediaPlayer widget for audio/video playback
+- Added EditableListBox widget
+- Added TimePicker widget
+- Added NotificationMessage widget
+- Added AnimationCtrl widget
+- Added various dialog widgets:
+  - MessageDialog
+  - FileDialog
+  - TextEntryDialog
+  - ColourDialog
+  - FontDialog
+  - ProgressDialog
+- Added picker controls:
+  - FilePickerCtrl
+  - DirPickerCtrl
+  - FontPickerCtrl
+- Added AUI (Advanced User Interface) components:
+  - AuiMdiParentFrame
+  - AuiMdiChildFrame
+  - AuiNotebook
+  - AuiToolbar
+- Added Drag and Drop (DnD) support with full callback implementation
+- Added Device Context (DC) related APIs
+- Added `app::call_after` for scheduling work on the main thread
+
+### Enhancements
+- Added more size-related functions to Window
+- Added more functions to ListCtrl
+- Added more functions and styles to TextCtrl
+- Added more colors and font functions
+- Enhanced memory management for Bitmap
+- Added enable/disable functions to widgets
+- Added general set_font capability to all widgets
+- Added sizer.detach and widget.destroy methods
+- Added TreeItemData support
+- Improved FileDataObject with proper get_filenames implementation
+- Added general set_font capability to all widgets
+
+### Refactoring
+- Refactored TreeCtrl to use unified item_data mechanism
+- Refined dialog code for better usability
+- Refined ListCtrl implementation
+- Applied widget macros to existing widgets for consistent implementation
+- Refined constant handling by converting to Rust enums
+- Restructured wxdragon.h to use separate modules
+
+### Platform Support
+- Added Windows theme support
+- Improved cross-compilation from macOS to Windows
+
+### Breaking Changes
+- Removed RawWxPtr in favor of a more robust approach
+
+## 0.1.0
+
+- Initial release of wxdragon and wxdragon-sys
