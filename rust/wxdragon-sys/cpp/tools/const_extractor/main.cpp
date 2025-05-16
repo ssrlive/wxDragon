@@ -165,6 +165,9 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxTOP", wxTOP});
     constants_to_extract.push_back({"wxBOTTOM", wxBOTTOM});
     constants_to_extract.push_back({"wxFIXED_MINSIZE", wxFIXED_MINSIZE});
+    constants_to_extract.push_back({"wxRESERVE_SPACE_EVEN_IF_HIDDEN", wxRESERVE_SPACE_EVEN_IF_HIDDEN});
+
+    // Border Styles
     constants_to_extract.push_back({"wxBORDER_DEFAULT", wxBORDER_DEFAULT});
     constants_to_extract.push_back({"wxBORDER_SIMPLE", wxBORDER_SIMPLE});
     constants_to_extract.push_back({"wxBORDER_SUNKEN", wxBORDER_SUNKEN});

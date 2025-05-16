@@ -224,24 +224,24 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
     tree_ctrl.select_item(&root_id);
 
     // Create sizers for layout
-    let main_sizer = BoxSizer::builder(HORIZONTAL).build();
+    let main_sizer = BoxSizer::builder(Orientation::Horizontal).build();
 
     // Left side: Tree control
-    let tree_sizer = BoxSizer::builder(VERTICAL).build();
-    tree_sizer.add(&tree_ctrl, 1, EXPAND | ALL, 10);
+    let tree_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    tree_sizer.add(&tree_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 10);
 
     // Right side: Info panel
-    let info_sizer = BoxSizer::builder(VERTICAL).build();
+    let info_sizer = BoxSizer::builder(Orientation::Vertical).build();
     let info_title = StaticText::builder(&panel)
         .with_label("Item Information:")
         .build();
 
-    info_sizer.add(&info_title, 0, ALL, 5);
-    info_sizer.add(&info_text, 1, EXPAND | ALL, 10);
+    info_sizer.add(&info_title, 0, SizerFlag::All, 5);
+    info_sizer.add(&info_text, 1, SizerFlag::Expand | SizerFlag::All, 10);
 
     // Add both sides to main sizer
-    main_sizer.add_sizer(&tree_sizer, 3, EXPAND | ALL, 10);
-    main_sizer.add_sizer(&info_sizer, 2, EXPAND | ALL, 10);
+    main_sizer.add_sizer(&tree_sizer, 3, SizerFlag::Expand | SizerFlag::All, 10);
+    main_sizer.add_sizer(&info_sizer, 2, SizerFlag::Expand | SizerFlag::All, 10);
 
     // Set the panel's sizer
     panel.set_sizer(main_sizer, true);

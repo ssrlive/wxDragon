@@ -44,7 +44,7 @@ pub use types::Style;
 pub use datetime::DateTime;
 pub use event::{Event, EventType, WxEvtHandler};
 pub use sizers::staticbox_sizer::StaticBoxSizer;
-pub use sizers::{BoxSizer, Orientation, Sizer, SizerFlags};
+pub use sizers::{BoxSizer, Orientation, Sizer, SizerFlag};
 pub use widgets::checklistbox::{CheckListBox, CheckListBoxBuilder};
 pub use widgets::togglebutton::{ToggleButton, ToggleButtonBuilder};
 pub use widgets::{Button, ButtonBuilder};

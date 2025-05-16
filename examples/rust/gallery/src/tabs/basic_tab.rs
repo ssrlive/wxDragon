@@ -264,9 +264,9 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .build();
 
     // --- Layout using Main Vertical BoxSizer and child FlexGridSizers ---
-    let main_sizer = BoxSizer::builder(VERTICAL).build();
-    let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
-    let control_flags = EXPAND;
+    let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    let label_flags = SizerFlag::AlignRight | SizerFlag::AlignCenterVertical;
+    let control_flags = SizerFlag::Expand;
 
     let grid_sizer_group1 = FlexGridSizer::builder(0, 2)
         .with_vgap(5)
@@ -277,19 +277,19 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     grid_sizer_group1.add(&static_text_label, 0, label_flags, 0);
     grid_sizer_group1.add(&text_ctrl, 1, control_flags, 0);
     grid_sizer_group1.add(&spin_button_label, 0, label_flags, 0);
-    grid_sizer_group1.add(&spin_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_group1.add(&spin_button, 0, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_group1.add(&spinctrl_double_label_widget, 0, label_flags, 0);
-    let spin_double_sizer = BoxSizer::builder(HORIZONTAL).build();
-    spin_double_sizer.add(&spinctrl_double, 0, ALIGN_CENTER_VERTICAL, 0);
+    let spin_double_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    spin_double_sizer.add(&spinctrl_double, 0, SizerFlag::AlignCenterVertical, 0);
     spin_double_sizer.add_spacer(5);
-    spin_double_sizer.add(&spinctrl_double_status_label, 1, EXPAND, 0);
+    spin_double_sizer.add(&spinctrl_double_status_label, 1, SizerFlag::Expand, 0);
     grid_sizer_group1.add_sizer(&spin_double_sizer, 1, control_flags, 0);
-    main_sizer.add_sizer(&grid_sizer_group1, 0, EXPAND | ALL, 10);
+    main_sizer.add_sizer(&grid_sizer_group1, 0, SizerFlag::Expand | SizerFlag::All, 10);
 
     let static_line_sep1 = StaticLine::builder(&basic_panel)
         .with_style(StaticLineStyle::Default) // Use Default for Horizontal
         .build();
-    main_sizer.add(&static_line_sep1, 0, EXPAND | ALL, 5);
+    main_sizer.add(&static_line_sep1, 0, SizerFlag::Expand | SizerFlag::All, 5);
 
     let grid_sizer_therest = FlexGridSizer::builder(0, 2)
         .with_vgap(5)
@@ -299,55 +299,55 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     grid_sizer_therest.add_growable_col(1, 3);
 
     grid_sizer_therest.add(&checkbox_label_widget, 0, label_flags, 0);
-    grid_sizer_therest.add(&checkbox, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_therest.add(&checkbox, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&radio_label, 0, label_flags, 0);
-    let radio_button_sizer = BoxSizer::builder(HORIZONTAL).build();
-    radio_button_sizer.add(&radio1, 0, ALIGN_CENTER_VERTICAL, 0);
+    let radio_button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    radio_button_sizer.add(&radio1, 0, SizerFlag::AlignCenterVertical, 0);
     radio_button_sizer.add_spacer(5);
-    radio_button_sizer.add(&radio2, 0, ALIGN_CENTER_VERTICAL, 0);
+    radio_button_sizer.add(&radio2, 0, SizerFlag::AlignCenterVertical, 0);
     radio_button_sizer.add_spacer(10);
-    radio_button_sizer.add(&radio_status_label, 1, EXPAND, 0);
+    radio_button_sizer.add(&radio_status_label, 1, SizerFlag::Expand, 0);
     grid_sizer_therest.add_sizer(&radio_button_sizer, 1, control_flags, 0);
     grid_sizer_therest.add(&radio_box_label, 0, label_flags, 0);
     grid_sizer_therest.add(&radio_box, 1, control_flags, 0);
 
     grid_sizer_therest.add(&toggle_button_label, 0, label_flags, 0);
-    let toggle_sizer = BoxSizer::builder(HORIZONTAL).build();
-    toggle_sizer.add(&toggle_button, 0, ALIGN_CENTER_VERTICAL, 0);
+    let toggle_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    toggle_sizer.add(&toggle_button, 0, SizerFlag::AlignCenterVertical, 0);
     toggle_sizer.add_spacer(5);
-    toggle_sizer.add(&toggle_status_label, 1, EXPAND, 0);
-    grid_sizer_therest.add_sizer(&toggle_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    toggle_sizer.add(&toggle_status_label, 1, SizerFlag::Expand, 0);
+    grid_sizer_therest.add_sizer(&toggle_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&bitmap_button_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&bitmap_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_therest.add(&bitmap_button, 0, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&art_button_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&art_button, 0, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_therest.add(&art_button, 0, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&activity_label, 0, label_flags, 0);
-    let activity_sizer = BoxSizer::builder(HORIZONTAL).build();
-    activity_sizer.add(&activity_indicator, 0, ALIGN_CENTER_VERTICAL, 0);
+    let activity_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    activity_sizer.add(&activity_indicator, 0, SizerFlag::AlignCenterVertical, 0);
     activity_sizer.add_spacer(5);
-    activity_sizer.add(&activity_start_btn, 0, ALIGN_CENTER_VERTICAL, 5);
+    activity_sizer.add(&activity_start_btn, 0, SizerFlag::AlignCenterVertical, 5);
     activity_sizer.add_spacer(5);
-    activity_sizer.add(&activity_stop_btn, 0, ALIGN_CENTER_VERTICAL, 5);
-    grid_sizer_therest.add_sizer(&activity_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    activity_sizer.add(&activity_stop_btn, 0, SizerFlag::AlignCenterVertical, 5);
+    grid_sizer_therest.add_sizer(&activity_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&scrollbar_label, 0, label_flags, 0);
-    let scrollbar_h_sizer = BoxSizer::builder(HORIZONTAL).build();
-    scrollbar_h_sizer.add(&scroll_bar, 1, EXPAND, 0);
+    let scrollbar_h_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    scrollbar_h_sizer.add(&scroll_bar, 1, SizerFlag::Expand, 0);
     scrollbar_h_sizer.add_spacer(5);
-    scrollbar_h_sizer.add(&scrollbar_status_label, 0, ALIGN_CENTER_VERTICAL, 0);
+    scrollbar_h_sizer.add(&scrollbar_status_label, 0, SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add_sizer(&scrollbar_h_sizer, 1, control_flags, 0);
 
     grid_sizer_therest.add(&colour_picker_label, 0, label_flags, 0);
-    let colour_sizer = BoxSizer::builder(HORIZONTAL).build();
-    colour_sizer.add(&colour_picker, 0, ALIGN_CENTER_VERTICAL, 0);
+    let colour_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    colour_sizer.add(&colour_picker, 0, SizerFlag::AlignCenterVertical, 0);
     colour_sizer.add_spacer(5);
-    colour_sizer.add(&colour_status_label, 1, EXPAND, 0);
-    grid_sizer_therest.add_sizer(&colour_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    colour_sizer.add(&colour_status_label, 1, SizerFlag::Expand, 0);
+    grid_sizer_therest.add_sizer(&colour_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&date_picker_label_widget, 0, label_flags, 0);
-    let date_sizer = BoxSizer::builder(HORIZONTAL).build();
-    date_sizer.add(&date_picker, 0, ALIGN_CENTER_VERTICAL, 0);
+    let date_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    date_sizer.add(&date_picker, 0, SizerFlag::AlignCenterVertical, 0);
     date_sizer.add_spacer(5);
-    date_sizer.add(&date_picker_status_label, 1, EXPAND, 0);
-    grid_sizer_therest.add_sizer(&date_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    date_sizer.add(&date_picker_status_label, 1, SizerFlag::Expand, 0);
+    grid_sizer_therest.add_sizer(&date_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     
     // Add Time Picker
     let time_picker_label_widget = StaticText::builder(&basic_panel)
@@ -365,29 +365,29 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         ))
         .build();
     grid_sizer_therest.add(&time_picker_label_widget, 0, label_flags, 0);
-    let time_sizer = BoxSizer::builder(HORIZONTAL).build();
-    time_sizer.add(&time_picker, 0, ALIGN_CENTER_VERTICAL, 0);
+    let time_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    time_sizer.add(&time_picker, 0, SizerFlag::AlignCenterVertical, 0);
     time_sizer.add_spacer(5);
-    time_sizer.add(&time_picker_status_label, 1, EXPAND, 0);
-    grid_sizer_therest.add_sizer(&time_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    time_sizer.add(&time_picker_status_label, 1, SizerFlag::Expand, 0);
+    grid_sizer_therest.add_sizer(&time_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     
     grid_sizer_therest.add(&calendar_label_widget, 0, label_flags, 0);
-    let calendar_sizer = BoxSizer::builder(HORIZONTAL).build();
-    calendar_sizer.add(&calendar_ctrl, 1, EXPAND, 0);
+    let calendar_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    calendar_sizer.add(&calendar_ctrl, 1, SizerFlag::Expand, 0);
     calendar_sizer.add_spacer(5);
-    calendar_sizer.add(&calendar_status_label, 1, EXPAND, 0);
-    grid_sizer_therest.add_sizer(&calendar_sizer, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    calendar_sizer.add(&calendar_status_label, 1, SizerFlag::Expand, 0);
+    grid_sizer_therest.add_sizer(&calendar_sizer, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
 
     grid_sizer_therest.add(&search_ctrl_label, 0, label_flags, 0);
     grid_sizer_therest.add(&search_ctrl, 1, control_flags, 0);
     grid_sizer_therest.add(&bitmap_combo_box_label, 0, label_flags, 0);
     grid_sizer_therest.add(&bitmap_combo_box, 1, control_flags, 0);
     grid_sizer_therest.add(&hyperlink_label, 0, label_flags, 0);
-    grid_sizer_therest.add(&hyperlink_ctrl, 1, ALIGN_LEFT | ALIGN_CENTER_VERTICAL, 0);
+    grid_sizer_therest.add(&hyperlink_ctrl, 1, SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical, 0);
     grid_sizer_therest.add(&cmd_link_button_label, 0, label_flags, 0);
     grid_sizer_therest.add(&cmd_link_button, 1, control_flags, 0);
 
-    main_sizer.add_sizer(&grid_sizer_therest, 1, EXPAND | ALL, 10);
+    main_sizer.add_sizer(&grid_sizer_therest, 1, SizerFlag::Expand | SizerFlag::All, 10);
     basic_panel.set_sizer_and_fit(main_sizer, true);
 
     // Event Handlers (Original and Moved)

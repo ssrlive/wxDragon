@@ -9,14 +9,14 @@ impl DropTargetPanel {
             .build();
 
         // Add a vertical sizer
-        let sizer = BoxSizer::builder(VERTICAL).build();
+        let sizer = BoxSizer::builder(Orientation::Vertical).build();
 
         // Create a title
         let title = StaticText::builder(&panel)
             .with_label("Drop files or text here:")
             .build();
         sizer.add_spacer(10);
-        sizer.add(&title, 0, EXPAND | ALL, 5);
+        sizer.add(&title, 0, SizerFlag::Expand | SizerFlag::All, 5);
         sizer.add_spacer(10);
 
         // Create two drop areas - one for text, one for files
@@ -36,31 +36,31 @@ impl DropTargetPanel {
             .build();
         
         // Setup the text drop area
-        let text_sizer = BoxSizer::builder(VERTICAL).build();
+        let text_sizer = BoxSizer::builder(Orientation::Vertical).build();
         let text_info = StaticText::builder(&text_area)
             .with_label("TEXT DROP ZONE\n\nDrag text here")
             .build();
 
         text_sizer.add_spacer(20);
-        text_sizer.add(&text_info, 0, ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL | ALL, 10);
+        text_sizer.add(&text_info, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical | SizerFlag::All, 10);
         text_area.set_sizer(text_sizer, true);
         text_area.set_background_color(Colour::rgb(220, 240, 220));
 
         // Setup the file drop area
-        let file_sizer = BoxSizer::builder(VERTICAL).build();
+        let file_sizer = BoxSizer::builder(Orientation::Vertical).build();
         let file_info = StaticText::builder(&file_area)
             .with_label("FILE DROP ZONE\n\nDrag files here")
             .build();
 
         file_sizer.add_spacer(20);
-        file_sizer.add(&file_info, 0, ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL | ALL, 10);
+        file_sizer.add(&file_info, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical | SizerFlag::All, 10);
         file_area.set_sizer(file_sizer, true);
         file_area.set_background_color(Colour::rgb(220, 220, 240));
 
         // Add the drop areas to the main sizer
-        sizer.add(&text_area, 1, EXPAND | ALL, 10);
-        sizer.add(&file_area, 1, EXPAND | ALL, 10);
-        sizer.add(&status_text, 0, EXPAND | ALL, 10);
+        sizer.add(&text_area, 1, SizerFlag::Expand | SizerFlag::All, 10);
+        sizer.add(&file_area, 1, SizerFlag::Expand | SizerFlag::All, 10);
+        sizer.add(&status_text, 0, SizerFlag::Expand | SizerFlag::All, 10);
         
         // Set the panel's sizer
         panel.set_sizer(sizer, true);

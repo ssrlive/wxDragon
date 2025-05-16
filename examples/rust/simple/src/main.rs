@@ -7,7 +7,7 @@ fn main() {
             .with_size(Size::new(300, 200))
             .build();
 
-        let sizer = BoxSizer::builder(VERTICAL).build();
+        let sizer = BoxSizer::builder(Orientation::Vertical).build();
 
         let button = Button::builder(&frame).with_label("Click me").build();
 
@@ -18,7 +18,7 @@ fn main() {
         sizer.add(
             &button,
             1,
-            ALIGN_CENTER_HORIZONTAL | ALIGN_CENTER_VERTICAL,
+            SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical,
             0,
         );
 

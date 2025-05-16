@@ -10,11 +10,10 @@ pub use crate::types::Style;
 pub use crate::window::WxWidget;
 
 // --- Sizers ---
-pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder, Orientation, SizerFlags};
+pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};
 // Sizer Flags/Constants
-pub use crate::sizers::box_sizer::{
-    ALIGN_CENTER_HORIZONTAL, ALIGN_CENTER_VERTICAL, ALIGN_LEFT, ALIGN_RIGHT, ALL, BORDER_DEFAULT,
-    BORDER_SIMPLE, BOTTOM, EXPAND, FIXED_MINSIZE, HORIZONTAL, LEFT, RIGHT, SHAPED, TOP, VERTICAL,
+pub use crate::sizers::base::{
+    Orientation, SizerFlag,
 };
 // ADDED: StaticBoxSizer
 pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};

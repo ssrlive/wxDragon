@@ -2,7 +2,7 @@ SHELL=/bin/bash # Explicitly set shell for $(shell ...) compatibility
 CXX = g++
 # IMPORTANT: Ensure WX_CONFIG points to the correct wx-config script.
 # Example: /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdragon-sys-SOMEHASH/out/build/wxwidgets_build/wx-config
-WX_CONFIG = /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdragon-sys-3791424745e5485a/out/build/wxwidgets_build/wx-config # Removed quotes
+WX_CONFIG = /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdragon-sys-c583f393bda846e7/out/build/wxwidgets_build/wx-config # Removed quotes
 
 # Get compiler and linker flags from wx-config
 CXXFLAGS_CMD = $(WX_CONFIG) --cxxflags --unicode=yes --debug=yes

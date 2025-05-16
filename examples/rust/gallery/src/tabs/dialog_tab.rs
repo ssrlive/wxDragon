@@ -139,9 +139,9 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
 
     // Layout using Main Vertical BoxSizer and child FlexGridSizer
-    let main_sizer = BoxSizer::builder(VERTICAL).build();
-    let label_flags = ALIGN_RIGHT | ALIGN_CENTER_VERTICAL;
-    let control_flags = EXPAND; // General flag for controls spanning the column
+    let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    let label_flags = SizerFlag::AlignRight | SizerFlag::AlignCenterVertical;
+    let control_flags = SizerFlag::Expand; // General flag for controls spanning the column
 
     let grid_sizer = FlexGridSizer::builder(0, 2) // 0 rows means flexible, 2 columns
         .with_vgap(5)
@@ -156,51 +156,51 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
 
     // Add File Dialog controls
     grid_sizer.add(&file_dialog_label, 0, label_flags, 0);
-    let file_btns_sizer = BoxSizer::builder(HORIZONTAL).build();
-    file_btns_sizer.add(&open_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
-    file_btns_sizer.add(&save_file_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    let file_btns_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    file_btns_sizer.add(&open_file_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    file_btns_sizer.add(&save_file_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
     file_btns_sizer.add_spacer(10);
-    file_btns_sizer.add(&file_dialog_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&file_btns_sizer, 1, EXPAND, 0);
+    file_btns_sizer.add(&file_dialog_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&file_btns_sizer, 1, SizerFlag::Expand, 0);
 
     // Add Text Entry Dialog controls
     grid_sizer.add(&text_entry_label, 0, label_flags, 0);
-    let text_entry_btns_sizer = BoxSizer::builder(HORIZONTAL).build();
-    text_entry_btns_sizer.add(&get_text_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
-    text_entry_btns_sizer.add(&get_password_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    let text_entry_btns_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    text_entry_btns_sizer.add(&get_text_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    text_entry_btns_sizer.add(&get_password_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
     text_entry_btns_sizer.add_spacer(10);
-    text_entry_btns_sizer.add(&text_entry_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&text_entry_btns_sizer, 1, EXPAND, 0);
+    text_entry_btns_sizer.add(&text_entry_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&text_entry_btns_sizer, 1, SizerFlag::Expand, 0);
 
     // Add Colour Dialog controls
     grid_sizer.add(&colour_dialog_label, 0, label_flags, 0);
-    let colour_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
-    colour_dialog_sizer.add(&choose_colour_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    let colour_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    colour_dialog_sizer.add(&choose_colour_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
     colour_dialog_sizer.add_spacer(10);
-    colour_dialog_sizer.add(&colour_dialog_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&colour_dialog_sizer, 1, EXPAND, 0);
+    colour_dialog_sizer.add(&colour_dialog_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&colour_dialog_sizer, 1, SizerFlag::Expand, 0);
 
     // Add FontDialog controls
     grid_sizer.add(&font_dialog_label, 0, label_flags, 0);
-    let font_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
-    font_dialog_sizer.add(&font_button, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    let font_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    font_dialog_sizer.add(&font_button, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
     font_dialog_sizer.add_spacer(10);
-    font_dialog_sizer.add(&font_sample_text, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&font_dialog_sizer, 1, EXPAND, 0);
+    font_dialog_sizer.add(&font_sample_text, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&font_dialog_sizer, 1, SizerFlag::Expand, 0);
 
     // Add ProgressDialog controls
     grid_sizer.add(&progress_dialog_label, 0, label_flags, 0);
-    let progress_dialog_sizer = BoxSizer::builder(HORIZONTAL).build();
-    progress_dialog_sizer.add(&progress_button, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
-    grid_sizer.add_sizer(&progress_dialog_sizer, 1, EXPAND, 0);
+    let progress_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    progress_dialog_sizer.add(&progress_button, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&progress_dialog_sizer, 1, SizerFlag::Expand, 0);
 
     // Add FilePickerCtrl controls
     grid_sizer.add(&file_picker_ctrl_label, 0, label_flags, 0);
-    let fpc_sizer = BoxSizer::builder(HORIZONTAL).build();
-    fpc_sizer.add(&file_picker_ctrl, 1, EXPAND | ALL, 2);
+    let fpc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    fpc_sizer.add(&file_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     fpc_sizer.add_spacer(5); // Small spacer
-    fpc_sizer.add(&file_picker_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&fpc_sizer, 1, EXPAND, 0);
+    fpc_sizer.add(&file_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&fpc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- DirPickerCtrl ---
     let dir_picker_ctrl_label = StaticText::builder(&dialog_panel)
@@ -215,11 +215,11 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
 
     grid_sizer.add(&dir_picker_ctrl_label, 0, label_flags, 0);
-    let dpc_sizer = BoxSizer::builder(HORIZONTAL).build();
-    dpc_sizer.add(&dir_picker_ctrl, 1, EXPAND | ALL, 2);
+    let dpc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    dpc_sizer.add(&dir_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     dpc_sizer.add_spacer(5);
-    dpc_sizer.add(&dir_picker_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&dpc_sizer, 1, EXPAND, 0);
+    dpc_sizer.add(&dir_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&dpc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- FontPickerCtrl ---
     let font_picker_ctrl_label = StaticText::builder(&dialog_panel)
@@ -235,11 +235,11 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
 
     grid_sizer.add(&font_picker_ctrl_label, 0, label_flags, 0);
-    let font_pc_sizer = BoxSizer::builder(HORIZONTAL).build();
-    font_pc_sizer.add(&font_picker_ctrl, 1, EXPAND | ALL, 2);
+    let font_pc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    font_pc_sizer.add(&font_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     font_pc_sizer.add_spacer(5);
-    font_pc_sizer.add(&font_picker_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&font_pc_sizer, 1, EXPAND, 0);
+    font_pc_sizer.add(&font_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&font_pc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- NotificationMessage ---
     let notification_label = StaticText::builder(&dialog_panel)
@@ -254,13 +254,13 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         .build();
 
     grid_sizer.add(&notification_label, 0, label_flags, 0);
-    let notification_sizer = BoxSizer::builder(HORIZONTAL).build();
-    notification_sizer.add(&show_notification_btn, 0, ALIGN_CENTER_VERTICAL | ALL, 2);
+    let notification_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    notification_sizer.add(&show_notification_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
     notification_sizer.add_spacer(10);
-    notification_sizer.add(&notification_status_label, 1, EXPAND | ALL, 2);
-    grid_sizer.add_sizer(&notification_sizer, 1, EXPAND, 0);
+    notification_sizer.add(&notification_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    grid_sizer.add_sizer(&notification_sizer, 1, SizerFlag::Expand, 0);
 
-    main_sizer.add_sizer(&grid_sizer, 1, EXPAND | ALL, 10);
+    main_sizer.add_sizer(&grid_sizer, 1, SizerFlag::Expand | SizerFlag::All, 10);
     dialog_panel.set_sizer_and_fit(main_sizer, true);
 
     DialogTabControls {

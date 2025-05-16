@@ -1,8 +1,8 @@
 use std::ffi::CString;
 use std::ops::Deref;
 
-use crate::sizers::base::Sizer;
-use crate::sizers::{Orientation, WxSizer as WxSizerTrait};
+use crate::sizers::base::{Sizer, Orientation};
+use crate::sizers::{WxSizer as WxSizerTrait};
 use crate::window::WxWidget;
 use crate::StaticBox;
 use wxdragon_sys as ffi;
@@ -101,7 +101,7 @@ impl StaticBoxSizerBuilder {
         let s_ptr = unsafe {
             match self.source {
                 StaticBoxSource::Box(box_ptr) => {
-                    ffi::wxd_StaticBoxSizer_Create_WithBox(box_ptr, self.orientation)
+                    ffi::wxd_StaticBoxSizer_Create_WithBox(box_ptr, self.orientation.bits() as i32)
                 }
                 StaticBoxSource::Label(label) => {
                     let parent_ptr = self.parent_window_ptr.expect(
@@ -110,7 +110,7 @@ impl StaticBoxSizerBuilder {
                     let label_cstring =
                         CString::new(label).unwrap_or_else(|_| CString::new("").unwrap());
                     ffi::wxd_StaticBoxSizer_Create_WithLabel(
-                        self.orientation,
+                        self.orientation.bits() as i32,
                         parent_ptr,
                         label_cstring.as_ptr(),
                     )

@@ -50,7 +50,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let panel = Panel::builder(&scrolled_list_window)
         .with_style(PanelStyle::TabTraversal) // Panel takes PanelStyle
         .build();
-    let _sizer = BoxSizer::builder(VERTICAL).build();
+    let _sizer = BoxSizer::builder(Orientation::Vertical).build();
 
     // --- Create controls, parenting them to the *inner_list_panel* ---
     let list_box_items = vec![
@@ -192,7 +192,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .build();
         
     // Add buttons to interact with the list control
-    let list_ctrl_button_sizer = BoxSizer::builder(HORIZONTAL).build();
+    let list_ctrl_button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
     
     let add_button = Button::builder(&panel)
         .with_label("Add Item")
@@ -214,11 +214,11 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .with_label("Test Cleanup")
         .build();
         
-    list_ctrl_button_sizer.add(&add_button, 0, ALL, 5);
-    list_ctrl_button_sizer.add(&remove_button, 0, ALL, 5);
-    list_ctrl_button_sizer.add(&select_button, 0, ALL, 5);
-    list_ctrl_button_sizer.add(&edit_button, 0, ALL, 5);
-    list_ctrl_button_sizer.add(&cleanup_button, 0, ALL, 5);
+    list_ctrl_button_sizer.add(&add_button, 0, SizerFlag::All, 5);
+    list_ctrl_button_sizer.add(&remove_button, 0, SizerFlag::All, 5);
+    list_ctrl_button_sizer.add(&select_button, 0, SizerFlag::All, 5);
+    list_ctrl_button_sizer.add(&edit_button, 0, SizerFlag::All, 5);
+    list_ctrl_button_sizer.add(&cleanup_button, 0, SizerFlag::All, 5);
 
     // --- ADDED: EditableListBox Example ---
     let editable_listbox = EditableListBox::builder(&panel)
@@ -241,50 +241,50 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .build();
 
     // --- Sizer for *inner_list_panel* ---
-    let list_sizer_main = BoxSizer::builder(VERTICAL).build();
-    let list_row_sizer = BoxSizer::builder(HORIZONTAL).build();
-    let list_box_col = BoxSizer::builder(VERTICAL).build();
-    list_box_col.add(&list_box, 1, EXPAND | ALL, 5);
-    list_box_col.add(&listbox_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
-    list_row_sizer.add_sizer(&list_box_col, 1, EXPAND | ALL, 5);
-    let check_list_col = BoxSizer::builder(VERTICAL).build();
-    check_list_col.add(&checklistbox, 1, EXPAND | ALL, 5);
+    let list_sizer_main = BoxSizer::builder(Orientation::Vertical).build();
+    let list_row_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    let list_box_col = BoxSizer::builder(Orientation::Vertical).build();
+    list_box_col.add(&list_box, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    list_box_col.add(&listbox_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    list_row_sizer.add_sizer(&list_box_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    let check_list_col = BoxSizer::builder(Orientation::Vertical).build();
+    check_list_col.add(&checklistbox, 1, SizerFlag::Expand | SizerFlag::All, 5);
     check_list_col.add(
         &checklistbox_status_label,
         0,
-        ALIGN_CENTER_HORIZONTAL | ALL,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
-    list_row_sizer.add_sizer(&check_list_col, 1, EXPAND | ALL, 5);
-    list_sizer_main.add_sizer(&list_row_sizer, 1, EXPAND | ALL, 5);
+    list_row_sizer.add_sizer(&check_list_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    list_sizer_main.add_sizer(&list_row_sizer, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
-    let choice_row_sizer = BoxSizer::builder(HORIZONTAL).build();
-    let choice_col = BoxSizer::builder(VERTICAL).build();
-    choice_col.add(&choice_ctrl, 0, ALL, 5);
-    choice_col.add(&choice_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
-    choice_row_sizer.add_sizer(&choice_col, 1, EXPAND | ALL, 5);
+    let choice_row_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    let choice_col = BoxSizer::builder(Orientation::Vertical).build();
+    choice_col.add(&choice_ctrl, 0, SizerFlag::All, 5);
+    choice_col.add(&choice_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    choice_row_sizer.add_sizer(&choice_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
-    let combo_col = BoxSizer::builder(VERTICAL).build();
-    combo_col.add(&combo_box, 0, ALL, 5);
-    combo_col.add(&combo_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
-    choice_row_sizer.add_sizer(&combo_col, 1, EXPAND | ALL, 5);
+    let combo_col = BoxSizer::builder(Orientation::Vertical).build();
+    combo_col.add(&combo_box, 0, SizerFlag::All, 5);
+    combo_col.add(&combo_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    choice_row_sizer.add_sizer(&combo_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
     // ADDED: Add the choice/combo row sizer to the main vertical sizer
-    list_sizer_main.add_sizer(&choice_row_sizer, 0, EXPAND | ALL, 5);
+    list_sizer_main.add_sizer(&choice_row_sizer, 0, SizerFlag::Expand | SizerFlag::All, 5);
 
     // Add ListCtrl and its status label
-    let list_ctrl_col_sizer = BoxSizer::builder(VERTICAL).build();
-    list_ctrl_col_sizer.add(&list_ctrl, 1, EXPAND | ALL, 5); // ListCtrl takes available space
-    list_ctrl_col_sizer.add_sizer(&list_ctrl_button_sizer, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
+    let list_ctrl_col_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    list_ctrl_col_sizer.add(&list_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 5); // ListCtrl takes available space
+    list_ctrl_col_sizer.add_sizer(&list_ctrl_button_sizer, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
     // Make sure status label has enough space and uses the full width
-    list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, EXPAND | ALL, 5);
-    list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, EXPAND | ALL, 5); // Add ListCtrl sizer to main, taking space
+    list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, SizerFlag::Expand | SizerFlag::All, 5);
+    list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, SizerFlag::Expand | SizerFlag::All, 5); // Add ListCtrl sizer to main, taking space
 
     // Add EditableListBox and its status label
-    let editable_listbox_sizer = BoxSizer::builder(VERTICAL).build();
-    editable_listbox_sizer.add(&editable_listbox, 1, EXPAND | ALL, 5);
-    editable_listbox_sizer.add(&editable_listbox_status_label, 0, ALIGN_CENTER_HORIZONTAL | ALL, 5);
-    list_sizer_main.add_sizer(&editable_listbox_sizer, 1, EXPAND | ALL, 5);
+    let editable_listbox_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    editable_listbox_sizer.add(&editable_listbox, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    editable_listbox_sizer.add(&editable_listbox_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    list_sizer_main.add_sizer(&editable_listbox_sizer, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
     panel.set_sizer(list_sizer_main, true);
     // Fit the inner panel to its contents initially

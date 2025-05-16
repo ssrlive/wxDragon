@@ -136,7 +136,7 @@ impl FlexGridSizerBuilder {
 
 // Example of how WxSizer methods would be available via Deref:
 // let flex_sizer = FlexGridSizer::builder(2,2).build();
-// flex_sizer.add_window(some_window, 0, SizerFlags::wxEXPAND(), 0);
+// flex_sizer.add_window(some_window, 0, SizerFlag::wxEXPAND(), 0);
 
 // TODO: Implement Drop carefully if FlexGridSizer has ownership distinct from Sizer
 // Currently, Sizer handles destruction.

@@ -93,6 +93,7 @@ pub const WXD_RIGHT: i64 = 32;
 pub const WXD_TOP: i64 = 64;
 pub const WXD_BOTTOM: i64 = 128;
 pub const WXD_FIXED_MINSIZE: i64 = 32768;
+pub const WXD_RESERVE_SPACE_EVEN_IF_HIDDEN: i64 = 2;
 pub const WXD_BORDER_DEFAULT: i64 = 0;
 pub const WXD_BORDER_SIMPLE: i64 = 33554432;
 pub const WXD_BORDER_SUNKEN: i64 = 134217728;

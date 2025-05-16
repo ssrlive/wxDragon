@@ -7,12 +7,9 @@ pub mod flex_grid_sizer;
 pub mod staticbox_sizer;
 
 // Re-export common types and constants
-pub use base::{Sizer, WxSizer};
+pub use base::{Sizer, WxSizer,  Orientation, SizerFlag};
 pub use box_sizer::{
-    BoxSizer, BoxSizerBuilder, Orientation, SizerFlags, ALIGN_CENTER_HORIZONTAL,
-    ALIGN_CENTER_VERTICAL, ALIGN_CENTRE, ALIGN_LEFT, ALIGN_RIGHT, ALL, BORDER_DEFAULT,
-    BORDER_SIMPLE, BOTH, BOTTOM, EXPAND, FIXED_MINSIZE, HORIZONTAL, LEFT, RIGHT, SHAPED, TOP,
-    VERTICAL,
+    BoxSizer, BoxSizerBuilder,
 };
 pub use flex_grid_sizer::{
     FlexGridSizer, FlexGridSizerBuilder, FLEX_GROWMODE_ALL, FLEX_GROWMODE_NONE,

@@ -23,7 +23,7 @@ pub fn create_color_tab(notebook: &Notebook, _frame: &Frame) -> ColorTabControls
         .with_style(ScrolledWindowStyle::VScroll)
         .build();
     
-    let main_sizer = BoxSizer::builder(VERTICAL).build();
+    let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
     
     // Title text
     let title = StaticText::builder(&color_panel)
@@ -37,10 +37,10 @@ pub fn create_color_tab(notebook: &Notebook, _frame: &Frame) -> ColorTabControls
         title.set_font(&font);
     }
     
-    main_sizer.add(&title, 0, EXPAND | ALL, 5);
+    main_sizer.add(&title, 0, SizerFlag::Expand | SizerFlag::All, 5);
     
     // Add the scrolled window to the main sizer
-    main_sizer.add(&scrolled_win, 1, EXPAND | ALL, 0);
+    main_sizer.add(&scrolled_win, 1, SizerFlag::Expand | SizerFlag::All, 0);
     
     // Create a grid sizer for the color swatches
     let color_sizer = FlexGridSizer::builder(0, COLORS_PER_ROW).build();
@@ -150,7 +150,7 @@ pub fn create_color_tab(notebook: &Notebook, _frame: &Frame) -> ColorTabControls
     // For each family
     for (family_name, colors) in families.iter() {
         // Add a family separator
-        let family_sizer = BoxSizer::builder(VERTICAL).build();
+        let family_sizer = BoxSizer::builder(Orientation::Vertical).build();
         
         // Family header
         let header = StaticText::builder(&scrolled_win)
@@ -163,7 +163,7 @@ pub fn create_color_tab(notebook: &Notebook, _frame: &Frame) -> ColorTabControls
             header.set_font(&font);
         }
         
-        family_sizer.add(&header, 0, ALL, 2);
+        family_sizer.add(&header, 0, SizerFlag::All, 2);
         
         // Create a grid for this color family
         let family_grid = FlexGridSizer::builder(2, 5).build();
@@ -181,14 +181,14 @@ pub fn create_color_tab(notebook: &Notebook, _frame: &Frame) -> ColorTabControls
             swatch_panel.set_tooltip(&format!("{}-{}\n{}", family_name.to_lowercase(), shade, rgb));
             
             // Add to the family grid
-            family_grid.add(&swatch_panel, 0, EXPAND | ALL, 1);
+            family_grid.add(&swatch_panel, 0, SizerFlag::Expand | SizerFlag::All, 1);
             
             // Add to our collection
             swatches.push(StaticText::builder(&swatch_panel).build());
         }
         
-        family_sizer.add_sizer(&family_grid, 0, ALL, 2);
-        color_sizer.add_sizer(&family_sizer, 0, ALL, 4);
+        family_sizer.add_sizer(&family_grid, 0, SizerFlag::All, 2);
+        color_sizer.add_sizer(&family_sizer, 0, SizerFlag::All, 4);
     }
     
     scrolled_win.set_sizer(color_sizer, true);

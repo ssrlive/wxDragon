@@ -1,35 +1,12 @@
 // Rust wrappers for wxWidgets Sizers (moved to sizers/box_sizer.rs)
 
-// use crate::window::WxWidget;
 use crate::sizers::base::Sizer;
 use crate::sizers::WxSizer as WxSizerTrait;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use wxdragon_sys as ffi;
 
-// --- Sizer Orientation Constants ---
-pub type Orientation = i32; // C API uses int (wxd_Orientation_t)
-pub const VERTICAL: Orientation = ffi::WXD_VERTICAL as i32;
-pub const HORIZONTAL: Orientation = ffi::WXD_HORIZONTAL as i32;
-pub const BOTH: Orientation = ffi::WXD_BOTH as i32;
-
-// --- Sizer Flag Constants ---
-pub type SizerFlags = i32; // C API uses int (wxd_SizerFlags_t)
-pub const LEFT: SizerFlags = ffi::WXD_LEFT as i32;
-pub const RIGHT: SizerFlags = ffi::WXD_RIGHT as i32;
-pub const TOP: SizerFlags = ffi::WXD_ALIGN_TOP as i32;
-pub const BOTTOM: SizerFlags = ffi::WXD_ALIGN_BOTTOM as i32;
-pub const ALL: SizerFlags = ffi::WXD_ALL as i32;
-pub const EXPAND: SizerFlags = ffi::WXD_EXPAND as i32;
-pub const ALIGN_LEFT: SizerFlags = ffi::WXD_ALIGN_LEFT as i32;
-pub const ALIGN_RIGHT: SizerFlags = ffi::WXD_ALIGN_RIGHT as i32;
-pub const ALIGN_CENTER_VERTICAL: SizerFlags = ffi::WXD_ALIGN_CENTRE_VERTICAL as i32;
-pub const ALIGN_CENTER_HORIZONTAL: SizerFlags = ffi::WXD_ALIGN_CENTRE_HORIZONTAL as i32;
-pub const ALIGN_CENTRE: SizerFlags = ffi::WXD_ALIGN_CENTRE as i32;
-pub const SHAPED: SizerFlags = ffi::WXD_SHAPED as i32;
-pub const FIXED_MINSIZE: SizerFlags = ffi::WXD_FIXED_MINSIZE as i32;
-pub const BORDER_DEFAULT: SizerFlags = ffi::WXD_BORDER_DEFAULT as i32;
-pub const BORDER_SIMPLE: SizerFlags = ffi::WXD_BORDER_SIMPLE as i32;
+use super::base::Orientation;
 
 /// Represents a wxBoxSizer.
 #[derive(Clone)]
@@ -73,7 +50,7 @@ impl BoxSizerBuilder {
     }
 
     pub fn build(self) -> BoxSizer {
-        let ptr = unsafe { ffi::wxd_BoxSizer_Create(self.orientation) };
+        let ptr = unsafe { ffi::wxd_BoxSizer_Create(self.orientation.bits() as i32) };
         let sizer_base =
             unsafe { Sizer::from_ptr(ptr).expect("Failed to create base Sizer for BoxSizer") };
         BoxSizer { sizer_base }

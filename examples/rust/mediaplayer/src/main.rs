@@ -50,18 +50,18 @@ impl MediaPlayerFrame {
             .build();
             
         // Button sizer
-        let button_sizer = BoxSizer::builder(HORIZONTAL).build();
-        button_sizer.add(&play_button, 0, EXPAND, 5);
-        button_sizer.add(&pause_button, 0, EXPAND, 5);
-        button_sizer.add(&stop_button, 0, EXPAND, 5);
+        let button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+        button_sizer.add(&play_button, 0, SizerFlag::Expand, 5);
+        button_sizer.add(&pause_button, 0, SizerFlag::Expand, 5);
+        button_sizer.add(&stop_button, 0, SizerFlag::Expand, 5);
         button_sizer.add_spacer(20);
-        button_sizer.add(&open_button, 0, EXPAND, 5);
+        button_sizer.add(&open_button, 0, SizerFlag::Expand, 5);
         button_panel.set_sizer(button_sizer, true);
         
         // Main sizer
-        let main_sizer = BoxSizer::builder(VERTICAL).build();
-        main_sizer.add(&media_ctrl, 1, EXPAND, 5);
-        main_sizer.add(&button_panel, 0, EXPAND, 5);
+        let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
+        main_sizer.add(&media_ctrl, 1, SizerFlag::Expand, 5);
+        main_sizer.add(&button_panel, 0, SizerFlag::Expand, 5);
         panel.set_sizer(main_sizer, true);
         
         // Status bar

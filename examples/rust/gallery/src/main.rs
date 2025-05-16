@@ -108,8 +108,8 @@ fn main() {
         notebook.add_page(&color_controls.panel, "Color", false);
 
         // --- Set Frame Sizer ---
-        let main_sizer = BoxSizer::builder(VERTICAL).build();
-        main_sizer.add(&notebook, 1, EXPAND | ALL, 1);
+        let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
+        main_sizer.add(&notebook, 1, SizerFlag::Expand | SizerFlag::All, 1);
         frame.set_sizer(main_sizer, true);
 
         // --- Bind Event Handlers ---
