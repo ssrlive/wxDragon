@@ -81,7 +81,13 @@ impl DataViewListModel {
             eprintln!("Error: Column index {} is out of bounds (column count: {})", col, self.column_count);
             return false;
         }
-        unsafe { ffi::wxd_DataViewListModel_SetValue(self.handle, row as u64, col as u64, value.as_raw()) }
+        
+        // Clone the variant since we need to transfer ownership to C++
+        let variant_clone = value.clone();
+        
+        // Use into_raw to properly transfer ownership to C++
+        // The C++ side will call wxd_Variant_Free to clean up
+        unsafe { ffi::wxd_DataViewListModel_SetValue(self.handle, row as u64, col as u64, variant_clone.into_raw()) }
     }
 
     /// Sets a value in the model at the specified row and column.

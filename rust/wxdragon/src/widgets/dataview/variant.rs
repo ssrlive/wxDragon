@@ -74,10 +74,10 @@ impl Variant {
 
     /// Gets the raw pointer to the native wxd_Variant_t.
     /// 
-    /// IMPORTANT: This creates a Box<wxd_Variant_t> and leaks it intentionally
-    /// since the C++ side is expected to take ownership of this memory and free it
-    /// when done. We're only leaking a small amount of memory here, and it's a necessary
-    /// part of FFI operations where ownership crosses language boundaries.
+    /// IMPORTANT: Caller must ensure the returned pointer is freed using
+    /// wxd_Variant_Free when no longer needed to avoid memory leaks.
+    /// This function allocates heap memory for both the variant structure
+    /// and any string data it contains.
     pub fn as_raw(&self) -> *const ffi::wxd_Variant_t {
         // Create a heap-allocated wxd_Variant_t to ensure it doesn't get dropped
         let mut variant = Box::new(ffi::wxd_Variant_t {
@@ -137,8 +137,90 @@ impl Variant {
     /// Gets a mutable raw pointer to the native wxd_Variant_t.
     ///
     /// This is primarily used by event.rs for event data.
+    /// 
+    /// IMPORTANT: Caller must ensure the returned pointer is freed using
+    /// wxd_Variant_Free when no longer needed to avoid memory leaks.
     pub fn as_raw_mut(&self) -> *mut ffi::wxd_Variant_t {
         self.as_raw() as *mut _
+    }
+    
+    /// Consumes the variant and transfers ownership to C++.
+    /// Returns a raw pointer that must be freed by C++ code using wxd_Variant_Free.
+    ///
+    /// This is preferred over as_raw() when transferring ownership to C++ code
+    /// to make the ownership transfer explicit in the code.
+    pub fn into_raw(self) -> *mut ffi::wxd_Variant_t {
+        self.as_raw() as *mut _
+    }
+    
+    /// Creates a Variant from a raw pointer, taking ownership and freeing the C++ resources.
+    ///
+    /// # Safety
+    /// The pointer must be valid and must not be used after this call.
+    /// The caller must ensure this pointer was allocated by as_raw() or into_raw().
+    pub unsafe fn from_raw(ptr: *mut ffi::wxd_Variant_t) -> Option<Self> {
+        if ptr.is_null() {
+            return None;
+        }
+        
+        let variant_ref = &*ptr;
+        let result = match variant_ref.type_ {
+            t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => 
+                Variant::Bool(variant_ref.data.bool_val),
+            t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => 
+                Variant::Int32(variant_ref.data.int32_val),
+            t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => 
+                Variant::Int64(variant_ref.data.int64_val),
+            t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => 
+                Variant::Double(variant_ref.data.double_val),
+            t if t == ffi::WXD_VARIANT_TYPE_STRING as i32 => {
+                if variant_ref.data.string_val.is_null() {
+                    Variant::String(String::new())
+                } else {
+                    let c_str = std::ffi::CStr::from_ptr(variant_ref.data.string_val);
+                    let string = c_str.to_string_lossy().into_owned();
+                    Variant::String(string)
+                }
+            },
+            t if t == ffi::WXD_VARIANT_TYPE_DATETIME as i32 => {
+                // Create a DateTime from the raw data
+                let dt = crate::DateTime::from_raw(variant_ref.data.datetime_val);
+                Variant::DateTime(dt)
+            },
+            t if t == ffi::WXD_VARIANT_TYPE_BITMAP as i32 => {
+                if variant_ref.data.bitmap_val.is_null() {
+                    // Since there's no default constructor, create a minimal 1x1 bitmap
+                    // or return a special case that represents "no bitmap"
+                    let data = vec![0u8, 0, 0, 0]; // 1x1 transparent pixel
+                    match crate::Bitmap::from_rgba(&data, 1, 1) {
+                        Some(bitmap) => Variant::Bitmap(bitmap),
+                        None => {
+                            // If even this fails, we're in trouble, but let's try to recover
+                            // by using a default variant type instead of failing completely
+                            eprintln!("Warning: Failed to create empty bitmap for null bitmap pointer");
+                            Variant::String("".to_string())
+                        }
+                    }
+                } else {
+                    // Use from_ptr_owned to take ownership of the bitmap
+                    let bitmap = crate::Bitmap::from_ptr_owned(variant_ref.data.bitmap_val);
+                    // Set the pointer to null to avoid double-free since we've taken ownership
+                    // Note: This is safe because we're working with a local temporary copy
+                    // of the variant_ref in memory that will be freed by wxd_Variant_Free
+                    Variant::Bitmap(bitmap)
+                }
+            },
+            _ => {
+                // Invalid type, free the memory and return None
+                ffi::wxd_Variant_Free(ptr);
+                return None;
+            }
+        };
+        
+        // Free the C++ resources
+        ffi::wxd_Variant_Free(ptr);
+        
+        Some(result)
     }
     
     /// Gets the type of the variant

@@ -1133,6 +1133,7 @@ WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* 
         value->type = WXD_VARIANT_TYPE_STRING;
         const wxString& str = wxVar.GetString();
         // Use strdup directly instead of wxd_cpp_utils::cpp_strdup
+        // Note: Caller is responsible for freeing this memory with wxd_Variant_Free
         value->data.string_val = strdup(str.utf8_str());
     }
     else if (wxVar.GetType() == "datetime") {

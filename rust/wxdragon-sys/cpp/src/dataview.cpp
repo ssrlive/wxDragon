@@ -320,8 +320,10 @@ public:
             case WXD_VARIANT_TYPE_STRING:
                 if (wxd_variant.data.string_val) {
                     variant = wxString::FromUTF8(wxd_variant.data.string_val);
-                    // We should free the string here
-                    // free(wxd_variant.data.string_val);
+                    // Note: We don't free the string here because the callback
+                    // maintains ownership. The string will be freed when the model
+                    // is destroyed or updated. If we freed it here, it would 
+                    // potentially cause a use-after-free error.
                 } else {
                     variant = wxString();
                 }
@@ -590,6 +592,19 @@ WXD_EXPORTED bool wxd_DataViewListModel_SetValue(wxd_DataViewModel_t* self,
     
     // Set the value
     return model->SetValue(wxVariantValue, item, static_cast<unsigned int>(col));
+}
+
+WXD_EXPORTED void wxd_Variant_Free(wxd_Variant_t* variant) {
+    if (!variant) return;
+    
+    // Free any string data
+    if (variant->type == WXD_VARIANT_TYPE_STRING && variant->data.string_val) {
+        free(variant->data.string_val);
+        variant->data.string_val = NULL;
+    }
+    
+    // Free the variant itself
+    free(variant);
 }
 
 } // extern "C" 

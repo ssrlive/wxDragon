@@ -129,6 +129,9 @@ WXD_EXPORTED bool wxd_DataViewCtrl_SelectRow(wxd_Window_t* self, int64_t row);
 WXD_EXPORTED int64_t wxd_DataViewCtrl_GetSelectedRow(wxd_Window_t* self);
 WXD_EXPORTED void wxd_DataViewCtrl_UnselectAll(wxd_Window_t* self);
 
+// Free a wxd_Variant_t and its contents, including any dynamically allocated string memory
+WXD_EXPORTED void wxd_Variant_Free(wxd_Variant_t* variant);
+
 #ifdef __cplusplus
 }
 #endif

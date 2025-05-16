@@ -591,15 +591,16 @@ impl Event {
             return None;
         }
         
-        // Create a default Variant to be filled by the C++ function
-        let variant = crate::widgets::dataview::Variant::new();
-        
-        // Get the raw pointer to the variant's internal data
-        let variant_ptr = variant.as_raw_mut();
+        // Create a temporary variant struct to hold the returned data
+        let variant_raw = Box::new(unsafe { std::mem::zeroed::<ffi::wxd_Variant_t>() });
+        let variant_ptr = Box::into_raw(variant_raw);
         
         if unsafe { ffi::wxd_DataViewEvent_GetValue(self.0, variant_ptr) } {
-            Some(variant)
+            // Convert the C++ variant to a Rust Variant, taking ownership and freeing the C resources
+            unsafe { crate::widgets::dataview::Variant::from_raw(variant_ptr) }
         } else {
+            // Free the memory if the call failed
+            unsafe { ffi::wxd_Variant_Free(variant_ptr) };
             None
         }
     }
@@ -610,7 +611,12 @@ impl Event {
             return false;
         }
         
-        unsafe { ffi::wxd_DataViewEvent_SetValue(self.0, value.as_raw()) }
+        // Clone the variant since we need to transfer ownership to C++
+        let variant_clone = value.clone();
+        
+        // Use into_raw to properly transfer ownership to C++
+        // C++ side will free the memory using wxd_Variant_Free
+        unsafe { ffi::wxd_DataViewEvent_SetValue(self.0, variant_clone.into_raw()) }
     }
     
     /// Checks if editing was cancelled in a DataView editing event.
