@@ -416,38 +416,6 @@ int main(int argc, char **argv) {
     // StaticLine styles
     constants_to_extract.push_back({"wxLI_HORIZONTAL", wxLI_HORIZONTAL});
     constants_to_extract.push_back({"wxLI_VERTICAL", wxLI_VERTICAL});
-    // Stock GDI objects (extracting their pointer values, usage in Rust needs care)
-    constants_to_extract.push_back({"wxNORMAL_FONT_PTR", reinterpret_cast<long long>(wxNORMAL_FONT)});
-    constants_to_extract.push_back({"wxSMALL_FONT_PTR", reinterpret_cast<long long>(wxSMALL_FONT)});
-    constants_to_extract.push_back({"wxITALIC_FONT_PTR", reinterpret_cast<long long>(wxITALIC_FONT)});
-    constants_to_extract.push_back({"wxSWISS_FONT_PTR", reinterpret_cast<long long>(wxSWISS_FONT)});
-    constants_to_extract.push_back({"wxRED_PTR", reinterpret_cast<long long>(wxRED)});
-    constants_to_extract.push_back({"wxBLUE_PTR", reinterpret_cast<long long>(wxBLUE)});
-    constants_to_extract.push_back({"wxGREEN_PTR", reinterpret_cast<long long>(wxGREEN)});
-    constants_to_extract.push_back({"wxBLACK_PTR", reinterpret_cast<long long>(wxBLACK)});
-    constants_to_extract.push_back({"wxWHITE_PTR", reinterpret_cast<long long>(wxWHITE)});
-    constants_to_extract.push_back({"wxCYAN_PTR", reinterpret_cast<long long>(wxCYAN)});
-    // constants_to_extract.push_back({"wxMAGENTA_PTR", reinterpret_cast<long long>(wxMAGENTA)}); // Temporarily comment out
-    constants_to_extract.push_back({"wxYELLOW_PTR", reinterpret_cast<long long>(wxYELLOW)});
-    constants_to_extract.push_back({"wxLIGHT_GREY_PTR", reinterpret_cast<long long>(wxLIGHT_GREY)});
-    constants_to_extract.push_back({"wxRED_PEN_PTR", reinterpret_cast<long long>(wxRED_PEN)});
-    constants_to_extract.push_back({"wxBLUE_PEN_PTR", reinterpret_cast<long long>(wxBLUE_PEN)});
-    constants_to_extract.push_back({"wxGREEN_PEN_PTR", reinterpret_cast<long long>(wxGREEN_PEN)});
-    constants_to_extract.push_back({"wxBLACK_PEN_PTR", reinterpret_cast<long long>(wxBLACK_PEN)});
-    constants_to_extract.push_back({"wxWHITE_PEN_PTR", reinterpret_cast<long long>(wxWHITE_PEN)});
-    constants_to_extract.push_back({"wxCYAN_PEN_PTR", reinterpret_cast<long long>(wxCYAN_PEN)});
-    // constants_to_extract.push_back({"wxMAGENTA_PEN_PTR", reinterpret_cast<long long>(wxMAGENTA_PEN)}); // Temporarily comment out
-    constants_to_extract.push_back({"wxYELLOW_PEN_PTR", reinterpret_cast<long long>(wxYELLOW_PEN)});
-    constants_to_extract.push_back({"wxLIGHT_GREY_PEN_PTR", reinterpret_cast<long long>(wxLIGHT_GREY_PEN)});
-    constants_to_extract.push_back({"wxRED_BRUSH_PTR", reinterpret_cast<long long>(wxRED_BRUSH)});
-    constants_to_extract.push_back({"wxBLUE_BRUSH_PTR", reinterpret_cast<long long>(wxBLUE_BRUSH)});
-    constants_to_extract.push_back({"wxGREEN_BRUSH_PTR", reinterpret_cast<long long>(wxGREEN_BRUSH)});
-    constants_to_extract.push_back({"wxBLACK_BRUSH_PTR", reinterpret_cast<long long>(wxBLACK_BRUSH)});
-    constants_to_extract.push_back({"wxWHITE_BRUSH_PTR", reinterpret_cast<long long>(wxWHITE_BRUSH)});
-    constants_to_extract.push_back({"wxCYAN_BRUSH_PTR", reinterpret_cast<long long>(wxCYAN_BRUSH)});
-    // constants_to_extract.push_back({"wxMAGENTA_BRUSH_PTR", reinterpret_cast<long long>(wxMAGENTA_BRUSH)}); // Temporarily comment out
-    constants_to_extract.push_back({"wxYELLOW_BRUSH_PTR", reinterpret_cast<long long>(wxYELLOW_BRUSH)});
-    constants_to_extract.push_back({"wxLIGHT_GREY_BRUSH_PTR", reinterpret_cast<long long>(wxLIGHT_GREY_BRUSH)});
     // FlexGridSizer Grow Modes
     constants_to_extract.push_back({"wxFLEX_GROWMODE_NONE", wxFLEX_GROWMODE_NONE});
     constants_to_extract.push_back({"wxFLEX_GROWMODE_SPECIFIED", wxFLEX_GROWMODE_SPECIFIED});
@@ -480,25 +448,7 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxLB_OWNERDRAW", wxLB_OWNERDRAW});
     constants_to_extract.push_back({"wxLB_HSCROLL", wxLB_HSCROLL}); // Note: This is wxListBox specific HSCROLL
     constants_to_extract.push_back({"wxLB_ALWAYS_SB", wxLB_ALWAYS_SB}); // Added: Verify this is a valid wx constant
-    // ListCtrl Styles
-    // constants_to_extract.push_back({"wxLC_HRULES", wxLC_HRULES}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLC_VRULES", wxLC_VRULES}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLC_ALIGN_LEFT", wxLC_ALIGN_LEFT}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLC_ALIGN_TOP", wxLC_ALIGN_TOP}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLC_ALIGN_RIGHT", wxLC_ALIGN_RIGHT}); // NOT A STANDARD wxListCtrl CONSTANT
-    // constants_to_extract.push_back({"wxLC_ALIGN_BOTTOM", wxLC_ALIGN_BOTTOM}); // NOT A STANDARD wxListCtrl CONSTANT
-    // ListBox Styles
-    // constants_to_extract.push_back({"wxLB_SORT", wxLB_SORT}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLB_SINGLE", wxLB_SINGLE}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLB_SIMPLE", wxLB_SIMPLE}); // NOT A STANDARD wxListBox CONSTANT
-    // constants_to_extract.push_back({"wxLB_NEEDLE", wxLB_NEEDLE}); // NOT A STANDARD wxListBox CONSTANT
-    // constants_to_extract.push_back({"wxLB_OWNERDRAW", wxLB_OWNERDRAW}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLB_MULTIPLE", wxLB_MULTIPLE});   // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLB_EXTENDED", wxLB_EXTENDED});   // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxLB_HSCROLL", wxLB_HSCROLL});   // DUPLICATE REMOVED (specific for listbox)
-    // SplitterWindow Styles
-    // constants_to_extract.push_back({"wxSP_3D", wxSP_3D}); // DUPLICATE REMOVED
-    // constants_to_extract.push_back({"wxSP_3DSW", wxSP_3DSW}); // NOT A STANDARD wxSplitterWindow CONSTANT
+
     constants_to_extract.push_back({"wxSP_3DBORDER", wxSP_3DBORDER});
     // StaticBitmap Styles
     constants_to_extract.push_back({"wxBITMAP_TYPE_PNG", wxBITMAP_TYPE_PNG});
