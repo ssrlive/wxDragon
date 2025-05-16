@@ -77,7 +77,6 @@ WXD_EXPORTED int wxd_FileDialog_GetFilterIndex(wxd_FileDialog_t* self) {
 }
 
 // --- Optional Setters ---
-/*
 WXD_EXPORTED void wxd_FileDialog_SetMessage(wxd_FileDialog_t* self, const char* message) {
     if (!self) return;
     ((wxFileDialog*)self)->SetMessage(WXD_STR_TO_WX_STRING_UTF8_NULL_OK(message));
@@ -107,4 +106,30 @@ WXD_EXPORTED void wxd_FileDialog_SetFilterIndex(wxd_FileDialog_t* self, int filt
     if (!self) return;
     ((wxFileDialog*)self)->SetFilterIndex(filterIndex);
 }
-*/ 
+
+// Add missing GetMessage, GetWildcard functions, and GetCurrentlySelectedFilterIndex
+WXD_EXPORTED int wxd_FileDialog_GetMessage(wxd_FileDialog_t* self, char* buffer, int bufLen) {
+    if (!self) return -1;
+    wxFileDialog* dlg = (wxFileDialog*)self;
+    return GET_WX_STRING_RESULT(dlg->GetMessage(), buffer, bufLen);
+}
+
+WXD_EXPORTED int wxd_FileDialog_GetWildcard(wxd_FileDialog_t* self, char* buffer, int bufLen) {
+    if (!self) return -1;
+    wxFileDialog* dlg = (wxFileDialog*)self;
+    return GET_WX_STRING_RESULT(dlg->GetWildcard(), buffer, bufLen);
+}
+
+WXD_EXPORTED int wxd_FileDialog_GetCurrentlySelectedFilterIndex(wxd_FileDialog_t* self) {
+    if (!self) return -1;
+    wxFileDialog* dlg = (wxFileDialog*)self;
+#ifdef __WXMSW__
+    return dlg->GetCurrentlySelectedFilterIndex();
+#else
+    #ifdef __WXOSX__
+        return dlg->GetCurrentlySelectedFilterIndex();
+    #else
+        return -1; // Not implemented on this platform
+    #endif
+#endif
+} 

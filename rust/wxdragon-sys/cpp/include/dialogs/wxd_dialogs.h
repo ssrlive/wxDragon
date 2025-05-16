@@ -24,6 +24,15 @@ WXD_EXPORTED int wxd_FileDialog_GetFilename(wxd_FileDialog_t* self, char* buffer
 WXD_EXPORTED void wxd_FileDialog_GetFilenames(wxd_FileDialog_t* self, wxd_ArrayString_t* filenames);
 WXD_EXPORTED int wxd_FileDialog_GetDirectory(wxd_FileDialog_t* self, char* buffer, int bufLen);
 WXD_EXPORTED int wxd_FileDialog_GetFilterIndex(wxd_FileDialog_t* self);
+WXD_EXPORTED int wxd_FileDialog_GetMessage(wxd_FileDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED int wxd_FileDialog_GetWildcard(wxd_FileDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED int wxd_FileDialog_GetCurrentlySelectedFilterIndex(wxd_FileDialog_t* self);
+WXD_EXPORTED void wxd_FileDialog_SetMessage(wxd_FileDialog_t* self, const char* message);
+WXD_EXPORTED void wxd_FileDialog_SetPath(wxd_FileDialog_t* self, const char* path);
+WXD_EXPORTED void wxd_FileDialog_SetDirectory(wxd_FileDialog_t* self, const char* directory);
+WXD_EXPORTED void wxd_FileDialog_SetFilename(wxd_FileDialog_t* self, const char* name);
+WXD_EXPORTED void wxd_FileDialog_SetWildcard(wxd_FileDialog_t* self, const char* wildCard);
+WXD_EXPORTED void wxd_FileDialog_SetFilterIndex(wxd_FileDialog_t* self, int filterIndex);
 
 // --- ColourDialog ---
 WXD_EXPORTED wxd_ColourData_t* wxd_ColourData_Create(void);

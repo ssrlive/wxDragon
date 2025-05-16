@@ -190,8 +190,129 @@ impl FileDialog {
         unsafe { ffi::wxd_FileDialog_GetFilterIndex(self.as_ptr()) }
     }
 
-    // TODO: Add Setters if needed
-    // set_message, set_path, set_directory, set_filename, set_wildcard, set_filter_index
+    /// Gets the message that will be displayed on the dialog.
+    pub fn get_message(&self) -> Option<String> {
+        unsafe {
+            let mut buffer: [c_char; 1024] = [0; 1024];
+            let len_needed = ffi::wxd_FileDialog_GetMessage(
+                self.as_ptr(),
+                buffer.as_mut_ptr(),
+                buffer.len() as i32,
+            );
+
+            if len_needed < 0 {
+                return None;
+            }
+
+            let len_needed_usize = len_needed as usize;
+            if len_needed_usize < buffer.len() {
+                let c_str = CStr::from_ptr(buffer.as_ptr());
+                Some(c_str.to_string_lossy().into_owned())
+            } else {
+                let mut vec_buffer: Vec<u8> = vec![0; len_needed_usize + 1];
+                let len_copied = ffi::wxd_FileDialog_GetMessage(
+                    self.as_ptr(),
+                    vec_buffer.as_mut_ptr() as *mut c_char,
+                    vec_buffer.len() as i32,
+                );
+                if len_copied == len_needed {
+                    vec_buffer.pop();
+                    String::from_utf8(vec_buffer).ok()
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
+    /// Gets the wildcard filter string.
+    pub fn get_wildcard(&self) -> Option<String> {
+        unsafe {
+            let mut buffer: [c_char; 1024] = [0; 1024];
+            let len_needed = ffi::wxd_FileDialog_GetWildcard(
+                self.as_ptr(),
+                buffer.as_mut_ptr(),
+                buffer.len() as i32,
+            );
+
+            if len_needed < 0 {
+                return None;
+            }
+
+            let len_needed_usize = len_needed as usize;
+            if len_needed_usize < buffer.len() {
+                let c_str = CStr::from_ptr(buffer.as_ptr());
+                Some(c_str.to_string_lossy().into_owned())
+            } else {
+                let mut vec_buffer: Vec<u8> = vec![0; len_needed_usize + 1];
+                let len_copied = ffi::wxd_FileDialog_GetWildcard(
+                    self.as_ptr(),
+                    vec_buffer.as_mut_ptr() as *mut c_char,
+                    vec_buffer.len() as i32,
+                );
+                if len_copied == len_needed {
+                    vec_buffer.pop();
+                    String::from_utf8(vec_buffer).ok()
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
+    /// Gets the index of the file type filter currently selected in dialog.
+    /// Currently this function is fully implemented under macOS and MSW and always returns `-1` elsewhere.
+    pub fn get_currently_selected_filter_index(&self) -> i32 {
+        unsafe { ffi::wxd_FileDialog_GetCurrentlySelectedFilterIndex(self.as_ptr()) }
+    }
+
+    /// Sets the default directory.
+    pub fn set_directory(&self, directory: &str) {
+        let c_directory = CString::new(directory).expect("CString::new failed for directory");
+        unsafe {
+            ffi::wxd_FileDialog_SetDirectory(self.as_ptr(), c_directory.as_ptr());
+        }
+    }
+
+    /// Sets the default filename.
+    pub fn set_filename(&self, filename: &str) {
+        let c_filename = CString::new(filename).expect("CString::new failed for filename");
+        unsafe {
+            ffi::wxd_FileDialog_SetFilename(self.as_ptr(), c_filename.as_ptr());
+        }
+    }
+
+    /// Sets the default filter index, starting from zero.
+    pub fn set_filter_index(&self, filter_index: i32) {
+        unsafe {
+            ffi::wxd_FileDialog_SetFilterIndex(self.as_ptr(), filter_index);
+        }
+    }
+
+    /// Sets the message that will be displayed on the dialog.
+    pub fn set_message(&self, message: &str) {
+        let c_message = CString::new(message).expect("CString::new failed for message");
+        unsafe {
+            ffi::wxd_FileDialog_SetMessage(self.as_ptr(), c_message.as_ptr());
+        }
+    }
+
+    /// Sets the path (the combined directory and filename that will be returned when the dialog is dismissed).
+    pub fn set_path(&self, path: &str) {
+        let c_path = CString::new(path).expect("CString::new failed for path");
+        unsafe {
+            ffi::wxd_FileDialog_SetPath(self.as_ptr(), c_path.as_ptr());
+        }
+    }
+
+    /// Sets the wildcard, which can contain multiple file types.
+    /// For example: "BMP files (*.bmp)|*.bmp|GIF files (*.gif)|*.gif".
+    pub fn set_wildcard(&self, wildcard: &str) {
+        let c_wildcard = CString::new(wildcard).expect("CString::new failed for wildcard");
+        unsafe {
+            ffi::wxd_FileDialog_SetWildcard(self.as_ptr(), c_wildcard.as_ptr());
+        }
+    }
 }
 
 // Implement WxWidget by delegating to the inner Dialog
