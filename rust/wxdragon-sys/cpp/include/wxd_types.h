@@ -325,4 +325,9 @@ typedef long long wxd_Long_t;
 #define WXD_LIST_MASK_WIDTH         0x0010
 #define WXD_LIST_MASK_FORMAT        0x0020
 
+// DataViewItem structure
+typedef struct {
+    void* id;  // Internally, wxDataViewItem wraps a void* as an id
+} wxd_DataViewItem_t;
+
 #endif // WXD_TYPES_H 

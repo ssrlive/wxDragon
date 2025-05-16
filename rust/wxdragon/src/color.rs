@@ -43,6 +43,16 @@ impl Colour {
     pub fn as_u32(&self) -> u32 {
         ((self.r as u32) << 24) | ((self.g as u32) << 16) | ((self.b as u32) << 8) | (self.a as u32)
     }
+    
+    /// Convert to wxd_Colour_t for use with the C API
+    pub fn to_raw(&self) -> ffi::wxd_Colour_t {
+        ffi::wxd_Colour_t {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a: self.a,
+        }
+    }
 
     /// Returns a darker version of this color
     pub fn darker(&self, factor: f32) -> Self {

@@ -36,6 +36,15 @@ impl DataViewColumn {
         };
         Self { handle }
     }
+    
+    /// Creates a DataViewColumn from a raw pointer.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be a valid pointer to a wxDataViewColumn.
+    pub unsafe fn from_ptr(ptr: *mut ffi::wxd_DataViewColumn_t) -> Self {
+        Self { handle: ptr }
+    }
 
     /// Gets the raw pointer to the native wxDataViewColumn.
     pub fn as_raw(&self) -> *mut ffi::wxd_DataViewColumn_t {

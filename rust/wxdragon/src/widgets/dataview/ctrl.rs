@@ -1,6 +1,6 @@
 //! DataViewCtrl implementation.
 
-use crate::{Id, Point, Size, Window, WxWidget, WxEvtHandler};
+use crate::{Id, WxWidget, WxEvtHandler};
 // These macros are exported at the crate root
 use crate::{widget_style_enum, widget_builder, implement_widget_traits_with_target};
 use wxdragon_sys as ffi;
@@ -17,8 +17,13 @@ use super::{
     DataViewSpinRenderer,
     VariantType,
     DataViewCellMode,
-    DataViewAlign
+    DataViewAlign,
+    DataViewItem
 };
+
+use crate::window::Window;
+use crate::geometry::{Point, Size};
+use crate::color::Colour;
 
 // Define style enum for DataViewCtrl using the macro
 widget_style_enum!(
@@ -291,6 +296,252 @@ impl DataViewCtrl {
         let renderer = DataViewSpinRenderer::new(VariantType::Int32, DataViewCellMode::Editable, align, min, max, inc);
         let column = DataViewColumn::new(label, &renderer, model_column, width, align);
         self.append_column(&column)
+    }
+
+    /// Gets the number of columns in the control.
+    ///
+    /// # Returns
+    ///
+    /// The number of columns.
+    pub fn get_column_count(&self) -> usize {
+        unsafe { ffi::wxd_DataViewCtrl_GetColumnCount(self.window.handle_ptr()) as usize }
+    }
+
+    /// Gets a column by index.
+    ///
+    /// # Parameters
+    ///
+    /// * `pos` - The position of the column to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing the column, or `None` if `pos` is out of bounds.
+    pub fn get_column(&self, pos: usize) -> Option<DataViewColumn> {
+        let col_ptr = unsafe { ffi::wxd_DataViewCtrl_GetColumn(self.window.handle_ptr(), pos as u32) };
+        if col_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { DataViewColumn::from_ptr(col_ptr) })
+        }
+    }
+
+    /// Gets the position of a column.
+    ///
+    /// # Parameters
+    ///
+    /// * `column` - The column to find.
+    ///
+    /// # Returns
+    ///
+    /// The position of the column, or -1 if not found.
+    pub fn get_column_position(&self, column: &DataViewColumn) -> i32 {
+        unsafe { ffi::wxd_DataViewCtrl_GetColumnPosition(self.window.handle_ptr(), column.as_raw()) }
+    }
+
+    /// Removes all columns from the control.
+    ///
+    /// # Returns
+    ///
+    /// `true` if successful, `false` otherwise.
+    pub fn clear_columns(&self) -> bool {
+        unsafe { ffi::wxd_DataViewCtrl_ClearColumns(self.window.handle_ptr()) }
+    }
+
+    /// Selects a specific item.
+    ///
+    /// # Parameters
+    ///
+    /// * `item` - The item to select.
+    pub fn select(&self, item: &DataViewItem) {
+        unsafe { ffi::wxd_DataViewCtrl_Select(self.window.handle_ptr(), item.as_raw()) }
+    }
+
+    /// Unselects a specific item.
+    ///
+    /// # Parameters
+    ///
+    /// * `item` - The item to unselect.
+    pub fn unselect(&self, item: &DataViewItem) {
+        unsafe { ffi::wxd_DataViewCtrl_Unselect(self.window.handle_ptr(), item.as_raw()) }
+    }
+
+    /// Selects all items in the control.
+    pub fn select_all(&self) {
+        unsafe { ffi::wxd_DataViewCtrl_SelectAll(self.window.handle_ptr()) }
+    }
+
+    /// Checks if an item is selected.
+    ///
+    /// # Parameters
+    ///
+    /// * `item` - The item to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the item is selected, `false` otherwise.
+    pub fn is_selected(&self, item: &DataViewItem) -> bool {
+        unsafe { ffi::wxd_DataViewCtrl_IsSelected(self.window.handle_ptr(), item.as_raw()) }
+    }
+
+    /// Gets the number of selected items.
+    ///
+    /// # Returns
+    ///
+    /// The number of selected items.
+    pub fn get_selected_items_count(&self) -> usize {
+        unsafe { ffi::wxd_DataViewCtrl_GetSelectedItemsCount(self.window.handle_ptr()) as usize }
+    }
+
+    /// Checks if any items are selected.
+    ///
+    /// # Returns
+    ///
+    /// `true` if any items are selected, `false` otherwise.
+    pub fn has_selection(&self) -> bool {
+        self.get_selected_items_count() > 0
+    }
+
+    /// Gets all selected items.
+    ///
+    /// # Returns
+    ///
+    /// A vector of selected items.
+    pub fn get_selections(&self) -> Vec<DataViewItem> {
+        let count = self.get_selected_items_count();
+        if count == 0 {
+            return Vec::new();
+        }
+
+        let mut items = Vec::with_capacity(count);
+        let mut items_raw = Vec::with_capacity(count);
+        items_raw.resize(count, ffi::wxd_DataViewItem_t { id: std::ptr::null_mut() });
+        
+        unsafe {
+            ffi::wxd_DataViewCtrl_GetSelections(
+                self.window.handle_ptr(),
+                items_raw.as_mut_ptr(),
+                count as u32
+            );
+            
+            for raw_item in items_raw {
+                if !raw_item.id.is_null() {
+                    items.push(DataViewItem::from_raw(raw_item));
+                }
+            }
+        }
+
+        items
+    }
+
+    /// Sets multiple item selections.
+    ///
+    /// # Parameters
+    ///
+    /// * `items` - The items to select.
+    pub fn set_selections(&self, items: &[DataViewItem]) {
+        let items_raw: Vec<_> = items.iter().map(|item| item.as_raw()).collect();
+        unsafe {
+            ffi::wxd_DataViewCtrl_SetSelections(
+                self.window.handle_ptr(),
+                items_raw.as_ptr(),
+                items_raw.len() as u32
+            );
+        }
+    }
+
+    /// Gets the currently focused item.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing the current item, or `None` if no item is focused.
+    pub fn get_current_item(&self) -> Option<DataViewItem> {
+        let item_raw = unsafe { ffi::wxd_DataViewCtrl_GetCurrentItem(self.window.handle_ptr()) };
+        if DataViewItem::is_valid_raw(item_raw) {
+            Some(unsafe { DataViewItem::from_raw(item_raw) })
+        } else {
+            None
+        }
+    }
+
+    /// Sets the currently focused item.
+    ///
+    /// # Parameters
+    ///
+    /// * `item` - The item to set as current.
+    pub fn set_current_item(&self, item: &DataViewItem) {
+        unsafe { ffi::wxd_DataViewCtrl_SetCurrentItem(self.window.handle_ptr(), item.as_raw()) }
+    }
+
+    /// Gets the currently used indentation.
+    ///
+    /// # Returns
+    ///
+    /// The current indentation in pixels.
+    pub fn get_indent(&self) -> i32 {
+        unsafe { ffi::wxd_DataViewCtrl_GetIndent(self.window.handle_ptr()) }
+    }
+
+    /// Sets the indentation for hierarchical items.
+    ///
+    /// # Parameters
+    ///
+    /// * `indent` - The indentation in pixels to use.
+    pub fn set_indent(&self, indent: i32) {
+        unsafe { ffi::wxd_DataViewCtrl_SetIndent(self.window.handle_ptr(), indent) }
+    }
+
+    /// Gets the column used as the expander column in tree mode.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing the expander column, or `None` if not set.
+    pub fn get_expander_column(&self) -> Option<DataViewColumn> {
+        let col_ptr = unsafe { ffi::wxd_DataViewCtrl_GetExpanderColumn(self.window.handle_ptr()) };
+        if col_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { DataViewColumn::from_ptr(col_ptr) })
+        }
+    }
+
+    /// Sets which column shall contain the tree-like expanders.
+    ///
+    /// # Parameters
+    ///
+    /// * `column` - The column to use as the expander column.
+    pub fn set_expander_column(&self, column: &DataViewColumn) {
+        unsafe { ffi::wxd_DataViewCtrl_SetExpanderColumn(self.window.handle_ptr(), column.as_raw()) }
+    }
+
+    /// Sets the height of each row.
+    ///
+    /// # Parameters
+    ///
+    /// * `height` - The height in pixels for each row.
+    ///
+    /// # Returns
+    ///
+    /// `true` if row height was changed, `false` otherwise.
+    ///
+    /// # Note
+    ///
+    /// This cannot be used when the `VariableLineHeight` style is enabled.
+    pub fn set_row_height(&self, height: i32) -> bool {
+        unsafe { ffi::wxd_DataViewCtrl_SetRowHeight(self.window.handle_ptr(), height) }
+    }
+
+    /// Sets alternate row colors for the control.
+    ///
+    /// # Parameters
+    ///
+    /// * `colour` - The color to use for alternate rows
+    ///
+    /// # Returns
+    ///
+    /// `true` if the operation was successful, `false` otherwise.
+    pub fn set_alternate_row_colour(&self, colour: &Colour) -> bool {
+        let colour_raw = colour.to_raw();
+        unsafe { ffi::wxd_DataViewCtrl_SetAlternateRowColour(self.window.handle_ptr(), &colour_raw) }
     }
 }
 

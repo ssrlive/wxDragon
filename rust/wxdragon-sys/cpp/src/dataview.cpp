@@ -5,6 +5,8 @@
 #include <wx/tokenzr.h> // For wxStringTokenizer
 #include <wx/bitmap.h> // For wxBitmap
 #include <wx/datetime.h> // For wxDateTime
+#include <wx/variant.h>
+#include <cstring>
 
 extern "C" {
 
@@ -605,6 +607,147 @@ WXD_EXPORTED void wxd_Variant_Free(wxd_Variant_t* variant) {
     
     // Free the variant itself
     free(variant);
+}
+
+// Column management
+WXD_EXPORTED int wxd_DataViewCtrl_GetColumnCount(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return 0;
+    return ctrl->GetColumnCount();
+}
+
+WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewCtrl_GetColumn(wxd_Window_t* self, uint32_t pos) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return nullptr;
+    return reinterpret_cast<wxd_DataViewColumn_t*>(ctrl->GetColumn(pos));
+}
+
+WXD_EXPORTED int wxd_DataViewCtrl_GetColumnPosition(wxd_Window_t* self, wxd_DataViewColumn_t* column) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(column);
+    if (!ctrl || !col) return -1;
+    return ctrl->GetColumnPosition(col);
+}
+
+WXD_EXPORTED bool wxd_DataViewCtrl_ClearColumns(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return false;
+    return ctrl->ClearColumns();
+}
+
+// Item management
+WXD_EXPORTED void wxd_DataViewCtrl_Select(wxd_Window_t* self, wxd_DataViewItem_t item) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return;
+    ctrl->Select(wxDataViewItem(item.id));
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_Unselect(wxd_Window_t* self, wxd_DataViewItem_t item) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return;
+    ctrl->Unselect(wxDataViewItem(item.id));
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_SelectAll(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return;
+    ctrl->SelectAll();
+}
+
+WXD_EXPORTED bool wxd_DataViewCtrl_IsSelected(wxd_Window_t* self, wxd_DataViewItem_t item) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return false;
+    return ctrl->IsSelected(wxDataViewItem(item.id));
+}
+
+WXD_EXPORTED uint32_t wxd_DataViewCtrl_GetSelectedItemsCount(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return 0;
+    return ctrl->GetSelectedItemsCount();
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_GetSelections(wxd_Window_t* self, wxd_DataViewItem_t* items, uint32_t max_count) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl || !items || max_count == 0) return;
+
+    wxDataViewItemArray selections;
+    ctrl->GetSelections(selections);
+    
+    uint32_t count = std::min(max_count, static_cast<uint32_t>(selections.GetCount()));
+    
+    for (uint32_t i = 0; i < count; i++) {
+        items[i].id = selections[i].GetID();
+    }
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_SetSelections(wxd_Window_t* self, const wxd_DataViewItem_t* items, uint32_t count) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl || !items || count == 0) return;
+
+    wxDataViewItemArray selections;
+    selections.Alloc(count);
+    
+    for (uint32_t i = 0; i < count; i++) {
+        selections.Add(wxDataViewItem(items[i].id));
+    }
+    
+    ctrl->SetSelections(selections);
+}
+
+WXD_EXPORTED wxd_DataViewItem_t wxd_DataViewCtrl_GetCurrentItem(wxd_Window_t* self) {
+    wxd_DataViewItem_t result = {nullptr};
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return result;
+    
+    wxDataViewItem item = ctrl->GetCurrentItem();
+    result.id = item.GetID();
+    return result;
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_SetCurrentItem(wxd_Window_t* self, wxd_DataViewItem_t item) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return;
+    ctrl->SetCurrentItem(wxDataViewItem(item.id));
+}
+
+// Visual appearance
+WXD_EXPORTED int wxd_DataViewCtrl_GetIndent(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return 0;
+    return ctrl->GetIndent();
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_SetIndent(wxd_Window_t* self, int indent) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return;
+    ctrl->SetIndent(indent);
+}
+
+WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewCtrl_GetExpanderColumn(wxd_Window_t* self) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return nullptr;
+    return reinterpret_cast<wxd_DataViewColumn_t*>(ctrl->GetExpanderColumn());
+}
+
+WXD_EXPORTED void wxd_DataViewCtrl_SetExpanderColumn(wxd_Window_t* self, wxd_DataViewColumn_t* column) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(column);
+    if (!ctrl || !col) return;
+    ctrl->SetExpanderColumn(col);
+}
+
+WXD_EXPORTED bool wxd_DataViewCtrl_SetRowHeight(wxd_Window_t* self, int height) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return false;
+    return ctrl->SetRowHeight(height);
+}
+
+WXD_EXPORTED bool wxd_DataViewCtrl_SetAlternateRowColour(wxd_Window_t* self, const wxd_Colour_t* colour) {
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl || !colour) return false;
+    
+    wxColour wxColour(colour->r, colour->g, colour->b, colour->a);
+    return ctrl->SetAlternateRowColour(wxColour);
 }
 
 } // extern "C" 

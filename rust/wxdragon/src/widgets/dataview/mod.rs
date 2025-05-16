@@ -20,7 +20,7 @@
 //!    - Associate the model with the control
 //!    - Add data to the model
 
-// Re-export all components from submodules
+// Internal module structure
 mod ctrl;
 mod column;
 mod renderer;
@@ -29,8 +29,19 @@ mod variant;
 mod list_ctrl;
 mod tree_ctrl;
 mod enums;
+mod item;
 
 // Public exports
+pub use ctrl::{DataViewCtrl, DataViewCtrlBuilder, DataViewStyle};
+pub use list_ctrl::{DataViewListCtrl, DataViewListCtrlBuilder};
+pub use tree_ctrl::{DataViewTreeCtrl, DataViewTreeCtrlBuilder};
+pub use column::DataViewColumn;
+pub use model::{DataViewModel, DataViewListModel};
+pub use variant::{VariantType, Variant};
+pub use enums::{DataViewCellMode, DataViewAlign};
+pub use item::DataViewItem;
+
+// Re-export all renderers
 pub use renderer::{
     DataViewRenderer,
     DataViewTextRenderer,
@@ -42,11 +53,4 @@ pub use renderer::{
     DataViewSpinRenderer,
     DataViewChoiceRenderer,
     DataViewCheckIconTextRenderer,
-};
-pub use variant::{VariantType, Variant};
-pub use model::{DataViewModel, DataViewListModel};
-pub use column::DataViewColumn;
-pub use ctrl::{DataViewCtrl, DataViewCtrlBuilder, DataViewStyle};
-pub use list_ctrl::{DataViewListCtrl, DataViewListCtrlBuilder};
-pub use tree_ctrl::{DataViewTreeCtrl, DataViewTreeCtrlBuilder};
-pub use enums::{DataViewCellMode, DataViewAlign}; 
+}; 
