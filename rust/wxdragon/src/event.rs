@@ -209,6 +209,32 @@ impl EventType {
 
     pub const DESTROY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DESTROY);
 
+    // DataView events
+    pub const DATAVIEW_SELECTION_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED);
+    pub const DATAVIEW_ITEM_ACTIVATED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED);
+    pub const DATAVIEW_ITEM_EDITING_STARTED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED);
+    pub const DATAVIEW_ITEM_EDITING_DONE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE);
+    pub const DATAVIEW_ITEM_COLLAPSING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING);
+    pub const DATAVIEW_ITEM_COLLAPSED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED);
+    pub const DATAVIEW_ITEM_EXPANDING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING);
+    pub const DATAVIEW_ITEM_EXPANDED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED);
+    pub const DATAVIEW_COLUMN_HEADER_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK);
+    pub const DATAVIEW_COLUMN_HEADER_RIGHT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK);
+    pub const DATAVIEW_COLUMN_SORTED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED);
+    pub const DATAVIEW_COLUMN_REORDERED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED);
+
     // Add others as needed
 
     /// Get the underlying stable C enum value.
@@ -527,6 +553,73 @@ impl Event {
              // } else {
              //     None
              // }
+    }
+
+    // --- DataView Event Accessors ---
+
+    /// Gets the column index from a DataView event.
+    pub fn get_dataview_column(&self) -> Option<i32> {
+        if self.0.is_null() {
+            return None;
+        }
+        let mut column: i32 = 0;
+        if unsafe { ffi::wxd_DataViewEvent_GetColumn(self.0, &mut column) } {
+            Some(column)
+        } else {
+            None
+        }
+    }
+
+    /// Gets the row index from a DataView event.
+    /// 
+    /// Note: This only works reliably for DataViewListCtrl, not for tree-based controls.
+    pub fn get_dataview_row(&self) -> Option<i64> {
+        if self.0.is_null() {
+            return None;
+        }
+        let mut row: i64 = 0;
+        if unsafe { ffi::wxd_DataViewEvent_GetRow(self.0, &mut row) } {
+            Some(row)
+        } else {
+            None
+        }
+    }
+    
+    /// Gets the value from a DataView editing event.
+    pub fn get_dataview_value(&self) -> Option<crate::widgets::dataview::Variant> {
+        if self.0.is_null() {
+            return None;
+        }
+        
+        // Create a default Variant to be filled by the C++ function
+        let variant = crate::widgets::dataview::Variant::new();
+        
+        // Get the raw pointer to the variant's internal data
+        let variant_ptr = variant.as_raw_mut();
+        
+        if unsafe { ffi::wxd_DataViewEvent_GetValue(self.0, variant_ptr) } {
+            Some(variant)
+        } else {
+            None
+        }
+    }
+    
+    /// Sets the value in a DataView editing event.
+    pub fn set_dataview_value(&self, value: &crate::widgets::dataview::Variant) -> bool {
+        if self.0.is_null() {
+            return false;
+        }
+        
+        unsafe { ffi::wxd_DataViewEvent_SetValue(self.0, value.as_raw()) }
+    }
+    
+    /// Checks if editing was cancelled in a DataView editing event.
+    pub fn is_dataview_edit_cancelled(&self) -> bool {
+        if self.0.is_null() {
+            return false;
+        }
+        
+        unsafe { ffi::wxd_DataViewEvent_IsEditCancelled(self.0) }
     }
 }
 

@@ -15,6 +15,7 @@ pub mod choice;
 pub mod colourpickerctrl;
 pub mod combobox;
 pub mod command_link_button;
+pub mod dataview;
 pub mod datepickerctrl;
 pub mod dir_picker_ctrl;
 pub mod editablelistbox;
@@ -115,3 +116,6 @@ pub use toolbar::ToolBar;
 pub use treebook::Treebook;
 pub use treebook::TreebookBuilder;
 pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
+pub use dataview::{DataViewCtrl, DataViewCtrlBuilder, DataViewListCtrl, DataViewListCtrlBuilder,
+                   DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewStyle, DataViewModel,
+                   DataViewListModel, DataViewColumn, Variant};

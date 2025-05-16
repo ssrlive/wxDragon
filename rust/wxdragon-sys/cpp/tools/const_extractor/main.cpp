@@ -44,6 +44,7 @@
 #include <wx/clrpicker.h>
 #include <wx/editlbox.h>
 #include <wx/mediactrl.h>
+#include <wx/dataview.h> // ADDED: Needed for wxDataView styles and constants
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -526,6 +527,20 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_STEP", wxMEDIACTRLPLAYERCONTROLS_STEP});
     constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_VOLUME", wxMEDIACTRLPLAYERCONTROLS_VOLUME});
     constants_to_extract.push_back({"wxMEDIACTRLPLAYERCONTROLS_DEFAULT", wxMEDIACTRLPLAYERCONTROLS_DEFAULT});
+    
+    // DataViewCtrl style flags
+    constants_to_extract.push_back({"wxDV_SINGLE", wxDV_SINGLE});
+    constants_to_extract.push_back({"wxDV_MULTIPLE", wxDV_MULTIPLE});
+    constants_to_extract.push_back({"wxDV_ROW_LINES", wxDV_ROW_LINES});
+    constants_to_extract.push_back({"wxDV_HORIZ_RULES", wxDV_HORIZ_RULES});
+    constants_to_extract.push_back({"wxDV_VERT_RULES", wxDV_VERT_RULES});
+    constants_to_extract.push_back({"wxDV_VARIABLE_LINE_HEIGHT", wxDV_VARIABLE_LINE_HEIGHT});
+    constants_to_extract.push_back({"wxDV_NO_HEADER", wxDV_NO_HEADER});
+    
+    // DataViewRenderer cell modes
+    constants_to_extract.push_back({"wxDATAVIEW_CELL_INERT", wxDATAVIEW_CELL_INERT});
+    constants_to_extract.push_back({"wxDATAVIEW_CELL_ACTIVATABLE", wxDATAVIEW_CELL_ACTIVATABLE});
+    constants_to_extract.push_back({"wxDATAVIEW_CELL_EDITABLE", wxDATAVIEW_CELL_EDITABLE});
     
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",

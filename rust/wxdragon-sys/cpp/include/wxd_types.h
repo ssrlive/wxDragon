@@ -31,6 +31,41 @@ typedef struct {
     unsigned char a;
 } wxd_Colour_t;
 
+// DateTime type for DataView
+typedef struct {
+    short day;
+    unsigned short month;
+    int year;
+    short hour;
+    short minute;
+    short second;
+} wxd_DateTime_t;
+
+// Variant type codes for DataView
+#define WXD_VARIANT_TYPE_INVALID 0
+#define WXD_VARIANT_TYPE_BOOL 1
+#define WXD_VARIANT_TYPE_INT32 2
+#define WXD_VARIANT_TYPE_INT64 3
+#define WXD_VARIANT_TYPE_DOUBLE 4
+#define WXD_VARIANT_TYPE_STRING 5
+#define WXD_VARIANT_TYPE_BITMAP 6
+#define WXD_VARIANT_TYPE_DATETIME 7
+#define WXD_VARIANT_TYPE_VOID_PTR 8
+
+// C-compatible variant type for DataView
+typedef struct wxd_Variant_t {
+    int32_t type;
+    union {
+        bool bool_val;
+        int32_t int32_val;
+        int64_t int64_val;
+        double double_val;
+        char* string_val;
+        struct wxd_Bitmap_t* bitmap_val;
+        wxd_DateTime_t datetime_val;
+    } data;
+} wxd_Variant_t;
+
 typedef enum {
     WXD_EVENT_TYPE_NULL = 0,
     WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED = 1,
@@ -127,6 +162,19 @@ typedef enum {
     WXD_EVENT_TYPE_MEDIA_STATECHANGED = 90,
     WXD_EVENT_TYPE_MEDIA_PLAY = 91,
     WXD_EVENT_TYPE_MEDIA_PAUSE = 92,
+    // DataView Events
+    WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED = 93,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED = 94,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED = 95,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE = 96,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING = 97,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED = 98,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING = 99,
+    WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED = 100,
+    WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK = 101,
+    WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK = 102,
+    WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED = 103,
+    WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED = 104,
     WXD_EVENT_TYPE_MAX
 } WXDEventTypeCEnum;
 
@@ -249,15 +297,6 @@ typedef enum {
     // wxITEM_DROPDOWN (specific to wxToolBar and wxRibbonBar, might add later if needed)
     // wxITEM_MAX is not typically used directly as a kind
 } WXDItemKindCEnum;
-
-typedef struct {
-    short day;
-    unsigned short month;
-    int year;
-    short hour;
-    short minute;
-    short second;
-} wxd_DateTime_t;
 
 // --- Function Pointer Typedefs --- 
 typedef bool (*wxd_OnInitCallback)(void* userData);

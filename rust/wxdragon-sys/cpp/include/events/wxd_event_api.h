@@ -39,6 +39,13 @@ WXD_EXPORTED int wxd_ListEvent_GetColumn(wxd_Event_t* event);
 WXD_EXPORTED int wxd_ListEvent_GetLabel(wxd_Event_t* event, char* buffer, int buffer_len);
 WXD_EXPORTED bool wxd_ListEvent_IsEditCancelled(wxd_Event_t* event);
 
+// DataView event accessors
+WXD_EXPORTED bool wxd_DataViewEvent_GetColumn(wxd_Event_t* event, int32_t* column);
+WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row);
+WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value);
+WXD_EXPORTED bool wxd_DataViewEvent_SetValue(wxd_Event_t* event, const wxd_Variant_t* value);
+WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event);
+
 // Rust callback for dropping closure box
 WXD_EXPORTED void drop_rust_closure_box(void* ptr);
 

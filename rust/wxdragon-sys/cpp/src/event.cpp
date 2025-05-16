@@ -26,6 +26,7 @@
 #include <wx/dnd.h> // ADDED: For drag and drop events (wxEVT_BEGIN_DRAG, wxEVT_DROP_TEXT, etc.)
 #include <wx/timectrl.h> // ADDED: For wxTimePickerCtrl and wxEVT_TIME_CHANGED
 #include <wx/mediactrl.h> // ADDED: For MediaCtrl events
+#include <wx/dataview.h> // ADDED: For DataView events
 #include "wxd_utils.h"
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
@@ -661,6 +662,55 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_DESTROY, functor);
             bound = true;
             break;
+        // DataView events
+        case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED:
+            wx_handler->Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EDITING_STARTED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EDITING_DONE, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_COLLAPSING, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_COLLAPSED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EXPANDING, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED:
+            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK:
+            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_HEADER_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK:
+            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED:
+            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_SORTED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED:
+            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_REORDERED, functor);
+            bound = true;
+            break;
 
         // Default case for unhandled/unknown event types
         default:
@@ -965,6 +1015,30 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
             return wxEVT_TIME_CHANGED;
         case WXD_EVENT_TYPE_DESTROY:
             return wxEVT_DESTROY;
+        case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED:
+            return wxEVT_DATAVIEW_SELECTION_CHANGED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED:
+            return wxEVT_DATAVIEW_ITEM_ACTIVATED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED:
+            return wxEVT_DATAVIEW_ITEM_EDITING_STARTED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE:
+            return wxEVT_DATAVIEW_ITEM_EDITING_DONE;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING:
+            return wxEVT_DATAVIEW_ITEM_COLLAPSING;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED:
+            return wxEVT_DATAVIEW_ITEM_COLLAPSED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING:
+            return wxEVT_DATAVIEW_ITEM_EXPANDING;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED:
+            return wxEVT_DATAVIEW_ITEM_EXPANDED;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK:
+            return wxEVT_DATAVIEW_COLUMN_HEADER_CLICK;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK:
+            return wxEVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED:
+            return wxEVT_DATAVIEW_COLUMN_SORTED;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED:
+            return wxEVT_DATAVIEW_COLUMN_REORDERED;
         default:
             // Unknown event type - should we handle this differently?
             // For now let's use a null/placeholder value
@@ -999,4 +1073,145 @@ wxd_Event_t* convert_wx_event_to_wxd_event(wxEvent* event) {
 
     // No complex casting logic needed here for now. Return the opaque pointer.
     return reinterpret_cast<wxd_Event_t*>(event);
+}
+
+// DataView event accessor implementations
+WXD_EXPORTED bool wxd_DataViewEvent_GetColumn(wxd_Event_t* event, int32_t* column) {
+    if (!event || !column) return false;
+    
+    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
+    if (!dvEvent) return false;
+    
+    *column = dvEvent->GetColumn();
+    return true;
+}
+
+WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row) {
+    if (!event || !row) return false;
+    
+    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
+    if (!dvEvent) return false;
+    
+    // wxDataViewEvent doesn't have a GetRow method in all wxWidgets versions
+    // Instead, we'll return -1 to indicate row is not available
+    *row = -1;
+    return false; // Return false to indicate this information is not available
+}
+
+WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value) {
+    if (!event || !value) return false;
+    
+    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
+    if (!dvEvent) return false;
+    
+    // Get the wxVariant from the event
+    const wxVariant& wxVar = dvEvent->GetValue();
+    
+    // Convert wxVariant to wxd_Variant_t
+    if (wxVar.IsNull()) {
+        value->type = WXD_VARIANT_TYPE_INVALID;
+        return true;
+    }
+    
+    if (wxVar.GetType() == "bool") {
+        value->type = WXD_VARIANT_TYPE_BOOL;
+        value->data.bool_val = wxVar.GetBool();
+    }
+    else if (wxVar.GetType() == "long") {
+        value->type = WXD_VARIANT_TYPE_INT32;
+        value->data.int32_val = wxVar.GetLong();
+    }
+    else if (wxVar.GetType() == "longlong") {
+        value->type = WXD_VARIANT_TYPE_INT64;
+        value->data.int64_val = wxVar.GetLongLong().GetValue();
+    }
+    else if (wxVar.GetType() == "double") {
+        value->type = WXD_VARIANT_TYPE_DOUBLE;
+        value->data.double_val = wxVar.GetDouble();
+    }
+    else if (wxVar.GetType() == "string") {
+        value->type = WXD_VARIANT_TYPE_STRING;
+        const wxString& str = wxVar.GetString();
+        // Use strdup directly instead of wxd_cpp_utils::cpp_strdup
+        value->data.string_val = strdup(str.utf8_str());
+    }
+    else if (wxVar.GetType() == "datetime") {
+        value->type = WXD_VARIANT_TYPE_DATETIME;
+        const wxDateTime& dt = wxVar.GetDateTime();
+        wxd_DateTime_t& dt_out = value->data.datetime_val;
+        dt_out.day = dt.GetDay();
+        dt_out.month = dt.GetMonth() + 1; // wxDateTime months are 0-based
+        dt_out.year = dt.GetYear();
+        dt_out.hour = dt.GetHour();
+        dt_out.minute = dt.GetMinute();
+        dt_out.second = dt.GetSecond();
+    }
+    else {
+        // Unsupported type
+        value->type = WXD_VARIANT_TYPE_INVALID;
+        return false;
+    }
+    
+    return true;
+}
+
+WXD_EXPORTED bool wxd_DataViewEvent_SetValue(wxd_Event_t* event, const wxd_Variant_t* value) {
+    if (!event || !value) return false;
+    
+    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
+    if (!dvEvent) return false;
+    
+    wxVariant wxVar;
+    
+    // Convert wxd_Variant_t to wxVariant
+    switch (value->type) {
+        case WXD_VARIANT_TYPE_BOOL:
+            wxVar = wxVariant(value->data.bool_val);
+            break;
+        case WXD_VARIANT_TYPE_INT32:
+            wxVar = wxVariant((long)value->data.int32_val);
+            break;
+        case WXD_VARIANT_TYPE_INT64:
+            wxVar = wxVariant(wxLongLong(value->data.int64_val));
+            break;
+        case WXD_VARIANT_TYPE_DOUBLE:
+            wxVar = wxVariant(value->data.double_val);
+            break;
+        case WXD_VARIANT_TYPE_STRING:
+            if (value->data.string_val) {
+                wxVar = wxVariant(wxString::FromUTF8(value->data.string_val));
+            } else {
+                wxVar = wxVariant(wxString());
+            }
+            break;
+        case WXD_VARIANT_TYPE_DATETIME: {
+            const wxd_DateTime_t& dt = value->data.datetime_val;
+            wxDateTime wxDt;
+            wxDt.Set(
+                dt.day,
+                static_cast<wxDateTime::Month>(dt.month - 1), // wxDateTime months are 0-based
+                dt.year,
+                dt.hour,
+                dt.minute,
+                dt.second
+            );
+            wxVar = wxVariant(wxDt);
+            break;
+        }
+        default:
+            // Unsupported type
+            return false;
+    }
+    
+    dvEvent->SetValue(wxVar);
+    return true;
+}
+
+WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event) {
+    if (!event) return false;
+    
+    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
+    if (!dvEvent) return false;
+    
+    return dvEvent->IsEditCancelled();
 }
