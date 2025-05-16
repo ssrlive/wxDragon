@@ -118,4 +118,4 @@ pub use treebook::TreebookBuilder;
 pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
 pub use dataview::{DataViewCtrl, DataViewCtrlBuilder, DataViewListCtrl, DataViewListCtrlBuilder,
                    DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewStyle, DataViewModel,
-                   DataViewListModel, DataViewColumn, Variant};
+                   DataViewListModel, DataViewColumn, Variant, DataViewCellMode, DataViewAlign};

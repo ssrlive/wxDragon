@@ -76,7 +76,7 @@ impl DataViewListModel {
     /// # Returns
     ///
     /// `true` if the value was successfully set, `false` otherwise.
-    pub fn set_value(&self, row: usize, col: usize, value: &Variant) -> bool {
+    fn internal_set_value(&self, row: usize, col: usize, value: &Variant) -> bool {
         if col >= self.column_count {
             eprintln!("Error: Column index {} is out of bounds (column count: {})", col, self.column_count);
             return false;
@@ -102,14 +102,14 @@ impl DataViewListModel {
     /// # Examples
     ///
     /// ```rust
-    /// model.set_value_as(0, 0, "001");
-    /// model.set_value_as(0, 1, "John Smith");
-    /// model.set_value_as(0, 2, true);
-    /// model.set_value_as(0, 3, 92);
+    /// model.set_value(0, 0, "001");
+    /// model.set_value(0, 1, "John Smith");
+    /// model.set_value(0, 2, true);
+    /// model.set_value(0, 3, 92);
     /// ```
-    pub fn set_value_as<T: Into<Variant>>(&self, row: usize, col: usize, value: T) -> bool {
+    pub fn set_value<T: Into<Variant>>(&self, row: usize, col: usize, value: T) -> bool {
         let variant = value.into();
-        self.set_value(row, col, &variant)
+        self.internal_set_value(row, col, &variant)
     }
 
     /// Gets the number of columns in this model.

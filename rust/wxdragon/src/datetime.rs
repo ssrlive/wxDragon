@@ -9,24 +9,46 @@ pub struct DateTime {
 impl DateTime {
     /// Creates a new DateTime from individual components.
     /// Note: `month` is 1-12 (January = 1).
+    /// 
+    /// Returns an invalid DateTime if any parameters are out of range:
+    /// - year must be positive
+    /// - month must be between 1 and 12
+    /// - day must be positive and <= days in the given month/year
+    /// - hour must be between 0 and 23
+    /// - minute must be between 0 and 59
+    /// - second must be between 0 and 59
     pub fn new(year: i32, month: u16, day: i16, hour: i16, minute: i16, second: i16) -> Self {
-        assert!((1..=12).contains(&month), "Month must be between 1 and 12.");
-        // The C struct wxd_DateTime_t expects month 0-11.
-        let c_month = month - 1;
-        Self {
+        // Validate parameters before trying to create a DateTime
+        if year <= 0 || 
+           month < 1 || month > 12 || 
+           day < 1 || day > 31 ||
+           hour < 0 || hour >= 24 || 
+           minute < 0 || minute >= 60 || 
+           second < 0 || second >= 60 {
+            return Self::default();
+        }
+       
+        // Convert 1-based month (used in Rust API) to 0-based (used in C API)
+        let c_month = month - 1;   
+        // Create the DateTime object
+        let dt = Self {
             raw: unsafe {
-                // Use the FFI function to ensure consistent creation if it involves more logic
-                // or rely on direct struct initialization if wxd_DateTime_FromComponents is simple.
-                // For now, directly initializing assuming wxd_DateTime_t is just a plain data struct.
-                // If wxd_DateTime_FromComponents does more (like validation), prefer calling it.
                 ffi::wxd_DateTime_FromComponents(year, c_month, day, hour, minute, second)
             },
+        };
+        
+        // Check if it's a valid date/time
+        if !dt.is_valid() {
+            return Self::default();
         }
+        
+        dt
     }
 
     /// Creates a DateTime representing the current moment.
     pub fn now() -> Self {
-        unsafe { Self::from_raw(ffi::wxd_DateTime_Now()) }
+        let dt = unsafe { Self::from_raw(ffi::wxd_DateTime_Now()) };
+        dt
     }
 
     /// Creates a DateTime from the raw FFI struct.
@@ -68,7 +90,9 @@ impl DateTime {
         if self.raw.year == 0 && self.raw.month == 0 && self.raw.day == 0 {
             return false;
         }
-        unsafe { ffi::wxd_DateTime_IsValid(&self.raw) }
+        
+        let result = unsafe { ffi::wxd_DateTime_IsValid(&self.raw) };
+        result
     }
 }
 

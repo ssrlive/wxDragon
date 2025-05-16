@@ -1,10 +1,8 @@
 //! DataViewRenderer implementation.
 
 use std::ffi::CString;
-use crate::Rect;
 use wxdragon_sys as ffi;
-
-use super::VariantType;
+use super::{VariantType, DataViewCellMode, DataViewAlign};
 
 /// Base trait for DataView renderers.
 ///
@@ -27,16 +25,17 @@ impl DataViewTextRenderer {
     ///
     /// # Parameters
     ///
-    /// * `variant_type` - The type of data this renderer can display (usually "string")
+    /// * `variant_type` - The type of data this renderer can display
     /// * `mode` - The cell mode (inert, activatable, or editable)
     /// * `align` - The text alignment
-    pub fn new(variant_type: &str, mode: i64, align: i64) -> Self {
-        let variant_type_cstr = CString::new(variant_type).unwrap();
+    pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
         let handle = unsafe {
             ffi::wxd_DataViewTextRenderer_Create(
                 variant_type_cstr.as_ptr(),
-                mode,
-                align,
+                mode.bits(),
+                align.bits(),
             )
         };
         Self { handle }
@@ -61,16 +60,17 @@ impl DataViewToggleRenderer {
     ///
     /// # Parameters
     ///
-    /// * `variant_type` - The type of data this renderer can display (usually "bool")
+    /// * `variant_type` - The type of data this renderer can display (typically Bool)
     /// * `mode` - The cell mode (typically activatable for toggles)
     /// * `align` - The alignment of the checkbox
-    pub fn new(variant_type: &str, mode: i64, align: i64) -> Self {
-        let variant_type_cstr = CString::new(variant_type).unwrap();
+    pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
         let handle = unsafe {
             ffi::wxd_DataViewToggleRenderer_Create(
                 variant_type_cstr.as_ptr(),
-                mode,
-                align,
+                mode.bits(),
+                align.bits(),
             )
         };
         Self { handle }
@@ -95,14 +95,15 @@ impl DataViewProgressRenderer {
     ///
     /// # Parameters
     ///
-    /// * `variant_type` - The type of data this renderer can display (usually "long")
+    /// * `variant_type` - The type of data this renderer can display (typically Int32)
     /// * `mode` - The cell mode (typically inert for progress bars)
-    pub fn new(variant_type: &str, mode: i64) -> Self {
-        let variant_type_cstr = CString::new(variant_type).unwrap();
+    pub fn new(variant_type: VariantType, mode: DataViewCellMode) -> Self {
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
         let handle = unsafe {
             ffi::wxd_DataViewProgressRenderer_Create(
                 variant_type_cstr.as_ptr(),
-                mode,
+                mode.bits(),
                 0, // align - ignored for progress renderer
             )
         };
@@ -128,16 +129,16 @@ impl DataViewIconTextRenderer {
     ///
     /// # Parameters
     ///
-    /// * `variant_type` - The type of data this renderer can display
-    /// * `mode` - The cell mode
-    /// * `align` - The text alignment
-    pub fn new(variant_type: &str, mode: i64, align: i64) -> Self {
-        let variant_type_cstr = CString::new(variant_type).unwrap();
+    /// * `mode` - The cell mode 
+    /// * `align` - The alignment
+    pub fn new(mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        // IconText renderer uses a special type string
+        let variant_type_cstr = CString::new("wxDataViewIconText").unwrap();
         let handle = unsafe {
             ffi::wxd_DataViewIconTextRenderer_Create(
                 variant_type_cstr.as_ptr(),
-                mode,
-                align,
+                mode.bits(),
+                align.bits(),
             )
         };
         Self { handle }
@@ -150,157 +151,189 @@ impl DataViewRenderer for DataViewIconTextRenderer {
     }
 }
 
-/// Trait for implementing custom rendering logic.
+/// A bitmap renderer for DataViewCtrl columns.
 ///
-/// This trait can be implemented to provide custom rendering for DataViewCtrl cells.
-pub trait CustomRendererLogic {
-    /// Render the content of a cell.
-    ///
-    /// # Parameters
-    ///
-    /// * `rect` - Rectangle defining the cell boundaries
-    /// * `row` - Row index
-    /// * `column` - Column index
-    fn render(&self, rect: &Rect, row: usize, column: usize) -> bool;
-}
-
-/// A custom renderer that allows for application-defined rendering of cells.
-///
-/// This renderer provides the ability to implement custom visualizations of data
-/// by implementing the `CustomRendererLogic` trait.
-///
-/// # Example
-///
-/// ```rust,no_run
-/// use wxdragon::prelude::*;
-/// use wxdragon::widgets::dataview::{DataViewCustomRenderer, DataViewColumn, CustomRendererLogic, VariantType};
-///
-/// // Create a custom renderer implementation
-/// struct ProgressArcRenderer;
-///
-/// impl CustomRendererLogic for ProgressArcRenderer {
-///     fn render(&self, rect: &Rect, row: usize, _column: usize) -> bool {
-///         // Sample implementation - display progress as text
-///         println!("Rendering row {} in rect ({}, {}, {}, {})",
-///                  row, rect.x, rect.y, rect.width, rect.height);
-///         true
-///     }
-/// }
-///
-/// // Create the renderer and add it to a column
-/// let renderer = DataViewCustomRenderer::new(VariantType::Double, Box::new(ProgressArcRenderer));
-/// let column = DataViewColumn::new("Custom", &renderer, 0, 100, wxdragon_sys::WXD_ALIGN_CENTER);
-/// dataview_ctrl.append_column(&column);
-/// ```
-pub struct DataViewCustomRenderer {
+/// DataViewBitmapRenderer displays a bitmap in a cell.
+pub struct DataViewBitmapRenderer {
     handle: *mut ffi::wxd_DataViewRenderer_t,
-    _callback_box: Box<RendererCallback>,
 }
 
-// Internal struct to store renderer data
-struct RendererCallback {
-    logic: Box<dyn CustomRendererLogic>,
-}
-
-impl DataViewCustomRenderer {
-    /// Creates a new custom renderer with the specified rendering logic.
+impl DataViewBitmapRenderer {
+    /// Creates a new bitmap renderer.
     ///
     /// # Parameters
     ///
-    /// * `variant_type` - The type of data this renderer can display
-    /// * `renderer` - Custom rendering logic implementation
-    pub fn new(variant_type: VariantType, renderer: Box<dyn CustomRendererLogic>) -> Self {
-        Self::with_mode(variant_type, ffi::WXD_DATAVIEW_CELL_INERT, ffi::WXD_ALIGN_CENTER, renderer)
-    }
-    
-    /// Creates a new custom renderer with the specified mode and alignment.
-    ///
-    /// # Parameters
-    ///
-    /// * `variant_type` - The type of data this renderer can display
-    /// * `mode` - The cell mode (inert, activatable, or editable)
-    /// * `align` - The content alignment
-    /// * `renderer` - Custom rendering logic implementation
-    pub fn with_mode(
-        variant_type: VariantType,
-        mode: i64,
-        align: i64,
-        renderer: Box<dyn CustomRendererLogic>
-    ) -> Self {
-        // Create callback wrapper
-        let callback = Box::new(RendererCallback {
-            logic: renderer,
-        });
-        
-        // Get a raw pointer to the callback data
-        let callback_ptr = Box::into_raw(callback);
-        
-        // Convert the variant type to a string
-        let type_str = variant_type.to_type_string();
-        
-        // Create a C string for the variant type
-        let variant_type_cstr = CString::new(type_str).unwrap();
-        
-        // Create the renderer
+    /// * `mode` - The cell mode
+    /// * `align` - The alignment
+    pub fn new(mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        // Bitmap renderer always uses the "bitmap" type
+        let variant_type_cstr = CString::new("bitmap").unwrap();
         let handle = unsafe {
-            ffi::wxd_DataViewCustomRenderer_Create(
+            ffi::wxd_DataViewBitmapRenderer_Create(
                 variant_type_cstr.as_ptr(),
-                mode,
-                align,
-                Some(custom_render_trampoline),
-                callback_ptr as *mut std::os::raw::c_void,
+                mode.bits(),
+                align.bits(),
             )
         };
-        
-        // Recreate the box to maintain ownership
-        let callback_box = unsafe { Box::from_raw(callback_ptr) };
-        
-        Self {
-            handle,
-            _callback_box: callback_box,
-        }
+        Self { handle }
     }
 }
 
-// Trampoline function that forwards the call to the Rust implementation
-unsafe extern "C" fn custom_render_trampoline(
-    user_data: *mut std::os::raw::c_void,
-    _dc_ptr: *mut ffi::wxd_DC_t,
-    rect_ptr: *mut ffi::wxd_Rect,
-    _flags: i64,
-    item: i64,
-) -> bool {
-    if user_data.is_null() || rect_ptr.is_null() {
-        return false;
-    }
-    
-    // Extract the struct from the pointer
-    let callback = &*(user_data as *const RendererCallback);
-    
-    // Create a safe rectangle for the callback using the existing Rect struct
-    let rect = Rect {
-        x: (*rect_ptr).x,
-        y: (*rect_ptr).y,
-        width: (*rect_ptr).width,
-        height: (*rect_ptr).height,
-    };
-    
-    // Calculate the row and column (simplistic approach)
-    let row = (item / 10) as usize;
-    let column = (item % 10) as usize;
-    
-    // Call the user's implementation
-    callback.logic.render(&rect, row, column)
-}
-
-impl DataViewRenderer for DataViewCustomRenderer {
+impl DataViewRenderer for DataViewBitmapRenderer {
     fn as_raw(&self) -> *mut ffi::wxd_DataViewRenderer_t {
         self.handle
     }
 }
 
-impl Drop for DataViewCustomRenderer {
-    fn drop(&mut self) {
-        // The renderer is owned by the column, so we don't need to free it here
+/// A date renderer for DataViewCtrl columns.
+///
+/// DataViewDateRenderer displays date values.
+pub struct DataViewDateRenderer {
+    handle: *mut ffi::wxd_DataViewRenderer_t,
+}
+
+impl DataViewDateRenderer {
+    /// Creates a new date renderer.
+    ///
+    /// # Parameters
+    ///
+    /// * `variant_type` - The type of data this renderer can display (typically DateTime)
+    /// * `mode` - The cell mode
+    /// * `align` - The alignment
+    pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
+        let handle = unsafe {
+            ffi::wxd_DataViewDateRenderer_Create(
+                variant_type_cstr.as_ptr(),
+                mode.bits(),
+                align.bits(),
+            )
+        };
+        Self { handle }
     }
-} 
+}
+
+impl DataViewRenderer for DataViewDateRenderer {
+    fn as_raw(&self) -> *mut ffi::wxd_DataViewRenderer_t {
+        self.handle
+    }
+}
+
+/// A spin renderer for DataViewCtrl columns.
+///
+/// DataViewSpinRenderer displays a spin control for numeric data.
+pub struct DataViewSpinRenderer {
+    handle: *mut ffi::wxd_DataViewRenderer_t,
+}
+
+impl DataViewSpinRenderer {
+    /// Creates a new spin renderer.
+    ///
+    /// # Parameters
+    ///
+    /// * `variant_type` - The type of data this renderer can display (typically Int32)
+    /// * `mode` - The cell mode
+    /// * `align` - The alignment
+    /// * `min` - Minimum value
+    /// * `max` - Maximum value
+    /// * `inc` - Increment value
+    pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign, min: i32, max: i32, inc: i32) -> Self {
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
+        let handle = unsafe {
+            ffi::wxd_DataViewSpinRenderer_Create(
+                variant_type_cstr.as_ptr(),
+                mode.bits(),
+                align.bits(),
+                min,
+                max,
+                inc,
+            )
+        };
+        Self { handle }
+    }
+}
+
+impl DataViewRenderer for DataViewSpinRenderer {
+    fn as_raw(&self) -> *mut ffi::wxd_DataViewRenderer_t {
+        self.handle
+    }
+}
+
+/// A choice renderer for DataViewCtrl columns.
+///
+/// DataViewChoiceRenderer displays a dropdown with choices.
+pub struct DataViewChoiceRenderer {
+    handle: *mut ffi::wxd_DataViewRenderer_t,
+}
+
+impl DataViewChoiceRenderer {
+    /// Creates a new choice renderer.
+    ///
+    /// # Parameters
+    ///
+    /// * `variant_type` - The type of data this renderer can display (typically String)
+    /// * `choices` - A list of choices to display in the dropdown
+    /// * `mode` - The cell mode
+    /// * `align` - The alignment
+    pub fn new(variant_type: VariantType, choices: &[&str], mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        // Convert choices to a comma-separated string
+        let choices_str = choices.join(",");
+        let choices_cstr = CString::new(choices_str).unwrap();
+        
+        let variant_type_str = variant_type.to_type_string();
+        let variant_type_cstr = CString::new(variant_type_str).unwrap();
+        
+        let handle = unsafe {
+            ffi::wxd_DataViewChoiceRenderer_Create(
+                variant_type_cstr.as_ptr(),
+                choices_cstr.as_ptr(),
+                mode.bits(),
+                align.bits(),
+            )
+        };
+        
+        Self { handle }
+    }
+}
+
+impl DataViewRenderer for DataViewChoiceRenderer {
+    fn as_raw(&self) -> *mut ffi::wxd_DataViewRenderer_t {
+        self.handle
+    }
+}
+
+/// A check-icon-text renderer for DataViewCtrl columns.
+///
+/// DataViewCheckIconTextRenderer displays a checkbox, an icon, and text.
+pub struct DataViewCheckIconTextRenderer {
+    handle: *mut ffi::wxd_DataViewRenderer_t,
+}
+
+impl DataViewCheckIconTextRenderer {
+    /// Creates a new check-icon-text renderer.
+    ///
+    /// # Parameters
+    ///
+    /// * `mode` - The cell mode
+    /// * `align` - The alignment
+    pub fn new(mode: DataViewCellMode, align: DataViewAlign) -> Self {
+        // This renderer uses a special variant type
+        let variant_type_cstr = CString::new("wxDataViewCheckIconText").unwrap();
+        let handle = unsafe {
+            ffi::wxd_DataViewCheckIconTextRenderer_Create(
+                variant_type_cstr.as_ptr(),
+                mode.bits(),
+                align.bits(),
+            )
+        };
+        Self { handle }
+    }
+}
+
+impl DataViewRenderer for DataViewCheckIconTextRenderer {
+    fn as_raw(&self) -> *mut ffi::wxd_DataViewRenderer_t {
+        self.handle
+    }
+}

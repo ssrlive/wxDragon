@@ -3,7 +3,7 @@
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
-use super::DataViewRenderer;
+use super::{DataViewRenderer, DataViewAlign};
 
 /// A column in a DataViewCtrl.
 ///
@@ -22,8 +22,8 @@ impl DataViewColumn {
     /// * `renderer` - The renderer that will be used to display data in this column
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
-    /// * `align` - The alignment of the column content (use constants from `ffi::WXD_ALIGN_*`)
-    pub fn new(title: &str, renderer: &dyn DataViewRenderer, model_column: usize, width: i32, align: i64) -> Self {
+    /// * `align` - The alignment of the column content
+    pub fn new(title: &str, renderer: &dyn DataViewRenderer, model_column: usize, width: i32, align: DataViewAlign) -> Self {
         let title_cstr = CString::new(title).unwrap();
         let handle = unsafe {
             ffi::wxd_DataViewColumn_Create(
@@ -31,7 +31,7 @@ impl DataViewColumn {
                 renderer.as_raw(),
                 model_column as i64,
                 width,
-                align,
+                align.bits(),
             )
         };
         Self { handle }

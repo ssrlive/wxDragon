@@ -54,6 +54,31 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewProgressRenderer_Create(const c
                                                                   int64_t mode, 
                                                                   int64_t align);
 
+// Additional renderer creation functions
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewBitmapRenderer_Create(const char* varianttype, 
+                                                                int64_t mode, 
+                                                                int64_t align);
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewDateRenderer_Create(const char* varianttype, 
+                                                              int64_t mode, 
+                                                              int64_t align);
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewSpinRenderer_Create(const char* varianttype, 
+                                                              int64_t mode, 
+                                                              int64_t align,
+                                                              int32_t min,
+                                                              int32_t max,
+                                                              int32_t inc);
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewChoiceRenderer_Create(const char* varianttype, 
+                                                                const char* choices,
+                                                                int64_t mode, 
+                                                                int64_t align);
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(const char* varianttype, 
+                                                                       int64_t mode, 
+                                                                       int64_t align);
+
 // Custom renderer callback type
 typedef bool (*wxd_DataViewRenderer_RenderCallback)(void* user_data, 
                                                   wxd_DC_t* dc, 

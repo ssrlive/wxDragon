@@ -4,7 +4,16 @@ use crate::{Id, Point, Size, Window, WxWidget, WxEvtHandler};
 use crate::{widget_builder, implement_widget_traits_with_target};
 use wxdragon_sys as ffi;
 
-use super::{DataViewStyle, DataViewTextRenderer, DataViewToggleRenderer, DataViewProgressRenderer, DataViewColumn};
+use super::{
+    DataViewStyle, 
+    DataViewTextRenderer, 
+    DataViewToggleRenderer, 
+    DataViewProgressRenderer, 
+    DataViewColumn,
+    VariantType,
+    DataViewCellMode,
+    DataViewAlign
+};
 
 /// A simplified DataViewCtrl that displays data in a list format.
 ///
@@ -48,8 +57,8 @@ impl DataViewListCtrl {
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_text_column(&self, label: &str, model_column: usize, align: i64, width: i32) -> bool {
-        let renderer = DataViewTextRenderer::new("string", ffi::WXD_DATAVIEW_CELL_INERT, align);
+    pub fn append_text_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32) -> bool {
+        let renderer = DataViewTextRenderer::new(VariantType::String, DataViewCellMode::Inert, align);
         let column = DataViewColumn::new(label, &renderer, model_column, width, align);
         
         // Since DataViewListCtrl is a wrapper around DataViewCtrl, we can cast it
@@ -69,8 +78,8 @@ impl DataViewListCtrl {
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_toggle_column(&self, label: &str, model_column: usize, align: i64, width: i32) -> bool {
-        let renderer = DataViewToggleRenderer::new("bool", ffi::WXD_DATAVIEW_CELL_ACTIVATABLE, align);
+    pub fn append_toggle_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32) -> bool {
+        let renderer = DataViewToggleRenderer::new(VariantType::Bool, DataViewCellMode::Activatable, align);
         let column = DataViewColumn::new(label, &renderer, model_column, width, align);
         
         let ctrl_ptr = self.window.handle_ptr();
@@ -89,8 +98,8 @@ impl DataViewListCtrl {
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
     pub fn append_progress_column(&self, label: &str, model_column: usize, width: i32) -> bool {
-        let renderer = DataViewProgressRenderer::new("long", ffi::WXD_DATAVIEW_CELL_INERT);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, ffi::WXD_ALIGN_CENTER);
+        let renderer = DataViewProgressRenderer::new(VariantType::Int32, DataViewCellMode::Inert);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, DataViewAlign::Center);
         
         let ctrl_ptr = self.window.handle_ptr();
         unsafe { ffi::wxd_DataViewCtrl_AppendColumn(ctrl_ptr, column.as_raw()) }

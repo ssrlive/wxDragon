@@ -2,6 +2,9 @@
 #include "../src/wxd_utils.h"
 #include <wx/dataview.h>
 #include <wx/string.h> // For wxString methods
+#include <wx/tokenzr.h> // For wxStringTokenizer
+#include <wx/bitmap.h> // For wxBitmap
+#include <wx/datetime.h> // For wxDateTime
 
 extern "C" {
 
@@ -127,6 +130,79 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewProgressRenderer_Create(const c
         wxEmptyString,  // label
         wxVarType,      // varianttype
         static_cast<wxDataViewCellMode>(mode)); // mode
+        
+    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+// Additional renderer implementations
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewBitmapRenderer_Create(const char* varianttype, 
+                                                                 int64_t mode, 
+                                                                 int64_t align) {
+    wxString wxVarType = wxString::FromUTF8(varianttype ? varianttype : "wxBitmap");
+    wxDataViewBitmapRenderer* renderer = new wxDataViewBitmapRenderer(
+        wxVarType, 
+        static_cast<wxDataViewCellMode>(mode),
+        static_cast<wxAlignment>(align));
+        
+    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewDateRenderer_Create(const char* varianttype, 
+                                                              int64_t mode, 
+                                                              int64_t align) {
+    wxString wxVarType = wxString::FromUTF8(varianttype ? varianttype : "datetime");
+    wxDataViewDateRenderer* renderer = new wxDataViewDateRenderer(
+        wxVarType, 
+        static_cast<wxDataViewCellMode>(mode),
+        static_cast<wxAlignment>(align));
+        
+    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewSpinRenderer_Create(const char* varianttype, 
+                                                              int64_t mode, 
+                                                              int64_t align,
+                                                              int32_t min,
+                                                              int32_t max,
+                                                              int32_t inc) {
+    // The constructor order is different: min and max come first, then mode and align
+    wxDataViewSpinRenderer* renderer = new wxDataViewSpinRenderer(
+        min,
+        max,
+        static_cast<wxDataViewCellMode>(mode),
+        static_cast<int>(align));
+        
+    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewChoiceRenderer_Create(const char* varianttype, 
+                                                                const char* choices_str,
+                                                                int64_t mode, 
+                                                                int64_t align) {
+    wxString wxChoices = wxString::FromUTF8(choices_str ? choices_str : "");
+    
+    // Parse choices and create wxArrayString
+    wxArrayString choices;
+    wxStringTokenizer tokenizer(wxChoices, ",");
+    while (tokenizer.HasMoreTokens()) {
+        choices.Add(tokenizer.GetNextToken().Trim());
+    }
+    
+    wxDataViewChoiceRenderer* renderer = new wxDataViewChoiceRenderer(
+        choices,
+        static_cast<wxDataViewCellMode>(mode),
+        static_cast<int>(align));
+        
+    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(const char* varianttype, 
+                                                                       int64_t mode, 
+                                                                       int64_t align) {
+    // This renderer doesn't accept a varianttype parameter
+    wxDataViewCheckIconTextRenderer* renderer = new wxDataViewCheckIconTextRenderer(
+        static_cast<wxDataViewCellMode>(mode),
+        static_cast<int>(align));
         
     return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
 }
@@ -481,7 +557,28 @@ WXD_EXPORTED bool wxd_DataViewListModel_SetValue(wxd_DataViewModel_t* self,
                 wxVariantValue = wxString();
             }
             break;
-        // Handle other types as needed
+        case WXD_VARIANT_TYPE_BITMAP:
+            if (variant->data.bitmap_val) {
+                wxBitmap* bitmap = reinterpret_cast<wxBitmap*>(variant->data.bitmap_val);
+                // Create a wxVariant with a bitmap value using native wxWidgets support
+                wxVariantValue << *bitmap;
+            } else {
+                wxVariantValue.Clear();
+            }
+            break;
+        case WXD_VARIANT_TYPE_DATETIME:
+            {
+                // Convert wxd_DateTime_t to wxDateTime
+                wxDateTime dt;
+                dt.Set(variant->data.datetime_val.day,
+                      static_cast<wxDateTime::Month>(variant->data.datetime_val.month - 1),
+                      variant->data.datetime_val.year,
+                      variant->data.datetime_val.hour,
+                      variant->data.datetime_val.minute,
+                      variant->data.datetime_val.second);
+                wxVariantValue = dt;
+            }
+            break;
         default:
             // Set an empty variant
             wxVariantValue.Clear();
