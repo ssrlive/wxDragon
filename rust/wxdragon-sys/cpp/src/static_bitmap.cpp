@@ -80,15 +80,20 @@ WXD_EXPORTED void wxd_StaticBitmap_SetBitmap(wxd_StaticBitmap_t* self, wxd_Bitma
     }
 }
 
-// Optional: GetBitmap (returns a new wxBitmap object, caller owns it)
-// WXD_EXPORTED wxd_Bitmap_t* wxd_StaticBitmap_GetBitmap(wxd_StaticBitmap_t* self) {
-//     wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
-//     if (!statBmp) return nullptr;
-// 
-//     const wxBitmap& currentBmp = statBmp->GetBitmap();
-//     if (!currentBmp.IsOk()) return nullptr;
-// 
-//     // Return a copy, as the internal one might be changed or deleted
-//     wxBitmap* newBmp = new wxBitmap(currentBmp);
-//     return reinterpret_cast<wxd_Bitmap_t*>(newBmp);
-// } 
+/**
+ * @brief Gets the current bitmap from the static bitmap control.
+ *
+ * The function creates a new wxBitmap that the caller takes ownership of.
+ * The caller is responsible for destroying the bitmap when done with it.
+ */
+WXD_EXPORTED wxd_Bitmap_t* wxd_StaticBitmap_GetBitmap(wxd_StaticBitmap_t* self) {
+    wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+    if (!statBmp) return nullptr;
+
+    const wxBitmap& currentBmp = statBmp->GetBitmap();
+    if (!currentBmp.IsOk()) return nullptr;
+
+    // Return a copy, as the internal one might be changed or deleted
+    wxBitmap* newBmp = new wxBitmap(currentBmp);
+    return reinterpret_cast<wxd_Bitmap_t*>(newBmp);
+} 

@@ -49,6 +49,23 @@ impl StaticBitmap {
             );
         }
     }
+
+    /// Gets the current bitmap from the control.
+    /// Returns a new bitmap instance that the caller owns.
+    pub fn get_bitmap(&self) -> Option<Bitmap> {
+        unsafe {
+            let ptr = ffi::wxd_StaticBitmap_GetBitmap(
+                self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t
+            );
+            
+            if ptr.is_null() {
+                None
+            } else {
+                // We get ownership of the bitmap from C++
+                Some(Bitmap::from_ptr_owned(ptr))
+            }
+        }
+    }
 }
 
 widget_builder!(
