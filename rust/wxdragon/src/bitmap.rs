@@ -63,8 +63,18 @@ impl Bitmap {
 
     /// Returns the raw underlying bitmap pointer.
     /// Use with caution, primarily for internal FFI calls.
-    pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_Bitmap_t {
+    pub fn as_ptr(&self) -> *mut ffi::wxd_Bitmap_t {
         self.ptr
+    }
+
+    /// Returns a pointer suitable for borrowing by C++ (e.g., for DataViewCtrl).
+    /// If the bitmap is not ok or its internal pointer is null, this returns null.
+    pub fn as_borrowable_ptr(&self) -> *mut ffi::wxd_Bitmap_t {
+        if self.is_ok() && !self.ptr.is_null() {
+            self.ptr
+        } else {
+            std::ptr::null_mut()
+        }
     }
 
     /// Returns the width of the bitmap in pixels.

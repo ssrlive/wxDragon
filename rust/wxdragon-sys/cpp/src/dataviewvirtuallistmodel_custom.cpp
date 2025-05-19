@@ -42,13 +42,15 @@ public:
     // Implementation of the pure virtual methods
     virtual void GetValueByRow(wxVariant &variant, unsigned int row, unsigned int col) const override {
         wxd_Variant_t rust_variant_data = {}; // Initialize to zeros/nulls
-        bool destroy_cloned_bitmap_in_rust_variant = false;
+        bool destroy_cloned_bitmap_in_rust_variant = false; // Default to false
 
         if (m_get_value) {
             m_get_value(m_userdata, static_cast<uint64_t>(row), static_cast<uint64_t>(col), &rust_variant_data);
+            // Only set destroy flag if it's the OLD WXD_VARIANT_TYPE_BITMAP type
             if (rust_variant_data.type == WXD_VARIANT_TYPE_BITMAP && rust_variant_data.data.bitmap_val != nullptr) {
                 destroy_cloned_bitmap_in_rust_variant = true;
             }
+            // For WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED, destroy_cloned_bitmap_in_rust_variant remains false.
         } else {
             rust_variant_data.type = WXD_VARIANT_TYPE_INVALID;
         }
@@ -84,54 +86,80 @@ public:
                 break;
                 
             case 5: 
-                if (rust_variant_data.type == WXD_VARIANT_TYPE_BITMAP) {
-                    void* cloned_bmp_ptr_from_rust = rust_variant_data.data.bitmap_val;
-                    
-                    wxBitmap fallback_bmp(16, 16);
-                    {
-                        wxMemoryDC dc(fallback_bmp);
-                        dc.SetBackground(*wxLIGHT_GREY_BRUSH);
-                        dc.Clear();
-                        dc.SelectObject(wxNullBitmap);
-                    }
-                    variant << fallback_bmp;
-
-                    if (cloned_bmp_ptr_from_rust != nullptr) {
-                        wxBitmap* casted_bmp = wxDynamicCast(reinterpret_cast<wxObject*>(cloned_bmp_ptr_from_rust), wxBitmap);
-                        
-                        if (casted_bmp != nullptr && casted_bmp->IsOk()) {
+                if (rust_variant_data.type == WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED) {
+                    void* borrowed_bmp_ptr_from_rust = rust_variant_data.data.bitmap_val;
+                    if (borrowed_bmp_ptr_from_rust != nullptr) {
+                        wxBitmap* casted_bmp = reinterpret_cast<wxBitmap*>(borrowed_bmp_ptr_from_rust);
+                        if (casted_bmp->IsOk()) {
                             try {
-                                wxBitmap final_copy(*casted_bmp); 
+                                wxBitmap final_copy(*casted_bmp); // Make a copy for the wxVariant
                                 if (final_copy.IsOk()) {
-                                    variant << final_copy; 
+                                    variant << final_copy;
+                                } else {
+                                    // Fallback if final_copy is not OK
+                                    wxBitmap fallback_bmp_on_error(16, 16); /* Create a visible fallback */
+                                    wxMemoryDC dc(fallback_bmp_on_error); 
+                                    dc.SetBackground(*wxRED_BRUSH); dc.Clear(); 
+                                    variant << fallback_bmp_on_error;
                                 }
                             } catch (...) {
-                                wxLogError("GetValueByRow: Exception during final wxBitmap copy from clone.");
+                                wxLogError("GetValueByRow: Exception during wxBitmap copy from borrowed ptr for WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED.");
+                                wxBitmap fallback_bmp_on_exception(16, 16); /* Create a visible fallback */
+                                wxMemoryDC dc(fallback_bmp_on_exception); 
+                                dc.SetBackground(*wxBLUE_BRUSH); dc.Clear(); 
+                                variant << fallback_bmp_on_exception;
                             }
+                        } else {
+                             // borrowed bitmap pointer is not IsOk()
+                             wxBitmap fallback_bmp_not_ok(16, 16); /* Create a visible fallback */
+                             wxMemoryDC dc(fallback_bmp_not_ok); 
+                             dc.SetBackground(*wxGREEN_BRUSH); dc.Clear(); 
+                             variant << fallback_bmp_not_ok;
                         }
+                    } else {
+                        // borrowed_bmp_ptr_from_rust was null
+                        wxBitmap fallback_bmp_null_ptr(16, 16); /* Create a visible fallback */
+                        wxMemoryDC dc(fallback_bmp_null_ptr); 
+                        dc.SetBackground(*wxYELLOW_BRUSH); dc.Clear(); 
+                        variant << fallback_bmp_null_ptr;
                     }
-                } else if (rust_variant_data.type == WXD_VARIANT_TYPE_STRING && rust_variant_data.data.string_val) {
-                    variant = wxVariant(wxString::FromUTF8(rust_variant_data.data.string_val));
-                    free(rust_variant_data.data.string_val);
-                    rust_variant_data.data.string_val = nullptr; 
+                } else if (rust_variant_data.type == WXD_VARIANT_TYPE_BITMAP) { // Handle OLD type (should ideally not be used by Rust anymore for get_value)
+                    void* cloned_bmp_ptr_from_rust = rust_variant_data.data.bitmap_val;
+                    if (cloned_bmp_ptr_from_rust != nullptr) {
+                        wxBitmap* casted_bmp = reinterpret_cast<wxBitmap*>(cloned_bmp_ptr_from_rust);
+                        if (casted_bmp->IsOk()) {
+                           try {
+                                wxBitmap final_copy(*casted_bmp); // Make a copy for the wxVariant
+                                if (final_copy.IsOk()) {
+                                    variant << final_copy;
+                                } else { /* Fallback for old type if copy fails */ }
+                            } catch (...) { /* Fallback for old type on exception */ }
+                        } else { /* Fallback for old type if not IsOk */ }
+                    } else { /* Fallback for old type if null ptr */ }
+                     // destroy_cloned_bitmap_in_rust_variant is true for this path, so it will be destroyed after switch.
                 } else {
-                    wxBitmap default_bmp(16, 16);
-                    {
-                        wxMemoryDC dc(default_bmp);
-                        dc.SetBackground(*wxBLACK_BRUSH); 
-                        dc.Clear();
-                        dc.SelectObject(wxNullBitmap);
-                    }
+                    // Fallback if Rust didn't send any known bitmap variant type
+                    wxBitmap default_bmp(16, 16); /* Create a black/default fallback */
+                    wxMemoryDC dc(default_bmp); 
+                    dc.SetBackground(*wxBLACK_BRUSH); dc.Clear(); 
                     variant << default_bmp;
                 }
                 break;
                 
             case 6: 
                 if (rust_variant_data.type == WXD_VARIANT_TYPE_DATETIME) {
+                    // wxLogDebug("C++ GetValueByRow (col 6) - Rust DateTime components: y=%d, m=%d, d=%d, h=%d, min=%d, s=%d", 
+                    //     rust_variant_data.data.datetime_val.year,
+                    //     rust_variant_data.data.datetime_val.month,
+                    //     rust_variant_data.data.datetime_val.day,
+                    //     rust_variant_data.data.datetime_val.hour,
+                    //     rust_variant_data.data.datetime_val.minute,
+                    //     rust_variant_data.data.datetime_val.second);
+
                     wxDateTime dt;
                     dt.Set(
                         rust_variant_data.data.datetime_val.day,
-                        static_cast<wxDateTime::Month>(rust_variant_data.data.datetime_val.month - 1),
+                        static_cast<wxDateTime::Month>(rust_variant_data.data.datetime_val.month),
                         rust_variant_data.data.datetime_val.year,
                         rust_variant_data.data.datetime_val.hour,
                         rust_variant_data.data.datetime_val.minute,

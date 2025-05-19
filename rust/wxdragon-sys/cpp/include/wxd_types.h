@@ -51,6 +51,7 @@ typedef struct {
 #define WXD_VARIANT_TYPE_BITMAP 6
 #define WXD_VARIANT_TYPE_DATETIME 7
 #define WXD_VARIANT_TYPE_VOID_PTR 8
+#define WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED 9 // New type for bitmaps borrowed from Rust
 
 // C-compatible variant type for DataView
 typedef struct wxd_Variant_t {

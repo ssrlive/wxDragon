@@ -64,6 +64,8 @@ pub enum Variant {
     DateTime(DateTime),
     /// Bitmap image data
     Bitmap(Bitmap),
+    /// Raw, borrowed pointer to a wxBitmap for FFI (used by DataViewCtrl GetValue)
+    BitmapBorrowed(*mut ffi::wxd_Bitmap_t),
 }
 
 impl Variant {
@@ -125,8 +127,12 @@ impl Variant {
                 };
             },
             Variant::Bitmap(value) => {
-                variant.type_ = ffi::WXD_VARIANT_TYPE_BITMAP as i32;
+                variant.type_ = ffi::WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED as i32;
                 variant.data.bitmap_val = value.as_ptr();
+            },
+            Variant::BitmapBorrowed(ptr) => {
+                variant.type_ = ffi::WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED as i32;
+                variant.data.bitmap_val = *ptr;
             },
         }
         
@@ -233,6 +239,7 @@ impl Variant {
             Variant::String(_) => VariantType::String,
             Variant::DateTime(_) => VariantType::DateTime,
             Variant::Bitmap(_) => VariantType::Bitmap,
+            Variant::BitmapBorrowed(_) => VariantType::Bitmap,
         }
     }
 }
@@ -247,6 +254,7 @@ impl Clone for Variant {
             Variant::String(value) => Variant::String(value.clone()),
             Variant::DateTime(value) => Variant::DateTime(*value),
             Variant::Bitmap(value) => Variant::Bitmap(value.clone()),
+            Variant::BitmapBorrowed(ptr) => Variant::BitmapBorrowed(*ptr),
         }
     }
 }
@@ -271,6 +279,7 @@ impl std::fmt::Debug for Variant {
             Variant::String(val) => write!(f, "String({})", val),
             Variant::DateTime(val) => write!(f, "DateTime({:?})", val),
             Variant::Bitmap(_) => write!(f, "Bitmap(...)"),
+            Variant::BitmapBorrowed(ptr) => write!(f, "BitmapBorrowed({:?})", ptr),
         }
     }
 }
@@ -320,5 +329,11 @@ impl From<DateTime> for Variant {
 impl From<Bitmap> for Variant {
     fn from(value: Bitmap) -> Self {
         Variant::Bitmap(value)
+    }
+}
+
+impl<'a> From<&'a Bitmap> for Variant {
+    fn from(value: &'a Bitmap) -> Self {
+        Variant::BitmapBorrowed(value.as_borrowable_ptr())
     }
 } 

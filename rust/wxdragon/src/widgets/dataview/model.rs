@@ -771,24 +771,25 @@ pub fn to_raw_variant(value: &Variant) -> ffi::wxd_Variant_t {
         },
         Variant::DateTime(val) => {
             result.type_ = ffi::WXD_VARIANT_TYPE_DATETIME as i32;
-            // Convert DateTime to raw datetime struct
             unsafe {
                 result.data.datetime_val = *val.as_ptr();
             }
         },
-        Variant::Bitmap(val) => {
-            result.type_ = ffi::WXD_VARIANT_TYPE_BITMAP as i32;
+        Variant::Bitmap(val) => { // This path is for an owned Bitmap, uses the FFI-cloned mechanism
+            result.type_ = ffi::WXD_VARIANT_TYPE_BITMAP as i32; 
             let original_rust_owned_ptr = val.as_ptr();
             if original_rust_owned_ptr.is_null() {
                 result.data.bitmap_val = std::ptr::null_mut();
-                // wxLogDebug or similar is not available here, C++ side should log if it gets a null
             } else {
                 // Ask C++ to clone the bitmap. This new bitmap is on the C++ heap.
                 // C++ GetValueByRow will be responsible for Destroying this clone later.
                 let cloned_ptr_on_cpp_heap = unsafe { ffi::wxd_Bitmap_Clone(original_rust_owned_ptr) };
                 result.data.bitmap_val = cloned_ptr_on_cpp_heap;
-                // If wxd_Bitmap_Clone fails, it should return null, which C++ will handle.
             }
+        },
+        Variant::BitmapBorrowed(borrowed_ptr) => { // New path for borrowed bitmap pointer
+            result.type_ = ffi::WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED as i32;
+            result.data.bitmap_val = *borrowed_ptr; // Pass the borrowed pointer directly
         },
     }
     
