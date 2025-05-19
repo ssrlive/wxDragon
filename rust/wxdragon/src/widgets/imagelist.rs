@@ -30,16 +30,16 @@ impl ImageList {
     /// * `mask` - `true` to use a mask, `false` otherwise.
     /// * `initial_count` - The initial number of images the list can store (can be resized).
     ///
-    /// Returns `Some(ImageList)` on success, or `None` if creation failed (e.g. invalid dimensions).
-    pub fn new(width: i32, height: i32, mask: bool, initial_count: i32) -> Option<Self> {
+    /// Returns `ImageList` on success. Panics if creation failed.
+    pub fn new(width: i32, height: i32, mask: bool, initial_count: i32) -> Self {
         if width <= 0 || height <= 0 {
-            return None; // Match C++ side check
+            panic!("ImageList::new: width and height must be positive.");
         }
         let ptr = unsafe { ffi::wxd_ImageList_Create(width, height, mask, initial_count) };
         if ptr.is_null() {
-            None
+            panic!("ImageList::new: FFI call to wxd_ImageList_Create failed to create ImageList.");
         } else {
-            Some(ImageList { ptr, owned: true })
+            ImageList { ptr, owned: true }
         }
     }
 

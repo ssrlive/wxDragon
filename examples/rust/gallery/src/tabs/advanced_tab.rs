@@ -28,12 +28,12 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_id(111)
         .with_style(TreeCtrlStyle::Default | TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
         .build();
-    if let Some(root_id) = tree_ctrl.add_root("Root Node") {
-        if let Some(child1_id) = tree_ctrl.append_item(&root_id, "Child 1") {
-            tree_ctrl.append_item(&child1_id, "Grandchild 1.1");
-            tree_ctrl.append_item(&child1_id, "Grandchild 1.2");
+    if let Some(root_id) = tree_ctrl.add_root("Root Node", None, None) {
+        if let Some(child1_id) = tree_ctrl.append_item(&root_id, "Child 1", None, None) {
+            tree_ctrl.append_item(&child1_id, "Grandchild 1.1", None, None);
+            tree_ctrl.append_item(&child1_id, "Grandchild 1.2", None, None);
         }
-        tree_ctrl.append_item(&root_id, "Child 2");
+        tree_ctrl.append_item(&root_id, "Child 2", None, None);
     }
     let tree_status_label = StaticText::builder(&tree_panel)
         .with_label("Tree Selection: None")

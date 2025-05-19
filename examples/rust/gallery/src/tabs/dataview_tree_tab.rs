@@ -11,6 +11,7 @@ use wxdragon::widgets::imagelist::ImageList;
 use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
 use wxdragon::bitmap::Bitmap;
 use wxdragon::geometry::Size;
+use wxdragon::widgets::static_text::StaticText;
 
 // Helper function to create a valid bitmap for this tab
 fn create_icon(art_id: ArtId) -> Bitmap {
@@ -35,7 +36,7 @@ pub fn create_dataview_tree_tab(parent: &impl WxWidget) -> DataViewTreeTabContro
         .build();
     sizer.add(&info_text, 0, SizerFlag::All | SizerFlag::Expand, 10);
 
-    let image_list = ImageList::new(16, 16, true, 5).expect("Failed to create ImageList");
+    let image_list = ImageList::new(16, 16, true, 5);
 
     let icon_folder = create_icon(ArtId::Folder);
     let icon_file = create_icon(ArtId::NormalFile);

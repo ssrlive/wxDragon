@@ -8,6 +8,7 @@ use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
+use crate::widgets::imagelist::ImageList;
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
@@ -54,17 +55,75 @@ impl Notebook {
     /// * `page` - The window to be added as a page.
     /// * `text` - The text for the page's tab.
     /// * `select` - If `true`, selects the page after adding it.
+    /// * `image_id` - Optional image index for the page's tab.
     ///
     /// Returns `true` if the page was added successfully.
-    pub fn add_page<W: WxWidget>(&self, page: &W, text: &str, select: bool) -> bool {
+    pub fn add_page<W: WxWidget>(
+        &self,
+        page: &W,
+        text: &str,
+        select: bool,
+        image_id: Option<i32>,
+    ) -> bool {
         let c_text = CString::new(text).expect("CString::new failed");
         unsafe {
-            ffi::wxd_Notebook_AddPage(
-                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
-                page.handle_ptr(), // Get the window handle of the page
-                c_text.as_ptr(),
-                select,
-            )
+            if let Some(id) = image_id {
+                ffi::wxd_Notebook_AddPageWithImageId(
+                    self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                    page.handle_ptr(),
+                    c_text.as_ptr(),
+                    select,
+                    id as c_int,
+                )
+            } else {
+                ffi::wxd_Notebook_AddPage(
+                    self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                    page.handle_ptr(),
+                    c_text.as_ptr(),
+                    select,
+                )
+            }
+        }
+    }
+
+    /// Inserts a new page at the specified position.
+    ///
+    /// # Arguments
+    /// * `index` - The position for the new page.
+    /// * `page` - The window to be added as a page.
+    /// * `text` - The text for the page's tab.
+    /// * `select` - If `true`, selects the page after adding it.
+    /// * `image_id` - Optional image index for the page's tab.
+    ///
+    /// Returns `true` if the page was inserted successfully.
+    pub fn insert_page<W: WxWidget>(
+        &self,
+        index: usize,
+        page: &W,
+        text: &str,
+        select: bool,
+        image_id: Option<i32>,
+    ) -> bool {
+        let c_text = CString::new(text).expect("CString::new failed");
+        unsafe {
+            if let Some(id) = image_id {
+                ffi::wxd_Notebook_InsertPageWithImageId(
+                    self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                    index as usize,
+                    page.handle_ptr(),
+                    c_text.as_ptr(),
+                    select,
+                    id as c_int,
+                )
+            } else {
+                ffi::wxd_Notebook_InsertPage(
+                    self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                    index as usize,
+                    page.handle_ptr(),
+                    c_text.as_ptr(),
+                    select,
+                )
+            }
         }
     }
 
@@ -82,6 +141,64 @@ impl Notebook {
                 self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
                 page as c_int,
             )
+        }
+    }
+
+    /// Changes the selection to the given page, returning the old selection.
+    /// This function does not generate a `EVT_NOTEBOOK_PAGE_CHANGING` event.
+    pub fn change_selection(&self, page: usize) -> i32 {
+        unsafe {
+            ffi::wxd_Notebook_ChangeSelection(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                page,
+            )
+        }
+    }
+
+    /// Advances the selection, optionally wrapping to the beginning/end.
+    pub fn advance_selection(&self, forward: bool) {
+        unsafe {
+            ffi::wxd_Notebook_AdvanceSelection(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                forward,
+            )
+        }
+    }
+
+    /// Sets the amount of space around the icon and label in a tab.
+    pub fn set_padding(&self, padding: Size) {
+        unsafe {
+            ffi::wxd_Notebook_SetPadding(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                padding.into(),
+            )
+        }
+    }
+
+    /// Sets the image list for the notebook.
+    /// The notebook takes ownership of the image list.
+    pub fn set_image_list(&self, image_list: ImageList) {
+        unsafe {
+            ffi::wxd_Notebook_SetImageList(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                image_list.as_ptr(),
+            );
+        }
+        // wxNotebook takes ownership of the ImageList, so we forget it in Rust
+        // to prevent a double free.
+        std::mem::forget(image_list);
+    }
+
+    /// Gets the image list associated with the notebook.
+    /// The notebook owns the image list, so the caller should not delete it.
+    pub fn get_image_list(&self) -> Option<ImageList> {
+        let ptr = unsafe {
+            ffi::wxd_Notebook_GetImageList(self.window.as_ptr() as *mut ffi::wxd_Notebook_t)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { ImageList::from_ptr_unowned(ptr) })
         }
     }
 

@@ -1,6 +1,7 @@
 #include "../include/wxdragon.h"
 #include "../src/wxd_utils.h"
 #include <wx/treectrl.h>
+#include <wx/imaglist.h>
 
 // Helper class that wraps a long value so it can be used with TreeCtrl's native SetItemData
 // which expects a wxTreeItemData pointer
@@ -284,6 +285,53 @@ WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetItem(wxd_Event_t* event) {
     
     wxTreeItemId* id = new wxTreeItemId(itemId);
     return WXD_WRAP_TREE_ITEM_ID(id);
+}
+
+// Helper to convert wxd_TreeItemIconType_t to wxTreeItemIcon
+static wxTreeItemIcon map_to_wx_tree_item_icon(wxd_TreeItemIconType_t which_wxd) {
+    switch (which_wxd) {
+        case WXD_TreeItemIcon_Normal:
+            return wxTreeItemIcon_Normal;
+        case WXD_TreeItemIcon_Selected:
+            return wxTreeItemIcon_Selected;
+        case WXD_TreeItemIcon_Expanded:
+            return wxTreeItemIcon_Expanded;
+        case WXD_TreeItemIcon_SelectedExpanded:
+            return wxTreeItemIcon_SelectedExpanded;
+        default:
+            return wxTreeItemIcon_Normal; // Fallback
+    }
+}
+
+WXD_EXPORTED void wxd_TreeCtrl_SetImageList(wxd_TreeCtrl_t* self, wxd_ImageList_t* imageList) {
+    wxTreeCtrl* treeCtrl = reinterpret_cast<wxTreeCtrl*>(self);
+    wxImageList* wx_imageList = reinterpret_cast<wxImageList*>(imageList);
+    if (treeCtrl) {
+        treeCtrl->SetImageList(wx_imageList); // wxTreeCtrl takes ownership of the image list
+    }
+}
+
+WXD_EXPORTED wxd_ImageList_t* wxd_TreeCtrl_GetImageList(wxd_TreeCtrl_t* self) {
+    wxTreeCtrl* treeCtrl = reinterpret_cast<wxTreeCtrl*>(self);
+    if (!treeCtrl) return nullptr;
+    return reinterpret_cast<wxd_ImageList_t*>(treeCtrl->GetImageList());
+}
+
+WXD_EXPORTED void wxd_TreeCtrl_SetItemImage(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* itemId, int image, wxd_TreeItemIconType_t which) {
+    wxTreeCtrl* treeCtrl = reinterpret_cast<wxTreeCtrl*>(self);
+    wxTreeItemId* wx_itemId = reinterpret_cast<wxTreeItemId*>(itemId);
+    if (treeCtrl && wx_itemId && wx_itemId->IsOk()) {
+        treeCtrl->SetItemImage(*wx_itemId, image, map_to_wx_tree_item_icon(which));
+    }
+}
+
+WXD_EXPORTED int wxd_TreeCtrl_GetItemImage(wxd_TreeCtrl_t* self, wxd_TreeItemId_t* itemId, wxd_TreeItemIconType_t which) {
+    wxTreeCtrl* treeCtrl = reinterpret_cast<wxTreeCtrl*>(self);
+    wxTreeItemId* wx_itemId = reinterpret_cast<wxTreeItemId*>(itemId);
+    if (treeCtrl && wx_itemId && wx_itemId->IsOk()) {
+        return treeCtrl->GetItemImage(*wx_itemId, map_to_wx_tree_item_icon(which));
+    }
+    return -1; // Default/error value
 }
 
 } // extern "C" 

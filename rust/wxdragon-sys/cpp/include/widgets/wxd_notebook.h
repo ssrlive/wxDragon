@@ -20,4 +20,37 @@ WXD_EXPORTED int wxd_Notebook_SetSelection(wxd_Notebook_t* self, int page);
 // The existing event API in `events/wxd_event_api.h` has generic `wxd_BookCtrlEvent_GetSelection` etc.
 // so no specific notebook event accessors needed here.
 
+WXD_EXPORTED void wxd_Notebook_SetPadding(wxd_Notebook_t* self, wxd_Size padding);
+WXD_EXPORTED int wxd_Notebook_ChangeSelection(wxd_Notebook_t* self, size_t page);
+WXD_EXPORTED void wxd_Notebook_AdvanceSelection(wxd_Notebook_t* self, bool forward);
+
+// ImageList support
+WXD_EXPORTED void wxd_Notebook_SetImageList(wxd_Notebook_t* self, wxd_ImageList_t* imageList);
+WXD_EXPORTED wxd_ImageList_t* wxd_Notebook_GetImageList(wxd_Notebook_t* self);
+
+// Modified page manipulation to include imageId
+WXD_EXPORTED bool wxd_Notebook_AddPageWithImageId(
+    wxd_Notebook_t* self, 
+    wxd_Window_t* page, 
+    const char* text, 
+    bool select,
+    int imageId
+);
+WXD_EXPORTED bool wxd_Notebook_InsertPageWithImageId(
+    wxd_Notebook_t* self, 
+    size_t index, 
+    wxd_Window_t* page, 
+    const char* text, 
+    bool select,
+    int imageId
+);
+
+WXD_EXPORTED bool wxd_Notebook_InsertPage(
+    wxd_Notebook_t* self, 
+    size_t index, 
+    wxd_Window_t* page, 
+    const char* text, 
+    bool select
+);
+
 #endif // WXD_NOTEBOOK_H 

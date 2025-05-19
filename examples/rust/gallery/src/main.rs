@@ -1,6 +1,8 @@
 use wxdragon::id::ID_ANY;
 use wxdragon::prelude::*;
 use wxdragon::widgets::toolbar::ToolBarStyle;
+use wxdragon::widgets::imagelist::ImageList;
+use wxdragon::art_provider::{ArtId, ArtClient, ArtProvider};
 
 mod tabs;
 use tabs::advanced_tab::create_advanced_tab;
@@ -56,6 +58,48 @@ fn main() {
         // --- Create the Notebook ---
         let notebook = Notebook::builder(&frame).with_id(120).build();
 
+        // --- Create and Set ImageList for Notebook ---
+        let image_list = ImageList::new(16, 16, true, 3);
+
+        let mut image_ids: Vec<i32> = Vec::new();
+
+        if let Some(bmp_info) = ArtProvider::get_bitmap(ArtId::Information, ArtClient::Menu, Some(Size::new(16,16))) {
+            let idx = image_list.add_bitmap(&bmp_info);
+            if idx != -1 {
+                image_ids.push(idx);
+            } else {
+                eprintln!("Failed to add Information icon to ImageList");
+            }
+        } else {
+            eprintln!("Failed to get ArtId::Information for Notebook");
+        }
+        if let Some(bmp_question) = ArtProvider::get_bitmap(ArtId::Question, ArtClient::Menu, Some(Size::new(16,16))) {
+            let idx = image_list.add_bitmap(&bmp_question);
+            if idx != -1 {
+                image_ids.push(idx);
+            } else {
+                eprintln!("Failed to add Question icon to ImageList");
+            }
+        } else {
+            eprintln!("Failed to get ArtId::Question for Notebook");
+        }
+        if let Some(bmp_warning) = ArtProvider::get_bitmap(ArtId::Warning, ArtClient::Menu, Some(Size::new(16,16))) {
+            let idx = image_list.add_bitmap(&bmp_warning);
+            if idx != -1 {
+                image_ids.push(idx);
+            } else {
+                eprintln!("Failed to add Warning icon to ImageList");
+            }
+        } else {
+            eprintln!("Failed to get ArtId::Warning for Notebook");
+        }
+        
+        if !image_ids.is_empty() {
+            notebook.set_image_list(image_list);
+        } else {
+            eprintln!("No images were added to the ImageList. Not setting it on the Notebook.");
+        }
+
         // --- Create Tabs ---
         let (advanced_splitter, advanced_controls) = create_advanced_tab(&notebook);
         let basic_controls = create_basic_tab(&notebook, &frame);
@@ -101,17 +145,27 @@ fn main() {
         }
 
         // --- Add Pages to Notebook ---
-        notebook.add_page(&basic_controls.panel, "Basic Controls", true);
-        notebook.add_page(&list_controls.panel, "Lists", false);
-        notebook.add_page(&advanced_splitter, "Advanced", false);
-        notebook.add_page(&book_controls.tab_panel, "Book Controls", false);
-        notebook.add_page(&dialog_controls.panel, "Dialogs", false);
-        notebook.add_page(&media_controls.panel, "Media", false);
-        notebook.add_page(&tree_controls.panel, "Tree Controls", false);
-        notebook.add_page(&aui_controls.panel, "AUI", false);
-        notebook.add_page(&color_controls.panel, "Color", false);
-        notebook.add_page(&dataview_virtual_controls.panel, "DataView Virtual", false);
-        notebook.add_page(&dataview_tree_controls.panel, "DataView Tree", false);
+        let mut current_image_idx = 0;
+        let mut next_image_id = || {
+            if image_ids.is_empty() {
+                return None;
+            }
+            let id = image_ids[current_image_idx % image_ids.len()];
+            current_image_idx += 1;
+            Some(id)
+        };
+
+        notebook.add_page(&basic_controls.panel, "Basic Controls", true, next_image_id());
+        notebook.add_page(&list_controls.panel, "Lists", false, next_image_id());
+        notebook.add_page(&advanced_splitter, "Advanced", false, next_image_id());
+        notebook.add_page(&book_controls.tab_panel, "Book Controls", false, next_image_id());
+        notebook.add_page(&dialog_controls.panel, "Dialogs", false, next_image_id());
+        notebook.add_page(&media_controls.panel, "Media", false, next_image_id());
+        notebook.add_page(&tree_controls.panel, "Tree Controls", false, next_image_id());
+        notebook.add_page(&aui_controls.panel, "AUI", false, next_image_id());
+        notebook.add_page(&color_controls.panel, "Color", false, next_image_id());
+        notebook.add_page(&dataview_virtual_controls.panel, "DataView Virtual", false, next_image_id());
+        notebook.add_page(&dataview_tree_controls.panel, "DataView Tree", false, next_image_id());
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(Orientation::Vertical).build();

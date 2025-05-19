@@ -4,6 +4,11 @@ use wxdragon::widgets::notebook::Notebook;
 use wxdragon::widgets::panel::{Panel, PanelStyle};
 use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
 use wxdragon::HasItemData;
+use wxdragon::widgets::static_text::StaticText;
+use wxdragon::{BoxSizer, Orientation, SizerFlag};
+use wxdragon::art_provider::{ArtId, ArtClient, ArtProvider};
+use wxdragon::widgets::imagelist::ImageList;
+use wxdragon::geometry::Size;
 
 /// A custom data type to associate with tree items
 #[derive(Debug, Clone)]
@@ -114,6 +119,30 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         .with_style(TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
         .build();
 
+    // --- ImageList Setup ---
+    let image_list = ImageList::new(16, 16, true, 5); 
+    let mut icons: Vec<i32> = Vec::new();
+
+    // Define icons (ensure these ArtIds are valid and available)
+    let art_ids = [
+        ArtId::Folder, 
+        ArtId::FolderOpen,
+        ArtId::NormalFile, 
+        ArtId::Information, 
+        ArtId::Error
+    ];
+    for art_id in art_ids.iter() {
+        if let Some(bmp) = ArtProvider::get_bitmap(*art_id, ArtClient::FrameIcon, Some(Size::new(16,16))) {
+            icons.push(image_list.add_bitmap(&bmp));
+        } else {
+            println!("Failed to load icon {:?} for TreeCtrl ImageList", art_id);
+            icons.push(-1); // Placeholder if icon loading fails
+        }
+    }
+    // Icon indices: 0:Folder, 1:OpenedFolder, 2:File, 3:Info, 4:Error
+    tree_ctrl.set_image_list(image_list); 
+    // --- End ImageList Setup ---
+
     // Create info text control to display data
     let info_text = StaticText::builder(&panel)
         .with_label("Select a tree item to see its data")
@@ -128,7 +157,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "CEO".to_string(),
     };
     let root_id = tree_ctrl
-        .add_root_with_data("Company Hierarchy", ceo_data)
+        .add_root_with_data("Company Hierarchy", ceo_data, Some(icons[0]), Some(icons[1])) // Folder icons
         .unwrap();
 
     // 2. Add departments with different data types
@@ -140,7 +169,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         deadline: "2024-12-31".to_string(),
     };
     let eng_id = tree_ctrl
-        .append_item_with_data(&root_id, "Engineering", eng_project)
+        .append_item_with_data(&root_id, "Engineering", eng_project, Some(icons[0]), Some(icons[1])) // Folder icons
         .unwrap();
 
     // Add engineers with PersonData
@@ -150,7 +179,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "Lead Engineer".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&eng_id, "Alice Johnson", eng_lead)
+        .append_item_with_data(&eng_id, "Alice Johnson", eng_lead, Some(icons[2]), Some(icons[2])) // File icon
         .unwrap();
 
     let dev1 = PersonData {
@@ -159,7 +188,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "Software Developer".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&eng_id, "Bob Williams", dev1)
+        .append_item_with_data(&eng_id, "Bob Williams", dev1, Some(icons[2]), Some(icons[2])) // File icon
         .unwrap();
 
     let dev2 = PersonData {
@@ -168,7 +197,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "QA Engineer".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&eng_id, "Carol Davis", dev2)
+        .append_item_with_data(&eng_id, "Carol Davis", dev2, Some(icons[2]), Some(icons[2])) // File icon
         .unwrap();
 
     // Marketing department with String data
@@ -177,6 +206,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
             &root_id,
             "Marketing",
             "Marketing department handles all promotional activities.".to_string(),
+            Some(icons[0]), Some(icons[1]) // Folder icons
         )
         .unwrap();
 
@@ -190,6 +220,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
                 age: 41,
                 role: "Marketing Director".to_string(),
             },
+            Some(icons[2]), Some(icons[2]) // File icon
         )
         .unwrap();
 
@@ -202,12 +233,13 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
                 priority: 2,
                 deadline: "2024-08-31".to_string(),
             },
+            Some(icons[3]), Some(icons[3]) // Info icon
         )
         .unwrap();
 
     // Finance department with i32 data (budget in thousands)
     let finance_id = tree_ctrl
-        .append_item_with_data(&root_id, "Finance", 250)
+        .append_item_with_data(&root_id, "Finance", 250, Some(icons[0]), Some(icons[1])) // Folder icons
         .unwrap();
 
     // Add finance staff
@@ -217,7 +249,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "CFO".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&finance_id, "Eve Brown", finance_lead)
+        .append_item_with_data(&finance_id, "Eve Brown", finance_lead, Some(icons[2]), Some(icons[2])) // File icon
         .unwrap();
 
     // Expand the root item to show the structure

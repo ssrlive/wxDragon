@@ -72,6 +72,7 @@ use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
+use crate::widgets::imagelist::ImageList;
 use wxdragon_sys as ffi;
 
 // --- TreeCtrl Styles ---
@@ -93,6 +94,23 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+// --- TreeItemIcon Enum ---
+/// Specifies which icon of a tree item is being referred to.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)] // Matches wxd_TreeItemIconType_t which is an enum, typically int/u32
+pub enum TreeItemIcon {
+    Normal = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Normal as u32,
+    Selected = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Selected as u32,
+    Expanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Expanded as u32,
+    SelectedExpanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_SelectedExpanded as u32,
+}
+
+impl From<TreeItemIcon> for ffi::wxd_TreeItemIconType_t {
+    fn from(icon: TreeItemIcon) -> Self {
+        icon as ffi::wxd_TreeItemIconType_t
+    }
+}
 
 // Represents the opaque wxTreeItemId used by wxWidgets.
 // This struct owns the pointer returned by the C++ FFI functions
@@ -242,72 +260,64 @@ impl TreeCtrl {
     }
 
     /// Adds the root item to the tree control.
+    ///
+    /// # Arguments
+    /// * `text` - The text label for the root item.
+    /// * `image` - Optional index of the image for the item (normal state).
+    /// * `selected_image` - Optional index of the image for the item when selected.
+    ///
     /// Returns the new item ID, or None if creation failed.
-    pub fn add_root(&self, text: &str) -> Option<TreeItemId> {
+    pub fn add_root(&self, text: &str, image: Option<i32>, selected_image: Option<i32>) -> Option<TreeItemId> {
         let c_text = CString::new(text).unwrap_or_default();
-        // Pass -1 for image/selImage, nullptr for data
+        let img = image.unwrap_or(-1);
+        let sel_img = selected_image.unwrap_or(-1);
         let item_ptr = unsafe {
-            ffi::wxd_TreeCtrl_AddRoot(self.as_ptr(), c_text.as_ptr(), -1, -1, ptr::null_mut())
+            ffi::wxd_TreeCtrl_AddRoot(self.as_ptr(), c_text.as_ptr(), img, sel_img, ptr::null_mut())
         };
         unsafe { TreeItemId::from_ptr(item_ptr) }
     }
 
     /// Adds the root item to the tree control with associated data.
     ///
-    /// This method creates the root item and associates custom data with it.
-    /// The data is stored using the HasItemData trait implementation and can be 
-    /// retrieved later using `get_custom_data()`.
+    /// # Arguments
+    /// * `text` - The text label for the root item.
+    /// * `data` - Custom data to associate with the item.
+    /// * `image` - Optional index of the image for the item (normal state).
+    /// * `selected_image` - Optional index of the image for the item when selected.
     ///
-    /// # Parameters
-    ///
-    /// * `text` - The text label for the root item
-    /// * `data` - Custom data to associate with the item. Can be any type that
-    ///            implements `'static + Send + Sync`
-    ///
-    /// # Returns
-    ///
-    /// * `Some(TreeItemId)` - The ID of the newly created item
-    /// * `None` - If item creation failed
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use wxdragon::prelude::*;
-    /// use wxdragon::widgets::treectrl::TreeCtrl;
-    ///
-    /// #[derive(Clone)]
-    /// struct CompanyData { employees: u32, revenue: f64 }
-    ///
-    /// let tree = TreeCtrl::builder(&panel).build();
-    /// let company = CompanyData { employees: 500, revenue: 10000000.0 };
-    /// let root = tree.add_root_with_data("ACME Corp", company).unwrap();
-    /// ```
+    /// Returns the new item ID, or None if creation failed.
     pub fn add_root_with_data<T: Any + Send + Sync + 'static>(
         &self,
         text: &str,
         data: T,
+        image: Option<i32>,
+        selected_image: Option<i32>,
     ) -> Option<TreeItemId> {
-        // First create the root item without data
-        let root_item = self.add_root(text)?;
-        
-        // Then associate data with it
+        let root_item = self.add_root(text, image, selected_image)?;
         self.set_custom_data(&root_item, data);
-        
         Some(root_item)
     }
 
     /// Appends an item to the given parent item.
+    ///
+    /// # Arguments
+    /// * `parent` - The parent item.
+    /// * `text` - The text label for the new item.
+    /// * `image` - Optional index of the image for the item (normal state).
+    /// * `selected_image` - Optional index of the image for the item when selected.
+    ///
     /// Returns the new item ID, or None if creation failed.
-    pub fn append_item(&self, parent: &TreeItemId, text: &str) -> Option<TreeItemId> {
+    pub fn append_item(&self, parent: &TreeItemId, text: &str, image: Option<i32>, selected_image: Option<i32>) -> Option<TreeItemId> {
         let c_text = CString::new(text).unwrap_or_default();
-        // Pass -1 for image/selImage, nullptr for data
+        let img = image.unwrap_or(-1);
+        let sel_img = selected_image.unwrap_or(-1);
         let item_ptr = unsafe {
             ffi::wxd_TreeCtrl_AppendItem(
                 self.as_ptr(),
                 parent.as_ptr(),
                 c_text.as_ptr(),
-                -1,
-                -1,
+                img,
+                sel_img,
                 ptr::null_mut(),
             )
         };
@@ -316,50 +326,24 @@ impl TreeCtrl {
 
     /// Appends an item to the given parent item with associated data.
     ///
-    /// This method creates a child item under the specified parent and associates
-    /// custom data with it. The data is stored using the HasItemData trait implementation
-    /// and can be retrieved later using `get_custom_data()`.
+    /// # Arguments
+    /// * `parent` - The parent item.
+    /// * `text` - The text label for the new item.
+    /// * `data` - Custom data to associate with the item.
+    /// * `image` - Optional index of the image for the item (normal state).
+    /// * `selected_image` - Optional index of the image for the item when selected.
     ///
-    /// # Parameters
-    ///
-    /// * `parent` - The parent item to which this item will be added
-    /// * `text` - The text label for the item
-    /// * `data` - Custom data to associate with the item. Can be any type that
-    ///            implements `'static + Send + Sync`
-    ///
-    /// # Returns
-    ///
-    /// * `Some(TreeItemId)` - The ID of the newly created item
-    /// * `None` - If item creation failed
-    ///
-    /// # Examples
-    ///
-    /// ```rust,no_run
-    /// use wxdragon::prelude::*;
-    /// use wxdragon::widgets::treectrl::TreeCtrl;
-    ///
-    /// let tree = TreeCtrl::builder(&panel).build();
-    /// let root = tree.add_root("Departments").unwrap();
-    ///
-    /// // Add child with integer data (budget)
-    /// tree.append_item_with_data(&root, "Engineering", 500000).unwrap();
-    ///
-    /// // Add child with string data (description)
-    /// tree.append_item_with_data(&root, "Marketing",
-    ///     "Handles all promotional activities".to_string()).unwrap();
-    /// ```
+    /// Returns the new item ID, or None if creation failed.
     pub fn append_item_with_data<T: Any + Send + Sync + 'static>(
         &self,
         parent: &TreeItemId,
         text: &str,
         data: T,
+        image: Option<i32>,
+        selected_image: Option<i32>,
     ) -> Option<TreeItemId> {
-        // First create the item without data
-        let item = self.append_item(parent, text)?;
-        
-        // Then associate data with it
+        let item = self.append_item(parent, text, image, selected_image)?;
         self.set_custom_data(&item, data);
-        
         Some(item)
     }
 
@@ -477,6 +461,58 @@ impl TreeCtrl {
     pub fn get_children_count(&self, item: &TreeItemId, recursively: bool) -> usize {
         unsafe {
             ffi::wxd_TreeCtrl_GetChildrenCount(self.as_ptr(), item.as_ptr(), recursively) as usize
+        }
+    }
+
+    // --- ImageList and Item Image Methods ---
+
+    /// Sets the image list for the tree control.
+    /// The tree control takes ownership of the image list.
+    pub fn set_image_list(&self, image_list: ImageList) {
+        unsafe {
+            ffi::wxd_TreeCtrl_SetImageList(
+                self.as_ptr(),
+                image_list.as_ptr(),
+            );
+        }
+        // wxTreeCtrl takes ownership of the ImageList
+        std::mem::forget(image_list);
+    }
+
+    /// Gets the image list associated with the tree control.
+    /// The tree control owns the image list, so the caller should not delete it.
+    pub fn get_image_list(&self) -> Option<ImageList> {
+        let ptr = unsafe {
+            ffi::wxd_TreeCtrl_GetImageList(self.as_ptr())
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { ImageList::from_ptr_unowned(ptr) })
+        }
+    }
+
+    /// Sets the image for the given item.
+    pub fn set_item_image(&self, item: &TreeItemId, image_index: i32, icon_type: TreeItemIcon) {
+        unsafe {
+            ffi::wxd_TreeCtrl_SetItemImage(
+                self.as_ptr(),
+                item.as_ptr(),
+                image_index,
+                icon_type.into(),
+            );
+        }
+    }
+
+    /// Gets the image for the given item.
+    /// Returns -1 if no image is associated with the item for the given type.
+    pub fn get_item_image(&self, item: &TreeItemId, icon_type: TreeItemIcon) -> i32 {
+        unsafe {
+            ffi::wxd_TreeCtrl_GetItemImage(
+                self.as_ptr(),
+                item.as_ptr(),
+                icon_type.into(),
+            )
         }
     }
 }
