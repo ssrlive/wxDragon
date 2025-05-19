@@ -39,11 +39,6 @@ impl DataViewItem {
         Self { id: raw.id }
     }
     
-    /// Checks if a raw FFI type represents a valid item.
-    pub(crate) fn is_valid_raw(raw: ffi::wxd_DataViewItem_t) -> bool {
-        !raw.id.is_null()
-    }
-    
     /// Converts the DataViewItem to its raw FFI representation.
     pub(crate) fn as_raw(&self) -> ffi::wxd_DataViewItem_t {
         ffi::wxd_DataViewItem_t { id: self.id }

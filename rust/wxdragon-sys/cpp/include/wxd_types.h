@@ -325,9 +325,21 @@ typedef long long wxd_Long_t;
 #define WXD_LIST_MASK_WIDTH         0x0010
 #define WXD_LIST_MASK_FORMAT        0x0020
 
-// DataViewItem structure
+// DataView item type
 typedef struct {
     void* id;  // Internally, wxDataViewItem wraps a void* as an id
-} wxd_DataViewItem_t;
+} wxd_DataViewItemWithID_t;
+
+// DataView types
+typedef void wxd_DataViewModel_t;
+//typedef void wxd_DataViewItem_t;  // Already defined above as a struct
+typedef void wxd_DataViewColumn_t;
+
+// DataViewCell mode enum (for cell renderers)
+typedef enum {
+    WXD_DATAVIEW_CELL_INERT,
+    WXD_DATAVIEW_CELL_ACTIVATABLE, 
+    WXD_DATAVIEW_CELL_EDITABLE
+} wxd_DataViewCellModeCEnum;
 
 #endif // WXD_TYPES_H 

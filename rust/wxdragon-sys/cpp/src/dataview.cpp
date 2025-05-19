@@ -7,6 +7,8 @@
 #include <wx/datetime.h> // For wxDateTime
 #include <wx/variant.h>
 #include <cstring>
+#include <wx/wx.h>
+#include <wx/log.h>  // For wxLogDebug and wxLogError
 
 extern "C" {
 
@@ -430,7 +432,23 @@ WXD_EXPORTED bool wxd_DataViewCtrl_AssociateModel(wxd_Window_t* self, wxd_DataVi
     wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
     wxDataViewModel* m = reinterpret_cast<wxDataViewModel*>(model);
     
-    return ctrl->AssociateModel(m);
+    // When we associate a model with a control, wxWidgets internally calls IncRef()
+    // We'll make sure the model is properly referenced
+    
+    // Workaround for a known issue in wxWidgets: DataViewCtrl::AssociateModel
+    // is taking ownership of the model, but we need to maintain it separately
+    // This is why we call IncRef before passing it
+    m->IncRef();
+    
+    // AssociateModel returns a bool indicating success/failure
+    bool result = ctrl->AssociateModel(m);
+    
+    if (!result) {
+        // If associating failed, we need to revert our IncRef
+        m->DecRef();
+    }
+    
+    return result;
 }
 
 // Selection management

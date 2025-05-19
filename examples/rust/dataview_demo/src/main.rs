@@ -46,7 +46,7 @@ fn main() {
         dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices);
 
         // Create and set up the model
-        let mut model = DataViewListModel::new();
+        let model = DataViewListModel::new();
         
         // Define columns in the model
         model.append_column("ID");               // 0: Text

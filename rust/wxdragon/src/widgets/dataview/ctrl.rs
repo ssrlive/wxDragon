@@ -99,8 +99,24 @@ impl DataViewCtrl {
     /// # Returns
     /// 
     /// `true` if the model was successfully associated, `false` otherwise.
+    ///
+    /// # Important
+    ///
+    /// This method doesn't take ownership of the model. When you associate a model 
+    /// with a DataViewCtrl, wxWidgets creates an internal copy of the model, which
+    /// results in reference counting being managed by wxWidgets. You must ensure
+    /// that:
+    ///
+    /// 1. The model lives at least as long as the control 
+    /// 2. The model's callbacks remain valid for its entire lifetime
+    /// 3. You don't prematurely call any "release" methods on the model
+    ///
+    /// For CustomDataViewVirtualListModel, the Rust implementation already handles
+    /// these requirements correctly in the Drop trait.
     pub fn associate_model<M: DataViewModel>(&self, model: &M) -> bool {
-        let model_ptr = model.as_raw();
+        // IMPORTANT: The model needs to remain valid for the lifetime of this control
+        // wxWidgets doesn't fully manage the lifetime of custom models.
+        let model_ptr = model.handle_ptr();
         unsafe { ffi::wxd_DataViewCtrl_AssociateModel(self.window.handle_ptr(), model_ptr) }
     }
 
@@ -353,7 +369,8 @@ impl DataViewCtrl {
     ///
     /// * `item` - The item to select.
     pub fn select(&self, item: &DataViewItem) {
-        unsafe { ffi::wxd_DataViewCtrl_Select(self.window.handle_ptr(), item.as_raw()) }
+        let item_raw = item.as_raw();
+        unsafe { ffi::wxd_DataViewCtrl_Select(self.window.handle_ptr(), item_raw) }
     }
 
     /// Unselects a specific item.
@@ -362,7 +379,8 @@ impl DataViewCtrl {
     ///
     /// * `item` - The item to unselect.
     pub fn unselect(&self, item: &DataViewItem) {
-        unsafe { ffi::wxd_DataViewCtrl_Unselect(self.window.handle_ptr(), item.as_raw()) }
+        let item_raw = item.as_raw();
+        unsafe { ffi::wxd_DataViewCtrl_Unselect(self.window.handle_ptr(), item_raw) }
     }
 
     /// Selects all items in the control.
@@ -380,7 +398,8 @@ impl DataViewCtrl {
     ///
     /// `true` if the item is selected, `false` otherwise.
     pub fn is_selected(&self, item: &DataViewItem) -> bool {
-        unsafe { ffi::wxd_DataViewCtrl_IsSelected(self.window.handle_ptr(), item.as_raw()) }
+        let item_raw = item.as_raw();
+        unsafe { ffi::wxd_DataViewCtrl_IsSelected(self.window.handle_ptr(), item_raw) }
     }
 
     /// Gets the number of selected items.
@@ -456,7 +475,7 @@ impl DataViewCtrl {
     /// An `Option` containing the current item, or `None` if no item is focused.
     pub fn get_current_item(&self) -> Option<DataViewItem> {
         let item_raw = unsafe { ffi::wxd_DataViewCtrl_GetCurrentItem(self.window.handle_ptr()) };
-        if DataViewItem::is_valid_raw(item_raw) {
+        if !item_raw.id.is_null() {
             Some(unsafe { DataViewItem::from_raw(item_raw) })
         } else {
             None
@@ -469,7 +488,8 @@ impl DataViewCtrl {
     ///
     /// * `item` - The item to set as current.
     pub fn set_current_item(&self, item: &DataViewItem) {
-        unsafe { ffi::wxd_DataViewCtrl_SetCurrentItem(self.window.handle_ptr(), item.as_raw()) }
+        let item_raw = item.as_raw();
+        unsafe { ffi::wxd_DataViewCtrl_SetCurrentItem(self.window.handle_ptr(), item_raw) }
     }
 
     /// Gets the currently used indentation.

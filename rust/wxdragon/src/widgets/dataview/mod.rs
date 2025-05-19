@@ -36,7 +36,13 @@ pub use ctrl::{DataViewCtrl, DataViewCtrlBuilder, DataViewStyle};
 pub use list_ctrl::{DataViewListCtrl, DataViewListCtrlBuilder};
 pub use tree_ctrl::{DataViewTreeCtrl, DataViewTreeCtrlBuilder};
 pub use column::DataViewColumn;
-pub use model::{DataViewModel, DataViewListModel};
+pub use model::{
+    DataViewModel, 
+    DataViewListModel,
+    DataViewVirtualListModel,
+    CustomDataViewVirtualListModel,
+    DataViewItemAttr,
+};
 pub use variant::{VariantType, Variant};
 pub use enums::{DataViewCellMode, DataViewAlign};
 pub use item::DataViewItem;

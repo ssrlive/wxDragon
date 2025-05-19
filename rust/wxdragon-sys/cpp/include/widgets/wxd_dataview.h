@@ -9,9 +9,24 @@ extern "C" {
 
 // Forward declarations
 typedef struct wxd_DataViewCtrl_tag wxd_DataViewCtrl_t;
-typedef struct wxd_DataViewModel_tag wxd_DataViewModel_t;
+// Don't redefine these types as they're already defined in wxd_types.h
+// typedef struct wxd_DataViewModel_tag wxd_DataViewModel_t;
+// typedef struct wxd_DataViewModel_tag wxd_DataViewModel_t;
 typedef struct wxd_DataViewRenderer_tag wxd_DataViewRenderer_t;
-typedef struct wxd_DataViewColumn_tag wxd_DataViewColumn_t;
+// typedef struct wxd_DataViewColumn_tag wxd_DataViewColumn_t;
+
+// Definition for DataViewItem type
+typedef wxd_DataViewItemWithID_t wxd_DataViewItem_t;
+
+// Define the alignment enum if not defined
+typedef enum {
+    WXD_ALIGN_LEFT = 0,
+    WXD_ALIGN_RIGHT,
+    WXD_ALIGN_CENTER,
+} wxd_AlignmentCEnum;
+
+// Define wxd_Id if needed
+// typedef int64_t wxd_Id; -- Already defined in wxd_types.h
 
 // Base DataViewCtrl functions
 WXD_EXPORTED wxd_Window_t* wxd_DataViewCtrl_Create(wxd_Window_t* parent, int64_t id, 
@@ -158,8 +173,58 @@ WXD_EXPORTED void wxd_DataViewCtrl_UnselectAll(wxd_Window_t* self);
 // Free a wxd_Variant_t and its contents, including any dynamically allocated string memory
 WXD_EXPORTED void wxd_Variant_Free(wxd_Variant_t* variant);
 
+// DataViewVirtualListModel functions
+WXD_EXPORTED wxd_DataViewModel_t* wxd_DataViewVirtualListModel_Create(uint64_t initial_size);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowPrepended(wxd_DataViewModel_t* model);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowInserted(wxd_DataViewModel_t* model, uint64_t before);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowAppended(wxd_DataViewModel_t* model);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowDeleted(wxd_DataViewModel_t* model, uint64_t row);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowsDeleted(wxd_DataViewModel_t* model, int32_t* rows, int32_t count);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowChanged(wxd_DataViewModel_t* model, uint64_t row);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_RowValueChanged(wxd_DataViewModel_t* model, uint64_t row, uint64_t col);
+WXD_EXPORTED void wxd_DataViewVirtualListModel_Reset(wxd_DataViewModel_t* model, uint64_t new_size);
+WXD_EXPORTED void* wxd_DataViewVirtualListModel_GetItem(wxd_DataViewModel_t* model, uint64_t row);
+WXD_EXPORTED uint64_t wxd_DataViewVirtualListModel_GetRow(wxd_DataViewModel_t* model, void* item);
+
+// Custom virtual list model with callbacks
+typedef struct {
+    bool has_text_colour;
+    unsigned char text_colour_red;
+    unsigned char text_colour_green;
+    unsigned char text_colour_blue;
+    unsigned char text_colour_alpha;
+    
+    bool has_bg_colour;
+    unsigned char bg_colour_red;
+    unsigned char bg_colour_green;
+    unsigned char bg_colour_blue;
+    unsigned char bg_colour_alpha;
+    
+    bool bold;
+    bool italic;
+} wxd_DataViewItemAttr_t;
+
+WXD_EXPORTED wxd_DataViewModel_t* wxd_DataViewVirtualListModel_CreateWithCallbacks(
+    uint64_t initial_size,
+    void* userdata,
+    void (*get_value_callback)(void* userdata, uint64_t row, uint64_t col, wxd_Variant_t* variant),
+    bool (*set_value_callback)(void* userdata, const wxd_Variant_t* variant, uint64_t row, uint64_t col),
+    bool (*get_attr_callback)(void* userdata, uint64_t row, uint64_t col, wxd_DataViewItemAttr_t* attr),
+    bool (*is_enabled_callback)(void* userdata, uint64_t row, uint64_t col)
+);
+
+WXD_EXPORTED void wxd_DataViewVirtualListModel_ReleaseCallbacks(wxd_DataViewModel_t* model);
+
+// Free function for custom model callbacks (used by Rust)
+WXD_EXPORTED void drop_rust_virtual_list_model_callbacks(void* ptr);
+
+// DataViewCtrl functions
+WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewCtrl_CreateTextColumn(wxd_Window_t* ctrl, const char* label, 
+                                                     uint32_t model_column, wxd_DataViewCellModeCEnum mode, 
+                                                     int width, wxd_AlignmentCEnum align, int flags);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // WXD_DATAVIEW_H 
+#endif /* WXD_DATAVIEW_H */ 

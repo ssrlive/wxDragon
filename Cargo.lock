@@ -216,6 +216,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dataview_virtual_demo"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+ "wxdragon-sys",
+]
+
+[[package]]
 name = "dc_example"
 version = "0.1.0"
 dependencies = [
