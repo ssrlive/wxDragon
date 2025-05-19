@@ -61,6 +61,21 @@ impl Bitmap {
         }
     }
 
+    /// Creates a bitmap wrapper around an existing bitmap pointer without taking ownership.
+    /// Rust will NOT destroy the bitmap when the wrapper is dropped.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be a valid `wxd_Bitmap_t` pointer that is managed (lifetime-wise)
+    /// by other code (e.g., wxWidgets internals). The pointer must remain valid for the
+    /// lifetime of this `Bitmap` object.
+    pub(crate) unsafe fn from_ptr_unowned(ptr: *mut ffi::wxd_Bitmap_t) -> Self {
+        Bitmap {
+            ptr,
+            is_owned: false,
+        }
+    }
+
     /// Returns the raw underlying bitmap pointer.
     /// Use with caution, primarily for internal FFI calls.
     pub fn as_ptr(&self) -> *mut ffi::wxd_Bitmap_t {

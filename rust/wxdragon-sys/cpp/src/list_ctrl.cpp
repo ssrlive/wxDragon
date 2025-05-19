@@ -308,22 +308,41 @@ extern "C" {
     }
 
     // Image List Support
-    // Note: This will need proper integration with wxdragon's ImageList implementation
-    WXD_EXPORTED void wxd_ListCtrl_SetImageList(wxd_ListCtrl_t* self, void* imageList, int which) {
-        if (!self || !imageList) return;
+    WXD_EXPORTED void wxd_ListCtrl_SetImageList(wxd_ListCtrl_t* self, wxd_ImageList_t* imageList, int which) {
+        if (!self) return;
         reinterpret_cast<wxListCtrl*>(self)->SetImageList(reinterpret_cast<wxImageList*>(imageList), which);
     }
 
-    WXD_EXPORTED void wxd_ListCtrl_AssignImageList(wxd_ListCtrl_t* self, void* imageList, int which) {
-        if (!self || !imageList) return;
+    WXD_EXPORTED void wxd_ListCtrl_AssignImageList(wxd_ListCtrl_t* self, wxd_ImageList_t* imageList, int which) {
+        if (!self) return;
         reinterpret_cast<wxListCtrl*>(self)->AssignImageList(reinterpret_cast<wxImageList*>(imageList), which);
     }
 
-    WXD_EXPORTED void* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which) {
+    WXD_EXPORTED wxd_ImageList_t* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which) {
         if (!self) return nullptr;
-        return reinterpret_cast<void*>(reinterpret_cast<wxListCtrl*>(self)->GetImageList(which));
+        return reinterpret_cast<wxd_ImageList_t*>(reinterpret_cast<wxListCtrl*>(self)->GetImageList(which));
     }
 
+    // New function to insert an item with a label and an image index
+    WXD_EXPORTED int32_t wxd_ListCtrl_InsertItemWithImage(wxd_ListCtrl_t* self, int64_t index, const char* label, int imageIndex) {
+        if (!self) return -1;
+        wxListCtrl* ctrl = reinterpret_cast<wxListCtrl*>(self);
+        wxString wxLabel = label ? wxString::FromUTF8(label) : wxString();
+        // wxListCtrl::InsertItem directly takes the image index
+        return static_cast<int32_t>(ctrl->InsertItem(index, wxLabel, imageIndex));
+    }
+
+    // Renamed function
+    WXD_EXPORTED bool wxd_ListCtrl_SetItemImageIndex(wxd_ListCtrl_t* self, int64_t itemIndex, int imageIndex) {
+        if (!self) return false;
+        wxListCtrl* ctrl = reinterpret_cast<wxListCtrl*>(self);
+        // Use wxListCtrl::SetItemImage. It takes item index and image list index.
+        // SetItemImage is a convenience function that creates a wxListItem, sets its image, 
+        // and calls SetItem with wxLIST_MASK_IMAGE.
+        return ctrl->SetItemImage(itemIndex, imageIndex);
+    }
+
+    // More comprehensive SetItem, already present and seems fine.
     WXD_EXPORTED bool wxd_ListCtrl_SetItem(wxd_ListCtrl_t* self, int64_t item, int col, const char* text, int image, int format, int64_t state, int64_t stateMask, int64_t data, int64_t mask) {
         if (!self) return false;
         

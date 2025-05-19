@@ -4,11 +4,28 @@ use crate::prelude::*; // Use prelude
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget}; // Make sure WxEvtHandler is imported
+use crate::bitmap::Bitmap; // Added
                                        // Remove specific imports covered by prelude
                                        // use crate::{Id, Point, Size};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi; // ADDED for enum bitwise operations
+
+/// Enum for specifying bitmap position on a button.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)] // Matches wxd_ButtonBitmapPosition_t which is an enum
+pub enum ButtonBitmapPosition {
+    Left = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_LEFT as u32,
+    Right = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_RIGHT as u32,
+    Top = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_TOP as u32,
+    Bottom = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_BOTTOM as u32,
+}
+
+impl Default for ButtonBitmapPosition {
+    fn default() -> Self {
+        ButtonBitmapPosition::Left
+    }
+}
 
 /// Represents a wxButton.
 #[derive(Clone)]
@@ -117,6 +134,89 @@ impl Button {
             String::new()
         }
     }
+
+    // --- Bitmap Methods ---
+
+    /// Sets the bitmap to be displayed by the button.
+    pub fn set_bitmap(&self, bitmap: &Bitmap, dir: ButtonBitmapPosition) {
+        unsafe {
+            ffi::wxd_Button_SetBitmap(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bitmap.as_ptr(),
+                dir as ffi::wxd_ButtonBitmapPosition_t,
+            );
+        }
+    }
+    
+    /// Sets the bitmap for the label (main bitmap, default position Left).
+    pub fn set_bitmap_label(&self, bitmap: &Bitmap) {
+        self.set_bitmap(bitmap, ButtonBitmapPosition::Left); // wxButton::SetBitmapLabel is often an alias for SetBitmap with wxLEFT
+    }
+
+    /// Sets the bitmap for the disabled state.
+    pub fn set_bitmap_disabled(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapDisabled(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bitmap.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap for the focused state.
+    pub fn set_bitmap_focus(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapFocus(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bitmap.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap for the current (hover) state.
+    pub fn set_bitmap_current(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapCurrent(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bitmap.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap for the pressed state.
+    pub fn set_bitmap_pressed(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapPressed(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bitmap.as_ptr(),
+            );
+        }
+    }
+
+    // Getters return Option<Bitmap> and are unowned due to C++ FFI returning direct or null pointers.
+    // The C++ FFI getters are currently placeholders returning nullptr.
+    // When implemented, they might return unowned pointers, requiring Bitmap::from_ptr_unowned.
+
+    pub fn get_bitmap(&self) -> Option<Bitmap> {
+        let ptr = unsafe { ffi::wxd_Button_GetBitmap(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+    }
+    pub fn get_bitmap_disabled(&self) -> Option<Bitmap> {
+        let ptr = unsafe { ffi::wxd_Button_GetBitmapDisabled(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+    }
+    pub fn get_bitmap_focus(&self) -> Option<Bitmap> {
+        let ptr = unsafe { ffi::wxd_Button_GetBitmapFocus(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+    }
+    pub fn get_bitmap_current(&self) -> Option<Bitmap> {
+        let ptr = unsafe { ffi::wxd_Button_GetBitmapCurrent(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+    }
+    pub fn get_bitmap_pressed(&self) -> Option<Bitmap> {
+        let ptr = unsafe { ffi::wxd_Button_GetBitmapPressed(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+    }
 }
 
 // Use the widget_builder macro to generate the ButtonBuilder implementation
@@ -125,18 +225,44 @@ widget_builder!(
     parent_type: &'a dyn WxWidget,
     style_type: ButtonStyle,
     fields: {
-        label: String = String::new()
+        label: String = String::new(),
+        bitmap_label: Option<Bitmap> = None, // Renamed from bitmap
+        bitmap_position: Option<ButtonBitmapPosition> = None,
+        bitmap_disabled: Option<Bitmap> = None,
+        bitmap_focus: Option<Bitmap> = None,
+        bitmap_current: Option<Bitmap> = None,
+        bitmap_pressed: Option<Bitmap> = None
     },
     build_impl: |slf| {
         let parent_ptr = slf.parent.handle_ptr();
-        Button::new_impl(
+        let button = Button::new_impl(
             parent_ptr,
             slf.id,
             &slf.label,
             slf.pos,
             slf.size,
             slf.style.bits(),
-        )
+        );
+
+        if let Some(ref bmp) = slf.bitmap_label {
+            button.set_bitmap(bmp, slf.bitmap_position.unwrap_or_default());
+        }
+        if let Some(ref bmp) = slf.bitmap_disabled {
+            button.set_bitmap_disabled(bmp);
+        }
+        if let Some(ref bmp) = slf.bitmap_focus {
+            button.set_bitmap_focus(bmp);
+        }
+        if let Some(ref bmp) = slf.bitmap_current {
+            button.set_bitmap_current(bmp);
+        }
+        if let Some(ref bmp) = slf.bitmap_pressed {
+            button.set_bitmap_pressed(bmp);
+        }
+        // Note: Bitmaps are passed by reference. If the underlying setters stored them
+        // or if Bitmap was not Clone and ownership was needed, this would need adjustment.
+        // Currently, set_bitmap takes &Bitmap, and Bitmap is Clone.
+        button
     }
 );
 

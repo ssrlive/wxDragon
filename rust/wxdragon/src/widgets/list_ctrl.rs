@@ -8,6 +8,7 @@ use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
+use crate::widgets::imagelist::ImageList;
 use std::ffi::CString;
 use std::os::raw::{c_int, c_longlong, c_void};
 use std::any::Any;
@@ -214,13 +215,15 @@ impl ListCtrl {
     }
 
     /// Inserts a simple item (label only) at the specified index.
-    pub fn insert_item(&self, index: i64, label: &str) -> i32 {
+    pub fn insert_item(&self, index: i64, label: &str, image_index: Option<i32>) -> i32 {
         let c_label = CString::new(label).unwrap_or_default();
+        let img_idx = image_index.unwrap_or(-1); // Use -1 if no image is specified
         unsafe {
-            ffi::wxd_ListCtrl_InsertItem_Simple(
+            ffi::wxd_ListCtrl_InsertItemWithImage(
                 self.as_list_ctrl_ptr(),
                 index as c_longlong,
                 c_label.as_ptr(),
+                img_idx,
             )
         }
     }
@@ -380,6 +383,20 @@ impl ListCtrl {
     /// Gets the first selected item in the list control.
     pub fn get_first_selected_item(&self) -> i32 {
         self.get_next_item(-1, ListNextItemFlag::All, ListItemState::Selected)
+    }
+
+    /// Sets the image for a specific item.
+    /// 
+    /// # Arguments
+    /// * `item_index` - The 0-based index of the item.
+    /// * `image_index` - The index of the image in the image list.
+    /// 
+    /// # Returns
+    /// `true` if successful, `false` otherwise.
+    pub fn set_item_image(&self, item_index: i64, image_index: i32) -> bool {
+        unsafe {
+            ffi::wxd_ListCtrl_SetItemImageIndex(self.as_list_ctrl_ptr(), item_index as c_longlong, image_index)
+        }
     }
 
     /// Deletes the specified item.
@@ -550,6 +567,46 @@ impl ListCtrl {
     /// Refreshes a range of items in a virtual list control.
     pub fn refresh_items(&self, item_from: i64, item_to: i64) {
         unsafe { ffi::wxd_ListCtrl_RefreshItems(self.as_list_ctrl_ptr(), item_from as c_longlong, item_to as c_longlong) }
+    }
+
+    // --- ImageList Methods ---
+
+    /// Sets the image list for the control.
+    /// The ListCtrl takes ownership of the ImageList.
+    /// 
+    /// # Arguments
+    /// * `image_list` - The ImageList to set.
+    /// * `list_type` - Which image list to set (e.g., `image_list_type::NORMAL`, `image_list_type::SMALL`).
+    pub fn set_image_list(&self, image_list: ImageList, list_type: i32) {
+        unsafe {
+            ffi::wxd_ListCtrl_SetImageList(
+                self.as_list_ctrl_ptr(),
+                image_list.as_ptr(), // Pass the raw pointer
+                list_type,
+            );
+        }
+        // wxWidgets takes ownership of the image list
+        std::mem::forget(image_list);
+    }
+
+    /// Gets the image list associated with the control.
+    /// The ListCtrl owns the ImageList, so the caller should not delete it.
+    /// 
+    /// # Arguments
+    /// * `list_type` - Which image list to get (e.g., `image_list_type::NORMAL`, `image_list_type::SMALL`).
+    /// 
+    /// # Returns
+    /// An Option containing the ImageList if it exists, otherwise None.
+    pub fn get_image_list(&self, list_type: i32) -> Option<ImageList> {
+        let ptr = unsafe {
+            ffi::wxd_ListCtrl_GetImageList(self.as_list_ctrl_ptr(), list_type)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            // The ImageList is owned by wxWidgets, so create an unowned wrapper
+            Some(unsafe { ImageList::from_ptr_unowned(ptr) })
+        }
     }
 }
 

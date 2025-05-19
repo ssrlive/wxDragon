@@ -5,13 +5,16 @@ use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
-use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat};
+use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat, image_list_type};
 use wxdragon::widgets::panel::PanelStyle;
 use wxdragon::HasItemData;
 use wxdragon::ListItemState;
 use wxdragon::widgets::{
     Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText
 };
+use wxdragon::widgets::imagelist::ImageList;
+use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
+use wxdragon::geometry::Size;
 
 // Define a custom data type for our list items
 #[derive(Clone)]
@@ -126,12 +129,22 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     list_ctrl.insert_column(2, "Quantity", ListColumnFormat::Right, 100);
     list_ctrl.insert_column(3, "Notes", ListColumnFormat::Left, -1); // Fill remaining space
 
+    // --- ImageList Setup for ListCtrl ---
+    let list_ctrl_image_list = ImageList::new(16, 16, true, 3);
+    let mut list_ctrl_icons: Vec<i32> = Vec::new();
+    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::NormalFile, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); } // 0: File
+    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::Folder, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); }    // 1: Folder
+    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::Information, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); } // 2: Info
+    
+    list_ctrl.set_image_list(list_ctrl_image_list, image_list_type::SMALL);
+    // --- End ImageList Setup ---
+
     // Insert items (only sets the text for column 0)
-    let _item1_idx = list_ctrl.insert_item(0, "P001");
-    let _item2_idx = list_ctrl.insert_item(1, "P002");
-    let _item3_idx = list_ctrl.insert_item(2, "P003");
-    let _item4_idx = list_ctrl.insert_item(3, "P004");
-    let _item5_idx = list_ctrl.insert_item(4, "P005");
+    let _item1_idx = list_ctrl.insert_item(0, "P001", Some(list_ctrl_icons[0])); // File icon
+    let _item2_idx = list_ctrl.insert_item(1, "P002", Some(list_ctrl_icons[1])); // Folder icon
+    let _item3_idx = list_ctrl.insert_item(2, "P003", Some(list_ctrl_icons[2])); // Info icon
+    let _item4_idx = list_ctrl.insert_item(3, "P004", Some(list_ctrl_icons[0])); // File icon
+    let _item5_idx = list_ctrl.insert_item(4, "P005", None); // No icon
     
     // Create product info for each item
     let product1 = ProductInfo {
@@ -214,11 +227,16 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .with_label("Test Cleanup")
         .build();
         
+    let populate_button = Button::builder(&panel)
+        .with_label("Populate More")
+        .build();
+        
     list_ctrl_button_sizer.add(&add_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&remove_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&select_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&edit_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&cleanup_button, 0, SizerFlag::All, 5);
+    list_ctrl_button_sizer.add(&populate_button, 0, SizerFlag::All, 5);
 
     // --- ADDED: EditableListBox Example ---
     let editable_listbox = EditableListBox::builder(&panel)
@@ -475,21 +493,17 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         }
     });
     
-    // Add button
+    // Bind button events
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
     add_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+        println!("Add Item button clicked");
         let count = list_ctrl_clone.get_item_count();
-        let item_idx = list_ctrl_clone.insert_item(count as i64, &format!("P{:03}", count + 1));
-        if item_idx >= 0 {
-            // Select the new item
-            list_ctrl_clone.set_item_state(
-                item_idx as i64, 
-                ListItemState::Selected, 
-                ListItemState::Selected
-            );
-            list_ctrl_status_label_clone.set_label(&format!("Added new item {}", item_idx));
-        }
+        let new_item_text = format!("P{:03}", count + 1);
+        let new_idx = list_ctrl_clone.insert_item(count as i64, &new_item_text, None);
+        list_ctrl_clone.set_item_text_by_column(new_idx as i64, 1, "New Description");
+        list_ctrl_clone.set_item_text_by_column(new_idx as i64, 2, "0");
+        list_ctrl_status_label_clone.set_label(&format!("Added new item {}", new_idx));
     });
     
     // Remove button
@@ -551,6 +565,15 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         println!("Cleanup button clicked - calling explicit cleanup");
         list_ctrl_clone.cleanup_custom_data();
         list_ctrl_status_label_clone.set_label("Manual cleanup completed");
+    });
+
+    let list_ctrl_clone_populate = list_ctrl.clone(); 
+    populate_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| { 
+        println!("Populate ListCtrl with more items button clicked");
+        for i in 5..15 { 
+            let item_text = format!("Item {}", i + 1);
+            list_ctrl_clone_populate.insert_item(i as i64, &item_text, None);
+        }
     });
 
     // Set column text for all items

@@ -54,8 +54,14 @@ WXD_EXPORTED bool wxd_ListCtrl_SortItems(wxd_ListCtrl_t* self, int (*cmpFunc)(vo
 WXD_EXPORTED void wxd_ListCtrl_ShowSortIndicator(wxd_ListCtrl_t* self, int col, bool ascending);
 
 // Image List Support
-WXD_EXPORTED void wxd_ListCtrl_SetImageList(wxd_ListCtrl_t* self, void* imageList, int which);
-WXD_EXPORTED void wxd_ListCtrl_AssignImageList(wxd_ListCtrl_t* self, void* imageList, int which);
-WXD_EXPORTED void* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which);
+WXD_EXPORTED void wxd_ListCtrl_SetImageList(wxd_ListCtrl_t* self, wxd_ImageList_t* imageList, int which);
+WXD_EXPORTED void wxd_ListCtrl_AssignImageList(wxd_ListCtrl_t* self, wxd_ImageList_t* imageList, int which);
+WXD_EXPORTED wxd_ImageList_t* wxd_ListCtrl_GetImageList(wxd_ListCtrl_t* self, int which);
+
+// New function for inserting item with an image index
+WXD_EXPORTED int32_t wxd_ListCtrl_InsertItemWithImage(wxd_ListCtrl_t* self, int64_t index, const char* label, int imageIndex);
+
+// Renamed function (SetItemImageOnly removed, SetItemImageIndex added)
+WXD_EXPORTED bool wxd_ListCtrl_SetItemImageIndex(wxd_ListCtrl_t* self, int64_t itemIndex, int imageIndex);
 
 #endif // WXD_LISTCTRL_H 

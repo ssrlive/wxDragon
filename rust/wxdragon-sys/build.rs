@@ -15,8 +15,14 @@ fn main() {
     println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_choices.h");
     println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_containers.h");
     println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_controls.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_button.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_bitmapbutton.h");
     println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_misc_widgets.h");
     println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_pickers.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_listctrl.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_treectrl.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_dataview.h");
+    println!("cargo:rerun-if-changed=cpp/include/widgets/wxd_notebook.h");
     println!("cargo:rerun-if-changed=cpp/src");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
