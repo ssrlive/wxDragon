@@ -27,3 +27,6 @@ pub mod aui_tab;
 
 /// Color tab demonstrates the Tailwind CSS color palette in wxDragon.
 pub mod color_tab;
+
+/// DataView Virtual tab demonstrates the virtual data view functionality.
+pub mod dataview_virtual_tab;
