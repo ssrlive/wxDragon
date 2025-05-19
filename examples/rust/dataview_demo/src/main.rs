@@ -1,7 +1,10 @@
+//! Simple demo for various wxDragon widgets, including DataViewCtrl.
+
 use wxdragon::prelude::*;
 use wxdragon::widgets::{
     DataViewCtrl, DataViewListModel, DataViewStyle, DataViewAlign
 };
+use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
 use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
 use wxdragon::bitmap::Bitmap;
 use wxdragon::geometry::Size;
@@ -32,18 +35,18 @@ fn main() {
             .build();
 
         // Add columns with different renderers
-        dvc.append_text_column("ID", 0, 60, DataViewAlign::Left);
-        dvc.append_text_column("Name", 1, 180, DataViewAlign::Left);
-        dvc.append_text_column("Department", 2, 150, DataViewAlign::Left);
-        dvc.append_toggle_column("Active", 3, 80, DataViewAlign::Center);
-        dvc.append_progress_column("Performance", 4, 120);
-        dvc.append_bitmap_column("Icon", 5, 80, DataViewAlign::Center);
-        dvc.append_date_column("Hire Date", 6, 120, DataViewAlign::Center);
-        dvc.append_spin_column("Hourly Rate", 7, 100, DataViewAlign::Right, 10, 100, 5);
+        dvc.append_text_column("ID", 0, 60, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+        dvc.append_text_column("Name", 1, 180, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+        dvc.append_text_column("Department", 2, 150, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+        dvc.append_toggle_column("Active", 3, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+        dvc.append_progress_column("Performance", 4, 120, DataViewColumnFlags::Resizable);
+        dvc.append_bitmap_column("Icon", 5, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+        dvc.append_date_column("Hire Date", 6, 120, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+        dvc.append_spin_column("Hourly Rate", 7, 100, DataViewAlign::Right, 10, 100, 5, DataViewColumnFlags::Resizable);
         
         // Choices renderer
         let status_choices = ["Full-time", "Part-time", "Contract"];
-        dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices);
+        dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices, DataViewColumnFlags::Resizable);
 
         // Create and set up the model
         let model = DataViewListModel::new();

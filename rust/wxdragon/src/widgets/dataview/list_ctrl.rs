@@ -14,6 +14,7 @@ use super::{
     DataViewCellMode,
     DataViewAlign
 };
+use super::enums::DataViewColumnFlags;
 
 /// A simplified DataViewCtrl that displays data in a list format.
 ///
@@ -53,15 +54,15 @@ impl DataViewListCtrl {
     /// * `model_column` - The column index in the data model
     /// * `align` - The text alignment
     /// * `width` - The column width (in pixels)
+    /// * `flags` - Column flags (e.g., resizable, sortable)
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_text_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32) -> bool {
+    pub fn append_text_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewTextRenderer::new(VariantType::String, DataViewCellMode::Inert, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         
-        // Since DataViewListCtrl is a wrapper around DataViewCtrl, we can cast it
         let ctrl_ptr = self.window.handle_ptr();
         unsafe { ffi::wxd_DataViewCtrl_AppendColumn(ctrl_ptr, column.as_raw()) }
     }
@@ -74,13 +75,14 @@ impl DataViewListCtrl {
     /// * `model_column` - The column index in the data model
     /// * `align` - The alignment of the checkbox
     /// * `width` - The column width (in pixels)
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_toggle_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32) -> bool {
+    pub fn append_toggle_column(&self, label: &str, model_column: usize, align: DataViewAlign, width: i32, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewToggleRenderer::new(VariantType::Bool, DataViewCellMode::Activatable, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         
         let ctrl_ptr = self.window.handle_ptr();
         unsafe { ffi::wxd_DataViewCtrl_AppendColumn(ctrl_ptr, column.as_raw()) }
@@ -93,13 +95,14 @@ impl DataViewListCtrl {
     /// * `label` - The header label for the column
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_progress_column(&self, label: &str, model_column: usize, width: i32) -> bool {
+    pub fn append_progress_column(&self, label: &str, model_column: usize, width: i32, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewProgressRenderer::new(VariantType::Int32, DataViewCellMode::Inert);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, DataViewAlign::Center);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, DataViewAlign::Center, flags);
         
         let ctrl_ptr = self.window.handle_ptr();
         unsafe { ffi::wxd_DataViewCtrl_AppendColumn(ctrl_ptr, column.as_raw()) }

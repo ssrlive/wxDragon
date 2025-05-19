@@ -343,4 +343,12 @@ typedef enum {
     WXD_DATAVIEW_CELL_EDITABLE
 } wxd_DataViewCellModeCEnum;
 
+// Image related opaque types
+typedef void wxd_Image_t;          // Added if not present
+typedef void wxd_ImageList_t;      // Added
+typedef struct wxd_Icon_t wxd_Icon_t; // Assuming this pattern from Bitmap_t
+
+// DataView opaque types
+// ... existing code ...
+
 #endif // WXD_TYPES_H 

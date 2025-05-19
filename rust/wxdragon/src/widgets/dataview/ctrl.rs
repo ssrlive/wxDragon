@@ -20,6 +20,8 @@ use super::{
     DataViewAlign,
     DataViewItem
 };
+use super::enums::DataViewColumnFlags;
+use super::renderer::DataViewIconTextRenderer;
 
 use crate::window::Window;
 use crate::geometry::{Point, Size};
@@ -181,13 +183,14 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The text alignment
+    /// * `flags` - Column flags (e.g., resizable, sortable)
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_text_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign) -> bool {
+    pub fn append_text_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewTextRenderer::new(VariantType::String, DataViewCellMode::Inert, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
     
@@ -201,13 +204,14 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_toggle_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign) -> bool {
+    pub fn append_toggle_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewToggleRenderer::new(VariantType::Bool, DataViewCellMode::Activatable, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
     
@@ -220,13 +224,14 @@ impl DataViewCtrl {
     /// * `label` - The header label for the column
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_progress_column(&self, label: &str, model_column: usize, width: i32) -> bool {
+    pub fn append_progress_column(&self, label: &str, model_column: usize, width: i32, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewProgressRenderer::new(VariantType::Int32, DataViewCellMode::Inert);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, DataViewAlign::Center);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, DataViewAlign::Center, flags);
         self.append_column(&column)
     }
     
@@ -240,13 +245,14 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_bitmap_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign) -> bool {
+    pub fn append_bitmap_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewBitmapRenderer::new(DataViewCellMode::Inert, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
     
@@ -260,13 +266,14 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_date_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign) -> bool {
-        let renderer = DataViewDateRenderer::new(VariantType::DateTime, DataViewCellMode::Inert, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+    pub fn append_date_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> bool {
+        let renderer = DataViewDateRenderer::new(VariantType::DateTime, DataViewCellMode::Activatable, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
     
@@ -280,20 +287,19 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment
-    /// * `choices` - The list of choices to display in the dropdown
+    /// * `choices` - A slice of string choices for the dropdown
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_choice_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, choices: &[&str]) -> bool {
+    pub fn append_choice_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, choices: &[&str], flags: DataViewColumnFlags) -> bool {
         let renderer = DataViewChoiceRenderer::new(VariantType::String, choices, DataViewCellMode::Editable, align);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
     
-    /// Creates and appends a spin column to this control.
-    ///
-    /// This is a convenience method for creating a spin renderer column and appending it.
+    /// Creates and appends a spin control column to this control.
     ///
     /// # Parameters
     ///
@@ -301,16 +307,37 @@ impl DataViewCtrl {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment
-    /// * `min` - Minimum value
-    /// * `max` - Maximum value
-    /// * `inc` - Increment value
+    /// * `min` - The minimum value for the spin control
+    /// * `max` - The maximum value for the spin control
+    /// * `inc` - The increment value for the spin control
+    /// * `flags` - Column flags
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_spin_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, min: i32, max: i32, inc: i32) -> bool {
-        let renderer = DataViewSpinRenderer::new(VariantType::Int32, DataViewCellMode::Editable, align, min, max, inc);
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align);
+    pub fn append_spin_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, min: i32, max: i32, inc: i32, flags: DataViewColumnFlags) -> bool {
+        let renderer = DataViewSpinRenderer::new(VariantType::Int64, DataViewCellMode::Editable, align, min, max, inc);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
+        self.append_column(&column)
+    }
+
+    /// Creates and appends an icon and text column to this control.
+    /// This is a convenience method for creating a text renderer with icon support and appending it.
+    ///
+    /// # Parameters
+    ///
+    /// * `label` - The header label for the column.
+    /// * `model_column` - The column index in the data model that provides the text and icon.
+    /// * `width` - The desired width of the column in pixels.
+    /// * `align` - The alignment of the content within the column.
+    /// * `flags` - Column behavior flags (e.g., resizable, sortable).
+    ///
+    /// # Returns
+    ///
+    /// `true` if the column was successfully appended, `false` otherwise.
+    pub fn append_icon_text_column(&self, label: &str, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> bool {
+        let renderer = DataViewIconTextRenderer::new(VariantType::String, DataViewCellMode::Inert, align);
+        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
         self.append_column(&column)
     }
 
@@ -333,11 +360,15 @@ impl DataViewCtrl {
     ///
     /// An `Option` containing the column, or `None` if `pos` is out of bounds.
     pub fn get_column(&self, pos: usize) -> Option<DataViewColumn> {
-        let col_ptr = unsafe { ffi::wxd_DataViewCtrl_GetColumn(self.window.handle_ptr(), pos as u32) };
-        if col_ptr.is_null() {
+        if pos >= self.get_column_count() {
+            return None; // Prevent out-of-bounds access
+        }
+        let raw_col = unsafe { ffi::wxd_DataViewCtrl_GetColumn(self.window.handle_ptr(), pos as u32) };
+        if raw_col.is_null() {
             None
         } else {
-            Some(unsafe { DataViewColumn::from_ptr(col_ptr) })
+            // DataViewColumn::from_ptr is unsafe
+            unsafe { Some(DataViewColumn::from_ptr(raw_col)) }
         }
     }
 

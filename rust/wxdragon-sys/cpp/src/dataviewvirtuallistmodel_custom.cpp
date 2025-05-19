@@ -94,7 +94,7 @@ public:
                             try {
                                 wxBitmap final_copy(*casted_bmp); // Make a copy for the wxVariant
                                 if (final_copy.IsOk()) {
-                                    variant << final_copy;
+                                    variant << final_copy; 
                                 } else {
                                     // Fallback if final_copy is not OK
                                     wxBitmap fallback_bmp_on_error(16, 16); /* Create a visible fallback */
@@ -115,7 +115,7 @@ public:
                              wxMemoryDC dc(fallback_bmp_not_ok); 
                              dc.SetBackground(*wxGREEN_BRUSH); dc.Clear(); 
                              variant << fallback_bmp_not_ok;
-                        }
+                            }
                     } else {
                         // borrowed_bmp_ptr_from_rust was null
                         wxBitmap fallback_bmp_null_ptr(16, 16); /* Create a visible fallback */
@@ -140,7 +140,7 @@ public:
                 } else {
                     // Fallback if Rust didn't send any known bitmap variant type
                     wxBitmap default_bmp(16, 16); /* Create a black/default fallback */
-                    wxMemoryDC dc(default_bmp); 
+                        wxMemoryDC dc(default_bmp);
                     dc.SetBackground(*wxBLACK_BRUSH); dc.Clear(); 
                     variant << default_bmp;
                 }

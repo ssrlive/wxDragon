@@ -2,8 +2,8 @@
 
 use std::ffi::CString;
 use wxdragon_sys as ffi;
-
-use super::{DataViewRenderer, DataViewAlign};
+use super::renderer::DataViewRenderer;
+use super::enums::{DataViewAlign, DataViewColumnFlags};
 
 /// A column in a DataViewCtrl.
 ///
@@ -23,15 +23,18 @@ impl DataViewColumn {
     /// * `model_column` - The column index in the data model
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment of the column content
-    pub fn new(title: &str, renderer: &dyn DataViewRenderer, model_column: usize, width: i32, align: DataViewAlign) -> Self {
+    /// * `flags` - Column flags specifying behavior (e.g., resizable, sortable)
+    pub fn new(title: &str, renderer: &dyn DataViewRenderer, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> Self {
         let title_cstr = CString::new(title).unwrap();
         let handle = unsafe {
+            // FFI function now takes 6 arguments, including flags as int.
             ffi::wxd_DataViewColumn_Create(
                 title_cstr.as_ptr(),
                 renderer.as_raw(),
-                model_column as i64,
+                model_column as i32, // FFI expects int
                 width,
-                align.bits(),
+                align.bits() as i32, // FFI expects int (align.bits() is i64)
+                flags.bits() as i32  // FFI expects int (flags.bits() is i64)
             )
         };
         Self { handle }
@@ -49,5 +52,41 @@ impl DataViewColumn {
     /// Gets the raw pointer to the native wxDataViewColumn.
     pub fn as_raw(&self) -> *mut ffi::wxd_DataViewColumn_t {
         self.handle
+    }
+
+    /// Sets the title of the column header.
+    pub fn set_title(&self, title: &str) {
+        let title_cstr = CString::new(title).unwrap_or_default();
+        unsafe {
+            ffi::wxd_DataViewColumn_SetTitle(self.handle, title_cstr.as_ptr());
+        }
+    }
+
+    /// Sets whether the column can be resized by the user.
+    pub fn set_resizeable(&self, resizeable: bool) {
+        unsafe {
+            ffi::wxd_DataViewColumn_SetResizeable(self.handle, resizeable);
+        }
+    }
+
+    /// Checks if the column can be resized by the user.
+    pub fn is_resizeable(&self) -> bool {
+        unsafe {
+            ffi::wxd_DataViewColumn_IsResizeable(self.handle)
+        }
+    }
+
+    /// Sets whether the column can be sorted by clicking its header.
+    pub fn set_sortable(&self, sortable: bool) {
+        unsafe {
+            ffi::wxd_DataViewColumn_SetSortable(self.handle, sortable);
+        }
+    }
+
+    /// Checks if the column can be sorted by clicking its header.
+    pub fn is_sortable(&self) -> bool {
+        unsafe {
+            ffi::wxd_DataViewColumn_IsSortable(self.handle)
+        }
     }
 } 

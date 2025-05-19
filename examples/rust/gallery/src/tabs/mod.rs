@@ -30,3 +30,6 @@ pub mod color_tab;
 
 /// DataView Virtual tab demonstrates the virtual data view functionality.
 pub mod dataview_virtual_tab;
+
+/// DataView Tree tab demonstrates the Tree data view functionality.
+pub mod dataview_tree_tab;

@@ -27,6 +27,8 @@ pub enum VariantType {
     Bitmap,
     /// Progress value (typically 0-100)
     Progress,
+    /// Icon text
+    IconText,
 }
 
 impl VariantType {
@@ -41,6 +43,7 @@ impl VariantType {
             VariantType::DateTime => "datetime",
             VariantType::Bitmap => "bitmap",
             VariantType::Progress => "long",
+            VariantType::IconText => "wxDataViewIconText",
         }
     }
 }
@@ -253,7 +256,7 @@ impl Clone for Variant {
             Variant::Double(value) => Variant::Double(*value),
             Variant::String(value) => Variant::String(value.clone()),
             Variant::DateTime(value) => Variant::DateTime(*value),
-            Variant::Bitmap(value) => Variant::Bitmap(value.clone()),
+            Variant::Bitmap(bitmap) => Variant::Bitmap(bitmap.clone()),
             Variant::BitmapBorrowed(ptr) => Variant::BitmapBorrowed(*ptr),
         }
     }

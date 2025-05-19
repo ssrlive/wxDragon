@@ -55,15 +55,20 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewTreeCtrl_Create(wxd_Window_t* parent, int
 // Column management
 WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewColumn_Create(const char* title, 
                                                      wxd_DataViewRenderer_t* renderer, 
-                                                     int64_t model_column, 
+                                                     int model_column,
                                                      int width, 
-                                                     int64_t align) {
+                                                     int align,
+                                                     int flags) {
     if (!renderer) return nullptr;
     
     wxString wxTitle = wxString::FromUTF8(title ? title : "");
     wxDataViewRenderer* r = reinterpret_cast<wxDataViewRenderer*>(renderer);
     
-    wxDataViewColumn* column = new wxDataViewColumn(wxTitle, r, static_cast<unsigned int>(model_column), width, static_cast<wxAlignment>(align));
+    wxDataViewColumn* column = new wxDataViewColumn(wxTitle, r, 
+                                                 static_cast<unsigned int>(model_column),
+                                                 width, 
+                                                 static_cast<wxAlignment>(align),
+                                                 flags);
     return reinterpret_cast<wxd_DataViewColumn_t*>(column);
 }
 
@@ -766,6 +771,44 @@ WXD_EXPORTED bool wxd_DataViewCtrl_SetAlternateRowColour(wxd_Window_t* self, con
     
     wxColour wxColour(colour->r, colour->g, colour->b, colour->a);
     return ctrl->SetAlternateRowColour(wxColour);
+}
+
+// DataViewColumn property implementations
+WXD_EXPORTED void wxd_DataViewColumn_SetTitle(wxd_DataViewColumn_t* self, const char* title) {
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(self);
+    if (col) {
+        col->SetTitle(WXD_STR_TO_WX_STRING_UTF8_NULL_OK(title));
+    }
+}
+
+WXD_EXPORTED void wxd_DataViewColumn_SetResizeable(wxd_DataViewColumn_t* self, bool resizeable) {
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(self);
+    if (col) {
+        col->SetResizeable(resizeable);
+    }
+}
+
+WXD_EXPORTED bool wxd_DataViewColumn_IsResizeable(wxd_DataViewColumn_t* self) {
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(self);
+    if (col) {
+        return col->IsResizeable();
+    }
+    return false; // Default if col is null
+}
+
+WXD_EXPORTED void wxd_DataViewColumn_SetSortable(wxd_DataViewColumn_t* self, bool sortable) {
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(self);
+    if (col) {
+        col->SetSortable(sortable);
+    }
+}
+
+WXD_EXPORTED bool wxd_DataViewColumn_IsSortable(wxd_DataViewColumn_t* self) {
+    wxDataViewColumn* col = reinterpret_cast<wxDataViewColumn*>(self);
+    if (col) {
+        return col->IsSortable();
+    }
+    return false; // Default if col is null
 }
 
 } // extern "C" 

@@ -9,6 +9,7 @@ use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
 use tabs::color_tab::create_color_tab;
 use tabs::dataview_virtual_tab::create_dataview_virtual_tab;
+use tabs::dataview_tree_tab::create_dataview_tree_tab;
 use tabs::dialog_tab::create_dialog_tab;
 use tabs::lists_tab::create_lists_tab;
 use tabs::media_tab::create_media_tab;
@@ -66,6 +67,7 @@ fn main() {
         let aui_controls = create_aui_tab(&notebook);
         let color_controls = create_color_tab(&notebook, &frame);
         let dataview_virtual_controls = create_dataview_virtual_tab(&notebook);
+        let dataview_tree_controls = create_dataview_tree_tab(&notebook);
 
         // --- ToolBar Setup ---
         let tb_style = ToolBarStyle::Text | ToolBarStyle::Default;
@@ -109,6 +111,7 @@ fn main() {
         notebook.add_page(&aui_controls.panel, "AUI", false);
         notebook.add_page(&color_controls.panel, "Color", false);
         notebook.add_page(&dataview_virtual_controls.panel, "DataView Virtual", false);
+        notebook.add_page(&dataview_tree_controls.panel, "DataView Tree", false);
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(Orientation::Vertical).build();

@@ -541,6 +541,12 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxDATAVIEW_CELL_INERT", wxDATAVIEW_CELL_INERT});
     constants_to_extract.push_back({"wxDATAVIEW_CELL_ACTIVATABLE", wxDATAVIEW_CELL_ACTIVATABLE});
     constants_to_extract.push_back({"wxDATAVIEW_CELL_EDITABLE", wxDATAVIEW_CELL_EDITABLE});
+
+    // DataViewColumnFlags
+    constants_to_extract.push_back({"wxDATAVIEW_COL_RESIZABLE", wxDATAVIEW_COL_RESIZABLE});
+    constants_to_extract.push_back({"wxDATAVIEW_COL_SORTABLE", wxDATAVIEW_COL_SORTABLE});
+    constants_to_extract.push_back({"wxDATAVIEW_COL_REORDERABLE", wxDATAVIEW_COL_REORDERABLE});
+    constants_to_extract.push_back({"wxDATAVIEW_COL_HIDDEN", wxDATAVIEW_COL_HIDDEN});
     
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",

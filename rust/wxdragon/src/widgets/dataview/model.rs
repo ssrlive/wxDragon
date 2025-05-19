@@ -776,7 +776,7 @@ pub fn to_raw_variant(value: &Variant) -> ffi::wxd_Variant_t {
             }
         },
         Variant::Bitmap(val) => { // This path is for an owned Bitmap, uses the FFI-cloned mechanism
-            result.type_ = ffi::WXD_VARIANT_TYPE_BITMAP as i32; 
+            result.type_ = ffi::WXD_VARIANT_TYPE_BITMAP as i32;
             let original_rust_owned_ptr = val.as_ptr();
             if original_rust_owned_ptr.is_null() {
                 result.data.bitmap_val = std::ptr::null_mut();

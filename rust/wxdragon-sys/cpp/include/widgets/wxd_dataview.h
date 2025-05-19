@@ -15,9 +15,6 @@ typedef struct wxd_DataViewCtrl_tag wxd_DataViewCtrl_t;
 typedef struct wxd_DataViewRenderer_tag wxd_DataViewRenderer_t;
 // typedef struct wxd_DataViewColumn_tag wxd_DataViewColumn_t;
 
-// Definition for DataViewItem type
-typedef wxd_DataViewItemWithID_t wxd_DataViewItem_t;
-
 // Define the alignment enum if not defined
 typedef enum {
     WXD_ALIGN_LEFT = 0,
@@ -42,11 +39,14 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewTreeCtrl_Create(wxd_Window_t* parent, int
                                                 int64_t style);
 
 // Column management
-WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewColumn_Create(const char* title, 
-                                                    wxd_DataViewRenderer_t* renderer, 
-                                                    int64_t model_column, 
-                                                    int width, 
-                                                    int64_t align);
+WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewColumn_Create(
+    const char* title, 
+    wxd_DataViewRenderer_t* renderer, 
+    int model_column, // native wx uses unsigned int, but int is safer for C FFI boundaries if values are not huge.
+    int width, 
+    int align,        // wxAlignment is an enum, typically int based.
+    int flags         // wxDataViewColumnFlags, int based.
+);
 
 WXD_EXPORTED bool wxd_DataViewCtrl_AppendColumn(wxd_Window_t* self, wxd_DataViewColumn_t* column);
 WXD_EXPORTED bool wxd_DataViewCtrl_PrependColumn(wxd_Window_t* self, wxd_DataViewColumn_t* column);
@@ -116,9 +116,7 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewChoiceRenderer_Create(const cha
                                                                 int64_t mode, 
                                                                 int64_t align);
 
-WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(const char* varianttype, 
-                                                                       int64_t mode, 
-                                                                       int64_t align);
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(const char* varianttype, int64_t mode, int64_t align);
 
 // Custom renderer callback type
 typedef bool (*wxd_DataViewRenderer_RenderCallback)(void* user_data, 
@@ -222,6 +220,15 @@ WXD_EXPORTED void drop_rust_virtual_list_model_callbacks(void* ptr);
 WXD_EXPORTED wxd_DataViewColumn_t* wxd_DataViewCtrl_CreateTextColumn(wxd_Window_t* ctrl, const char* label, 
                                                      uint32_t model_column, wxd_DataViewCellModeCEnum mode, 
                                                      int width, wxd_AlignmentCEnum align, int flags);
+
+// Setting column properties after creation
+WXD_EXPORTED void wxd_DataViewColumn_SetTitle(wxd_DataViewColumn_t* self, const char* title);
+
+WXD_EXPORTED void wxd_DataViewColumn_SetResizeable(wxd_DataViewColumn_t* self, bool resizeable);
+WXD_EXPORTED bool wxd_DataViewColumn_IsResizeable(wxd_DataViewColumn_t* self);
+WXD_EXPORTED void wxd_DataViewColumn_SetSortable(wxd_DataViewColumn_t* self, bool sortable);
+WXD_EXPORTED bool wxd_DataViewColumn_IsSortable(wxd_DataViewColumn_t* self);
+// TODO: Add other properties like Reorderable, Hidden, Alignment, Width etc. as needed
 
 #ifdef __cplusplus
 }

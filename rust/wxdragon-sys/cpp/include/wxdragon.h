@@ -12,6 +12,7 @@
 // Include all fundamental types first
 #include "wxd_types.h" // Contains all basic C types and opaque struct typedefs
 #include "array_string.h" // ArrayString helper functions
+#include "core/wxd_item.h" // Added for wxd_DataViewItem_t and its functions
 
 #ifdef __cplusplus
 // Include C++ specific utility functions and macros
@@ -64,6 +65,9 @@ extern "C" {
 #include "widgets/wxd_listctrl.h"
 #include "widgets/wxd_dataview.h"
 
+// Include ImageList FFI
+#include "widgets/wxd_imagelist.h"
+
 // Container widgets
 #include "widgets/wxd_panel.h"
 #include "widgets/wxd_staticbox.h"
@@ -93,6 +97,22 @@ extern "C" {
 #include "dialogs/wxd_dialogs.h"
 #include "dnd/wxd_dnd.h" // Drag and drop functionality
 #include "graphics/wxd_dc.h" // Device context functionality
+
+// DataView related includes.
+// wxd_dataview.h provides main FFI for DataViewCtrl, ListCtrl, TreeCtrl (creation),
+// DataViewModel, DataViewColumn, DataViewRenderer.
+#include "widgets/wxd_dataview.h"
+
+// wxd_dataviewtreectrl.h provides specific FFI functions for DataViewTreeCtrl methods
+// beyond basic creation (e.g., AppendItem, DeleteItem).
+#include "widgets/wxd_dataviewtreectrl.h"
+
+// The following individual dataview component headers are likely redundant if wxd_dataview.h is comprehensive
+// and are removed to prevent redefinition or missing file errors if they were just parts of wxd_dataview.h.
+// #include "widgets/wxd_dataviewctrl.h"
+// #include "widgets/wxd_dataviewlistctrl.h"
+// #include "widgets/wxd_dataviewcolumn.h"
+// #include "widgets/wxd_dataviewrenderer.h"
 
 #ifdef __cplusplus
 } // extern "C"

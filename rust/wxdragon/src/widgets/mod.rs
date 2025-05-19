@@ -54,6 +54,9 @@ pub mod toolbar;
 pub mod treebook;
 pub mod treectrl;
 
+// Add ImageList module
+pub mod imagelist;
+
 pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
 pub use dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
@@ -119,3 +122,6 @@ pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
 pub use dataview::{DataViewCtrl, DataViewCtrlBuilder, DataViewListCtrl, DataViewListCtrlBuilder,
                    DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewStyle, DataViewModel,
                    DataViewListModel, DataViewColumn, Variant, DataViewCellMode, DataViewAlign};
+
+// Re-export ImageList
+pub use imagelist::ImageList;

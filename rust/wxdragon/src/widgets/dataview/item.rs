@@ -4,10 +4,14 @@ use wxdragon_sys as ffi;
 
 /// Represents an item in a DataViewCtrl.
 /// 
-/// A DataViewItem is used to uniquely identify an item in a 
-/// DataViewModel and DataViewCtrl.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// This struct is a wrapper around a pointer to a C++ wxDataViewItem object.
+/// It owns the C++ object when returned from an FFI call that allocates it (e.g., via FromWxDVI helpers).
+/// When a DataViewItem is passed from Rust to C++, its internal pointer is used, but C++
+/// does not take ownership of the Rust-side `DataViewItem` or the wxDataViewItem it points to.
+#[derive(Debug)]
+#[repr(C)]
 pub struct DataViewItem {
+    // This id is a *mut wxDataViewItem (cast to void*) that Rust owns if created by FromWxDVI.
     id: *mut std::ffi::c_void,
 }
 
@@ -55,4 +59,28 @@ impl DataViewItem {
             self.id as usize
         }
     }
-} 
+
+    /// Creates a new invalid `DataViewItem`.
+    /// This is often used to represent the root item or no specific item.
+    pub fn new_invalid() -> Self {
+        Self { id: std::ptr::null_mut() }
+    }
+}
+
+impl Drop for DataViewItem {
+    fn drop(&mut self) {
+        if !self.id.is_null() {
+            // This item was created by an FFI call (e.g., FromWxDVI) that allocated a wxDataViewItem on the heap.
+            // Rust is responsible for releasing this memory.
+            unsafe { ffi::wxd_DataViewItem_Release(self.as_raw()) };
+            // Set to null to prevent double free if this Drop is somehow called again (though not typical for owned types).
+            self.id = std::ptr::null_mut(); 
+        }
+    }
+}
+
+// It's important that DataViewItem is not Clone or Copy by default if it manages ownership via Drop.
+// If cloning is needed, it would require manual implementation (e.g., an explicit clone method that calls
+// a C++ FFI function to duplicate the wxDataViewItem if that's meaningful, or by using Rc/Arc if shared ownership
+// within Rust is desired, though that doesn't map directly to the C++ object lifecycle here).
+// For now, treating it as a unique owner is safest. 

@@ -3,6 +3,7 @@ use wxdragon::widgets::dataview::{
     DataViewCtrl, CustomDataViewVirtualListModel, 
     DataViewStyle, DataViewAlign, DataViewItemAttr, Variant
 };
+use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
 use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
 use wxdragon::bitmap::Bitmap;
 use wxdragon::geometry::Size;
@@ -130,17 +131,17 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
         .with_style(DataViewStyle::RowLines | DataViewStyle::HorizontalRules)
         .build();
 
-    dvc.append_text_column("ID", 0, 60, DataViewAlign::Left);
-    dvc.append_text_column("Name", 1, 180, DataViewAlign::Left);
-    dvc.append_text_column("Department", 2, 150, DataViewAlign::Left);
-    dvc.append_toggle_column("Active", 3, 80, DataViewAlign::Center);
-    dvc.append_progress_column("Performance", 4, 120);
-    dvc.append_bitmap_column("Icon", 5, 80, DataViewAlign::Center);
-    dvc.append_date_column("Hire Date", 6, 120, DataViewAlign::Center);
-    dvc.append_spin_column("Hourly Rate", 7, 100, DataViewAlign::Right, 10, 100, 5);
+    dvc.append_text_column("ID", 0, 60, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+    dvc.append_text_column("Name", 1, 180, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+    dvc.append_text_column("Department", 2, 150, DataViewAlign::Left, DataViewColumnFlags::Resizable);
+    dvc.append_toggle_column("Active", 3, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+    dvc.append_progress_column("Performance", 4, 120, DataViewColumnFlags::Resizable);
+    dvc.append_bitmap_column("Icon", 5, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+    dvc.append_date_column("Hire Date", 6, 120, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+    dvc.append_spin_column("Hourly Rate", 7, 100, DataViewAlign::Right, 10, 100, 5, DataViewColumnFlags::Resizable);
     
-    let status_choices = ["Full-time", "Part-time", "Contract"];
-    dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices);
+    let status_choices = vec!["Pending", "Active", "Inactive", "On Hold"];
+    dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices, DataViewColumnFlags::Resizable);
 
     let employees_ref_get = Rc::clone(&employees);
     let icon_bitmaps_for_closure_get = icon_bitmaps_master.clone();

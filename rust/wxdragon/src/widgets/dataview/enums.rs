@@ -29,3 +29,16 @@ widget_style_enum!(
     },
     default_variant: Left
 );
+
+widget_style_enum!(
+    name: DataViewColumnFlags,
+    doc: "Flags for DataViewColumn behavior.",
+    variants: {
+        DefaultNone: 0, "Default behavior, often implies resizable by wxWidgets default.",
+        Resizable: ffi::WXD_DATAVIEW_COL_RESIZABLE, "Column can be resized by the user.",
+        Sortable: ffi::WXD_DATAVIEW_COL_SORTABLE, "Column can be sorted by clicking the header.",
+        Reorderable: ffi::WXD_DATAVIEW_COL_REORDERABLE, "Column can be reordered by the user.",
+        Hidden: ffi::WXD_DATAVIEW_COL_HIDDEN, "Column is not initially visible."
+    },
+    default_variant: DefaultNone // A variant representing 0 is a good default for flags
+);

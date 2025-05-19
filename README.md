@@ -207,10 +207,10 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxListCtrl`
         *   [x] `wxBitmapComboBox`
         *   [ ] `wxComboCtrl`
-        *   [ ] `wxDataViewCtrl`
-        *   [ ] `wxDataViewListCtrl`
-        *   [ ] `wxDataViewTreeCtrl`
-        *   [ ] `wxEditableListBox`
+        *   [x] `wxDataViewCtrl`
+        *   [x] `wxDataViewListCtrl`
+        *   [x] `wxDataViewTreeCtrl`
+        *   [x] `wxEditableListBox`
         *   [x] `wxFileCtrl`
         *   [ ] `wxGenericDirCtrl`
         *   [ ] `wxHtmlListBox`
