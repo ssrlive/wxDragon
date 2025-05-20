@@ -14,4 +14,7 @@ WXD_EXPORTED void wxd_App_ProcessCallbacks();
 // Utility to free strings allocated by wxDragon C API
 WXD_EXPORTED void wxd_free_string(char* str);
 
+// New function to free an array of integers allocated by C++
+WXD_EXPORTED void wxd_free_int_array(int* ptr);
+
 #endif // WXD_APP_H 

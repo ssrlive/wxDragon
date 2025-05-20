@@ -2,7 +2,6 @@
 
 use std::ffi::CString;
 use wxdragon_sys as ffi;
-use std::os::raw::c_char;
 use crate::{DateTime, Bitmap};
 
 /// Represents the type of data stored in a variant.
@@ -110,17 +109,7 @@ impl Variant {
             },
             Variant::String(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_STRING as i32;
-                let cstr = CString::new(value.as_str()).unwrap();
-                variant.data.string_val = unsafe { 
-                    // Use standard C function strdup instead of libc::strdup
-                    let s = cstr.as_ptr();
-                    let len = libc::strlen(s) + 1;
-                    let new_s = libc::malloc(len) as *mut c_char;
-                    if !new_s.is_null() {
-                        libc::strcpy(new_s, s);
-                    }
-                    new_s
-                };
+                variant.data.string_val = CString::new(value.as_str()).unwrap_or_default().into_raw();
             },
             Variant::DateTime(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_DATETIME as i32;

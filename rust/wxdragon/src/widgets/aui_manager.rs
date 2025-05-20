@@ -407,7 +407,7 @@ impl AuiManager {
         let result = unsafe {
             let c_string = std::ffi::CStr::from_ptr(c_str);
             let string = c_string.to_string_lossy().into_owned();
-            libc::free(c_str as *mut libc::c_void);
+            ffi::wxd_free_string(c_str);
             string
         };
 

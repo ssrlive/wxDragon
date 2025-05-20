@@ -1,9 +1,10 @@
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
 use wxdragon_sys as ffi;
 
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
+use crate::utils::WxdArrayString;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
@@ -86,28 +87,16 @@ impl EditableListBox {
 
     /// Get all strings in the listbox.
     pub fn get_strings(&self) -> Vec<String> {
-        let mut count: i32 = 0;
-        let strings_ptr = unsafe { ffi::wxd_EditableListBox_GetStrings(self.window.handle_ptr(), &mut count) };
-        
-        let mut result = Vec::new();
-        
-        if !strings_ptr.is_null() && count > 0 {
-            unsafe {
-                for i in 0..count as isize {
-                    let string_ptr = *strings_ptr.offset(i);
-                    if !string_ptr.is_null() {
-                        let c_str = CStr::from_ptr(string_ptr);
-                        let string = c_str.to_string_lossy().into_owned();
-                        result.push(string);
-                        ffi::wxd_free_string(string_ptr);
-                    }
-                }
-                // Free the array itself
-                libc::free(strings_ptr as *mut libc::c_void);
-            }
+        let array_str_ptr = unsafe {
+            ffi::wxd_EditableListBox_CopyStringsToArrayString(self.window.handle_ptr())
+        };
+
+        if array_str_ptr.is_null() {
+            return Vec::new();
         }
-        
-        result
+
+        let wxd_array_string = unsafe { WxdArrayString::from_ptr(array_str_ptr, true) };
+        wxd_array_string.get_strings()
     }
 
     /// Set all strings in the listbox.

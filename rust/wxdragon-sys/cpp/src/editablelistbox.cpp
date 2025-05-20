@@ -110,4 +110,15 @@ wxd_Window_t* wxd_EditableListBox_GetListCtrl(wxd_Window_t* self) {
     
     wxListCtrl* list_ctrl = TO_WX_EDITABLELB(self)->GetListCtrl();
     return (wxd_Window_t*)list_ctrl;
+}
+
+wxd_ArrayString_t* wxd_EditableListBox_CopyStringsToArrayString(wxd_Window_t* self_ptr) {
+    if (!self_ptr) return nullptr;
+    wxEditableListBox* el = (wxEditableListBox*)self_ptr;
+    if (!el) return nullptr; // Extra check
+
+    wxArrayString* result_array = new wxArrayString(); // wxd_ArrayString_t is wxArrayString*
+    el->GetStrings(*result_array); // Fill the wxArrayString
+    
+    return (wxd_ArrayString_t*)result_array;
 } 

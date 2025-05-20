@@ -10,7 +10,7 @@ use crate::window::{Window, WxWidget};
 use crate::widgets::item_data::{HasItemData, store_item_data, get_item_data, remove_item_data};
 use crate::widgets::imagelist::ImageList;
 use std::ffi::CString;
-use std::os::raw::{c_int, c_longlong, c_void};
+use std::os::raw::{c_int, c_longlong};
 use std::any::Any;
 use std::sync::Arc;
 use wxdragon_sys as ffi;
@@ -530,7 +530,7 @@ impl ListCtrl {
             }
             
             // Free the memory allocated by the C function
-            libc::free(ptr as *mut c_void);
+            ffi::wxd_free_int_array(ptr as *mut i32);
             
             result
         }

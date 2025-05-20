@@ -470,15 +470,8 @@ impl CustomDataViewVirtualListModel {
                 if userdata.is_null() {
                     unsafe {
                         (*variant).type_ = ffi::WXD_VARIANT_TYPE_STRING as i32;
-                        let s = CString::new(format!("Error: null userdata")).unwrap();
-                        let len = libc::strlen(s.as_ptr()) + 1;
-                        let new_s = libc::malloc(len) as *mut i8;
-                        if !new_s.is_null() {
-                            libc::strcpy(new_s, s.as_ptr());
-                            (*variant).data.string_val = new_s;
-                        } else {
-                            (*variant).data.string_val = std::ptr::null_mut();
-                        }
+                        let error_message = format!("Error: null userdata");
+                        (*variant).data.string_val = CString::new(error_message).unwrap_or_default().into_raw();
                     }
                     return;
                 }
@@ -758,16 +751,7 @@ pub fn to_raw_variant(value: &Variant) -> ffi::wxd_Variant_t {
             result.type_ = ffi::WXD_VARIANT_TYPE_STRING as i32;
             
             // Use proper string duplication to ensure C++ can safely free it
-            unsafe {
-                let c_str = CString::new(val.as_str()).unwrap();
-                let s = c_str.as_ptr();
-                let len = libc::strlen(s) + 1;
-                let new_s = libc::malloc(len) as *mut i8;
-                if !new_s.is_null() {
-                    libc::strcpy(new_s, s);
-                }
-                result.data.string_val = new_s;
-            }
+            result.data.string_val = CString::new(val.as_str()).unwrap_or_default().into_raw();
         },
         Variant::DateTime(val) => {
             result.type_ = ffi::WXD_VARIANT_TYPE_DATETIME as i32;

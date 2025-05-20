@@ -144,6 +144,13 @@ void wxd_free_string(char* str) {
     }
 }
 
+// Implementation for wxd_free_int_array
+void wxd_free_int_array(int* ptr) {
+    if (ptr) {
+        free(ptr);
+    }
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif

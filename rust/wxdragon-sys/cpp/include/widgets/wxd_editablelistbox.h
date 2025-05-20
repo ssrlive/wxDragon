@@ -59,6 +59,14 @@ void wxd_EditableListBox_AddString(wxd_Window_t* self, const char* string);
  */
 wxd_Window_t* wxd_EditableListBox_GetListCtrl(wxd_Window_t* self);
 
+/**
+ * @brief Copy strings from the listbox to an array of wxd_ArrayString_t
+ * 
+ * @param self Pointer to wxEditableListBox
+ * @return Pointer to the array of strings
+ */
+wxd_ArrayString_t* wxd_EditableListBox_CopyStringsToArrayString(wxd_Window_t* self_ptr);
+
 #ifdef __cplusplus
 }
 #endif
