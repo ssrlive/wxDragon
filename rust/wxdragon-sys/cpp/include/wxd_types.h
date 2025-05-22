@@ -81,6 +81,7 @@ typedef struct wxd_Variant_t {
     } data;
 } wxd_Variant_t;
 
+/// @brief Event types represented by stable integer values in C.
 typedef enum {
     WXD_EVENT_TYPE_NULL = 0,
     WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED = 1,
@@ -238,6 +239,8 @@ typedef enum {
     // ADDED: RearrangeList event
     WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST = 141, // Event for RearrangeList when items are rearranged
 
+    WXD_EVENT_TYPE_TIMER = 200, // Added wxTimer event
+
     WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;
 
@@ -307,7 +310,7 @@ typedef struct wxd_FileDialog wxd_FileDialog_t;
 typedef struct wxd_ColourData wxd_ColourData_t;
 typedef struct wxd_ColourDialog wxd_ColourDialog_t;
 typedef struct wxd_FontData wxd_FontData_t;
-typedef struct wxd_Font wxd_Font_t;
+typedef struct wxd_Font_t wxd_Font_t;
 typedef struct wxd_FontDialog wxd_FontDialog_t;
 typedef struct wxd_TextEntryDialog wxd_TextEntryDialog_t;
 typedef struct wxd_ProgressDialog wxd_ProgressDialog_t;
@@ -439,5 +442,17 @@ typedef struct wxd_Control_t wxd_Control_t;
 // ... existing code ...
 
 typedef struct wxd_BitmapBundle_t wxd_BitmapBundle_t;
+
+/// Opaque pointer to wxFont
+typedef struct wxd_Font_t wxd_Font_t;
+
+/// Opaque pointer to wxWindow
+typedef struct wxd_Window_t wxd_Window_t;
+
+/// Opaque pointer to wxTimer
+typedef struct wxd_Timer_t wxd_Timer_t;
+
+/// Window ID type (must match wxWidgets window ID type)
+typedef int wxd_Id;
 
 #endif // WXD_TYPES_H 

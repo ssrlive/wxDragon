@@ -849,6 +849,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_COMMAND_LISTBOX_SELECTED, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_TIMER:
+            wx_handler->Bind(wxEVT_TIMER, functor);
+            bound = true;
+            break;
         default:
             wxLogWarning("wxd_EvtHandler_Bind: Unsupported WXDEventTypeCEnum value %d for handler %p.", (int)eventTypeC, wx_handler);
             bound = false;

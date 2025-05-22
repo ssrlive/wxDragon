@@ -26,6 +26,7 @@ pub mod types;
 pub mod utils;
 pub mod widgets;
 pub mod window;
+pub mod timer;
 
 // Re-export common utilities
 pub use utils::WxdArrayString;
@@ -163,3 +164,8 @@ pub use dc::{
     BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
     WindowDC,
 };
+
+// Re-export Timer functionality
+pub use timer::Timer;
+
+

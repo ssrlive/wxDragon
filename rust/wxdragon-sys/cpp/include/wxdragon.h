@@ -95,6 +95,9 @@ extern "C" {
 #include "widgets/wxd_editablelistbox.h" // For wxEditableListBox
 #include "widgets/wxd_aui.h"
 
+// Timer
+#include "core/wxd_timer.h"
+
 // Other categories
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"

@@ -331,6 +331,9 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_ACTIVATED);
     pub const AUI_RENDER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_RENDER);
 
+    // Timer event
+    pub const TIMER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TIMER);
+
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {
         self.0
