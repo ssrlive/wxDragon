@@ -1,20 +1,22 @@
+use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
+use wxdragon::geometry::Size;
 use wxdragon::id;
 use wxdragon::prelude::*;
 use wxdragon::widgets::checklistbox::CheckListBoxStyle;
 use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
 use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
+use wxdragon::widgets::imagelist::ImageList;
+use wxdragon::widgets::list_ctrl::{image_list_type, ListColumnFormat, ListCtrl, ListCtrlStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
-use wxdragon::widgets::list_ctrl::{ListCtrl, ListCtrlStyle, ListColumnFormat, image_list_type};
 use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::{
+    Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText,
+};
 use wxdragon::HasItemData;
 use wxdragon::ListItemState;
-use wxdragon::widgets::{
-    Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText
-};
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
-use wxdragon::geometry::Size;
+// TODO: Re-evaluate create_section_title usage
+// use crate::utils::create_section_title;
 
 // Define a custom data type for our list items
 #[derive(Clone)]
@@ -132,10 +134,32 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // --- ImageList Setup for ListCtrl ---
     let list_ctrl_image_list = ImageList::new(16, 16, true, 3);
     let mut list_ctrl_icons: Vec<i32> = Vec::new();
-    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::NormalFile, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); } // 0: File
-    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::Folder, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); }    // 1: Folder
-    if let Some(bmp) = ArtProvider::get_bitmap(ArtId::Information, ArtClient::FrameIcon, Some(Size::new(16,16))) { list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp)); } else { list_ctrl_icons.push(-1); } // 2: Info
-    
+    if let Some(bmp) = ArtProvider::get_bitmap(
+        ArtId::NormalFile,
+        ArtClient::FrameIcon,
+        Some(Size::new(16, 16)),
+    ) {
+        list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp));
+    } else {
+        list_ctrl_icons.push(-1);
+    } // 0: File
+    if let Some(bmp) =
+        ArtProvider::get_bitmap(ArtId::Folder, ArtClient::FrameIcon, Some(Size::new(16, 16)))
+    {
+        list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp));
+    } else {
+        list_ctrl_icons.push(-1);
+    } // 1: Folder
+    if let Some(bmp) = ArtProvider::get_bitmap(
+        ArtId::Information,
+        ArtClient::FrameIcon,
+        Some(Size::new(16, 16)),
+    ) {
+        list_ctrl_icons.push(list_ctrl_image_list.add_bitmap(&bmp));
+    } else {
+        list_ctrl_icons.push(-1);
+    } // 2: Info
+
     list_ctrl.set_image_list(list_ctrl_image_list, image_list_type::SMALL);
     // --- End ImageList Setup ---
 
@@ -145,7 +169,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let _item3_idx = list_ctrl.insert_item(2, "P003", Some(list_ctrl_icons[2])); // Info icon
     let _item4_idx = list_ctrl.insert_item(3, "P004", Some(list_ctrl_icons[0])); // File icon
     let _item5_idx = list_ctrl.insert_item(4, "P005", None); // No icon
-    
+
     // Create product info for each item
     let product1 = ProductInfo {
         sku: "ABC123".to_string(),
@@ -153,84 +177,74 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         in_stock: true,
         reorder_level: 5,
     };
-    
+
     let product2 = ProductInfo {
         sku: "DEF456".to_string(),
         price: 29.99,
         in_stock: false,
         reorder_level: 10,
     };
-    
+
     let product3 = ProductInfo {
         sku: "GHI789".to_string(),
         price: 39.99,
         in_stock: true,
         reorder_level: 15,
     };
-    
+
     // Attach the data to the items
     list_ctrl.set_custom_data(0u64, product1);
     list_ctrl.set_custom_data(1u64, product2);
     list_ctrl.set_custom_data(2u64, product3);
-    
+
     // Set up some colors - use valid RGB values
-    let blue_color = Colour::new(230, 240, 255, 255);  // Light blue
+    let blue_color = Colour::new(230, 240, 255, 255); // Light blue
     let yellow_color = Colour::new(255, 255, 230, 255); // Light yellow
-    let red_text = Colour::new(200, 0, 0, 255);        // Dark red
-    let green_text = Colour::new(0, 150, 0, 255);      // Dark green
-    
+    let red_text = Colour::new(200, 0, 0, 255); // Dark red
+    let green_text = Colour::new(0, 150, 0, 255); // Dark green
+
     // Format specific rows
     list_ctrl.set_item_background_colour(0, &blue_color);
     list_ctrl.set_item_background_colour(2, &yellow_color);
     list_ctrl.set_item_background_colour(4, &blue_color);
-    
+
     // Format specific cell text
     list_ctrl.set_item_text_colour(1, &red_text);
     list_ctrl.set_item_text_colour(3, &green_text);
-    
+
     // Set item data - allows storing arbitrary integer data with each row
     list_ctrl.set_custom_data(0u64, 1001);
     list_ctrl.set_custom_data(1u64, 2002);
     list_ctrl.set_custom_data(2u64, 3003);
     list_ctrl.set_custom_data(3u64, 4004);
     list_ctrl.set_custom_data(4u64, 5005);
-    
+
     // Set up selection
     list_ctrl.set_item_state(0, ListItemState::Selected, ListItemState::Selected);
-    
+
     // Set up status display
     let list_ctrl_status_label = StaticText::builder(&panel)
         .with_label("ListCtrl Status: None")
-        .with_size(Size::new(400, -1))  // Set wider width, auto height
+        .with_size(Size::new(400, -1)) // Set wider width, auto height
         .build();
-        
+
     // Add buttons to interact with the list control
     let list_ctrl_button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    
-    let add_button = Button::builder(&panel)
-        .with_label("Add Item")
-        .build();
-        
+
+    let add_button = Button::builder(&panel).with_label("Add Item").build();
+
     let remove_button = Button::builder(&panel)
         .with_label("Remove Selected")
         .build();
-        
-    let select_button = Button::builder(&panel)
-        .with_label("Select First")
-        .build();
-        
-    let edit_button = Button::builder(&panel)
-        .with_label("Edit Selected")
-        .build();
-        
-    let cleanup_button = Button::builder(&panel)
-        .with_label("Test Cleanup")
-        .build();
-        
-    let populate_button = Button::builder(&panel)
-        .with_label("Populate More")
-        .build();
-        
+
+    let select_button = Button::builder(&panel).with_label("Select First").build();
+
+    let edit_button = Button::builder(&panel).with_label("Edit Selected").build();
+
+    let cleanup_button = Button::builder(&panel).with_label("Test Cleanup").build();
+
+    let populate_button = Button::builder(&panel).with_label("Populate More").build();
+
     list_ctrl_button_sizer.add(&add_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&remove_button, 0, SizerFlag::All, 5);
     list_ctrl_button_sizer.add(&select_button, 0, SizerFlag::All, 5);
@@ -241,18 +255,15 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // --- ADDED: EditableListBox Example ---
     let editable_listbox = EditableListBox::builder(&panel)
         .with_label("Editable List")
-        .with_style(EditableListBoxStyle::AllowNew|EditableListBoxStyle::AllowEdit|EditableListBoxStyle::AllowDelete)
+        .with_style(
+            EditableListBoxStyle::AllowNew
+                | EditableListBoxStyle::AllowEdit
+                | EditableListBoxStyle::AllowDelete,
+        )
         .build();
 
     // Add some initial items to the editable listbox
-    editable_listbox.set_strings(&[
-        "Task 1", 
-        "Task 2", 
-        "Task 3", 
-        "Click + to add more tasks",
-        "Select a task and click - to remove it",
-        "Use the up/down buttons to reorder tasks"
-    ]);
+    editable_listbox.set_strings(&["Task 1", "Task 2", "Task 3"]);
 
     let editable_listbox_status_label = StaticText::builder(&panel)
         .with_label("EditableListBox: Use buttons to modify list")
@@ -262,8 +273,15 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let list_sizer_main = BoxSizer::builder(Orientation::Vertical).build();
     let list_row_sizer = BoxSizer::builder(Orientation::Horizontal).build();
     let list_box_col = BoxSizer::builder(Orientation::Vertical).build();
+    // TODO: Re-evaluate create_section_title usage
+    // listbox_sizer.add(&create_section_title(&panel, "ListBox"), 0, SizerFlag::Expand | SizerFlag::Bottom, 5);
     list_box_col.add(&list_box, 1, SizerFlag::Expand | SizerFlag::All, 5);
-    list_box_col.add(&listbox_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    list_box_col.add(
+        &listbox_status_label,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
     list_row_sizer.add_sizer(&list_box_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
     let check_list_col = BoxSizer::builder(Orientation::Vertical).build();
     check_list_col.add(&checklistbox, 1, SizerFlag::Expand | SizerFlag::All, 5);
@@ -279,12 +297,22 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let choice_row_sizer = BoxSizer::builder(Orientation::Horizontal).build();
     let choice_col = BoxSizer::builder(Orientation::Vertical).build();
     choice_col.add(&choice_ctrl, 0, SizerFlag::All, 5);
-    choice_col.add(&choice_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    choice_col.add(
+        &choice_status_label,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
     choice_row_sizer.add_sizer(&choice_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
     let combo_col = BoxSizer::builder(Orientation::Vertical).build();
     combo_col.add(&combo_box, 0, SizerFlag::All, 5);
-    combo_col.add(&combo_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    combo_col.add(
+        &combo_status_label,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
     choice_row_sizer.add_sizer(&combo_col, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
     // ADDED: Add the choice/combo row sizer to the main vertical sizer
@@ -293,16 +321,41 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // Add ListCtrl and its status label
     let list_ctrl_col_sizer = BoxSizer::builder(Orientation::Vertical).build();
     list_ctrl_col_sizer.add(&list_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 5); // ListCtrl takes available space
-    list_ctrl_col_sizer.add_sizer(&list_ctrl_button_sizer, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
+    list_ctrl_col_sizer.add_sizer(
+        &list_ctrl_button_sizer,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
     // Make sure status label has enough space and uses the full width
-    list_ctrl_col_sizer.add(&list_ctrl_status_label, 0, SizerFlag::Expand | SizerFlag::All, 5);
-    list_sizer_main.add_sizer(&list_ctrl_col_sizer, 1, SizerFlag::Expand | SizerFlag::All, 5); // Add ListCtrl sizer to main, taking space
+    list_ctrl_col_sizer.add(
+        &list_ctrl_status_label,
+        0,
+        SizerFlag::Expand | SizerFlag::All,
+        5,
+    );
+    list_sizer_main.add_sizer(
+        &list_ctrl_col_sizer,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        5,
+    ); // Add ListCtrl sizer to main, taking space
 
     // Add EditableListBox and its status label
     let editable_listbox_sizer = BoxSizer::builder(Orientation::Vertical).build();
     editable_listbox_sizer.add(&editable_listbox, 1, SizerFlag::Expand | SizerFlag::All, 5);
-    editable_listbox_sizer.add(&editable_listbox_status_label, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 5);
-    list_sizer_main.add_sizer(&editable_listbox_sizer, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    editable_listbox_sizer.add(
+        &editable_listbox_status_label,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
+    list_sizer_main.add_sizer(
+        &editable_listbox_sizer,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        5,
+    );
 
     panel.set_sizer(list_sizer_main, true);
     // Fit the inner panel to its contents initially
@@ -324,76 +377,54 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         true,                          // no refresh immediately
     );
 
-    // --- Bind events for list controls ---
-
-    // ListCtrl events
-    let list_ctrl_clone = list_ctrl.clone();
-    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    list_ctrl.bind(EventType::LIST_ITEM_SELECTED, move |event: Event| {
-        let item_index = event.get_item_index();
-        println!("DEBUG: List item selected, index: {}", item_index);
-        
-        if item_index != -1 {
-            // Get the item ID (the text in column 0)
-            let id_text = list_ctrl_clone.get_item_text(item_index as i64, 0);
-            println!("DEBUG: Item text for column 0: {}", id_text);
-            
-            // Get text for other columns
-            let description = list_ctrl_clone.get_item_text(item_index as i64, 1);
-            let quantity = list_ctrl_clone.get_item_text(item_index as i64, 2);
-            let notes = list_ctrl_clone.get_item_text(item_index as i64, 3);
-            println!("DEBUG: Description: {}, Quantity: {}, Notes: {}", 
-                    description, quantity, notes);
-            
-            // Also check the integer item data (this works reliably)
-            if let Some(item_data) = list_ctrl_clone.get_custom_data(item_index as u64) {
-                if let Some(int_data) = item_data.downcast_ref::<i32>() {
-                    println!("DEBUG: Item integer data: {}", int_data);
-                    
-                    // Build a status message with the information we have
-                    let status = format!(
-                        "Item: {} | Description: {} | Quantity: {} | Notes: {} | Data ID: {}", 
-                        id_text, description, quantity, notes, int_data
-                    );
-                    
-                    println!("DEBUG: Setting label to: {}", status);
-                    list_ctrl_status_label_clone.set_label(&status);
-                }
-            }
-            
-            // Check if the item has any data attached
-            let has_data = list_ctrl_clone.has_custom_data(item_index as u64);
-            println!("DEBUG: Item has custom data: {}", has_data);
-        }
-    });
-
-    // Add column click event for ListCtrl
-    let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    list_ctrl.bind(EventType::LIST_COL_CLICK, move |event| {
-        if let Some(col_index) = event.get_column() {
-            list_ctrl_status_label_clone
-                .set_label(&format!("ListCtrl Column Clicked: {}", col_index));
-        }
-    });
-
-    // ListBox selection event
-    let list_box_clone = list_box.clone();
+    // --- Event Binding ---
+    // ListBox Event Binding (Refactored)
     let listbox_status_label_clone = listbox_status_label.clone();
-    list_box.bind(EventType::COMMAND_LISTBOX_SELECTED, move |_event: Event| {
-        if let Some(selected_string) = list_box_clone.get_string_selection() {
-            let status_text = format!("Selected: {}", selected_string);
-            listbox_status_label_clone.set_label(&status_text);
-            // Note: removed status bar update as it should be in main.rs
-        } else {
-            listbox_status_label_clone.set_label("List Selection: None");
+    list_box.on_selection_changed(move |event_data| {
+        if let Some(selection_str) = event_data.get_string() {
+            listbox_status_label_clone.set_label(&format!("List Selection: {}", selection_str));
+        }
+        if let Some(index) = event_data.get_selection() {
+            println!(
+                "ListBox Selected - Index: {}, String: {:?}",
+                index,
+                event_data.get_string().unwrap_or_default()
+            );
         }
     });
 
-    // Choice selection event
-    let choice_ctrl_clone = choice_ctrl.clone();
+    list_box.on_item_double_clicked(|event_data| {
+        if let Some(index) = event_data.get_selection() {
+            println!(
+                "ListBox DoubleClicked - Index: {}, String: {:?}",
+                index,
+                event_data.get_string().unwrap_or_default()
+            );
+        }
+    });
+
+    // CheckListBox Event Binding
+    let checklistbox_status_label_clone = checklistbox_status_label.clone();
+    let checklistbox_clone = checklistbox.clone();
+    checklistbox.on_selected(move |event_data| {
+        if let Some(index) = event_data.get_selection() {
+            let is_checked = checklistbox_clone.is_checked(index);
+            let item_text = event_data.get_string().unwrap_or_else(|| "?".to_string());
+            checklistbox_status_label_clone.set_label(&format!(
+                "CheckList Sel: {} ('{}' {})",
+                index,
+                item_text,
+                if is_checked { "Checked" } else { "Unchecked" }
+            ));
+        } else {
+            checklistbox_status_label_clone.set_label("CheckList Sel: None");
+        }
+    });
+
+    // Choice selection event (Refactored)
     let choice_status_label_clone = choice_status_label.clone();
-    choice_ctrl.bind(EventType::COMMAND_CHOICE_SELECTED, move |_event: Event| {
-        if let Some(selected_string) = choice_ctrl_clone.get_string_selection() {
+    choice_ctrl.on_selection_changed(move |event_data| {
+        if let Some(selected_string) = event_data.get_string() {
             choice_status_label_clone.set_label(&format!("Choice Selection: {}", selected_string));
         } else {
             choice_status_label_clone.set_label("Choice Selection: None");
@@ -401,86 +432,51 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     });
 
     // ComboBox events
-    let combo_box_clone = combo_box.clone();
     let combo_status_label_clone = combo_status_label.clone();
-    combo_box.bind(
-        EventType::COMMAND_COMBOBOX_SELECTED,
-        move |_event: Event| {
-            if let Some(selected_string) = combo_box_clone.get_string_selection() {
-                combo_status_label_clone.set_label(&format!("Combo Selected: {}", selected_string));
-            } else {
-                combo_status_label_clone.set_label("Combo Selected: None");
-            }
-        },
-    );
-
-    let combo_box_clone = combo_box.clone();
-    let combo_status_label_clone = combo_status_label.clone();
-    combo_box.bind(EventType::TEXT, move |_event: Event| {
-        let current_text = combo_box_clone.get_value();
-        combo_status_label_clone.set_label(&format!("Combo Text: {}", current_text));
+    combo_box.on_selection_changed(move |event_data| {
+        if let Some(selected_string) = event_data.get_string() {
+            combo_status_label_clone.set_label(&format!("Combo Selected: {}", selected_string));
+        } else {
+            combo_status_label_clone.set_label("Combo Selected: None");
+        }
     });
 
-    let combo_box_clone = combo_box.clone();
-    combo_box.bind(EventType::TEXT_ENTER, move |event: Event| {
-        let current_text = combo_box_clone.get_value();
-        println!("ComboBox Enter: {}", current_text);
-        event.skip(false);
+    let combo_status_label_clone = combo_status_label.clone();
+    combo_box.on_text_updated(move |event_data| {
+        if let Some(current_text) = event_data.get_string() {
+            combo_status_label_clone.set_label(&format!("Combo Text: {}", current_text));
+        }
     });
 
-    // CheckListBox selection/check event
-    let checklistbox_clone = checklistbox.clone();
-    let checklistbox_status_label_clone = checklistbox_status_label.clone();
-    checklistbox.bind(
-        EventType::COMMAND_CHECKLISTBOX_SELECTED,
-        move |_event: Event| {
-            if let Some(index) = checklistbox_clone.get_selection() {
-                // TODO: Needs GetInt
-                let is_checked = checklistbox_clone.is_checked(index);
-                let item_text = checklistbox_clone
-                    .get_string(index)
-                    .unwrap_or_else(|| "?".to_string());
-                checklistbox_status_label_clone.set_label(&format!(
-                    "CheckList Sel: {} ('{}' {})",
-                    index,
-                    item_text,
-                    if is_checked { "Checked" } else { "Unchecked" }
-                ));
-            } else {
-                checklistbox_status_label_clone.set_label("CheckList Sel: None");
-            }
-        },
-    );
+    combo_box.on_enter_pressed(move |event_data| {
+        if let Some(current_text) = event_data.get_string() {
+            println!("ComboBox Enter: {}", current_text);
+        }
+    });
 
     // EditableListBox events - basic selection event
     let status_label_clone1 = editable_listbox_status_label.clone();
-    editable_listbox.bind(EventType::COMMAND_LISTBOX_SELECTED, 
-        move |_event: Event| {
-            // Simple update without accessing complex methods
-            status_label_clone1.set_label("Item selected in EditableListBox");
-        }
-    );
-    
+    editable_listbox.on_selection_changed(move |_event_data| {
+        // Simple update without accessing complex methods
+        status_label_clone1.set_label("Item selected in EditableListBox");
+    });
+
     // Bind event for when editing begins
     let status_label_clone2 = editable_listbox_status_label.clone();
-    editable_listbox.bind(EventType::LIST_BEGIN_LABEL_EDIT, 
-        move |_event: Event| {
-            status_label_clone2.set_label("Editing item...");
-        }
-    );
-    
+    editable_listbox.on_begin_label_edit(move |_event_data| {
+        status_label_clone2.set_label("Editing item...");
+    });
+
     // Bind event for when editing ends
     let status_label_clone3 = editable_listbox_status_label.clone();
-    editable_listbox.bind(EventType::LIST_END_LABEL_EDIT, 
-        move |_event: Event| {
-            status_label_clone3.set_label("Item edited");
-        }
-    );
+    editable_listbox.on_end_label_edit(move |_event_data| {
+        status_label_clone3.set_label("Item edited");
+    });
 
     // Edit button
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    edit_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+    edit_button.on_click(move |_| {
         let selected_item = list_ctrl_clone.get_first_selected_item();
         if selected_item >= 0 {
             // Start editing the label of the selected item
@@ -492,11 +488,11 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             list_ctrl_status_label_clone.set_label("Please select an item to edit");
         }
     });
-    
+
     // Bind button events
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    add_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+    add_button.on_click(move |_| {
         println!("Add Item button clicked");
         let count = list_ctrl_clone.get_item_count();
         let new_item_text = format!("P{:03}", count + 1);
@@ -505,28 +501,29 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         list_ctrl_clone.set_item_text_by_column(new_idx as i64, 2, "0");
         list_ctrl_status_label_clone.set_label(&format!("Added new item {}", new_idx));
     });
-    
+
     // Remove button
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    remove_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+    remove_button.on_click(move |_| {
         let selected_item = list_ctrl_clone.get_first_selected_item();
         if selected_item >= 0 {
             // Delete the selected item
             if list_ctrl_clone.delete_item(selected_item as i64) {
                 list_ctrl_status_label_clone.set_label(&format!("Removed item {}", selected_item));
             } else {
-                list_ctrl_status_label_clone.set_label(&format!("Failed to remove item {}", selected_item));
+                list_ctrl_status_label_clone
+                    .set_label(&format!("Failed to remove item {}", selected_item));
             }
         } else {
             list_ctrl_status_label_clone.set_label("Please select an item to remove");
         }
     });
-    
+
     // Select first button
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    select_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+    select_button.on_click(move |_| {
         // Ensure first item exists
         if list_ctrl_clone.get_item_count() > 0 {
             // Select the first item
@@ -538,22 +535,24 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             list_ctrl_status_label_clone.set_label("List is empty");
         }
     });
-    
+
     // Bind events for item editing
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    list_ctrl.bind(EventType::LIST_BEGIN_LABEL_EDIT, move |_| {
+    list_ctrl.on_begin_label_edit(move |_| {
         list_ctrl_status_label_clone.set_label("Started editing label...");
     });
-    
+
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    list_ctrl.bind(EventType::LIST_END_LABEL_EDIT, move |event: Event| {
+    list_ctrl.on_end_label_edit(move |event_data| {
         // Check if edit was cancelled - note: we need to handle this correctly
-        let cancelled = event.is_edit_cancelled().unwrap_or(true);
+        let cancelled = event_data.is_edit_cancelled().unwrap_or(true);
         if cancelled {
             list_ctrl_status_label_clone.set_label("Label edit cancelled");
         } else {
-            let _item_index = event.get_item_index();
-            let label = event.get_label().unwrap_or_else(|| String::from("<no label>"));
+            let _item_index = event_data.get_item_index();
+            let label = event_data
+                .get_label()
+                .unwrap_or_else(|| String::from("<no label>"));
             list_ctrl_status_label_clone.set_label(&format!("Label changed to: {}", label));
         }
     });
@@ -561,16 +560,16 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // Cleanup button handler
     let list_ctrl_clone = list_ctrl.clone();
     let list_ctrl_status_label_clone = list_ctrl_status_label.clone();
-    cleanup_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| {
+    cleanup_button.on_click(move |_| {
         println!("Cleanup button clicked - calling explicit cleanup");
         list_ctrl_clone.cleanup_custom_data();
         list_ctrl_status_label_clone.set_label("Manual cleanup completed");
     });
 
-    let list_ctrl_clone_populate = list_ctrl.clone(); 
-    populate_button.bind(EventType::COMMAND_BUTTON_CLICKED, move |_| { 
+    let list_ctrl_clone_populate = list_ctrl.clone();
+    populate_button.on_click(move |_| {
         println!("Populate ListCtrl with more items button clicked");
-        for i in 5..15 { 
+        for i in 5..15 {
             let item_text = format!("Item {}", i + 1);
             list_ctrl_clone_populate.insert_item(i as i64, &item_text, None);
         }
@@ -579,14 +578,14 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     // Set column text for all items
     for i in 0..5 {
         let item_idx = i as i64;
-        
+
         // Set the main item label (column 0)
         let label = format!("P{:03}", i + 1);
         list_ctrl.set_item_text(item_idx, &label);
-        
+
         // Get in-stock status based on even/odd
         let is_in_stock = i % 2 == 0;
-        
+
         // Set colors based on availability
         if is_in_stock {
             list_ctrl.set_item_background_colour(item_idx, &blue_color);
@@ -595,6 +594,31 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             list_ctrl.set_item_text_colour(item_idx, &red_text);
         }
     }
+
+    // ComboBox events (Refactored)
+    let combo_status_label_selected = combo_status_label.clone();
+    combo_box.on_selection_changed(move |event_data| {
+        if let Some(selected_string) = event_data.get_string() {
+            combo_status_label_selected.set_label(&format!("Combo Selected: {}", selected_string));
+        } else {
+            combo_status_label_selected.set_label("Combo Selected: None");
+        }
+    });
+
+    let combo_status_label_text_changed = combo_status_label.clone();
+    combo_box.on_text_updated(move |event_data| {
+        if let Some(current_text) = event_data.get_string() {
+            combo_status_label_text_changed.set_label(&format!("Combo Text: {}", current_text));
+        }
+    });
+
+    combo_box.on_enter_pressed(move |event_data| {
+        if let Some(text_val) = event_data.get_string() {
+            println!("ComboBox Enter: {}", text_val);
+        } else {
+            println!("ComboBox Enter: (no text in event data)");
+        }
+    });
 
     // Return the controls struct
     ListsTabControls {

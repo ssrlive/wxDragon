@@ -2,6 +2,7 @@
 //! Safe wrapper for wxToolBar.
 
 use crate::bitmap::Bitmap;
+use crate::event::{Event, EventType, WindowEvents, WxEvtHandler};
 use crate::id::Id;
 use crate::menus::ItemKind; // Reuse ItemKind for tool types
 use crate::window::{Window, WxWidget};
@@ -46,6 +47,46 @@ impl BitOr for ToolBarStyle {
 impl BitOrAssign for ToolBarStyle {
     fn bitor_assign(&mut self, rhs: Self) {
         *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
+    }
+}
+
+/// Events for ToolBar
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ToolBarEvent {
+    /// Menu event (tool clicked)
+    Menu,
+}
+
+/// Event data for a ToolBar event
+#[derive(Debug)]
+pub struct ToolBarEventData {
+    event: Event,
+}
+
+impl ToolBarEventData {
+    /// Create a new ToolBarEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the tool that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the integer value associated with this event (typically the tool ID)
+    pub fn get_int(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+
+    /// Get whether the tool is checked (for checkable tools)
+    pub fn is_checked(&self) -> Option<bool> {
+        self.event.is_checked()
     }
 }
 
@@ -224,7 +265,24 @@ impl WxWidget for ToolBar {
     }
 }
 
+// Add WxEvtHandler implementation
+impl WxEvtHandler for ToolBar {
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.window.handle_ptr() as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
 // ToolBar doesn't handle events directly, the parent (Frame) does via EventType::MENU
 // So, no WxEvtHandler impl needed for ToolBar itself.
 
 // No Drop needed, wxToolBar is a Window managed by its parent frame.
+
+// Implement widget-specific event handlers
+crate::implement_widget_local_event_handlers!(
+    ToolBar,
+    ToolBarEvent,
+    ToolBarEventData,
+    Menu => menu, EventType::MENU
+);
+
+impl WindowEvents for ToolBar {}

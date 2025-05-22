@@ -13,7 +13,8 @@ impl AuiTabControls {
         // Use a simple approach for the demo that doesn't try to access self inside the closure
         let toolbar_ref = self.toolbar.clone();
 
-        toolbar_ref.bind(EventType::MENU, move |event| {
+        // Use on_menu directly since we've added it to AuiToolBar via the event handlers macro
+        toolbar_ref.on_menu(move |event| {
             let id = event.get_id();
             if id == 1001 {
                 println!("Save Perspective button clicked");

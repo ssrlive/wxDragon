@@ -1,3 +1,4 @@
+use crate::event::{Event, EventType, WindowEvents};
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
 use crate::widget_builder;
@@ -21,6 +22,40 @@ widget_style_enum!(
     },
     default_variant: Open
 );
+
+/// Events emitted by FileCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FileCtrlEvent {
+    /// Emitted when a file selection changes
+    FileSelectionChanged,
+    /// Emitted when a folder selection changes
+    FolderSelectionChanged,
+    /// Emitted when a file is activated (typically by double-clicking)
+    FileActivated,
+}
+
+/// Event data for FileCtrl events
+#[derive(Debug)]
+pub struct FileCtrlEventData {
+    event: Event,
+}
+
+impl FileCtrlEventData {
+    /// Create a new FileCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+}
 
 #[derive(Clone)]
 pub struct FileCtrl {
@@ -105,3 +140,16 @@ widget_builder!(
 
 // Use the implement_widget_traits_with_target macro to implement traits
 implement_widget_traits_with_target!(FileCtrl, window, Window);
+
+// Implement event handlers for FileCtrl
+crate::implement_widget_local_event_handlers!(
+    FileCtrl,
+    FileCtrlEvent,
+    FileCtrlEventData,
+    FileSelectionChanged => file_selection_changed, EventType::FILE_PICKER_CHANGED,
+    FolderSelectionChanged => folder_selection_changed, EventType::DIR_PICKER_CHANGED,
+    FileActivated => file_activated, EventType::LIST_ITEM_ACTIVATED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for FileCtrl {}

@@ -1,4 +1,3 @@
-use wxdragon::id;
 use wxdragon::prelude::*;
 
 use std::thread;
@@ -7,8 +6,8 @@ use wxdragon::dialogs::colour_dialog::ColourDialog;
 use wxdragon::dialogs::file_dialog::{FileDialog, FileDialogStyle};
 use wxdragon::dialogs::font_dialog::FontDialog;
 use wxdragon::dialogs::message_dialog::{MessageDialog, MessageDialogStyle};
-use wxdragon::dialogs::progress_dialog::ProgressDialog;
-use wxdragon::dialogs::text_entry_dialog::TextEntryDialog;
+use wxdragon::dialogs::progress_dialog::{ProgressDialog, ProgressDialogStyle};
+use wxdragon::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogStyle};
 use wxdragon::widgets::notification_message::{NotificationMessage, NotificationStyle};
 use wxdragon::widgets::panel::PanelStyle;
 
@@ -154,36 +153,87 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     grid_sizer.add(&show_msg_dialog_label, 0, label_flags, 0);
     grid_sizer.add(&show_msg_dialog_btn, 1, control_flags, 0);
 
+    // Event binding is now handled in bind_events()
+
     // Add File Dialog controls
     grid_sizer.add(&file_dialog_label, 0, label_flags, 0);
     let file_btns_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    file_btns_sizer.add(&open_file_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
-    file_btns_sizer.add(&save_file_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event bindings for file dialog buttons are handled in bind_events()
+    file_btns_sizer.add(
+        &open_file_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
+    file_btns_sizer.add(
+        &save_file_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     file_btns_sizer.add_spacer(10);
-    file_btns_sizer.add(&file_dialog_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    file_btns_sizer.add(
+        &file_dialog_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&file_btns_sizer, 1, SizerFlag::Expand, 0);
 
     // Add Text Entry Dialog controls
     grid_sizer.add(&text_entry_label, 0, label_flags, 0);
     let text_entry_btns_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    text_entry_btns_sizer.add(&get_text_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
-    text_entry_btns_sizer.add(&get_password_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event bindings for text entry buttons are handled in bind_events()
+    text_entry_btns_sizer.add(
+        &get_text_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
+    text_entry_btns_sizer.add(
+        &get_password_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     text_entry_btns_sizer.add_spacer(10);
-    text_entry_btns_sizer.add(&text_entry_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    text_entry_btns_sizer.add(
+        &text_entry_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&text_entry_btns_sizer, 1, SizerFlag::Expand, 0);
 
     // Add Colour Dialog controls
     grid_sizer.add(&colour_dialog_label, 0, label_flags, 0);
     let colour_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    colour_dialog_sizer.add(&choose_colour_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event binding for colour dialog button is handled in bind_events()
+    colour_dialog_sizer.add(
+        &choose_colour_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     colour_dialog_sizer.add_spacer(10);
-    colour_dialog_sizer.add(&colour_dialog_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    colour_dialog_sizer.add(
+        &colour_dialog_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&colour_dialog_sizer, 1, SizerFlag::Expand, 0);
 
     // Add FontDialog controls
     grid_sizer.add(&font_dialog_label, 0, label_flags, 0);
     let font_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    font_dialog_sizer.add(&font_button, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event binding for font dialog button is handled in bind_events()
+    font_dialog_sizer.add(
+        &font_button,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     font_dialog_sizer.add_spacer(10);
     font_dialog_sizer.add(&font_sample_text, 1, SizerFlag::Expand | SizerFlag::All, 2);
     grid_sizer.add_sizer(&font_dialog_sizer, 1, SizerFlag::Expand, 0);
@@ -191,15 +241,27 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     // Add ProgressDialog controls
     grid_sizer.add(&progress_dialog_label, 0, label_flags, 0);
     let progress_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    progress_dialog_sizer.add(&progress_button, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event binding for progress dialog button is handled in bind_events()
+    progress_dialog_sizer.add(
+        &progress_button,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&progress_dialog_sizer, 1, SizerFlag::Expand, 0);
 
     // Add FilePickerCtrl controls
     grid_sizer.add(&file_picker_ctrl_label, 0, label_flags, 0);
     let fpc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    // Event binding for file picker control is handled in bind_events()
     fpc_sizer.add(&file_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     fpc_sizer.add_spacer(5); // Small spacer
-    fpc_sizer.add(&file_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    fpc_sizer.add(
+        &file_picker_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&fpc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- DirPickerCtrl ---
@@ -216,29 +278,51 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
 
     grid_sizer.add(&dir_picker_ctrl_label, 0, label_flags, 0);
     let dpc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    // Event binding for directory picker control is handled in bind_events()
     dpc_sizer.add(&dir_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     dpc_sizer.add_spacer(5);
-    dpc_sizer.add(&dir_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    dpc_sizer.add(
+        &dir_picker_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&dpc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- FontPickerCtrl ---
     let font_picker_ctrl_label = StaticText::builder(&dialog_panel)
         .with_label("Font Picker Ctrl:")
         .build();
-    let initial_font_for_picker = Font::new(); // Use default font for now
-    let font_picker_ctrl = FontPickerCtrl::builder(&dialog_panel)
-        .with_initial_font(Some(initial_font_for_picker))
-        .with_style(FontPickerCtrlStyle::Default | FontPickerCtrlStyle::UseFontForLabel)
-        .build();
-    let font_picker_status_label = StaticText::builder(&dialog_panel)
-        .with_label("FontPicker: Initial font set.")
+
+    // Create a fresh font specifically for the FontPickerCtrl to avoid sharing
+    let font_for_picker = Font::builder()
+        .with_point_size(12)
+        .with_face_name("Swiss")
         .build();
 
+    let font_picker_ctrl = FontPickerCtrl::builder(&dialog_panel)
+        .with_initial_font(font_for_picker)
+        .build();
+    let font_picker_status_label = StaticText::builder(&dialog_panel)
+        .with_label("Font: Default")
+        .build();
+
+    // Event binding for font picker control is handled in bind_events()
+
+    // Add the label to the grid sizer directly like other rows
     grid_sizer.add(&font_picker_ctrl_label, 0, label_flags, 0);
+
+    // Create a horizontal sizer for the controls only
     let font_pc_sizer = BoxSizer::builder(Orientation::Horizontal).build();
     font_pc_sizer.add(&font_picker_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 2);
     font_pc_sizer.add_spacer(5);
-    font_pc_sizer.add(&font_picker_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    // Use the original font_picker_status_label here, not a clone
+    font_pc_sizer.add(
+        &font_picker_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&font_pc_sizer, 1, SizerFlag::Expand, 0);
 
     // --- NotificationMessage ---
@@ -248,20 +332,31 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let show_notification_btn = Button::builder(&dialog_panel)
         .with_label("Show Notification")
         .build();
-    show_notification_btn.set_tooltip("Click to show a notification message with actions.");
     let notification_status_label = StaticText::builder(&dialog_panel)
         .with_label("Notification Status: -")
         .build();
 
     grid_sizer.add(&notification_label, 0, label_flags, 0);
     let notification_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    notification_sizer.add(&show_notification_btn, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 2);
+    // Event binding for notification button is handled in bind_events()
+    notification_sizer.add(
+        &show_notification_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
     notification_sizer.add_spacer(10);
-    notification_sizer.add(&notification_status_label, 1, SizerFlag::Expand | SizerFlag::All, 2);
+    notification_sizer.add(
+        &notification_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
     grid_sizer.add_sizer(&notification_sizer, 1, SizerFlag::Expand, 0);
 
     main_sizer.add_sizer(&grid_sizer, 1, SizerFlag::Expand | SizerFlag::All, 10);
-    dialog_panel.set_sizer_and_fit(main_sizer, true);
+    dialog_panel.set_sizer(main_sizer, true);
+    dialog_panel.fit(); // Fit the panel to its contents
 
     DialogTabControls {
         panel: dialog_panel,
@@ -277,19 +372,15 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         font_button,
         font_sample_text,
         progress_button,
-        // Added for FilePickerCtrl
         file_picker_ctrl_label,
         file_picker_ctrl,
         file_picker_status_label,
-        // Added for DirPickerCtrl
         dir_picker_ctrl_label,
         dir_picker_ctrl,
         dir_picker_status_label,
-        // Added for FontPickerCtrl
         font_picker_ctrl_label,
         font_picker_ctrl,
         font_picker_status_label,
-        // NotificationMessage
         show_notification_btn,
         notification_status_label,
     }
@@ -297,361 +388,262 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
 
 impl DialogTabControls {
     pub fn bind_events(&self, frame: &Frame) {
-        // Event handlers for Message Dialog
-        let dialog_panel_clone = self.panel.clone();
-        self.show_msg_dialog_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Show Message Dialog button clicked.");
-                let dialog = MessageDialog::builder(
-                    Some(&dialog_panel_clone),
-                    "This is an informational message from wxDragon!",
-                    "Info",
+        // Message Dialog button
+        let show_msg_btn_clone = self.show_msg_dialog_btn.clone();
+        self.show_msg_dialog_btn.on_click(move |_event| {
+            MessageDialog::builder(
+                &show_msg_btn_clone,                // Parent
+                "This is a sample message dialog.", // Message
+                "Message Dialog Title",             // Caption
+            )
+            .with_style(MessageDialogStyle::OK | MessageDialogStyle::IconInformation)
+            .build()
+            .show_modal();
+        });
+
+        // File Dialog buttons
+        let frame_clone_open = frame.clone();
+        let status_label_clone_open = self.file_dialog_status_label.clone();
+        self.open_file_btn.on_click(move |_event| {
+            let dialog = FileDialog::builder(&frame_clone_open)
+                .with_message("Choose a file to open")
+                .with_style(FileDialogStyle::Open | FileDialogStyle::FileMustExist)
+                .with_default_dir(".")
+                .with_wildcard(
+                    "Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
                 )
-                .with_style(MessageDialogStyle::OK | MessageDialogStyle::IconInformation)
                 .build();
-                dialog.show_modal();
-                println!("Message Dialog Closed.");
-            });
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                let path_option = dialog.get_path();
+                let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
+                status_label_clone_open.set_label(&format!("Opened: {}", path_str));
+                println!("File Dialog: Opened file: {}", path_str);
+            } else {
+                status_label_clone_open.set_label("Open cancelled.");
+                println!("File Dialog: Open cancelled.");
+            }
+        });
 
-        // Event handlers for File Dialog
-        let fd_status_label_clone = self.file_dialog_status_label.clone();
-        let frame_for_fd_clone = frame.clone();
-
-        let status_label_open_clone = fd_status_label_clone.clone();
-        let frame_parent_open_ctx = frame_for_fd_clone.clone();
-        self.open_file_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Open File button clicked.");
-                let dialog = FileDialog::builder(Some(&frame_parent_open_ctx))
-                    .with_message("Choose a file")
-                    .with_style(
-                        FileDialogStyle::Open
-                            | FileDialogStyle::FileMustExist
-                            | FileDialogStyle::Multiple,
-                    )
-                    .with_wildcard(
-                        "Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
-                    )
-                    .build();
-                if dialog.show_modal() == id::ID_OK {
-                    let paths = dialog.get_paths();
-                    let status = format!("Opened: {:?}", paths);
-                    status_label_open_clone.set_label(&status);
-                    println!("{}", status);
-                } else {
-                    status_label_open_clone.set_label("Open File Cancelled.");
-                    println!("Open File Cancelled.");
-                }
-                println!("Open File Dialog Closed.");
-            });
-
-        let status_label_save_clone = fd_status_label_clone.clone();
-        let frame_parent_save_ctx = frame_for_fd_clone.clone();
-        self.save_file_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Save File button clicked.");
-                let dialog = FileDialog::builder(Some(&frame_parent_save_ctx))
-                    .with_message("Save file as")
-                    .with_style(FileDialogStyle::Save | FileDialogStyle::OverwritePrompt)
-                    .with_default_file("my_document.txt")
-                    .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
-                    .build();
-                if dialog.show_modal() == id::ID_OK {
-                    if let Some(path) = dialog.get_path() {
-                        let status = format!("Saved: {}", path);
-                        status_label_save_clone.set_label(&status);
-                        println!("{}", status);
-                    } else {
-                        status_label_save_clone.set_label("Save File Error: No path returned.");
-                        println!("Save File Error: No path returned.");
-                    }
-                } else {
-                    status_label_save_clone.set_label("Save File Cancelled.");
-                    println!("Save File Cancelled.");
-                }
-                println!("Save File Dialog Closed.");
-            });
-
-        // Event handlers for Text Entry Dialog
-        let te_status_label_clone = self.text_entry_status_label.clone();
-        let frame_for_te_clone = frame.clone();
-
-        let te_status_text_clone = te_status_label_clone.clone();
-        let frame_parent_text_ctx = frame_for_te_clone.clone();
-        self.get_text_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Get Text button clicked.");
-                let dialog = TextEntryDialog::builder(
-                    Some(&frame_parent_text_ctx),
-                    "Enter some text:",
-                    "Text Input",
-                )
-                .with_default_value("Default text") // Assuming with_default_value is correct for original
+        let frame_clone_save = frame.clone();
+        let status_label_clone_save = self.file_dialog_status_label.clone();
+        self.save_file_btn.on_click(move |_event| {
+            let dialog = FileDialog::builder(&frame_clone_save)
+                .with_message("Choose a file to save to")
+                .with_style(FileDialogStyle::Save | FileDialogStyle::OverwritePrompt)
+                .with_default_dir(".")
+                .with_default_file("my_document.txt")
+                .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
                 .build();
-                if dialog.show_modal() == id::ID_OK {
-                    let entered_value = dialog.get_value().unwrap_or_else(|| "<empty>".to_string());
-                    te_status_text_clone.set_label(&format!("Text Entered: {}", entered_value));
-                } else {
-                    te_status_text_clone.set_label("Text Entry Cancelled.");
-                }
-                println!("Text Entry Dialog Closed.");
-            });
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                let path_option = dialog.get_path();
+                let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
+                status_label_clone_save.set_label(&format!("Saved to: {}", path_str));
+                println!("File Dialog: Saved to file: {}", path_str);
+            } else {
+                status_label_clone_save.set_label("Save cancelled.");
+                println!("File Dialog: Save cancelled.");
+            }
+        });
 
-        let te_status_pass_clone = te_status_label_clone.clone();
-        let frame_parent_pass_ctx = frame_for_te_clone.clone();
-        self.get_password_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Get Password button clicked.");
-                let dialog = TextEntryDialog::builder(
-                    Some(&frame_parent_pass_ctx),
-                    "Enter your password:",
-                    "Password Input",
-                )
-                .password() // Assuming .password() is correct for original
+        // Text Entry Dialog buttons
+        let frame_clone_text = frame.clone();
+        let status_label_clone_text = self.text_entry_status_label.clone();
+        self.get_text_btn.on_click(move |_event| {
+            let dialog = TextEntryDialog::builder(
+                &frame_clone_text,
+                "Please enter your name:",
+                "Text Input",
+            )
+            .with_default_value("wxDragon User")
+            .build();
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(text) = dialog.get_value() {
+                    status_label_clone_text.set_label(&format!("Entered: {}", text));
+                    println!("Text Entry Dialog: Entered text: {}", text);
+                } else {
+                    status_label_clone_text.set_label("Input: No value.");
+                    println!("Text Entry Dialog: Input: No value returned.");
+                }
+            } else {
+                status_label_clone_text.set_label("Input cancelled.");
+                println!("Text Entry Dialog: Input cancelled.");
+            }
+        });
+
+        let frame_clone_pass = frame.clone();
+        let status_label_clone_pass = self.text_entry_status_label.clone();
+        self.get_password_btn.on_click(move |_event| {
+            let dialog = TextEntryDialog::builder(
+                &frame_clone_pass,
+                "Please enter your password:",
+                "Password Input",
+            )
+            .with_style(
+                TextEntryDialogStyle::Password
+                    | TextEntryDialogStyle::Centre
+                    | TextEntryDialogStyle::Ok
+                    | TextEntryDialogStyle::Cancel,
+            )
+            .build();
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(text) = dialog.get_value() {
+                    status_label_clone_pass
+                        .set_label(&format!("Password entered (length: {})", text.len()));
+                    println!(
+                        "Text Entry Dialog: Password entered (length: {}). Value: 'REDACTED'",
+                        text.len()
+                    );
+                } else {
+                    status_label_clone_pass.set_label("Password input: No value.");
+                    println!("Text Entry Dialog: Password input: No value returned.");
+                }
+            } else {
+                status_label_clone_pass.set_label("Password input cancelled.");
+                println!("Text Entry Dialog: Password input cancelled.");
+            }
+        });
+
+        // Colour Dialog button
+        let frame_clone_colour = frame.clone();
+        let status_label_clone_colour = self.colour_dialog_status_label.clone();
+        let colour_sample_panel_clone = self.colour_dialog_status_label.clone();
+        self.choose_colour_btn.on_click(move |_event| {
+            let dialog = ColourDialog::builder(&frame_clone_colour)
+                .with_title("Select a Colour")
+                .with_initial_colour(colours::BLUE)
                 .build();
-                if dialog.show_modal() == id::ID_OK {
-                    te_status_pass_clone
-                        .set_label("Password Entered (value not shown for security)");
-                } else {
-                    te_status_pass_clone.set_label("Password Entry Cancelled.");
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(colour) = dialog.get_colour() {
+                    status_label_clone_colour.set_label(&format!("Chosen: {:?}", colour));
+                    colour_sample_panel_clone.set_background_color(colour);
+                    colour_sample_panel_clone.refresh(true, None);
+                    println!("Colour Dialog: Chosen colour: {:?}", colour);
                 }
-                println!("Password Entry Dialog Closed.");
-            });
+            } else {
+                status_label_clone_colour.set_label("Colour choice cancelled.");
+                println!("Colour Dialog: Colour choice cancelled.");
+            }
+        });
 
-        // Event handler for Colour Dialog
-        let colour_status_label_clone = self.colour_dialog_status_label.clone();
-        let frame_parent_colour_ctx = frame.clone();
-        self.choose_colour_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Choose Colour button clicked.");
-                let dialog = ColourDialog::builder(Some(&frame_parent_colour_ctx))
-                    .with_title("Choose a colour") // Assuming this is correct for original
-                    .build();
-                if dialog.show_modal() == id::ID_OK {
-                    if let Some(colour) = dialog.get_colour() {
-                        let status = format!(
-                            "Selected colour: RGB({}, {}, {})",
-                            colour.r, colour.g, colour.b
-                        );
-                        colour_status_label_clone.set_label(&status);
-                        println!("{}", status);
-                    } else {
-                        colour_status_label_clone.set_label("Colour Dialog: No colour returned.");
-                        println!("Colour Dialog: No colour returned.");
-                    }
-                } else {
-                    colour_status_label_clone.set_label("Colour Selection Cancelled.");
-                    println!("Colour Selection Cancelled.");
-                }
-                println!("Colour Dialog Closed.");
-            });
-
-        // Add a handler for the font button
-        let frame_parent_font_ctx = frame.clone();
+        // Font Dialog Button
+        let frame_clone_font = frame.clone();
         let font_sample_text_clone = self.font_sample_text.clone();
-        self.font_button
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Choose Font button clicked.");
-                let dialog = FontDialog::builder(Some(&frame_parent_font_ctx))
-                    .with_title("Choose a font") // Assuming this is correct for original
-                    .build();
-                if dialog.show_modal() == id::ID_OK {
-                    if let Some(font) = dialog.get_font() {
-                        let font_info = format!(
-                            "Font: {} ({} pt, {})",
-                            font.get_face_name(),
-                            font.get_point_size(),
-                            if font.is_underlined() {
-                                "underlined"
-                            } else {
-                                "not underlined"
-                            }
-                        );
-                        font_sample_text_clone.set_label(&font_info);
-                        println!("Selected {}", font_info);
-                    } else {
-                        font_sample_text_clone.set_label("No font selected");
-                        println!("No font was returned by the dialog");
-                    }
+        self.font_button.on_click(move |_event| {
+            let font_dialog = FontDialog::builder(&frame_clone_font).build();
+            if font_dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(font) = font_dialog.get_font() {
+                    // Create a copy of the font before setting it on the text control
+                    let font_copy = font.to_owned();
+                    font_sample_text_clone.set_font(&font_copy);
+                    font_sample_text_clone.set_label("Font Changed!");
+                    println!(
+                        "Font Dialog: Font chosen: {:?}, Family: {:?}, Size: {}, Style: {:?}, Weight: {:?}",
+                        font_copy.get_face_name(),
+                        font_copy.get_family(),
+                        font_copy.get_point_size(),
+                        font_copy.get_style(),
+                        font_copy.get_weight()
+                    );
                 } else {
-                    println!("Font Dialog Cancelled.");
+                    println!("Font Dialog: No font chosen or error retrieving font.");
                 }
-            });
+            } else {
+                println!("Font Dialog: Font choice cancelled.");
+            }
+        });
 
-        // Add a handler for the progress dialog button
-        let frame_parent_progress_ctx = frame.clone();
-        self.progress_button
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                println!("Show Progress Dialog button clicked.");
-                let dialog = ProgressDialog::builder(
-                    // Assuming original signature
-                    Some(&frame_parent_progress_ctx),
-                    "Progress Demonstration",
-                    "Processing items...",
-                    100, // Max value
-                )
-                .can_abort()
-                .can_skip()
-                .show_elapsed_time()
-                .show_remaining_time()
-                .build();
-                let mut continue_progress = true;
-                for i in 0..=100 {
-                    if !continue_progress {
-                        break;
-                    }
-                    thread::sleep(Duration::from_millis(50));
-                    let message = if i % 10 == 0 && i > 0 {
-                        Some(format!("Processed {} items...", i))
-                    } else {
-                        None
-                    };
-                    let (should_continue, was_skipped) =
-                        dialog.update_with_skip(i, message.as_deref());
-                    continue_progress = should_continue;
-                    if was_skipped {
-                        println!("Progress operation was skipped at step {}.", i);
-                    }
-                    if dialog.was_cancelled() {
-                        println!("Progress operation was cancelled by user.");
-                        break;
-                    }
+        // Progress Dialog button
+        let frame_clone_progress = frame.clone();
+        self.progress_button.on_click(move |_event| {
+            let dialog =
+                ProgressDialog::builder(&frame_clone_progress, "Processing...", "Please wait", 100)
+                    .with_style(
+                        ProgressDialogStyle::CanAbort
+                            | ProgressDialogStyle::Smooth
+                            | ProgressDialogStyle::AutoHide,
+                    )
+                    .build();
+
+            let mut keep_going = true;
+            for i in 0..=100 {
+                thread::sleep(Duration::from_millis(50));
+                if i == 50 {
+                    keep_going = dialog.update(i, Some("Halfway there!"));
+                } else {
+                    keep_going = dialog.update(i, None);
                 }
-                println!("Progress Dialog Closed.");
-            });
+                if !keep_going {
+                    println!("Progress Dialog: Aborted by user at {}%", i);
+                    break;
+                }
+            }
+            if keep_going {
+                println!("Progress Dialog: Completed.");
+            }
+        });
+
+        // NotificationMessage button
+        let frame_clone_notify = frame.clone();
+        let status_label_clone_notify = self.notification_status_label.clone();
+        self.show_notification_btn.on_click(move |_event| {
+            let notification_result = NotificationMessage::builder()
+                .with_title("wxDragon Notification")
+                .with_message("This is a notification message from the gallery example!")
+                .with_parent(&frame_clone_notify)
+                .with_style(NotificationStyle::Information)
+                .build();
+
+            match notification_result {
+                Ok(notification) => {
+                    notification.show(wxdragon::widgets::notification_message::TIMEOUT_AUTO);
+                    status_label_clone_notify.set_label("Notification shown.");
+                    println!("NotificationMessage: Shown.");
+                }
+                Err(e) => {
+                    status_label_clone_notify.set_label(&format!("Notify Err: {:?}", e));
+                    println!("NotificationMessage Error: {:?}", e);
+                }
+            }
+        });
 
         // Event handler for FilePickerCtrl
         let fpc_status_label_clone = self.file_picker_status_label.clone();
-        let file_picker_ctrl_clone = self.file_picker_ctrl.clone();
-        self.file_picker_ctrl
-            .bind(EventType::FILE_PICKER_CHANGED, move |_event: Event| {
-                let path_string: String = file_picker_ctrl_clone.get_path();
+        let fpc_clone = self.file_picker_ctrl.clone();
+        self.file_picker_ctrl.on_file_changed(move |_event| {
+            let path = fpc_clone.get_path();
+            fpc_status_label_clone.set_label(&format!("FilePicker Path: {}", path));
+            println!("FilePickerCtrl changed: {}", path);
+        });
 
-                if !path_string.is_empty() {
-                    let status = format!("Selected Path: {}", path_string);
-                    fpc_status_label_clone.set_label(&status);
-                    println!("FilePickerCtrl Path Changed: {}", path_string);
-
-                    // Set a new font (currently default) to the status label
-                    let new_font = Font::new();
-                    fpc_status_label_clone.set_font(&new_font);
-                    // Note: new_font is dropped here, but the label should have its font set.
-                } else {
-                    fpc_status_label_clone
-                        .set_label("FilePickerCtrl: No path selected or path is empty.");
-                    println!("FilePickerCtrl Path Changed: No path selected or path is empty.");
-                    // Optionally reset to a default font here too if desired
-                    let default_font = Font::new();
-                    fpc_status_label_clone.set_font(&default_font);
-                }
-            });
-
-        // Event handlers for DirPickerCtrl
-        let dir_picker_ctrl_clone = self.dir_picker_ctrl.clone();
-        let dir_picker_status_label_clone = self.dir_picker_status_label.clone();
-        self.dir_picker_ctrl
-            .bind(EventType::DIR_PICKER_CHANGED, move |_event| {
-                let selected_path = dir_picker_ctrl_clone.get_path();
-                if !selected_path.is_empty() {
-                    let status = format!("DirPicker: Selected directory: {}", selected_path);
-                    dir_picker_status_label_clone.set_label(&status);
-                    println!("{}", status);
-                } else {
-                    dir_picker_status_label_clone.set_label("DirPicker: No directory selected.");
-                    println!("DirPicker: No directory selected.");
-                }
-            });
+        // Event handler for DirPickerCtrl
+        let dpc_status_label_clone = self.dir_picker_status_label.clone();
+        let dpc_clone = self.dir_picker_ctrl.clone();
+        self.dir_picker_ctrl.on_dir_changed(move |_event| {
+            let path = dpc_clone.get_path();
+            dpc_status_label_clone.set_label(&format!("DirPicker Path: {}", path));
+            println!("DirPickerCtrl changed: {}", path);
+        });
 
         // Event handler for FontPickerCtrl
         let font_pc_status_label_clone = self.font_picker_status_label.clone();
-        let font_picker_ctrl_clone = self.font_picker_ctrl.clone(); // Clone for the closure
-        self.font_picker_ctrl
-            .bind(EventType::FONT_PICKER_CHANGED, move |_event: Event| {
-                if let Some(selected_font) = font_picker_ctrl_clone.get_selected_font() {
-                    let status = format!(
-                        "Selected Font: {} pt {}",
-                        selected_font.get_point_size(),
-                        selected_font.get_face_name()
-                    );
-                    font_pc_status_label_clone.set_label(&status);
-                    // Apply the selected font to the status label
-                    font_pc_status_label_clone.set_font(&selected_font);
-                    println!(
-                        "FontPickerCtrl Font Changed: {} pt {}",
-                        selected_font.get_point_size(),
-                        selected_font.get_face_name()
-                    );
-                } else {
-                    font_pc_status_label_clone
-                        .set_label("FontPickerCtrl: No font selected or font is invalid.");
-                    println!("FontPickerCtrl Font Changed: No font selected or font is invalid.");
-                }
-            });
-
-        // --- NotificationMessage Events ---
-        let notification_status_label_clone = self.notification_status_label.clone();
-        let panel_for_notif_handler = self.panel.clone(); // Clone for notification related event handlers
-        let frame_for_notif_parent = frame.clone(); // Clone the frame for the notification parent
-
-        self.show_notification_btn
-            .bind(EventType::COMMAND_BUTTON_CLICKED, move |_event| {
-                let notif_builder = NotificationMessage::builder()
-                    .with_title("Hello from wxDragon!")
-                    .with_message("This is a notification with actions.")
-                    .with_style(NotificationStyle::Information);
-
-                match notif_builder.build() {
-                    Ok(notif_msg) => {
-                        // Make notif_msg mutable to call set_parent
-                        // Set the main frame as the parent
-                        if let Err(e) = notif_msg.set_parent(Some(&frame_for_notif_parent)) {
-                            println!("Error: Failed to set notification parent: {:?}", e);
-                        }
-
-                        if let Err(e) = notif_msg.add_action(101, "Action 1") {
-                            println!("Error: Failed to add action 1: {:?}", e);
-                        }
-                        if let Err(e) = notif_msg.add_action(102, "Action 2") {
-                            println!("Error: Failed to add action 2: {:?}", e);
-                        }
-
-                        if notif_msg.show(TIMEOUT_NEVER) {
-                            // Changed to TIMEOUT_NEVER
-                            notification_status_label_clone
-                                .set_label("Notification shown (TIMEOUT_NEVER).");
-                            println!("Info: Notification shown (TIMEOUT_NEVER).");
-                        } else {
-                            notification_status_label_clone
-                                .set_label("Failed to show notification.");
-                            println!("Error: Failed to show notification.");
-                        }
-                    }
-                    Err(e) => {
-                        notification_status_label_clone.set_label("Failed to build notification.");
-                        println!("Error: Failed to build notification: {:?}", e);
-                    }
-                }
-            });
-
-        // Bind notification events to the panel
-        let notif_status_click_clone = self.notification_status_label.clone();
-        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_CLICK, move |_event| {
-            notif_status_click_clone.set_label("Notification: Clicked!");
-            println!("Info: Notification Clicked");
+        let font_picker_ctrl_clone = self.font_picker_ctrl.clone();
+        self.font_picker_ctrl.on_font_changed(move |_event| {
+            let selected_font = font_picker_ctrl_clone.get_selected_font();
+            let mut font_desc = "FontPicker: No font selected".to_string();
+            if let Some(font) = selected_font {
+                let font_desc_base = format!(
+                    "{}, {}pt, {:?}, {:?}",
+                    font.get_face_name(),
+                    font.get_point_size(),
+                    font.get_style(),
+                    font.get_weight()
+                );
+                font_desc = format!("Font: {}", font_desc_base);
+            }
+            font_pc_status_label_clone.set_label(&font_desc);
+            println!("{}", font_desc);
         });
 
-        let notif_status_dismiss_clone = self.notification_status_label.clone();
-        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_DISMISSED, move |_event| {
-            notif_status_dismiss_clone.set_label("Notification: Dismissed!");
-            println!("Info: Notification Dismissed");
-        });
-
-        let notif_status_action_clone = self.notification_status_label.clone();
-        panel_for_notif_handler.bind(EventType::NOTIFICATION_MESSAGE_ACTION, move |event| {
-            let action_id = event.get_id(); // wxCommandEvent::GetId()
-            notif_status_action_clone
-                .set_label(&format!("Notification: Action {} clicked!", action_id));
-            println!("Info: Notification Action {} clicked", action_id);
-        });
+        // Note: Notification message event binding has been temporarily removed
     }
 }

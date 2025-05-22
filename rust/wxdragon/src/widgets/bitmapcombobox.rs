@@ -1,7 +1,7 @@
 //! Safe wrapper for wxBitmapComboBox.
 
 use crate::bitmap::Bitmap;
-use crate::event::WxEvtHandler;
+use crate::event::EventType;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -191,3 +191,19 @@ widget_builder!(
 
 // Apply common trait implementations for this widget
 implement_widget_traits_with_target!(BitmapComboBox, window, Window);
+
+// Implement the ComboBox events for BitmapComboBox
+use crate::implement_widget_local_event_handlers;
+use crate::widgets::combobox::{ComboBoxEvent, ComboBoxEventData};
+
+// Implement the event handlers for BitmapComboBox
+implement_widget_local_event_handlers!(
+    BitmapComboBox,
+    ComboBoxEvent,
+    ComboBoxEventData,
+    Selected => selection_changed, EventType::COMMAND_COMBOBOX_SELECTED
+);
+
+// Also implement TextEvents for text entry capabilities
+use crate::event::TextEvents;
+impl TextEvents for BitmapComboBox {}

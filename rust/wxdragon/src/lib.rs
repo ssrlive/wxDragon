@@ -90,7 +90,7 @@ pub use crate::widgets::list_ctrl::{
 };
 
 // ADDED: Re-export ItemData functionality
-pub use crate::widgets::item_data::{ItemData, HasItemData};
+pub use crate::widgets::item_data::{HasItemData, ItemData};
 
 // --- ADDED: Menus Module ---
 pub use menus::{ItemKind, Menu, MenuBar, MenuItem};

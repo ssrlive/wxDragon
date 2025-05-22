@@ -1,3 +1,5 @@
+// use crate::event::WxEvtHandler; // This might be unused if all macros import it directly.
+
 /// Macros to simplify implementation of common patterns in the codebase.
 
 /// Creates a builder pattern for widgets
@@ -114,6 +116,64 @@ macro_rules! widget_builder {
     };
 }
 
+/// Implements common widget traits.
+///
+/// This macro generates implementations for:
+/// - WxWidget trait
+/// - Deref/DerefMut to Window
+/// - WxEvtHandler trait
+/// - Drop implementation with empty body (for child widgets)
+///
+/// # Parameters
+///
+/// * `name` - The name of the widget struct
+/// * `field` - The name of the field within the struct that is a Window
+///
+/// # Example
+///
+/// ```ignore
+/// implement_widget_traits!(MyWidget, window_field);
+/// ```
+#[macro_export]
+macro_rules! implement_widget_traits {
+    ($widget_name:ident, $window_field:ident) => {
+        // Don't import WxEvtHandler here as modules might already have it imported
+        // use $crate::event::WxEvtHandler;
+
+        impl $crate::window::WxWidget for $widget_name {
+            fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+                self.$window_field.handle_ptr()
+            }
+        }
+
+        impl std::ops::Deref for $widget_name {
+            type Target = $crate::window::Window;
+            fn deref(&self) -> &Self::Target {
+                &self.$window_field
+            }
+        }
+
+        impl std::ops::DerefMut for $widget_name {
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                &mut self.$window_field
+            }
+        }
+
+        impl $crate::event::WxEvtHandler for $widget_name {
+            unsafe fn get_event_handler_ptr(&self) -> *mut wxdragon_sys::wxd_EvtHandler_t {
+                self.$window_field.get_event_handler_ptr()
+            }
+        }
+
+        impl Drop for $widget_name {
+            fn drop(&mut self) {
+                // Child windows are managed by their parent in wxWidgets,
+                // so no explicit cleanup is needed here.
+            }
+        }
+    };
+}
+
 /// Implements common widget traits with a custom target type for Deref
 ///
 /// This macro generates implementations for:
@@ -139,37 +199,39 @@ macro_rules! widget_builder {
 /// ```
 #[macro_export]
 macro_rules! implement_widget_traits_with_target {
-    ($widget_name:ident, $field:ident, $target_type:ty) => {
-        impl WxWidget for $widget_name {
-            fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-                self.$field.handle_ptr()
+    ($widget_name:ident, $window_field:ident, $target_ty:ty) => {
+        // Don't import WxEvtHandler here as modules might already have it imported
+        // use $crate::event::WxEvtHandler;
+
+        impl $crate::window::WxWidget for $widget_name {
+            fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+                self.$window_field.handle_ptr()
             }
         }
 
         impl std::ops::Deref for $widget_name {
-            type Target = $target_type;
+            type Target = $target_ty;
             fn deref(&self) -> &Self::Target {
-                &self.$field
+                &self.$window_field
             }
         }
 
         impl std::ops::DerefMut for $widget_name {
             fn deref_mut(&mut self) -> &mut Self::Target {
-                &mut self.$field
+                &mut self.$window_field
             }
         }
 
-        impl WxEvtHandler for $widget_name {
-            unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-                self.$field.get_event_handler_ptr()
+        impl $crate::event::WxEvtHandler for $widget_name {
+            unsafe fn get_event_handler_ptr(&self) -> *mut wxdragon_sys::wxd_EvtHandler_t {
+                self.$window_field.get_event_handler_ptr()
             }
         }
 
-        // No explicit Drop implementation needed - child widget managed by parent
         impl Drop for $widget_name {
             fn drop(&mut self) {
-                // Child widgets are typically managed by their parent in wxWidgets
-                // The field's Drop implementation handles event unbinding
+                // Child windows are managed by their parent in wxWidgets,
+                // so no explicit cleanup is needed here.
             }
         }
     };

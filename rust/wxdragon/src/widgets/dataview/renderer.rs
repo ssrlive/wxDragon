@@ -1,8 +1,8 @@
 //! DataViewRenderer implementation.
 
+use super::{DataViewAlign, DataViewCellMode, VariantType};
 use std::ffi::CString;
 use wxdragon_sys as ffi;
-use super::{VariantType, DataViewCellMode, DataViewAlign};
 
 /// Base trait for DataView renderers.
 ///
@@ -130,11 +130,12 @@ impl DataViewIconTextRenderer {
     /// # Parameters
     ///
     /// * `variant_type` - The type of data this renderer can display (e.g., String for text part)
-    /// * `mode` - The cell mode 
+    /// * `mode` - The cell mode
     /// * `align` - The alignment
     pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign) -> Self {
         let variant_type_str = variant_type.to_type_string();
-        let variant_type_cstr = CString::new(variant_type_str).unwrap_or_else(|_| CString::new("string").unwrap());
+        let variant_type_cstr =
+            CString::new(variant_type_str).unwrap_or_else(|_| CString::new("string").unwrap());
         let handle = unsafe {
             ffi::wxd_DataViewIconTextRenderer_Create(
                 variant_type_cstr.as_ptr(),
@@ -239,7 +240,14 @@ impl DataViewSpinRenderer {
     /// * `min` - Minimum value
     /// * `max` - Maximum value
     /// * `inc` - Increment value
-    pub fn new(variant_type: VariantType, mode: DataViewCellMode, align: DataViewAlign, min: i32, max: i32, inc: i32) -> Self {
+    pub fn new(
+        variant_type: VariantType,
+        mode: DataViewCellMode,
+        align: DataViewAlign,
+        min: i32,
+        max: i32,
+        inc: i32,
+    ) -> Self {
         let variant_type_str = variant_type.to_type_string();
         let variant_type_cstr = CString::new(variant_type_str).unwrap();
         let handle = unsafe {
@@ -278,14 +286,19 @@ impl DataViewChoiceRenderer {
     /// * `choices` - A list of choices to display in the dropdown
     /// * `mode` - The cell mode
     /// * `align` - The alignment
-    pub fn new(variant_type: VariantType, choices: &[&str], mode: DataViewCellMode, align: DataViewAlign) -> Self {
+    pub fn new(
+        variant_type: VariantType,
+        choices: &[&str],
+        mode: DataViewCellMode,
+        align: DataViewAlign,
+    ) -> Self {
         // Convert choices to a comma-separated string
         let choices_str = choices.join(",");
         let choices_cstr = CString::new(choices_str).unwrap();
-        
+
         let variant_type_str = variant_type.to_type_string();
         let variant_type_cstr = CString::new(variant_type_str).unwrap();
-        
+
         let handle = unsafe {
             ffi::wxd_DataViewChoiceRenderer_Create(
                 variant_type_cstr.as_ptr(),
@@ -294,7 +307,7 @@ impl DataViewChoiceRenderer {
                 align.bits(),
             )
         };
-        
+
         Self { handle }
     }
 }

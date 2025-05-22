@@ -3,7 +3,7 @@ use std::ptr;
 use wxdragon_sys as ffi;
 
 use crate::datetime::DateTime;
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
 use crate::widget_builder;
@@ -24,6 +24,38 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by DatePickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DatePickerCtrlEvent {
+    /// Emitted when the date is changed
+    DateChanged,
+}
+
+/// Event data for DatePickerCtrl events
+#[derive(Debug)]
+pub struct DatePickerCtrlEventData {
+    event: Event,
+}
+
+impl DatePickerCtrlEventData {
+    /// Create a new DatePickerCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the selected date
+    pub fn get_date(&self) -> Option<DateTime> {
+        if self.event.is_null() {
+            return None;
+        }
+        let date_ptr = unsafe { ffi::wxd_CalendarEvent_GetDate(self.event.0) };
+        if date_ptr.is_null() {
+            return None;
+        }
+        Some(unsafe { DateTime::from_raw(*date_ptr) })
+    }
+}
 
 // --- wxDatePickerCtrl ---
 #[derive(Clone)]
@@ -105,6 +137,17 @@ impl DatePickerCtrl {
         }
     }
 }
+
+// Implement event handlers for DatePickerCtrl
+crate::implement_widget_local_event_handlers!(
+    DatePickerCtrl,
+    DatePickerCtrlEvent,
+    DatePickerCtrlEventData,
+    DateChanged => date_changed, EventType::DATE_CHANGED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for DatePickerCtrl {}
 
 // Use the widget_builder macro to generate the DatePickerCtrlBuilder implementation
 widget_builder!(

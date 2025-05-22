@@ -1,6 +1,7 @@
 //! Safe wrapper for wxComboBox.
 
-use crate::event::WxEvtHandler;
+use crate::event::event_data::CommandEventData;
+use crate::event::{Event, EventType, TextEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
@@ -53,13 +54,42 @@ impl ComboBox {
         }
     }
 
-    /// Gets the string value of the currently selected item in the list.
-    /// Returns `None` if no item is selected.
+    /// Gets the string selection from the combo box.
     pub fn get_string_selection(&self) -> Option<String> {
-        // Reuse the get_string_from_ffi helper
-        get_string_from_ffi(|buffer, len| unsafe {
-            ffi::wxd_ComboBox_GetStringSelection(self.window.as_ptr() as *mut _, buffer, len)
-        })
+        const DEFAULT_BUF_SIZE: usize = 256;
+        let mut buffer: Vec<u8> = Vec::with_capacity(DEFAULT_BUF_SIZE);
+        let mut actual_len: i32;
+
+        unsafe {
+            actual_len = ffi::wxd_ComboBox_GetStringSelection(
+                self.window.as_ptr() as *mut _,
+                buffer.as_mut_ptr() as *mut std::os::raw::c_char,
+                buffer.capacity() as i32,
+            );
+
+            if actual_len < 0 {
+                // Indicates an error or no selection
+                return None;
+            }
+
+            if actual_len as usize > buffer.capacity() {
+                // Buffer was too small, resize and try again
+                buffer.reserve_exact(actual_len as usize - buffer.capacity());
+                actual_len = ffi::wxd_ComboBox_GetStringSelection(
+                    self.window.as_ptr() as *mut _,
+                    buffer.as_mut_ptr() as *mut std::os::raw::c_char,
+                    buffer.capacity() as i32,
+                );
+            }
+
+            if actual_len >= 0 {
+                buffer.set_len(actual_len as usize); // Set actual length of string
+                                                     // Create String from UTF-8 bytes, handling potential invalid UTF-8
+                Some(String::from_utf8_lossy(&buffer).into_owned())
+            } else {
+                None // Error occurred
+            }
+        }
     }
 
     /// Selects the item at the given index in the list.
@@ -73,9 +103,41 @@ impl ComboBox {
     /// Gets the string at the specified index in the list.
     /// Returns `None` if the index is out of bounds.
     pub fn get_string(&self, index: u32) -> Option<String> {
-        get_string_from_ffi(|buffer, len| unsafe {
-            ffi::wxd_ComboBox_GetString(self.window.as_ptr() as *mut _, index as i32, buffer, len)
-        })
+        unsafe {
+            let mut buffer: [c_char; 256] = [0; 256]; // Reasonable buffer size
+            let len_needed = ffi::wxd_ComboBox_GetString(
+                self.window.as_ptr() as *mut _,
+                index as i32,
+                buffer.as_mut_ptr(),
+                buffer.len() as i32,
+            );
+
+            if len_needed <= 0 {
+                return None; // Error or invalid index
+            }
+
+            let len_needed_usize = len_needed as usize;
+            if len_needed_usize <= buffer.len() {
+                let c_str = CStr::from_ptr(buffer.as_ptr());
+                Some(c_str.to_string_lossy().into_owned())
+            } else {
+                // Buffer too small, try again with required size
+                let mut vec_buffer: Vec<c_char> = vec![0; len_needed_usize];
+                let len_needed_2 = ffi::wxd_ComboBox_GetString(
+                    self.window.as_ptr() as *mut _,
+                    index as i32,
+                    vec_buffer.as_mut_ptr(),
+                    vec_buffer.len() as i32,
+                );
+                if len_needed_2 == len_needed {
+                    let c_str = CStr::from_ptr(vec_buffer.as_ptr());
+                    Some(c_str.to_string_lossy().into_owned())
+                } else {
+                    // Something went wrong
+                    None
+                }
+            }
+        }
     }
 
     /// Gets the number of items in the combobox list.
@@ -85,10 +147,39 @@ impl ComboBox {
 
     /// Gets the current text value from the text entry field.
     pub fn get_value(&self) -> String {
-        get_string_from_ffi(|buffer, len| unsafe {
-            ffi::wxd_ComboBox_GetValue(self.window.as_ptr() as *mut _, buffer, len)
-        })
-        .unwrap_or_default() // Should always return a string, even if empty
+        unsafe {
+            let mut buffer: [c_char; 256] = [0; 256]; // Reasonable buffer size
+            let len_needed = ffi::wxd_ComboBox_GetValue(
+                self.window.as_ptr() as *mut _,
+                buffer.as_mut_ptr(),
+                buffer.len() as i32,
+            );
+
+            if len_needed <= 0 {
+                return String::new(); // Return empty string for errors
+            }
+
+            let len_needed_usize = len_needed as usize;
+            if len_needed_usize <= buffer.len() {
+                let c_str = CStr::from_ptr(buffer.as_ptr());
+                c_str.to_string_lossy().into_owned()
+            } else {
+                // Buffer too small, try again with required size
+                let mut vec_buffer: Vec<c_char> = vec![0; len_needed_usize];
+                let len_needed_2 = ffi::wxd_ComboBox_GetValue(
+                    self.window.as_ptr() as *mut _,
+                    vec_buffer.as_mut_ptr(),
+                    vec_buffer.len() as i32,
+                );
+                if len_needed_2 == len_needed {
+                    let c_str = CStr::from_ptr(vec_buffer.as_ptr());
+                    c_str.to_string_lossy().into_owned()
+                } else {
+                    // Something went wrong
+                    String::new()
+                }
+            }
+        }
     }
 
     /// Sets the text value in the text entry field.
@@ -168,43 +259,50 @@ impl<'a> ComboBoxBuilder<'a> {
 // --- Widget traits implementation using macro ---
 implement_widget_traits_with_target!(ComboBox, window, Window);
 
-// --- Helper Function --- (Consider moving to a common utils module)
+// --- ComboBox specific event enum ---
+/// Events specific to ComboBox controls
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ComboBoxEvent {
+    /// Fired when an item is selected from the dropdown
+    Selected,
+}
 
-/// Helper function to safely get a String from an FFI function
-/// that follows the C pattern of returning buffer length needed
-/// and writing to a provided buffer.
-pub(crate) fn get_string_from_ffi<F>(ffi_getter: F) -> Option<String>
-where
-    F: Fn(*mut c_char, i32) -> i32,
-{
-    unsafe {
-        let mut buffer: [c_char; 1024] = [0; 1024];
-        let len_needed = ffi_getter(buffer.as_mut_ptr(), buffer.len() as i32);
+/// Event data for ComboBox events
+#[derive(Debug)]
+pub struct ComboBoxEventData {
+    pub event: CommandEventData,
+}
 
-        if len_needed < 0 {
-            return None; // Indicates error
-        }
-        if len_needed == 0 {
-            return Some(String::new()); // Empty string
-        }
-
-        let len_needed_usize = len_needed as usize;
-        if len_needed_usize < buffer.len() {
-            let c_str = CStr::from_ptr(buffer.as_ptr());
-            Some(c_str.to_string_lossy().into_owned())
-        } else {
-            let mut vec_buffer: Vec<u8> = vec![0; len_needed_usize + 1];
-            let len_copied = ffi_getter(
-                vec_buffer.as_mut_ptr() as *mut c_char,
-                vec_buffer.len() as i32,
-            );
-            if len_copied == len_needed {
-                vec_buffer.pop(); // Remove null terminator
-                String::from_utf8(vec_buffer).ok()
-            } else {
-                eprintln!("get_string_from_ffi: Length mismatch on second call");
-                None // Error on second call
-            }
+impl ComboBoxEventData {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event: CommandEventData::new(event),
         }
     }
+
+    /// Get the widget ID that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Get the selected item's index
+    pub fn get_selection(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+
+    /// Get the selected item's text (if available)
+    pub fn get_string(&self) -> Option<String> {
+        self.event.get_string()
+    }
 }
+
+// At the bottom of the file, use the local macro
+crate::implement_widget_local_event_handlers!(
+    ComboBox,
+    ComboBoxEvent,
+    ComboBoxEventData,
+    Selected => selection_changed, EventType::COMMAND_COMBOBOX_SELECTED
+);
+
+// We still implement TextEvents for text entry capabilities
+impl TextEvents for ComboBox {}

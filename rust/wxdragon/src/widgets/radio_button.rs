@@ -1,6 +1,7 @@
 //! Safe wrapper for wxRadioButton.
 
-use crate::event::WxEvtHandler;
+use crate::event::event_data::CommandEventData;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -102,3 +103,42 @@ impl<'a> RadioButtonBuilder<'a> {
         self
     }
 }
+
+// --- RadioButton Event Handling ---
+
+/// Event types specific to `RadioButton`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RadioButtonEvent {
+    /// The radio button was selected.
+    /// Corresponds to `EventType::COMMAND_RADIOBUTTON_SELECTED` (`wxEVT_RADIOBUTTON`).
+    Selected,
+}
+
+/// Event data for `RadioButton` events.
+#[derive(Debug)]
+pub struct RadioButtonEventData {
+    base: CommandEventData,
+}
+
+impl RadioButtonEventData {
+    /// Creates new `RadioButtonEventData` from base `CommandEventData`.
+    pub(crate) fn new(event: Event) -> Self {
+        Self {
+            base: CommandEventData::new(event),
+        }
+    }
+
+    /// Returns the ID of the radio button that was selected.
+    pub fn get_id(&self) -> i32 {
+        self.base.get_id()
+    }
+}
+
+// Use the implement_widget_local_event_handlers macro
+crate::implement_widget_local_event_handlers!(
+    RadioButton, RadioButtonEvent, RadioButtonEventData,
+    Selected => selected, EventType::COMMAND_RADIOBUTTON_SELECTED
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for RadioButton {}

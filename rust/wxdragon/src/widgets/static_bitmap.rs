@@ -2,7 +2,7 @@
 //! Safe wrapper for wxStaticBitmap
 
 use crate::bitmap::Bitmap;
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
@@ -57,7 +57,7 @@ impl StaticBitmap {
             let ptr = ffi::wxd_StaticBitmap_GetBitmap(
                 self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t
             );
-            
+
             if ptr.is_null() {
                 None
             } else {
@@ -105,3 +105,5 @@ widget_builder!(
 
 // Use the macro to implement all the standard traits
 implement_widget_traits_with_target!(StaticBitmap, window, Window);
+
+impl WindowEvents for StaticBitmap {}

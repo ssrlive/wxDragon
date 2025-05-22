@@ -2,7 +2,7 @@
 //! wxStaticBox wrapper
 //!
 
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
@@ -68,3 +68,5 @@ widget_builder!(
 
 // Now we can use the implement_widget_traits_with_target macro
 implement_widget_traits_with_target!(StaticBox, window, Window);
+
+impl WindowEvents for StaticBox {}

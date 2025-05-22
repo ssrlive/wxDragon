@@ -1,14 +1,13 @@
-use wxdragon::event::EventType;
-use wxdragon::prelude::*;
+use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
+use wxdragon::event::TreeEvents;
+use wxdragon::geometry::Size;
+use wxdragon::widgets::imagelist::ImageList;
 use wxdragon::widgets::notebook::Notebook;
 use wxdragon::widgets::panel::{Panel, PanelStyle};
+use wxdragon::widgets::static_text::StaticText;
 use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
 use wxdragon::HasItemData;
-use wxdragon::widgets::static_text::StaticText;
 use wxdragon::{BoxSizer, Orientation, SizerFlag};
-use wxdragon::art_provider::{ArtId, ArtClient, ArtProvider};
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::geometry::Size;
 
 /// A custom data type to associate with tree items
 #[derive(Debug, Clone)]
@@ -57,54 +56,52 @@ pub struct TreeCtrlTabControls {
 impl TreeCtrlTabControls {
     pub fn bind_events(&self) {
         // Clone references for use in event handlers
-        let tree_ctrl = self.tree_ctrl.clone();
-        let info_text = self.info_text.clone();
+        let tree_ctrl_clone = self.tree_ctrl.clone(); // Renamed for clarity
+        let info_text_clone = self.info_text.clone(); // Renamed for clarity
 
         // Bind selection changed event for tree control
-        self.tree_ctrl
-            .bind(EventType::TREE_SEL_CHANGED, move |event| {
-                if let Some(item_id) = event.get_item() {
-                    // Get data from the selected item
-                    if let Some(item_data) = tree_ctrl.get_custom_data(&item_id) {
-                        // Try to downcast to PersonData first
-                        if let Some(person) = item_data.downcast_ref::<PersonData>() {
-                            info_text.set_label(&person.to_display_string());
-                        }
-                        // Try to downcast to ProjectData
-                        else if let Some(project) = item_data.downcast_ref::<ProjectData>() {
-                            info_text.set_label(&project.to_display_string());
-                        }
-                        // Handle standard types
-                        else if let Some(text) = item_data.downcast_ref::<String>() {
-                            info_text.set_label(&format!("Text: {}", text));
-                        } else if let Some(number) = item_data.downcast_ref::<i32>() {
-                            info_text.set_label(&format!("Number: {}", number));
-                        } else if let Some(_) = item_data.downcast_ref::<()>() {
-                            info_text.set_label("This item has empty data (unit type)");
-                        } else {
-                            // If we can't determine the type specifically, show a generic message
-                            info_text.set_label("Item has data of an unknown type");
-                        }
-                    } else {
-                        info_text.set_label("Item has no associated data");
+        self.tree_ctrl.on_selection_changed(move |event_data| {
+            if let Some(item_id) = event_data.get_item() {
+                // Get data from the selected item
+                if let Some(item_data) = tree_ctrl_clone.get_custom_data(&item_id) {
+                    // Try to downcast to PersonData first
+                    if let Some(person) = item_data.downcast_ref::<PersonData>() {
+                        info_text_clone.set_label(&person.to_display_string());
                     }
+                    // Try to downcast to ProjectData
+                    else if let Some(project) = item_data.downcast_ref::<ProjectData>() {
+                        info_text_clone.set_label(&project.to_display_string());
+                    }
+                    // Handle standard types
+                    else if let Some(text) = item_data.downcast_ref::<String>() {
+                        info_text_clone.set_label(&format!("Text: {}", text));
+                    } else if let Some(number) = item_data.downcast_ref::<i32>() {
+                        info_text_clone.set_label(&format!("Number: {}", number));
+                    } else if item_data.downcast_ref::<()>().is_some() {
+                        info_text_clone.set_label("This item has empty data (unit type)");
+                    } else {
+                        // If we can't determine the type specifically, show a generic message
+                        info_text_clone.set_label("Item has data of an unknown type");
+                    }
+                } else {
+                    info_text_clone.set_label("Item has no associated data");
                 }
-            });
+            }
+        });
 
         // Bind item activation (double-click) event
-        let tree_ctrl = self.tree_ctrl.clone();
-        let info_text = self.info_text.clone();
+        let tree_ctrl_clone_activated = self.tree_ctrl.clone(); // Separate clone for this closure
+        let info_text_clone_activated = self.info_text.clone(); // Separate clone
 
-        self.tree_ctrl
-            .bind(EventType::TREE_ITEM_ACTIVATED, move |event| {
-                if let Some(item_id) = event.get_item() {
-                    if tree_ctrl.has_custom_data(&item_id) {
-                        info_text.set_label("Double-clicked on item with custom data");
-                    } else {
-                        info_text.set_label("Double-clicked on item with no data");
-                    }
+        self.tree_ctrl.on_item_activated(move |event_data| {
+            if let Some(item_id) = event_data.get_item() {
+                if tree_ctrl_clone_activated.has_custom_data(&item_id) {
+                    info_text_clone_activated.set_label("Double-clicked on item with custom data");
+                } else {
+                    info_text_clone_activated.set_label("Double-clicked on item with no data");
                 }
-            });
+            }
+        });
     }
 }
 
@@ -120,19 +117,21 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         .build();
 
     // --- ImageList Setup ---
-    let image_list = ImageList::new(16, 16, true, 5); 
+    let image_list = ImageList::new(16, 16, true, 5);
     let mut icons: Vec<i32> = Vec::new();
 
     // Define icons (ensure these ArtIds are valid and available)
     let art_ids = [
-        ArtId::Folder, 
+        ArtId::Folder,
         ArtId::FolderOpen,
-        ArtId::NormalFile, 
-        ArtId::Information, 
-        ArtId::Error
+        ArtId::NormalFile,
+        ArtId::Information,
+        ArtId::Error,
     ];
     for art_id in art_ids.iter() {
-        if let Some(bmp) = ArtProvider::get_bitmap(*art_id, ArtClient::FrameIcon, Some(Size::new(16,16))) {
+        if let Some(bmp) =
+            ArtProvider::get_bitmap(*art_id, ArtClient::FrameIcon, Some(Size::new(16, 16)))
+        {
             icons.push(image_list.add_bitmap(&bmp));
         } else {
             println!("Failed to load icon {:?} for TreeCtrl ImageList", art_id);
@@ -140,7 +139,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         }
     }
     // Icon indices: 0:Folder, 1:OpenedFolder, 2:File, 3:Info, 4:Error
-    tree_ctrl.set_image_list(image_list); 
+    tree_ctrl.set_image_list(image_list);
     // --- End ImageList Setup ---
 
     // Create info text control to display data
@@ -157,7 +156,12 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "CEO".to_string(),
     };
     let root_id = tree_ctrl
-        .add_root_with_data("Company Hierarchy", ceo_data, Some(icons[0]), Some(icons[1])) // Folder icons
+        .add_root_with_data(
+            "Company Hierarchy",
+            ceo_data,
+            Some(icons[0]),
+            Some(icons[1]),
+        ) // Folder icons
         .unwrap();
 
     // 2. Add departments with different data types
@@ -169,7 +173,13 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         deadline: "2024-12-31".to_string(),
     };
     let eng_id = tree_ctrl
-        .append_item_with_data(&root_id, "Engineering", eng_project, Some(icons[0]), Some(icons[1])) // Folder icons
+        .append_item_with_data(
+            &root_id,
+            "Engineering",
+            eng_project,
+            Some(icons[0]),
+            Some(icons[1]),
+        ) // Folder icons
         .unwrap();
 
     // Add engineers with PersonData
@@ -179,7 +189,13 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "Lead Engineer".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&eng_id, "Alice Johnson", eng_lead, Some(icons[2]), Some(icons[2])) // File icon
+        .append_item_with_data(
+            &eng_id,
+            "Alice Johnson",
+            eng_lead,
+            Some(icons[2]),
+            Some(icons[2]),
+        ) // File icon
         .unwrap();
 
     let dev1 = PersonData {
@@ -188,7 +204,13 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "Software Developer".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&eng_id, "Bob Williams", dev1, Some(icons[2]), Some(icons[2])) // File icon
+        .append_item_with_data(
+            &eng_id,
+            "Bob Williams",
+            dev1,
+            Some(icons[2]),
+            Some(icons[2]),
+        ) // File icon
         .unwrap();
 
     let dev2 = PersonData {
@@ -206,7 +228,8 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
             &root_id,
             "Marketing",
             "Marketing department handles all promotional activities.".to_string(),
-            Some(icons[0]), Some(icons[1]) // Folder icons
+            Some(icons[0]),
+            Some(icons[1]), // Folder icons
         )
         .unwrap();
 
@@ -220,7 +243,8 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
                 age: 41,
                 role: "Marketing Director".to_string(),
             },
-            Some(icons[2]), Some(icons[2]) // File icon
+            Some(icons[2]),
+            Some(icons[2]), // File icon
         )
         .unwrap();
 
@@ -233,7 +257,8 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
                 priority: 2,
                 deadline: "2024-08-31".to_string(),
             },
-            Some(icons[3]), Some(icons[3]) // Info icon
+            Some(icons[3]),
+            Some(icons[3]), // Info icon
         )
         .unwrap();
 
@@ -249,7 +274,13 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         role: "CFO".to_string(),
     };
     tree_ctrl
-        .append_item_with_data(&finance_id, "Eve Brown", finance_lead, Some(icons[2]), Some(icons[2])) // File icon
+        .append_item_with_data(
+            &finance_id,
+            "Eve Brown",
+            finance_lead,
+            Some(icons[2]),
+            Some(icons[2]),
+        ) // File icon
         .unwrap();
 
     // Expand the root item to show the structure

@@ -2,6 +2,7 @@ use std::ffi::CString;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_longlong};
 
+use crate::event::{Event, EventType};
 use crate::prelude::*;
 use crate::window::Window;
 use wxdragon_sys as ffi;
@@ -37,6 +38,54 @@ pub enum ItemKind {
 impl Default for ItemKind {
     fn default() -> Self {
         ItemKind::Normal
+    }
+}
+
+/// Events for AuiToolBar
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AuiToolBarEvent {
+    /// Tool clicked event
+    ToolClicked,
+    /// Tool enter event (mouse enters tool area)
+    ToolEnter,
+    /// Tool right-clicked event
+    ToolRightClicked,
+    /// Tool dropdown button clicked
+    ToolDropDown,
+    /// Menu event
+    Menu,
+}
+
+/// Event data for an AuiToolBar event
+#[derive(Debug)]
+pub struct AuiToolBarEventData {
+    event: Event,
+}
+
+impl AuiToolBarEventData {
+    /// Create a new AuiToolBarEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the tool that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the integer value associated with this event (typically the tool ID)
+    pub fn get_int(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+
+    /// Get whether the tool is checked (for checkable tools)
+    pub fn is_checked(&self) -> Option<bool> {
+        self.event.is_checked()
     }
 }
 
@@ -290,3 +339,18 @@ widget_builder!(
 
 // Implement all standard widget traits in one go
 implement_widget_traits_with_target!(AuiToolBar, window, Window);
+
+// Use the implement_widget_local_event_handlers macro to implement event handling
+crate::implement_widget_local_event_handlers!(
+    AuiToolBar,
+    AuiToolBarEvent,
+    AuiToolBarEventData,
+    ToolClicked => tool_clicked, EventType::COMMAND_BUTTON_CLICKED,
+    ToolEnter => tool_enter, EventType::TOOL_ENTER,
+    ToolRightClicked => tool_right_clicked, EventType::RIGHT_UP,
+    ToolDropDown => tool_dropdown, EventType::COMMAND_BUTTON_CLICKED, // No specific dropdown event, so use button clicked
+    Menu => menu, EventType::MENU // Add menu event support
+);
+
+// Add WindowEvents implementation
+impl crate::event::WindowEvents for AuiToolBar {}

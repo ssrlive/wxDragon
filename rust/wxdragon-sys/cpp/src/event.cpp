@@ -1,4 +1,5 @@
 #include "../include/wxdragon.h"
+// #include "../include/events/wxd_event_api.h" // No longer needed, wxd_Event_t defined in wxd_types.h (via wxdragon.h)
 #include <wx/wx.h>
 #include <unordered_map>
 #include <memory> // For std::unique_ptr if we want safer memory management
@@ -27,7 +28,9 @@
 #include <wx/timectrl.h> // ADDED: For wxTimePickerCtrl and wxEVT_TIME_CHANGED
 #include <wx/mediactrl.h> // ADDED: For MediaCtrl events
 #include <wx/dataview.h> // ADDED: For DataView events
-#include "wxd_utils.h"
+#include <wx/grid.h>
+#include "../src/wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK, etc.
+#include <wx/aui/framemanager.h> // ADDED: For wxEVT_AUI_* constants
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
 
@@ -288,6 +291,10 @@ extern "C" void wxd_EvtHandler_Bind(
              wx_handler->Bind(wxEVT_LISTBOX, functor);
              bound = true;
              break;
+        case WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED:
+            wx_handler->Bind(wxEVT_LISTBOX_DCLICK, functor);
+             bound = true;
+             break;
         case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED:
              wx_handler->Bind(wxEVT_CHOICE, functor);
              bound = true;
@@ -298,8 +305,8 @@ extern "C" void wxd_EvtHandler_Bind(
              break;
         case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED:
              wx_handler->Bind(wxEVT_CHECKLISTBOX, functor);
-             bound = true;
-             break;
+            bound = true;
+            break;
         case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED:
              wx_handler->Bind(wxEVT_TOGGLEBUTTON, functor); 
              bound = true;
@@ -479,6 +486,26 @@ extern "C" void wxd_EvtHandler_Bind(
              wx_handler->Bind(wxEVT_SIZE, functor);
              bound = true;
              break;
+        case WXD_EVENT_TYPE_MOVE:
+            wx_handler->Bind(wxEVT_MOVE, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_ERASE:
+            wx_handler->Bind(wxEVT_ERASE_BACKGROUND, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_SET_FOCUS:
+            wx_handler->Bind(wxEVT_SET_FOCUS, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_KILL_FOCUS:
+            wx_handler->Bind(wxEVT_KILL_FOCUS, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_PAINT:
+            wx_handler->Bind(wxEVT_PAINT, functor);
+             bound = true;
+             break;
 
         // --- Mouse Events ---
         case WXD_EVENT_TYPE_LEFT_DOWN:
@@ -487,6 +514,22 @@ extern "C" void wxd_EvtHandler_Bind(
              break;
         case WXD_EVENT_TYPE_LEFT_UP:
              wx_handler->Bind(wxEVT_LEFT_UP, functor);
+             bound = true;
+             break;
+        case WXD_EVENT_TYPE_RIGHT_DOWN:
+            wx_handler->Bind(wxEVT_RIGHT_DOWN, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_RIGHT_UP:
+            wx_handler->Bind(wxEVT_RIGHT_UP, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MIDDLE_DOWN:
+            wx_handler->Bind(wxEVT_MIDDLE_DOWN, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MIDDLE_UP:
+            wx_handler->Bind(wxEVT_MIDDLE_UP, functor);
              bound = true;
              break;
         case WXD_EVENT_TYPE_MOTION:
@@ -522,7 +565,7 @@ extern "C" void wxd_EvtHandler_Bind(
             bound = true;
             break;
         case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED:
-            wx_handler->Bind(wxEVT_TREEBOOK_NODE_EXPANDED, functor);
+            wx_handler->Bind(wxEVT_TREEBOOK_NODE_COLLAPSED, functor);
             bound = true;
             break;
         case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED:
@@ -650,10 +693,6 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_DROP_FILES, functor);
             bound = true;
             break;
-        case WXD_EVENT_TYPE_PAINT:
-            wx_handler->Bind(wxEVT_PAINT, functor);
-            bound = true;
-            break;
         case WXD_EVENT_TYPE_TIME_CHANGED:
             wx_handler->Bind(wxEVT_TIME_CHANGED, functor);
             bound = true;
@@ -712,7 +751,96 @@ extern "C" void wxd_EvtHandler_Bind(
             bound = true;
             break;
 
-        // Default case for unhandled/unknown event types
+        // New TreeCtrl Event types
+        case WXD_EVENT_TYPE_TREE_SEL_CHANGING:
+            wx_handler->Bind(wxEVT_TREE_SEL_CHANGING, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSING:
+            wx_handler->Bind(wxEVT_TREE_ITEM_COLLAPSING, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSED:
+            wx_handler->Bind(wxEVT_TREE_ITEM_COLLAPSED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDING:
+            wx_handler->Bind(wxEVT_TREE_ITEM_EXPANDING, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDED:
+            wx_handler->Bind(wxEVT_TREE_ITEM_EXPANDED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_RIGHT_CLICK:
+            wx_handler->Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_MIDDLE_CLICK:
+            wx_handler->Bind(wxEVT_TREE_ITEM_MIDDLE_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_KEY_DOWN:
+            wx_handler->Bind(wxEVT_TREE_KEY_DOWN, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_DELETE_ITEM:
+            wx_handler->Bind(wxEVT_TREE_DELETE_ITEM, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_MENU:
+            wx_handler->Bind(wxEVT_TREE_ITEM_MENU, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_BEGIN_DRAG:
+            wx_handler->Bind(wxEVT_TREE_BEGIN_DRAG, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_BEGIN_RDRAG:
+            wx_handler->Bind(wxEVT_TREE_BEGIN_RDRAG, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_END_DRAG:
+            wx_handler->Bind(wxEVT_TREE_END_DRAG, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK:
+            wx_handler->Bind(wxEVT_TREE_STATE_IMAGE_CLICK, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TOOL_ENTER:
+            wx_handler->Bind(wxEVT_TOOL_ENTER, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP:
+            wx_handler->Bind(wxEVT_TREE_ITEM_GETTOOLTIP, functor);
+            bound = true;
+            break;
+        // AUI Manager event types
+        case WXD_EVENT_TYPE_AUI_PANE_BUTTON:
+            wx_handler->Bind(wxEVT_AUI_PANE_BUTTON, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_AUI_PANE_CLOSE:
+            wx_handler->Bind(wxEVT_AUI_PANE_CLOSE, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE:
+            wx_handler->Bind(wxEVT_AUI_PANE_MAXIMIZE, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_AUI_PANE_RESTORE:
+            wx_handler->Bind(wxEVT_AUI_PANE_RESTORE, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED:
+            wx_handler->Bind(wxEVT_AUI_PANE_ACTIVATED, functor);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_AUI_RENDER:
+            wx_handler->Bind(wxEVT_AUI_RENDER, functor);
+            bound = true;
+            break;
         default:
             wxLogWarning("wxd_EvtHandler_Bind: Unsupported WXDEventTypeCEnum value %d for handler %p.", (int)eventTypeC, wx_handler);
             bound = false;
@@ -834,385 +962,157 @@ WXD_EXPORTED int wxd_ScrollEvent_GetOrientation(wxd_Event_t* event) {
     return scrollEvent->GetOrientation();
 }
 
-// Maps our stable C enum value to wxWidgets' dynamic event types
+// Forward declaration
+static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val);
+
+static WXDEventTypeCEnum get_c_enum_for_wx_event_type(wxEventType wx_event_type) {
+    // This is a bit inefficient, but it's simple and should be correct
+    for (int i = WXD_EVENT_TYPE_NULL; i < WXD_EVENT_TYPE_MAX; i++) {
+        WXDEventTypeCEnum c_enum = static_cast<WXDEventTypeCEnum>(i);
+        wxEventType wx_type = get_wx_event_type_for_c_enum(c_enum);
+        if (wx_type == wx_event_type) {
+            return c_enum;
+        }
+    }
+    // If we can't find a matching C enum, return NULL
+    return WXD_EVENT_TYPE_NULL;
+}
+
+// Add the implementation of wxd_Event_GetEventType
+wxEventType wxd_Event_GetEventType(wxd_Event_t* event) {
+    if (!event || !event->event) {
+        wxLogWarning("wxd_Event_GetEventType called with null event or null event->event");
+        return wxEVT_NULL;
+    }
+    wxEventType eventType = event->event->GetEventType();
+    WXDEventTypeCEnum c_enum_val = get_c_enum_for_wx_event_type(eventType);
+    return eventType;
+}
+
+// Implement get_wx_event_type_for_c_enum to handle the mapping
 static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
     switch (c_enum_val) {
-        case WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED:
-            return wxEVT_BUTTON;
-        case WXD_EVENT_TYPE_CLOSE_WINDOW:
-            return wxEVT_CLOSE_WINDOW;
-        case WXD_EVENT_TYPE_CHECKBOX:
-            return wxEVT_CHECKBOX;
-        case WXD_EVENT_TYPE_TEXT:
-            return wxEVT_TEXT;
-        case WXD_EVENT_TYPE_TEXT_ENTER:
-            return wxEVT_TEXT_ENTER;
-        case WXD_EVENT_TYPE_SIZE:
-            return wxEVT_SIZE;
-        case WXD_EVENT_TYPE_MENU:
-            return wxEVT_MENU;
-        case WXD_EVENT_TYPE_LEFT_DOWN:
-            return wxEVT_LEFT_DOWN;
-        case WXD_EVENT_TYPE_LEFT_UP:
-            return wxEVT_LEFT_UP;
-        case WXD_EVENT_TYPE_MOTION:
-            return wxEVT_MOTION;
-        case WXD_EVENT_TYPE_MOUSEWHEEL:
-            return wxEVT_MOUSEWHEEL;
-        case WXD_EVENT_TYPE_KEY_DOWN:
-            return wxEVT_KEY_DOWN;
-        case WXD_EVENT_TYPE_KEY_UP:
-            return wxEVT_KEY_UP;
-        case WXD_EVENT_TYPE_CHAR:
-            return wxEVT_CHAR;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBUTTON_SELECTED:
-            return wxEVT_RADIOBUTTON;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBOX_SELECTED:
-            return wxEVT_RADIOBOX;
-        case WXD_EVENT_TYPE_COMMAND_LISTBOX_SELECTED:
-            return wxEVT_LISTBOX;
-        case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED:
-            return wxEVT_CHOICE;
-        case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED:
-            return wxEVT_COMBOBOX;
-        case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED:
-            return wxEVT_CHECKLISTBOX;
-        case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED:
-            return wxEVT_TOGGLEBUTTON;
-        case WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT:
-            return wxEVT_TREE_BEGIN_LABEL_EDIT;
-        case WXD_EVENT_TYPE_TREE_END_LABEL_EDIT:
-            return wxEVT_TREE_END_LABEL_EDIT;
-        case WXD_EVENT_TYPE_TREE_SEL_CHANGED:
-            return wxEVT_TREE_SEL_CHANGED;
-        case WXD_EVENT_TYPE_TREE_ITEM_ACTIVATED:
-            return wxEVT_TREE_ITEM_ACTIVATED;
-        case WXD_EVENT_TYPE_SLIDER:
-            return wxEVT_SLIDER;
-        case WXD_EVENT_TYPE_SPINCTRL:
-            return wxEVT_SPINCTRL;
-        case WXD_EVENT_TYPE_SPIN_UP:
-            return wxEVT_SPIN_UP;
-        case WXD_EVENT_TYPE_SPIN_DOWN:
-            return wxEVT_SPIN_DOWN;
-        case WXD_EVENT_TYPE_SPIN:
-            return wxEVT_SPIN;
-        case WXD_EVENT_TYPE_NOTEBOOK_PAGE_CHANGED:
-            return wxEVT_NOTEBOOK_PAGE_CHANGED;
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGED:
-            return wxEVT_SPLITTER_SASH_POS_CHANGED;
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGING:
-            return wxEVT_SPLITTER_SASH_POS_CHANGING;
-        case WXD_EVENT_TYPE_SPLITTER_DOUBLECLICKED:
-            return wxEVT_SPLITTER_DOUBLECLICKED;
-        case WXD_EVENT_TYPE_SPLITTER_UNSPLIT:
-            return wxEVT_SPLITTER_UNSPLIT;
-        case WXD_EVENT_TYPE_LIST_ITEM_SELECTED:
-            return wxEVT_LIST_ITEM_SELECTED;
-        case WXD_EVENT_TYPE_LIST_ITEM_ACTIVATED:
-            return wxEVT_LIST_ITEM_ACTIVATED;
-        case WXD_EVENT_TYPE_LIST_COL_CLICK:
-            return wxEVT_LIST_COL_CLICK;
-        case WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT:
-            return wxEVT_LIST_BEGIN_LABEL_EDIT;
-        case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT:
-            return wxEVT_LIST_END_LABEL_EDIT;
-        case WXD_EVENT_TYPE_LIST_BEGIN_DRAG:
-            return wxEVT_LIST_BEGIN_DRAG;
-        case WXD_EVENT_TYPE_LIST_BEGIN_RDRAG:
-            return wxEVT_LIST_BEGIN_RDRAG;
-        case WXD_EVENT_TYPE_LIST_DELETE_ITEM:
-            return wxEVT_LIST_DELETE_ITEM;
-        case WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS:
-            return wxEVT_LIST_DELETE_ALL_ITEMS;
-        case WXD_EVENT_TYPE_LIST_ITEM_DESELECTED:
-            return wxEVT_LIST_ITEM_DESELECTED;
-        case WXD_EVENT_TYPE_LIST_ITEM_FOCUSED:
-            return wxEVT_LIST_ITEM_FOCUSED;
-        case WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK:
-            return wxEVT_LIST_ITEM_MIDDLE_CLICK;
-        case WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK:
-            return wxEVT_LIST_ITEM_RIGHT_CLICK;
-        case WXD_EVENT_TYPE_LIST_KEY_DOWN:
-            return wxEVT_LIST_KEY_DOWN;
-        case WXD_EVENT_TYPE_LIST_INSERT_ITEM:
-            return wxEVT_LIST_INSERT_ITEM;
-        case WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK:
-            return wxEVT_LIST_COL_RIGHT_CLICK;
-        case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG:
-            return wxEVT_LIST_COL_BEGIN_DRAG;
-        case WXD_EVENT_TYPE_COLOURPICKER_CHANGED:
-            return wxEVT_COLOURPICKER_CHANGED;
-        case WXD_EVENT_TYPE_DATE_CHANGED:
-            return wxEVT_DATE_CHANGED;
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED:
-            return wxEVT_TREEBOOK_PAGE_CHANGED;
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGING:
-            return wxEVT_TREEBOOK_PAGE_CHANGING;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED:
-            return wxEVT_TREEBOOK_NODE_COLLAPSED;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED:
-            return wxEVT_TREEBOOK_NODE_COLLAPSED;
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_SEARCH_BTN:
-            return wxEVT_SEARCHCTRL_SEARCH_BTN;
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_CANCEL_BTN:
-            return wxEVT_SEARCHCTRL_CANCEL_BTN;
-        case WXD_EVENT_TYPE_COMMAND_HYPERLINK:
-            return wxEVT_HYPERLINK;
-        case WXD_EVENT_TYPE_SPINCTRLDOUBLE:
-            return wxEVT_SPINCTRLDOUBLE;
-        case WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED:
-            return wxEVT_CALENDAR_SEL_CHANGED;
-        case WXD_EVENT_TYPE_SCROLL_TOP:
-            return wxEVT_SCROLL_TOP;
-        case WXD_EVENT_TYPE_SCROLL_BOTTOM:
-            return wxEVT_SCROLL_BOTTOM;
-        case WXD_EVENT_TYPE_SCROLL_LINEUP:
-            return wxEVT_SCROLL_LINEUP;
-        case WXD_EVENT_TYPE_SCROLL_LINEDOWN:
-            return wxEVT_SCROLL_LINEDOWN;
-        case WXD_EVENT_TYPE_SCROLL_PAGEUP:
-            return wxEVT_SCROLL_PAGEUP;
-        case WXD_EVENT_TYPE_SCROLL_PAGEDOWN:
-            return wxEVT_SCROLL_PAGEDOWN;
-        case WXD_EVENT_TYPE_SCROLL_THUMBTRACK:
-            return wxEVT_SCROLL_THUMBTRACK;
-        case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE:
-            return wxEVT_SCROLL_THUMBRELEASE;
-        case WXD_EVENT_TYPE_SCROLL_CHANGED:
-            return wxEVT_SCROLL_CHANGED;
-        case WXD_EVENT_TYPE_FILEPICKER_CHANGED:
-            return wxEVT_FILEPICKER_CHANGED;
-        case WXD_EVENT_TYPE_DIRPICKER_CHANGED:
-            return wxEVT_DIRPICKER_CHANGED;
-        case WXD_EVENT_TYPE_FONTPICKER_CHANGED:
-            return wxEVT_FONTPICKER_CHANGED;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK:
-            return wxEVT_NOTIFICATION_MESSAGE_CLICK;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED:
-            return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION:
-            return wxEVT_NOTIFICATION_MESSAGE_ACTION;
-        case WXD_EVENT_TYPE_MEDIA_LOADED:
-            return wxEVT_MEDIA_LOADED;
-        case WXD_EVENT_TYPE_MEDIA_STOP:
-            return wxEVT_MEDIA_STOP;
-        case WXD_EVENT_TYPE_MEDIA_FINISHED:
-            return wxEVT_MEDIA_FINISHED;
-        case WXD_EVENT_TYPE_MEDIA_STATECHANGED:
-            return wxEVT_MEDIA_STATECHANGED;
-        case WXD_EVENT_TYPE_MEDIA_PLAY:
-            return wxEVT_MEDIA_PLAY;
-        case WXD_EVENT_TYPE_MEDIA_PAUSE:
-            return wxEVT_MEDIA_PAUSE;
-        case WXD_EVENT_TYPE_IDLE:
-            return wxEVT_IDLE;
-        case WXD_EVENT_TYPE_DROP_FILES:
-            return wxEVT_DROP_FILES;
-        case WXD_EVENT_TYPE_PAINT:
-            return wxEVT_PAINT;
-        case WXD_EVENT_TYPE_TIME_CHANGED:
-            return wxEVT_TIME_CHANGED;
-        case WXD_EVENT_TYPE_DESTROY:
-            return wxEVT_DESTROY;
-        case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED:
-            return wxEVT_DATAVIEW_SELECTION_CHANGED;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED:
-            return wxEVT_DATAVIEW_ITEM_ACTIVATED;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED:
-            return wxEVT_DATAVIEW_ITEM_EDITING_STARTED;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE:
-            return wxEVT_DATAVIEW_ITEM_EDITING_DONE;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING:
-            return wxEVT_DATAVIEW_ITEM_COLLAPSING;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED:
-            return wxEVT_DATAVIEW_ITEM_COLLAPSED;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING:
-            return wxEVT_DATAVIEW_ITEM_EXPANDING;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED:
-            return wxEVT_DATAVIEW_ITEM_EXPANDED;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK:
-            return wxEVT_DATAVIEW_COLUMN_HEADER_CLICK;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK:
-            return wxEVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED:
-            return wxEVT_DATAVIEW_COLUMN_SORTED;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED:
-            return wxEVT_DATAVIEW_COLUMN_REORDERED;
-        default:
-            // Unknown event type - should we handle this differently?
-            // For now let's use a null/placeholder value
-            return wxEVT_NULL;
+        case WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED: return wxEVT_BUTTON;
+        case WXD_EVENT_TYPE_CLOSE_WINDOW: return wxEVT_CLOSE_WINDOW;
+        case WXD_EVENT_TYPE_CHECKBOX: return wxEVT_CHECKBOX;
+        case WXD_EVENT_TYPE_TEXT: return wxEVT_TEXT;
+        case WXD_EVENT_TYPE_TEXT_ENTER: return wxEVT_TEXT_ENTER;
+        case WXD_EVENT_TYPE_SIZE: return wxEVT_SIZE;
+        case WXD_EVENT_TYPE_MENU: return wxEVT_MENU;
+        case WXD_EVENT_TYPE_LEFT_DOWN: return wxEVT_LEFT_DOWN;
+        case WXD_EVENT_TYPE_LEFT_UP: return wxEVT_LEFT_UP;
+        case WXD_EVENT_TYPE_RIGHT_DOWN: return wxEVT_RIGHT_DOWN;
+        case WXD_EVENT_TYPE_RIGHT_UP: return wxEVT_RIGHT_UP;
+        case WXD_EVENT_TYPE_MIDDLE_DOWN: return wxEVT_MIDDLE_DOWN;
+        case WXD_EVENT_TYPE_MIDDLE_UP: return wxEVT_MIDDLE_UP;
+        case WXD_EVENT_TYPE_MOTION: return wxEVT_MOTION;
+        case WXD_EVENT_TYPE_MOUSEWHEEL: return wxEVT_MOUSEWHEEL;
+        case WXD_EVENT_TYPE_KEY_DOWN: return wxEVT_KEY_DOWN;
+        case WXD_EVENT_TYPE_KEY_UP: return wxEVT_KEY_UP;
+        case WXD_EVENT_TYPE_CHAR: return wxEVT_CHAR;
+        case WXD_EVENT_TYPE_COMMAND_RADIOBUTTON_SELECTED: return wxEVT_RADIOBUTTON;
+        case WXD_EVENT_TYPE_COMMAND_RADIOBOX_SELECTED: return wxEVT_RADIOBOX;
+        case WXD_EVENT_TYPE_COMMAND_LISTBOX_SELECTED: return wxEVT_LISTBOX;
+        case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED: return wxEVT_CHOICE;
+        case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED: return wxEVT_COMBOBOX;
+        case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED: return wxEVT_CHECKLISTBOX;
+        case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED: return wxEVT_TOGGLEBUTTON;
+        // AUI Manager event types
+        case WXD_EVENT_TYPE_AUI_PANE_BUTTON: return wxEVT_AUI_PANE_BUTTON;
+        case WXD_EVENT_TYPE_AUI_PANE_CLOSE: return wxEVT_AUI_PANE_CLOSE;
+        case WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE: return wxEVT_AUI_PANE_MAXIMIZE;
+        case WXD_EVENT_TYPE_AUI_PANE_RESTORE: return wxEVT_AUI_PANE_RESTORE;
+        case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED: return wxEVT_AUI_PANE_ACTIVATED;
+        case WXD_EVENT_TYPE_AUI_RENDER: return wxEVT_AUI_RENDER;
+        default: return wxEVT_NULL;
     }
 }
 
-// Function to convert a generic wxEvent* to a wxd_Event_t* (which is also wxEvent*),
-// but potentially casting to a more specific wx derived event type if known and safe.
-// This is primarily for potential future use or debugging; for now, it's mostly identity.
-wxd_Event_t* convert_wx_event_to_wxd_event(wxEvent* event) {
+// Type checking helper for casting
+template<typename T>
+T* wxEvent_SafeDynamicCast(wxd_Event_t* event) {
     if (!event) return nullptr;
-
-    wxEventType type = event->GetEventType();
-
-    // Current guideline: The C-API `wxd_Event_t` is an opaque `wxEvent*`.
-    // Specific event data access (e.g., `wxd_CommandEvent_GetString`) will perform
-    // the necessary cast from `wxd_Event_t*` (which is a wxEvent*) to the correct `wx...Event*`.
-    // So, this function can generally just return the event pointer as is.
-    // The main purpose of checking types here is for potential sanity checks or future needs
-    // if we wanted this function to do more aggressive casting, but it's not strictly needed
-    // for the current accessor pattern.
-
-    if (type == wxEVT_NULL) return nullptr; // Should not happen for valid events
-
-    // Most events, including wxCommandEvent and its many derivatives (wxButton, wxTextCtrl, wxChoice,
-    // wxDateEvent, wxCalendarEvent, wxTreeEvent, wxNotebookEvent, wxSpinEvent, wxColourPickerEvent etc.)
-    // will be covered by IsCommandEvent() or are other common event types.
-    // We can simply return the event as wxd_Event_t* (which is an opaque wxEvent*).
-    // The specific accessor functions (e.g., wxd_CommandEvent_GetString, wxd_MouseEvent_GetPosition)
-    // are responsible for casting to the correct wx...Event type from wxd_Event_t*.
-
-    // No complex casting logic needed here for now. Return the opaque pointer.
-    return reinterpret_cast<wxd_Event_t*>(event);
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    return dynamic_cast<T*>(wx_event);
 }
 
-// DataView event accessor implementations
-WXD_EXPORTED bool wxd_DataViewEvent_GetColumn(wxd_Event_t* event, int32_t* column) {
-    if (!event || !column) return false;
+// --- Event Type Checking Functions ---
+
+extern "C" int wxd_IsMouseButtonEvent(wxd_Event_t* event) {
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxEventType type = wx_event->GetEventType();
     
-    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
-    if (!dvEvent) return false;
-    
-    *column = dvEvent->GetColumn();
-    return true;
+    // Check if it's any of the mouse button event types
+    return (type == wxEVT_LEFT_DOWN || 
+            type == wxEVT_LEFT_UP || 
+            type == wxEVT_RIGHT_DOWN || 
+            type == wxEVT_RIGHT_UP || 
+            type == wxEVT_MIDDLE_DOWN || 
+            type == wxEVT_MIDDLE_UP || 
+            type == wxEVT_MOUSEWHEEL) ? 1 : 0;
 }
 
-WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row) {
-    if (!event || !row) return false;
+extern "C" int wxd_IsMouseMotionEvent(wxd_Event_t* event) {
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxEventType type = wx_event->GetEventType();
     
-    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
-    if (!dvEvent) return false;
-    
-    // wxDataViewEvent doesn't have a GetRow method in all wxWidgets versions
-    // Instead, we'll return -1 to indicate row is not available
-    *row = -1;
-    return false; // Return false to indicate this information is not available
+    // Check if it's a mouse motion event
+    return (type == wxEVT_MOTION) ? 1 : 0;
 }
 
-WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value) {
-    if (!event || !value) return false;
+extern "C" int wxd_IsKeyboardEvent(wxd_Event_t* event) {
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxEventType type = wx_event->GetEventType();
     
-    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
-    if (!dvEvent) return false;
-    
-    // Get the wxVariant from the event
-    const wxVariant& wxVar = dvEvent->GetValue();
-    
-    // Convert wxVariant to wxd_Variant_t
-    if (wxVar.IsNull()) {
-        value->type = WXD_VARIANT_TYPE_INVALID;
-        return true;
-    }
-    
-    if (wxVar.GetType() == "bool") {
-        value->type = WXD_VARIANT_TYPE_BOOL;
-        value->data.bool_val = wxVar.GetBool();
-    }
-    else if (wxVar.GetType() == "long") {
-        value->type = WXD_VARIANT_TYPE_INT32;
-        value->data.int32_val = wxVar.GetLong();
-    }
-    else if (wxVar.GetType() == "longlong") {
-        value->type = WXD_VARIANT_TYPE_INT64;
-        value->data.int64_val = wxVar.GetLongLong().GetValue();
-    }
-    else if (wxVar.GetType() == "double") {
-        value->type = WXD_VARIANT_TYPE_DOUBLE;
-        value->data.double_val = wxVar.GetDouble();
-    }
-    else if (wxVar.GetType() == "string") {
-        value->type = WXD_VARIANT_TYPE_STRING;
-        const wxString& str = wxVar.GetString();
-        // Use strdup directly instead of wxd_cpp_utils::cpp_strdup
-        // Note: Caller is responsible for freeing this memory with wxd_Variant_Free
-        value->data.string_val = strdup(str.utf8_str());
-    }
-    else if (wxVar.GetType() == "datetime") {
-        value->type = WXD_VARIANT_TYPE_DATETIME;
-        const wxDateTime& dt = wxVar.GetDateTime();
-        wxd_DateTime_t& dt_out = value->data.datetime_val;
-        dt_out.day = dt.GetDay();
-        dt_out.month = dt.GetMonth() + 1; // wxDateTime months are 0-based
-        dt_out.year = dt.GetYear();
-        dt_out.hour = dt.GetHour();
-        dt_out.minute = dt.GetMinute();
-        dt_out.second = dt.GetSecond();
-    }
-    else {
-        // Unsupported type
-        value->type = WXD_VARIANT_TYPE_INVALID;
-        return false;
-    }
-    
-    return true;
+    // Check if it's any of the keyboard event types
+    return (type == wxEVT_KEY_DOWN || 
+            type == wxEVT_KEY_UP || 
+            type == wxEVT_CHAR) ? 1 : 0;
 }
 
-WXD_EXPORTED bool wxd_DataViewEvent_SetValue(wxd_Event_t* event, const wxd_Variant_t* value) {
-    if (!event || !value) return false;
+extern "C" int wxd_IsSizeEvent(wxd_Event_t* event) {
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
     
-    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
-    if (!dvEvent) return false;
-    
-    wxVariant wxVar;
-    
-    // Convert wxd_Variant_t to wxVariant
-    switch (value->type) {
-        case WXD_VARIANT_TYPE_BOOL:
-            wxVar = wxVariant(value->data.bool_val);
-            break;
-        case WXD_VARIANT_TYPE_INT32:
-            wxVar = wxVariant((long)value->data.int32_val);
-            break;
-        case WXD_VARIANT_TYPE_INT64:
-            wxVar = wxVariant(wxLongLong(value->data.int64_val));
-            break;
-        case WXD_VARIANT_TYPE_DOUBLE:
-            wxVar = wxVariant(value->data.double_val);
-            break;
-        case WXD_VARIANT_TYPE_STRING:
-            if (value->data.string_val) {
-                wxVar = wxVariant(wxString::FromUTF8(value->data.string_val));
-            } else {
-                wxVar = wxVariant(wxString());
-            }
-            break;
-        case WXD_VARIANT_TYPE_DATETIME: {
-            const wxd_DateTime_t& dt = value->data.datetime_val;
-            wxDateTime wxDt;
-            wxDt.Set(
-                dt.day,
-                static_cast<wxDateTime::Month>(dt.month - 1), // wxDateTime months are 0-based
-                dt.year,
-                dt.hour,
-                dt.minute,
-                dt.second
-            );
-            wxVar = wxVariant(wxDt);
-            break;
-        }
-        default:
-            // Unsupported type
-            return false;
-    }
-    
-    dvEvent->SetValue(wxVar);
-    return true;
+    // Check if it's a size event
+    return (wx_event->GetEventType() == wxEVT_SIZE) ? 1 : 0;
 }
 
-WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event) {
-    if (!event) return false;
-    
-    wxDataViewEvent* dvEvent = wxDynamicCast((wxEvent*)event, wxDataViewEvent);
-    if (!dvEvent) return false;
-    
-    return dvEvent->IsEditCancelled();
+extern "C" int wxd_Event_GetRawType(wxd_Event_t* event) {
+    if (!event) return -1;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    return static_cast<int>(wx_event->GetEventType());
 }
+
+// --- CommandEvent specific ---
+WXD_EXPORTED void* wxd_CommandEvent_GetClientData(wxd_Event_t* self) {
+    if (!self) return nullptr;
+    wxEvent* baseEvent = reinterpret_cast<wxEvent*>(self);
+    wxCommandEvent* cmdEvent = wxDynamicCast(baseEvent, wxCommandEvent);
+    if (!cmdEvent) return nullptr;
+    return cmdEvent->GetClientData();
+}
+
+// --- CheckListBox specific --- 
+WXD_EXPORTED int32_t wxd_CheckListBoxEvent_GetSelection(wxd_Event_t* self) {
+    if (!self) return -1;
+    wxEvent* baseEvent = reinterpret_cast<wxEvent*>(self);
+    wxCommandEvent* cmdEvent = wxDynamicCast(baseEvent, wxCommandEvent);
+    if (!cmdEvent) return -1;
+    // For list-like controls, GetInt() often returns the selection index.
+    // wxCheckListBox emits wxEVT_LISTBOX, which uses GetInt() for selection.
+    return cmdEvent->GetInt(); 
+}
+
+// --- Notebook specific ---
+// This is already implemented in notebook.cpp
+/*
+WXD_EXPORTED int32_t wxd_NotebookEvent_GetSelection(wxd_Event_t* self) {
+    if (!self) return -1;
+    wxNotebookEvent* notebookEvent = static_cast<wxNotebookEvent*>(self);
+    return notebookEvent->GetSelection();
+}
+*/

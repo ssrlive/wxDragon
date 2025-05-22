@@ -4,7 +4,7 @@
 use std::ffi::{c_longlong, CString};
 use wxdragon_sys as ffi;
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
 use crate::widget_builder;
@@ -26,6 +26,31 @@ widget_style_enum!(
     },
     default_variant: DefaultStyle
 );
+
+/// Events emitted by FilePickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FilePickerCtrlEvent {
+    /// Emitted when the file is changed
+    FileChanged,
+}
+
+/// Event data for FilePickerCtrl events
+#[derive(Debug)]
+pub struct FilePickerCtrlEventData {
+    event: Event,
+}
+
+impl FilePickerCtrlEventData {
+    /// Create a new FilePickerCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+}
 
 // --- FilePickerCtrl ---
 #[derive(Clone)]
@@ -76,6 +101,17 @@ impl FilePickerCtrl {
         }
     }
 }
+
+// Implement event handlers for FilePickerCtrl
+crate::implement_widget_local_event_handlers!(
+    FilePickerCtrl,
+    FilePickerCtrlEvent,
+    FilePickerCtrlEventData,
+    FileChanged => file_changed, EventType::FILE_PICKER_CHANGED
+);
+
+// Implement WindowEvents to get standard window events
+impl WindowEvents for FilePickerCtrl {}
 
 // Use the widget_builder macro to generate the FilePickerCtrlBuilder implementation
 widget_builder!(

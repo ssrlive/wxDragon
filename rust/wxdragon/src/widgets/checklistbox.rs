@@ -1,6 +1,6 @@
 // ! Safe wrapper for wxCheckListBox.
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -26,6 +26,46 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by CheckListBox
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CheckListBoxEvent {
+    /// Emitted when an item is selected
+    Selected,
+    /// Emitted when a checkbox is toggled
+    Toggled,
+    /// Emitted when an item is double-clicked
+    DoubleClicked,
+}
+
+/// Event data for CheckListBox events
+#[derive(Debug)]
+pub struct CheckListBoxEventData {
+    event: Event,
+}
+
+impl CheckListBoxEventData {
+    /// Create a new CheckListBoxEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the index of the item that was selected or toggled
+    pub fn get_selection(&self) -> Option<u32> {
+        // For CheckListBox events, GetInt() returns the selection index
+        self.event.get_int().map(|i| i as u32)
+    }
+
+    /// Get the text of the item that was selected or toggled
+    pub fn get_string(&self) -> Option<String> {
+        self.event.get_string()
+    }
+
+    /// Get whether the checkbox was checked or unchecked (for Toggled events)
+    pub fn is_checked(&self) -> Option<bool> {
+        self.event.is_checked()
+    }
+}
 
 /// Represents a wxCheckListBox control, which combines a ListBox with checkboxes.
 #[derive(Clone)]
@@ -168,6 +208,19 @@ impl CheckListBox {
         unsafe { ffi::wxd_CheckListBox_Check(self.window.as_ptr() as *mut _, index, check) }
     }
 }
+
+// Implement event handlers for CheckListBox
+crate::implement_widget_local_event_handlers!(
+    CheckListBox,
+    CheckListBoxEvent,
+    CheckListBoxEventData,
+    Selected => selected, EventType::COMMAND_LISTBOX_SELECTED,
+    Toggled => toggled, EventType::COMMAND_CHECKLISTBOX_SELECTED,
+    DoubleClicked => double_clicked, EventType::COMMAND_LISTBOX_DOUBLECLICKED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for CheckListBox {}
 
 widget_builder!(
     name: CheckListBox,

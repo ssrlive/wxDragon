@@ -12,14 +12,14 @@ pub struct FontDialog {
 
 /// Builder for FontDialog
 pub struct FontDialogBuilder<'a, W: WxWidget> {
-    parent: Option<&'a W>,
+    parent: &'a W,
     title: String,
     font_data: Option<&'a FontData>,
 }
 
 impl FontDialog {
     /// Creates a builder for a font dialog.
-    pub fn builder<'a, W: WxWidget>(parent: Option<&'a W>) -> FontDialogBuilder<'a, W> {
+    pub fn builder<'a, W: WxWidget>(parent: &'a W) -> FontDialogBuilder<'a, W> {
         FontDialogBuilder {
             parent,
             title: "Choose a font".to_string(),
@@ -92,7 +92,11 @@ impl<'a, W: WxWidget> FontDialogBuilder<'a, W> {
     pub fn build(self) -> FontDialog {
         let c_title = CString::new(self.title).expect("CString::new failed for title");
         let font_data_ptr = self.font_data.map_or(std::ptr::null_mut(), |d| d.as_ptr());
-        let parent_ptr = self.parent.map_or(std::ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "FontDialog requires a valid parent window pointer."
+        );
 
         let ptr =
             unsafe { ffi::wxd_FontDialog_Create(parent_ptr, c_title.as_ptr(), font_data_ptr) };

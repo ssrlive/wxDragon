@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -41,6 +41,47 @@ widget_style_enum!(
     default_variant: Default
 );
 
+/// Events emitted by MediaCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MediaCtrlEvent {
+    /// Emitted when media is successfully loaded
+    Loaded,
+    /// Emitted when media is stopped
+    Stop,
+    /// Emitted when media playback has finished
+    Finished,
+    /// Emitted when media state changes
+    StateChanged,
+    /// Emitted when media starts playing
+    Play,
+    /// Emitted when media is paused
+    Pause,
+}
+
+/// Event data for MediaCtrl events
+#[derive(Debug)]
+pub struct MediaCtrlEventData {
+    event: Event,
+}
+
+impl MediaCtrlEventData {
+    /// Create a new MediaCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the current state of the media player
+    pub fn get_state(&self) -> Option<MediaState> {
+        // Since the event doesn't provide state information directly,
+        // we can get the mediaCtrl from the event source and query it
+        if let Some(window_obj) = self.event.get_event_object() {
+            let media_ctrl = MediaCtrl { window: window_obj };
+            return Some(media_ctrl.get_state());
+        }
+        None
+    }
+}
+
 /// Represents a seek mode for media controls and similar use cases
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
@@ -57,7 +98,7 @@ impl Default for SeekMode {
     fn default() -> Self {
         SeekMode::FromStart
     }
-} 
+}
 
 /// A wxWidgets media player control
 #[derive(Clone)]
@@ -89,17 +130,13 @@ impl MediaCtrl {
     /// Load media from a file path.
     pub fn load(&self, file_name: &str) -> bool {
         let c_file_name = CString::new(file_name).expect("CString::new failed for file_name");
-        unsafe {
-            ffi::wxd_MediaCtrl_Load(self.window.as_ptr() as *mut _, c_file_name.as_ptr())
-        }
+        unsafe { ffi::wxd_MediaCtrl_Load(self.window.as_ptr() as *mut _, c_file_name.as_ptr()) }
     }
 
     /// Load media from a URI.
     pub fn load_uri(&self, uri: &str) -> bool {
         let c_uri = CString::new(uri).expect("CString::new failed for uri");
-        unsafe {
-            ffi::wxd_MediaCtrl_LoadURI(self.window.as_ptr() as *mut _, c_uri.as_ptr())
-        }
+        unsafe { ffi::wxd_MediaCtrl_LoadURI(self.window.as_ptr() as *mut _, c_uri.as_ptr()) }
     }
 
     /// Load media from a URI using a proxy.
@@ -117,27 +154,19 @@ impl MediaCtrl {
 
     /// Get the current state of the media.
     pub fn get_state(&self) -> MediaState {
-        let state = unsafe {
-            ffi::wxd_MediaCtrl_GetState(self.window.as_ptr() as *mut _)
-        };
-        
+        let state = unsafe { ffi::wxd_MediaCtrl_GetState(self.window.as_ptr() as *mut _) };
+
         match state as u32 {
             0 => MediaState::Stopped,
             1 => MediaState::Paused,
             2 => MediaState::Playing,
-            _ => MediaState::Stopped // Default to Stopped for unknown values
+            _ => MediaState::Stopped, // Default to Stopped for unknown values
         }
     }
 
     /// Seek to a position in the media.
     pub fn seek(&self, where_: i64, mode: SeekMode) -> i64 {
-        unsafe {
-            ffi::wxd_MediaCtrl_Seek(
-                self.window.as_ptr() as *mut _,
-                where_,
-                mode as i32,
-            )
-        }
+        unsafe { ffi::wxd_MediaCtrl_Seek(self.window.as_ptr() as *mut _, where_, mode as i32) }
     }
 
     /// Get the current position in the media.
@@ -191,6 +220,22 @@ impl MediaCtrl {
     }
 }
 
+// Implement event handlers for MediaCtrl
+crate::implement_widget_local_event_handlers!(
+    MediaCtrl,
+    MediaCtrlEvent,
+    MediaCtrlEventData,
+    Loaded => loaded, EventType::MEDIA_LOADED,
+    Stop => stop, EventType::MEDIA_STOP,
+    Finished => finished, EventType::MEDIA_FINISHED,
+    StateChanged => state_changed, EventType::MEDIA_STATECHANGED,
+    Play => play, EventType::MEDIA_PLAY,
+    Pause => pause, EventType::MEDIA_PAUSE
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for MediaCtrl {}
+
 // Create the builder for MediaCtrl
 widget_builder!(
     name: MediaCtrl,
@@ -226,4 +271,4 @@ widget_builder!(
 );
 
 // Implement standard widget traits
-implement_widget_traits_with_target!(MediaCtrl, window, Window); 
+implement_widget_traits_with_target!(MediaCtrl, window, Window);

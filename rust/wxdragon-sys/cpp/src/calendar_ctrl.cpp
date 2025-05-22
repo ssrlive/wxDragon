@@ -69,33 +69,25 @@ WXD_EXPORTED bool wxd_CalendarCtrl_SetDate(wxd_CalendarCtrl_t* self, const wxd_D
     return ctrl->SetDate(wxd_to_wx_datetime(date));
 }
 
-WXD_EXPORTED wxd_DateTime_t wxd_CalendarCtrl_GetDate(wxd_CalendarCtrl_t* self) {
+WXD_EXPORTED wxd_DateTime_t* wxd_CalendarCtrl_GetDate(wxd_CalendarCtrl_t* self) {
     if (!self) {
-        // Return an invalid or default date
-        // Year 0 can signify an invalid/uninitialized wxd_DateTime_t
-        wxd_DateTime_t dt_invalid = {0, 0, 0, 0, 0, 0}; 
-        return dt_invalid;
+        // Return nullptr for an invalid/uninitialized date pointer
+        return nullptr; 
     }
     wxCalendarCtrl* ctrl = (wxCalendarCtrl*)self;
-    return wx_to_wxd_datetime(ctrl->GetDate());
-}
-
-// For wxCalendarEvent, which is a wxDateEvent
-WXD_EXPORTED wxd_DateTime_t wxd_CalendarEvent_GetDate(wxd_Event_t* event) {
-    if (!event) {
-        wxd_DateTime_t dt_invalid = {0, 0, 0, 0, 0, 0};
-        return dt_invalid;
+    const wxDateTime& dt = ctrl->GetDate();
+    if (!dt.IsValid()) {
+        return nullptr;
     }
-    // event is an opaque pointer to a wxEvent or derived class instance.
-    // First, cast it to wxEvent*.
-    wxEvent* baseEvent = reinterpret_cast<wxEvent*>(event);
-    // Then, cast to the specific event type. Since this function is
-    // wxd_CalendarEvent_GetDate, we expect a wxCalendarEvent.
-    // wxCalendarEvent derives from wxDateEvent.
-    wxCalendarEvent* calEvent = static_cast<wxCalendarEvent*>(baseEvent); 
-    // For safety, one might use dynamic_cast and check for null if the type isn't guaranteed by call context.
-    // However, given the C function's name, static_cast is acceptable if Rust ensures correct usage.
-    return wx_to_wxd_datetime(calEvent->GetDate());
+    // Allocate on heap, Rust (DateTime::from_raw) will take ownership and free.
+    return new wxd_DateTime_t{
+        (short)dt.GetDay(wxDateTime::Local),
+        (unsigned short)(dt.GetMonth(wxDateTime::Local) + 1), // wxDateTime::Month is 0-indexed for GetMonth(), but constructor needs 1-12 for wxd_DateTime_t
+        dt.GetYear(wxDateTime::Local),
+        (short)dt.GetHour(wxDateTime::Local),
+        (short)dt.GetMinute(wxDateTime::Local),
+        (short)dt.GetSecond(wxDateTime::Local)
+    };
 }
 
 } // extern "C" 

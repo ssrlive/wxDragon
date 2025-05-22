@@ -1,6 +1,6 @@
 //! Safe wrapper for wxSlider.
 
-use crate::event::WxEvtHandler;
+use crate::event::ScrollEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -59,7 +59,7 @@ impl Slider {
 
     /// Sets the slider value.
     pub fn set_value(&self, value: i32) {
-        unsafe { ffi::wxd_Slider_SetValue(self.as_ptr(), value as c_int) };
+        unsafe { ffi::wxd_Slider_SetValue(self.as_ptr(), value) }
     }
 
     /// Sets the slider range (minimum and maximum values).
@@ -75,6 +75,10 @@ impl Slider {
     /// Gets the maximum slider value.
     pub fn max(&self) -> i32 {
         unsafe { ffi::wxd_Slider_GetMax(self.as_ptr()) }
+    }
+
+    pub fn get_value(&self) -> i32 {
+        unsafe { ffi::wxd_Slider_GetValue(self.as_ptr()) }
     }
 }
 
@@ -112,3 +116,6 @@ widget_builder!(
         unsafe { Slider::from_ptr(slider_ptr) }
     }
 );
+
+// At the bottom of the file, add the ScrollEvents trait implementation
+impl ScrollEvents for Slider {}

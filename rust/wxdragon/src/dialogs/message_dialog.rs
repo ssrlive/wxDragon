@@ -47,7 +47,7 @@ impl MessageDialog {
     }
 
     pub fn builder<'a>(
-        parent: Option<&'a dyn WxWidget>,
+        parent: &'a dyn WxWidget,
         message: &str,
         caption: &str,
     ) -> MessageDialogBuilder<'a> {
@@ -96,14 +96,14 @@ impl Drop for MessageDialog {
 
 // --- MessageDialogBuilder ---
 pub struct MessageDialogBuilder<'a> {
-    parent: Option<&'a dyn WxWidget>,
+    parent: &'a dyn WxWidget,
     message: String,
     caption: String,
     style: MessageDialogStyle, // Using the enum instead of i64
 }
 
 impl<'a> MessageDialogBuilder<'a> {
-    pub fn new(parent: Option<&'a dyn WxWidget>, message: &str, caption: &str) -> Self {
+    pub fn new(parent: &'a dyn WxWidget, message: &str, caption: &str) -> Self {
         MessageDialogBuilder {
             parent,
             message: message.to_string(),
@@ -124,7 +124,11 @@ impl<'a> MessageDialogBuilder<'a> {
     pub fn build(self) -> MessageDialog {
         let c_message = CString::new(self.message).expect("CString::new failed for message");
         let c_caption = CString::new(self.caption).expect("CString::new failed for caption");
-        let parent_ptr = self.parent.map_or(std::ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "MessageDialog requires a valid parent window pointer."
+        );
 
         let ptr = unsafe {
             ffi::wxd_MessageDialog_Create(

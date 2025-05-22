@@ -1,12 +1,13 @@
-use crate::event::WxEvtHandler;
+use crate::bitmap::Bitmap;
+use crate::event::button_events::ButtonEvents; // Added ButtonEvents import
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*; // Use prelude
 use crate::widget_builder;
 use crate::widget_style_enum;
-use crate::window::{Window, WxWidget}; // Make sure WxEvtHandler is imported
-use crate::bitmap::Bitmap; // Added
-                                       // Remove specific imports covered by prelude
-                                       // use crate::{Id, Point, Size};
+use crate::window::{Window, WxWidget}; // Make sure WxEvtHandler is imported // Added
+                                                                             // Remove specific imports covered by prelude
+                                                                             // use crate::{Id, Point, Size};
+use crate::event::WindowEvents;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi; // ADDED for enum bitwise operations
@@ -147,7 +148,7 @@ impl Button {
             );
         }
     }
-    
+
     /// Sets the bitmap for the label (main bitmap, default position Left).
     pub fn set_bitmap_label(&self, bitmap: &Bitmap) {
         self.set_bitmap(bitmap, ButtonBitmapPosition::Left); // wxButton::SetBitmapLabel is often an alias for SetBitmap with wxLEFT
@@ -198,26 +199,61 @@ impl Button {
     // When implemented, they might return unowned pointers, requiring Bitmap::from_ptr_unowned.
 
     pub fn get_bitmap(&self) -> Option<Bitmap> {
-        let ptr = unsafe { ffi::wxd_Button_GetBitmap(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
-        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+        let ptr =
+            unsafe { ffi::wxd_Button_GetBitmap(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Bitmap::from_ptr_unowned(ptr) })
+        }
     }
     pub fn get_bitmap_disabled(&self) -> Option<Bitmap> {
-        let ptr = unsafe { ffi::wxd_Button_GetBitmapDisabled(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
-        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+        let ptr = unsafe {
+            ffi::wxd_Button_GetBitmapDisabled(self.window.as_ptr() as *mut ffi::wxd_Button_t)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Bitmap::from_ptr_unowned(ptr) })
+        }
     }
     pub fn get_bitmap_focus(&self) -> Option<Bitmap> {
-        let ptr = unsafe { ffi::wxd_Button_GetBitmapFocus(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
-        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+        let ptr = unsafe {
+            ffi::wxd_Button_GetBitmapFocus(self.window.as_ptr() as *mut ffi::wxd_Button_t)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Bitmap::from_ptr_unowned(ptr) })
+        }
     }
     pub fn get_bitmap_current(&self) -> Option<Bitmap> {
-        let ptr = unsafe { ffi::wxd_Button_GetBitmapCurrent(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
-        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+        let ptr = unsafe {
+            ffi::wxd_Button_GetBitmapCurrent(self.window.as_ptr() as *mut ffi::wxd_Button_t)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Bitmap::from_ptr_unowned(ptr) })
+        }
     }
     pub fn get_bitmap_pressed(&self) -> Option<Bitmap> {
-        let ptr = unsafe { ffi::wxd_Button_GetBitmapPressed(self.window.as_ptr() as *mut ffi::wxd_Button_t) };
-        if ptr.is_null() { None } else { Some(unsafe { Bitmap::from_ptr_unowned(ptr) }) }
+        let ptr = unsafe {
+            ffi::wxd_Button_GetBitmapPressed(self.window.as_ptr() as *mut ffi::wxd_Button_t)
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Bitmap::from_ptr_unowned(ptr) })
+        }
     }
 }
+
+// Implement ButtonEvents trait for Button
+impl ButtonEvents for Button {}
+
+// Implement WindowEvents trait for Button
+impl WindowEvents for Button {}
 
 // Use the widget_builder macro to generate the ButtonBuilder implementation
 widget_builder!(

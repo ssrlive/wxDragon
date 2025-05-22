@@ -1,7 +1,7 @@
 //!
 //! Safe wrapper for wxTreebook.
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -24,6 +24,70 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by Treebook
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreebookEvent {
+    /// Emitted when the selected page changes
+    PageChanged,
+    /// Emitted when the selected page is about to change
+    PageChanging,
+    /// Emitted when a tree node is expanded
+    NodeExpanded,
+    /// Emitted when a tree node is collapsed
+    NodeCollapsed,
+}
+
+/// Event data for Treebook page changed/changing events
+#[derive(Debug)]
+pub struct TreebookEventData {
+    base: Event,
+}
+
+impl TreebookEventData {
+    /// Create a new NotebookEventData with the provided Event
+    pub fn new(event: Event) -> Self {
+        Self { base: event }
+    }
+
+    /// Skip this event (allowing the default processing to occur)
+    pub fn skip(&self, skip: bool) {
+        self.base.skip(skip);
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.base.get_id()
+    }
+
+    /// Gets the page that has been selected.
+    /// For a `PageChanged` event, this is the new page.
+    pub fn get_selection(&self) -> Option<i32> {
+        if self.base.is_null() {
+            return None;
+        }
+        let val = unsafe { ffi::wxd_NotebookEvent_GetSelection(self.base.0) };
+        if val == ffi::WXD_NOT_FOUND as i32 {
+            None
+        } else {
+            Some(val)
+        }
+    }
+
+    /// Gets the page that was selected before the change.
+    /// For a `PageChanged` event, this is the old page.
+    pub fn get_old_selection(&self) -> Option<i32> {
+        if self.base.is_null() {
+            return None;
+        }
+        let val = unsafe { ffi::wxd_NotebookEvent_GetOldSelection(self.base.0) };
+        if val == ffi::WXD_NOT_FOUND as i32 {
+            None
+        } else {
+            Some(val)
+        }
+    }
+}
 
 /// Represents a wxTreebook control.
 #[derive(Clone)]
@@ -197,3 +261,17 @@ widget_builder!(
         )
     }
 );
+
+// Implement Treebook-specific event handlers
+crate::implement_widget_local_event_handlers!(
+    Treebook,
+    TreebookEvent,
+    TreebookEventData,
+    PageChanged => page_changed, EventType::TREEBOOK_PAGE_CHANGED,
+    PageChanging => page_changing, EventType::TREEBOOK_PAGE_CHANGING,
+    NodeExpanded => node_expanded, EventType::TREEBOOK_NODE_EXPANDED,
+    NodeCollapsed => node_collapsed, EventType::TREEBOOK_NODE_COLLAPSED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for Treebook {}

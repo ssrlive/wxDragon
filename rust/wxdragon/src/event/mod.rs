@@ -1,15 +1,37 @@
 //! Safe wrappers for wxWidgets events.
 
-use crate::color::Colour;
-use crate::datetime::DateTime;
 use crate::geometry::Point;
-use crate::widgets::treectrl::TreeItemId;
 use crate::window::Window;
 use std::boxed::Box;
 use std::ffi::c_void;
 use std::ffi::CStr;
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
+pub mod button_events;
+pub mod event_data;
+pub mod macros;
+pub mod scroll_events;
+pub mod text_events;
+pub mod tree_events;
+pub mod window_events;
+
+// Re-export window events for easier access
+pub use window_events::{
+    KeyboardEvent, MouseButtonEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
+    WindowSizeEvent,
+};
+
+// Re-export button events for easier access
+pub use button_events::{ButtonEvent, ButtonEventData, ButtonEvents};
+
+// Re-export text events for easier access
+pub use text_events::{TextEvent, TextEventData, TextEvents};
+
+// Re-export tree events for easier access
+pub use tree_events::{TreeEvent, TreeEventData, TreeEvents};
+
+// Re-export scroll events for easier access
+pub use scroll_events::{ScrollEvent, ScrollEventData, ScrollEvents};
 
 // Re-export FFI EventType alias and specific EVT_ constants
 // pub use ffi::{EventType as EventTypeInt, EVT_COMMAND_BUTTON_CLICKED, EVT_CHECKBOX, EVT_CLOSE_WINDOW, EVT_MENU, EVT_TEXT, EVT_TEXT_ENTER};
@@ -37,6 +59,10 @@ impl EventType {
     pub const MENU: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MENU);
     pub const LEFT_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LEFT_DOWN);
     pub const LEFT_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LEFT_UP);
+    pub const RIGHT_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RIGHT_DOWN);
+    pub const RIGHT_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RIGHT_UP);
+    pub const MIDDLE_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MIDDLE_DOWN);
+    pub const MIDDLE_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MIDDLE_UP);
     pub const MOTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOTION);
     pub const MOUSEWHEEL: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOUSEWHEEL);
     pub const KEY_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KEY_DOWN);
@@ -54,6 +80,8 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED);
     pub const COMMAND_CHECKLISTBOX_SELECTED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED);
+    pub const COMMAND_LISTBOX_DOUBLECLICKED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED);
     pub const COMMAND_TOGGLEBUTTON_CLICKED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED);
     // ADDED: TreeCtrl event types
@@ -151,6 +179,15 @@ impl EventType {
     // ADDED: Calendar Control Event Type
     pub const CALENDAR_SEL_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED);
+    // ADDED: Missing Calendar Control Event Types
+    pub const CALENDAR_DOUBLECLICKED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CALENDAR_DOUBLECLICKED);
+    pub const CALENDAR_MONTH_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CALENDAR_MONTH_CHANGED);
+    pub const CALENDAR_YEAR_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CALENDAR_YEAR_CHANGED);
+    pub const CALENDAR_WEEKDAY_CLICKED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CALENDAR_WEEKDAY_CLICKED);
     // ADDED: ScrollBar Events
     pub const SCROLL_TOP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_SCROLL_TOP);
     pub const SCROLL_BOTTOM: EventType =
@@ -186,16 +223,13 @@ impl EventType {
     // Media events
     pub const MEDIA_LOADED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_LOADED);
-    pub const MEDIA_STOP: EventType =
-        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STOP);
+    pub const MEDIA_STOP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STOP);
     pub const MEDIA_FINISHED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_FINISHED);
     pub const MEDIA_STATECHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STATECHANGED);
-    pub const MEDIA_PLAY: EventType =
-        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PLAY);
-    pub const MEDIA_PAUSE: EventType =
-        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PAUSE);
+    pub const MEDIA_PLAY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PLAY);
+    pub const MEDIA_PAUSE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PAUSE);
 
     pub const EVT_DATE_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATE_CHANGED);
@@ -208,6 +242,12 @@ impl EventType {
     pub const PAINT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_PAINT);
 
     pub const DESTROY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DESTROY);
+
+    // Additional window events
+    pub const MOVE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOVE);
+    pub const ERASE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_ERASE);
+    pub const SET_FOCUS: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_SET_FOCUS);
+    pub const KILL_FOCUS: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KILL_FOCUS);
 
     // DataView events
     pub const DATAVIEW_SELECTION_CHANGED: EventType =
@@ -235,7 +275,61 @@ impl EventType {
     pub const DATAVIEW_COLUMN_REORDERED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED);
 
-    // Add others as needed
+    // ADDED: New TreeCtrl Event Types (complementing 22-25)
+    pub const TREE_SEL_CHANGING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_SEL_CHANGING);
+    pub const TREE_ITEM_COLLAPSING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_COLLAPSING);
+    pub const TREE_ITEM_COLLAPSED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_COLLAPSED);
+    pub const TREE_ITEM_EXPANDING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_EXPANDING);
+    pub const TREE_ITEM_EXPANDED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_EXPANDED);
+    pub const TREE_ITEM_RIGHT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_RIGHT_CLICK);
+    pub const TREE_ITEM_MIDDLE_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_MIDDLE_CLICK);
+    pub const TREE_KEY_DOWN: EventType = // Specific to TreeCtrl
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_KEY_DOWN);
+    pub const TREE_DELETE_ITEM: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_DELETE_ITEM);
+    pub const TREE_ITEM_MENU: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_MENU);
+    pub const TREE_BEGIN_DRAG: EventType = // Specific to TreeCtrl
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_BEGIN_DRAG);
+    pub const TREE_BEGIN_RDRAG: EventType = // Specific to TreeCtrl
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_BEGIN_RDRAG);
+    pub const TREE_END_DRAG: EventType = // Specific to TreeCtrl
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_END_DRAG);
+    pub const TREE_STATE_IMAGE_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK);
+
+    // ToolBar Events
+    pub const TOOL_ENTER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TOOL_ENTER);
+
+    // TreeCtrl Events
+    pub const TREE_ITEM_GETTOOLTIP: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP);
+
+    // Generic events that might not fit a specific category or are widely used
+    pub const ANY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_ANY);
+
+    // Special event type for null/None, not a real wxWidgets event type
+    pub const NONE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NULL); // Assuming NULL is 0
+
+    // AuiManager events
+    pub const AUI_PANE_BUTTON: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_BUTTON);
+    pub const AUI_PANE_CLOSE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_CLOSE);
+    pub const AUI_PANE_MAXIMIZE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE);
+    pub const AUI_PANE_RESTORE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_RESTORE);
+    pub const AUI_PANE_ACTIVATED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_ACTIVATED);
+    pub const AUI_RENDER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_RENDER);
 
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {
@@ -287,6 +381,27 @@ impl Event {
             None
         } else {
             Some(unsafe { Window::from_ptr(ptr) })
+        }
+    }
+
+    /// Gets the event type.
+    pub fn get_event_type(&self) -> Option<EventType> {
+        if self.0.is_null() {
+            return None;
+        }
+        let event_type_c = unsafe { ffi::wxd_Event_GetEventType(self.0) };
+        // If event_type_c is WXD_EVENT_TYPE_NULL or an invalid value, return None
+        if event_type_c
+            == ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NULL
+                .try_into()
+                .unwrap()
+        {
+            None
+        } else {
+            // Convert i32 to the C enum type
+            let c_enum_val =
+                unsafe { std::mem::transmute::<i32, ffi::WXDEventTypeCEnum>(event_type_c) };
+            Some(EventType(c_enum_val))
         }
     }
 
@@ -385,248 +500,6 @@ impl Event {
             Some(int_val)
         }
     }
-
-    // --- Scroll Event Data Accessors ---
-
-    /// Gets the scroll position associated with a scroll event.
-    pub fn get_scroll_position(&self) -> Option<i32> {
-        if self.0.is_null() {
-            return None;
-        }
-        let pos = unsafe { ffi::wxd_ScrollEvent_GetPosition(self.0) };
-        if pos == -1 {
-            None
-        } else {
-            Some(pos)
-        } // Assuming -1 indicates error/not applicable
-    }
-
-    /// Gets the orientation (wxHORIZONTAL/wxVERTICAL) associated with a scroll event.
-    pub fn get_scroll_orientation(&self) -> Option<i32> {
-        if self.0.is_null() {
-            return None;
-        }
-        let orient = unsafe { ffi::wxd_ScrollEvent_GetOrientation(self.0) };
-        if orient == -1 {
-            None
-        } else {
-            Some(orient)
-        } // Assuming -1 indicates error/not applicable
-    }
-
-    // --- ColourPicker Event Data Accessor ---
-    pub fn get_colour(&self) -> Option<Colour> {
-        if self.0.is_null() {
-            return None;
-        }
-        // The C function returns wxd_Colour_t directly.
-        // We assume if the event type is correct, the call is valid.
-        // No easy way to return None if the underlying event wasn't a ColourPickerEvent
-        // without adding more complex type checking or specific event structs.
-        let c_colour = unsafe { ffi::wxd_ColourPickerEvent_GetColour(self.0) };
-        // Check for a potential default/invalid value returned by C++ if the cast failed internally?
-        // E.g., if (c_colour.r == 0 && c_colour.g == 0 && c_colour.b == 0 && c_colour.a == 0) { None } else { Some(Colour::from(c_colour)) }
-        // For now, directly convert.
-        Some(Colour::from(c_colour))
-    }
-
-    // --- TreeEvent Data Accessors ---
-    pub fn get_item(&self) -> Option<TreeItemId> {
-        if self.0.is_null() {
-            return None;
-        }
-        let item_ptr = unsafe { ffi::wxd_TreeEvent_GetItem(self.0) };
-        unsafe { TreeItemId::from_ptr(item_ptr) }
-    }
-
-    // --- NotebookEvent Data Accessor ---
-    pub fn get_selection(&self) -> Option<i32> {
-        let val = unsafe { ffi::wxd_NotebookEvent_GetSelection(self.0) };
-        if val == ffi::WXD_NOT_FOUND as i32 {
-            None
-        } else {
-            Some(val)
-        }
-    }
-
-    /// For book control events (Notebook, Treebook, etc.), gets the old page selection.
-    pub fn get_old_selection(&self) -> Option<i32> {
-        let val = unsafe { ffi::wxd_NotebookEvent_GetOldSelection(self.0) };
-        if val == ffi::WXD_NOT_FOUND as i32 {
-            None
-        } else {
-            Some(val)
-        }
-    }
-
-    // --- SplitterEvent Data Accessor ---
-    pub fn get_sash_position(&self) -> Option<i32> {
-        if self.0.is_null() {
-            return None;
-        }
-        Some(unsafe { ffi::wxd_SplitterEvent_GetSashPosition(self.0) })
-    }
-
-    // --- ListCtrl Event Data Accessors ---
-    pub fn get_item_index(&self) -> i32 {
-        // Changed return type to i32
-        if self.0.is_null() {
-            return -1;
-        }
-        unsafe { ffi::wxd_ListEvent_GetItemIndex(self.0) } // Should now return i32
-    }
-
-    pub fn get_column(&self) -> Option<i32> {
-        if self.0.is_null() {
-            return None;
-        }
-        let col = unsafe { ffi::wxd_ListEvent_GetColumn(self.0) };
-        if col == -1 {
-            None
-        } else {
-            Some(col)
-        }
-    }
-
-    // get_label for ListCtrl events (duplicates TreeEvent get_label, but okay on non-generic Event)
-    pub fn get_label(&self) -> Option<String> {
-        if self.0.is_null() {
-            return None;
-        }
-        // Try ListEvent first, then TreeEvent?
-        // Let's assume context implies correct FFI call or FFI handles it.
-        // Using wxd_ListEvent_GetLabel here.
-        unsafe {
-            let mut buffer: [c_char; 1024] = [0; 1024];
-            let len_needed =
-                ffi::wxd_ListEvent_GetLabel(self.0, buffer.as_mut_ptr(), buffer.len() as i32);
-            if len_needed < 0 {
-                return None;
-            }
-            let len_needed_usize = len_needed as usize;
-            if len_needed_usize < buffer.len() {
-                Some(
-                    CStr::from_ptr(buffer.as_ptr())
-                        .to_string_lossy()
-                        .into_owned(),
-                )
-            } else {
-                let mut vec_buffer: Vec<u8> = vec![0; len_needed_usize + 1];
-                let len_copied = ffi::wxd_ListEvent_GetLabel(
-                    self.0,
-                    vec_buffer.as_mut_ptr() as *mut c_char,
-                    vec_buffer.len() as i32,
-                );
-                if len_copied == len_needed {
-                    vec_buffer.pop();
-                    String::from_utf8(vec_buffer).ok()
-                } else {
-                    None
-                }
-            }
-        }
-    }
-
-    pub fn is_edit_cancelled(&self) -> Option<bool> {
-        if self.0.is_null() {
-            return None;
-        }
-        Some(unsafe { ffi::wxd_ListEvent_IsEditCancelled(self.0) })
-    }
-
-    // --- DatePicker / CalendarCtrl Event Data Accessor ---
-    // Note: wxDatePickerCtrl and wxCalendarCtrl both use wxDateEvent / wxCalendarEvent
-    // which derive from wxCommandEvent. The C function wxd_DatePickerEvent_GetDate
-    // and the new wxd_CalendarEvent_GetDate should be compatible or identical in practice for GetDate().
-    // We can have a generic get_date() if EventType helps dispatch, or specific ones.
-    // For now, adding a specific one for calendar.
-    pub fn get_calendar_date(&self) -> Option<DateTime> {
-        // SAFETY: Assumes self.0 is a valid wxd_Event_t containing calendar data.
-        // Needs corresponding C API function wxd_CalendarEvent_GetDate.
-        // let raw_dt = unsafe { ffi::wxd_CalendarEvent_GetDate(self.0) }; // REMOVED
-        // If the event doesn't contain date info, we might get default/invalid DateTime.
-        // Consider getting date directly from the CalendarCtrl in the handler instead.
-        println!("Warning: Event::get_calendar_date() called, but FFI wxd_CalendarEvent_GetDate is removed. Returning None.");
-        None // Temporarily return None as FFI is missing
-             // if DateTime::is_valid_raw(&raw_dt) {
-             //     Some(DateTime::from_ffi(raw_dt))
-             // } else {
-             //     None
-             // }
-    }
-
-    // --- DataView Event Accessors ---
-
-    /// Gets the column index from a DataView event.
-    pub fn get_dataview_column(&self) -> Option<i32> {
-        if self.0.is_null() {
-            return None;
-        }
-        let mut column: i32 = 0;
-        if unsafe { ffi::wxd_DataViewEvent_GetColumn(self.0, &mut column) } {
-            Some(column)
-        } else {
-            None
-        }
-    }
-
-    /// Gets the row index from a DataView event.
-    /// 
-    /// Note: This only works reliably for DataViewListCtrl, not for tree-based controls.
-    pub fn get_dataview_row(&self) -> Option<i64> {
-        if self.0.is_null() {
-            return None;
-        }
-        let mut row: i64 = 0;
-        if unsafe { ffi::wxd_DataViewEvent_GetRow(self.0, &mut row) } {
-            Some(row)
-        } else {
-            None
-        }
-    }
-    
-    /// Gets the value from a DataView editing event.
-    pub fn get_dataview_value(&self) -> Option<crate::widgets::dataview::Variant> {
-        if self.0.is_null() {
-            return None;
-        }
-        
-        // Create a temporary variant struct to hold the returned data
-        let variant_raw = Box::new(unsafe { std::mem::zeroed::<ffi::wxd_Variant_t>() });
-        let variant_ptr = Box::into_raw(variant_raw);
-        
-        if unsafe { ffi::wxd_DataViewEvent_GetValue(self.0, variant_ptr) } {
-            // Convert the C++ variant to a Rust Variant, taking ownership and freeing the C resources
-            unsafe { crate::widgets::dataview::Variant::from_raw(variant_ptr) }
-        } else {
-            // Free the memory if the call failed
-            unsafe { ffi::wxd_Variant_Free(variant_ptr) };
-            None
-        }
-    }
-    
-    /// Sets the value in a DataView editing event.
-    pub fn set_dataview_value(&self, value: &crate::widgets::dataview::Variant) -> bool {
-        if self.0.is_null() {
-            return false;
-        }
-        
-        // Clone the variant since we need to transfer ownership to C++
-        let variant_clone = value.clone();
-        
-        // Use into_raw to properly transfer ownership to C++
-        // C++ side will free the memory using wxd_Variant_Free
-        unsafe { ffi::wxd_DataViewEvent_SetValue(self.0, variant_clone.into_raw()) }
-    }
-    
-    /// Checks if editing was cancelled in a DataView editing event.
-    pub fn is_dataview_edit_cancelled(&self) -> bool {
-        if self.0.is_null() {
-            return false;
-        }
-        
-        unsafe { ffi::wxd_DataViewEvent_IsEditCancelled(self.0) }
-    }
 }
 
 // --- WxEvtHandler Trait (Updated for Simple Event Handling) ---
@@ -634,8 +507,9 @@ impl Event {
 pub trait WxEvtHandler {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t;
 
-    // UPDATED: Takes simple FnMut(Event)
-    fn bind<F>(&self, event_type: EventType, callback: F)
+    // Internal implementation with crate visibility
+    #[doc(hidden)]
+    fn bind_internal<F>(&self, event_type: EventType, callback: F)
     where
         F: FnMut(Event) + 'static,
     {

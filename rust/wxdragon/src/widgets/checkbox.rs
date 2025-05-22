@@ -1,4 +1,5 @@
-use crate::event::WxEvtHandler;
+use crate::event::event_data::CommandEventData;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -66,6 +67,51 @@ impl CheckBox {
         }
     }
 }
+
+// --- CheckBox Event Handling ---
+
+/// Event types specific to `CheckBox`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CheckBoxEvent {
+    /// The checkbox state has changed (checked or unchecked).
+    /// Corresponds to `EventType::CHECKBOX` (`wxEVT_CHECKBOX`).
+    Toggled,
+}
+
+/// Event data for `CheckBox` events.
+#[derive(Debug)]
+pub struct CheckBoxEventData {
+    base: CommandEventData,
+}
+
+impl CheckBoxEventData {
+    /// Creates new `CheckBoxEventData` from base `CommandEventData`.
+    pub(crate) fn new(event: Event) -> Self {
+        Self {
+            base: CommandEventData::new(event),
+        }
+    }
+
+    /// Returns `true` if the checkbox is currently checked, `false` otherwise.
+    /// This reflects the state of the checkbox when the event occurred.
+    pub fn is_checked(&self) -> bool {
+        self.base.is_checked().unwrap_or(false) // CHECKBOX event should always provide this
+    }
+
+    /// Returns the ID of the checkbox that generated the event.
+    pub fn get_id(&self) -> i32 {
+        self.base.get_id()
+    }
+}
+
+// Use the implement_widget_local_event_handlers macro
+crate::implement_widget_local_event_handlers!(
+    CheckBox, CheckBoxEvent, CheckBoxEventData,
+    Toggled => toggled, EventType::CHECKBOX
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for CheckBox {}
 
 // Define the CheckBoxStyle enum using the widget_style_enum macro
 widget_style_enum!(

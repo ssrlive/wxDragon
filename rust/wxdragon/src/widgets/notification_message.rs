@@ -3,6 +3,7 @@
 
 // use crate::window::Window; // For parent type, though it's just a handle - Unused, removing
 // use crate::base::WxResult; // Will define locally for now
+use crate::event::{Event, EventType};
 use crate::window::WxWidget;
 use std::ffi::{CString, NulError};
 use std::os::raw::c_int;
@@ -44,6 +45,35 @@ widget_style_enum!(
     },
     default_variant: None
 );
+
+/// Events emitted by NotificationMessage
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NotificationMessageEvent {
+    /// Emitted when the notification is clicked
+    Click,
+    /// Emitted when the notification is dismissed
+    Dismissed,
+    /// Emitted when an action button is clicked
+    Action,
+}
+
+/// Event data for NotificationMessageEvent events
+#[derive(Debug)]
+pub struct NotificationMessageEventData {
+    event: Event,
+}
+
+impl NotificationMessageEventData {
+    /// Create a new NotificationMessageEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the notification or the action button that was clicked
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+}
 
 /// Represents a `wxNotificationMessage`.
 ///
@@ -150,8 +180,32 @@ impl NotificationMessage {
         Ok(result)
     }
 
-    // Note: wxNotificationMessage also supports AddAction, but this is not yet in the C API.
+    /// Gets the raw pointer to the notification message
+    #[allow(dead_code)]
+    pub(crate) fn get_ptr(&self) -> *mut ffi::wxd_NotificationMessage_t {
+        self.ptr
+    }
 }
+
+// Implement event handlers for NotificationMessage
+crate::implement_widget_local_event_handlers!(
+    NotificationMessage,
+    NotificationMessageEvent,
+    NotificationMessageEventData,
+    Click => click, EventType::NOTIFICATION_MESSAGE_CLICK,
+    Dismissed => dismissed, EventType::NOTIFICATION_MESSAGE_DISMISSED,
+    Action => action, EventType::NOTIFICATION_MESSAGE_ACTION
+);
+
+// Special implementation of WxEvtHandler for NotificationMessage
+impl crate::event::WxEvtHandler for NotificationMessage {
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.ptr as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
+// Since NotificationMessage is not a true window, we don't implement WindowEvents
+// However, we can still bind specific events defined above
 
 impl Drop for NotificationMessage {
     fn drop(&mut self) {
@@ -234,34 +288,3 @@ impl NotificationMessageBuilder {
         Ok(NotificationMessage { ptr })
     }
 }
-
-// For backward compatibility
-#[allow(deprecated)]
-/// Use with `NotificationMessageBuilder::with_style` to show an information icon.
-///
-/// This constant is deprecated, use `NotificationStyle::Information` instead.
-#[deprecated(since = "0.1.0", note = "Use NotificationStyle::Information instead")]
-pub const ICON_INFORMATION: i64 = ffi::WXD_ICON_INFORMATION;
-
-#[allow(deprecated)]
-/// Use with `NotificationMessageBuilder::with_style` to show a warning icon.
-///
-/// This constant is deprecated, use `NotificationStyle::Warning` instead.
-#[deprecated(since = "0.1.0", note = "Use NotificationStyle::Warning instead")]
-pub const ICON_WARNING: i64 = ffi::WXD_ICON_WARNING;
-
-#[allow(deprecated)]
-/// Use with `NotificationMessageBuilder::with_style` to show an error icon.
-///
-/// This constant is deprecated, use `NotificationStyle::Error` instead.
-#[deprecated(since = "0.1.0", note = "Use NotificationStyle::Error instead")]
-pub const ICON_ERROR: i64 = ffi::WXD_ICON_ERROR;
-
-#[allow(deprecated)]
-/// Use with `NotificationMessageBuilder::with_style` to show a question icon.
-///
-/// This constant is deprecated, use `NotificationStyle::Question` instead.
-#[deprecated(since = "0.1.0", note = "Use NotificationStyle::Question instead")]
-pub const ICON_QUESTION: i64 = ffi::WXD_ICON_QUESTION;
-
-// Ensure `Window` has `handle_ptr` and `

@@ -1,7 +1,7 @@
 //! ImageList widget wrapper.
 
-use wxdragon_sys as ffi;
-use crate::bitmap::Bitmap; // Corrected path: crate::bitmap instead of crate::widgets::bitmap
+use crate::bitmap::Bitmap;
+use wxdragon_sys as ffi; // Corrected path: crate::bitmap instead of crate::widgets::bitmap
 
 /// Represents a wxImageList.
 ///
@@ -109,7 +109,9 @@ impl ImageList {
 impl Drop for ImageList {
     fn drop(&mut self) {
         if self.owned && !self.ptr.is_null() {
-            unsafe { ffi::wxd_ImageList_Destroy(self.ptr); }
+            unsafe {
+                ffi::wxd_ImageList_Destroy(self.ptr);
+            }
         }
     }
 }
@@ -117,4 +119,4 @@ impl Drop for ImageList {
 // Ensure ImageList is Send + Sync if it makes sense.
 // wxWidgets objects are generally not Send/Sync unless explicitly designed for it.
 // Since this wraps a raw pointer tied to the main UI thread, it's likely !Send and !Sync.
-// For now, no explicit impl/negative impl. Default is !Send/!Sync due to raw pointer. 
+// For now, no explicit impl/negative impl. Default is !Send/!Sync due to raw pointer.

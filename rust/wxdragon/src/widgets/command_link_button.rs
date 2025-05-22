@@ -1,4 +1,3 @@
-use crate::event::WxEvtHandler;
 use crate::prelude::*;
 use crate::widgets::button::Button; // Compose Button
 use crate::window::{Window, WxWidget};

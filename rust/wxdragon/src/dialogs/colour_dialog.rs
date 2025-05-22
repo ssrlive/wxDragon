@@ -12,14 +12,14 @@ pub struct ColourDialog {
 
 /// Builder for ColourDialog
 pub struct ColourDialogBuilder<'a, W: WxWidget> {
-    parent: Option<&'a W>,
+    parent: &'a W,
     title: String,
     initial_colour: Option<Colour>,
 }
 
 impl ColourDialog {
     /// Creates a builder for a colour dialog.
-    pub fn builder<'a, W: WxWidget>(parent: Option<&'a W>) -> ColourDialogBuilder<'a, W> {
+    pub fn builder<'a, W: WxWidget>(parent: &'a W) -> ColourDialogBuilder<'a, W> {
         ColourDialogBuilder {
             parent,
             title: "Choose a colour".to_string(),
@@ -92,7 +92,11 @@ impl<'a, W: WxWidget> ColourDialogBuilder<'a, W> {
             std::ptr::null_mut()
         };
 
-        let parent_ptr = self.parent.map_or(std::ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "ColourDialog requires a valid parent window pointer."
+        );
 
         let ptr =
             unsafe { ffi::wxd_ColourDialog_Create(parent_ptr, c_title.as_ptr(), colour_data_ptr) };

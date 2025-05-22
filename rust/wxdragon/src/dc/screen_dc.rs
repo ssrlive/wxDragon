@@ -1,7 +1,7 @@
 use crate::dc::DeviceContext;
 
 /// A device context for drawing directly on the screen.
-/// 
+///
 /// ScreenDC allows for capturing screen content or drawing directly on the screen.
 pub struct ScreenDC {
     dc_ptr: *mut wxdragon_sys::wxd_ScreenDC_t,
@@ -33,4 +33,4 @@ impl Default for ScreenDC {
     fn default() -> Self {
         Self::new()
     }
-} 
+}

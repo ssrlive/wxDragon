@@ -2,7 +2,7 @@ use crate::dc::DeviceContext;
 use crate::window::WxWidget;
 
 /// A device context to draw on a window during a paint event.
-/// 
+///
 /// This DC must be created in response to a paint event, and only one
 /// PaintDC should exist at a time for a given window.
 pub struct PaintDC {
@@ -11,7 +11,7 @@ pub struct PaintDC {
 
 impl PaintDC {
     /// Create a new PaintDC for the specified window during a paint event
-    /// 
+    ///
     /// # Arguments
     /// * `window` - The window to draw on
     pub fn new<W: WxWidget>(window: &W) -> Self {
@@ -33,4 +33,4 @@ impl Drop for PaintDC {
             wxdragon_sys::wxd_PaintDC_Destroy(self.dc_ptr);
         }
     }
-} 
+}

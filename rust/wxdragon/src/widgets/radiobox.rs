@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -10,12 +10,40 @@ use std::os::raw::c_char;
 use std::ptr;
 use wxdragon_sys as ffi;
 
-// Constants from wxWidgets for RadioBox
-// Values populated by const_extractor via ffi
-// pub const RA_SPECIFY_COLS: i64 = ffi::WXD_RA_SPECIFY_COLS;
-// pub const RA_SPECIFY_ROWS: i64 = ffi::WXD_RA_SPECIFY_ROWS;
-// wxRB_GROUP, wxRB_SINGLE seem less relevant for RadioBox itself, more for RadioButton
-// Default style includes wxRA_SPECIFY_COLS
+/// Events emitted by RadioBox
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RadioBoxEvent {
+    /// Emitted when selection changes in the radio box
+    Selected,
+}
+
+/// Event data for RadioBox events
+#[derive(Debug)]
+pub struct RadioBoxEventData {
+    event: Event,
+}
+
+impl RadioBoxEventData {
+    /// Create a new RadioBoxEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the selected item index
+    pub fn get_selection(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+}
 
 /// Represents a wxRadioBox control.
 #[derive(Clone)]
@@ -180,3 +208,14 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+// Use the implement_widget_local_event_handlers macro for event handling
+crate::implement_widget_local_event_handlers!(
+    RadioBox,
+    RadioBoxEvent,
+    RadioBoxEventData,
+    Selected => selected, EventType::COMMAND_RADIOBOX_SELECTED
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for RadioBox {}

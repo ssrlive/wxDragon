@@ -8,7 +8,7 @@
 //! It also provides supporting types for renderers, columns, and data models.
 //!
 //! # Important Notes
-//! 
+//!
 //! When using the DataView controls, remember these key points:
 //!
 //! 1. Define columns in the DataViewListModel *before* adding any rows
@@ -32,6 +32,7 @@
 pub mod column;
 pub mod ctrl;
 pub mod enums;
+pub mod events;
 pub mod item;
 pub mod list_ctrl;
 pub mod model;
@@ -43,20 +44,16 @@ pub mod variant;
 pub use column::DataViewColumn;
 pub use ctrl::{DataViewCtrl, DataViewCtrlBuilder, DataViewStyle};
 pub use enums::{DataViewAlign, DataViewCellMode};
+pub use events::{DataViewEvent, DataViewEventData, DataViewEventHandler, TreeViewEventHandler};
 pub use item::DataViewItem;
 pub use list_ctrl::{DataViewListCtrl, DataViewListCtrlBuilder};
-pub use model::{CustomDataViewVirtualListModel, DataViewListModel, DataViewModel, DataViewItemAttr};
+pub use model::{
+    CustomDataViewVirtualListModel, DataViewItemAttr, DataViewListModel, DataViewModel,
+};
 pub use renderer::{
-    DataViewBitmapRenderer,
-    DataViewChoiceRenderer,
-    DataViewDateRenderer,
-    DataViewIconTextRenderer,
-    DataViewProgressRenderer,
-    DataViewRenderer,
-    DataViewSpinRenderer,
-    DataViewTextRenderer,
-    DataViewToggleRenderer,
-    DataViewCheckIconTextRenderer,
+    DataViewBitmapRenderer, DataViewCheckIconTextRenderer, DataViewChoiceRenderer,
+    DataViewDateRenderer, DataViewIconTextRenderer, DataViewProgressRenderer, DataViewRenderer,
+    DataViewSpinRenderer, DataViewTextRenderer, DataViewToggleRenderer,
 };
 pub use tree_ctrl::{DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewTreeCtrlStyle};
-pub use variant::{Variant, VariantType}; 
+pub use variant::{Variant, VariantType};

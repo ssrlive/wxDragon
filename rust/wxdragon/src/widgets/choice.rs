@@ -1,4 +1,6 @@
-use crate::event::WxEvtHandler;
+use crate::event::event_data::CommandEventData;
+use crate::event::WindowEvents;
+use crate::event::{Event, EventType};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -189,3 +191,50 @@ widget_builder!(
 );
 
 implement_widget_traits_with_target!(Choice, window, Window);
+
+// --- Choice specific event enum ---
+/// Events specific to Choice controls
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ChoiceEvent {
+    /// Fired when an item is selected
+    Selected,
+}
+
+/// Event data for Choice events
+#[derive(Debug)]
+pub struct ChoiceEventData {
+    pub event: CommandEventData,
+}
+
+impl ChoiceEventData {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event: CommandEventData::new(event),
+        }
+    }
+
+    /// Get the widget ID that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Get the selected item's index
+    pub fn get_selection(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+
+    /// Get the selected item's text (if available)
+    pub fn get_string(&self) -> Option<String> {
+        self.event.get_string()
+    }
+}
+
+// At the bottom of the file, use the local macro
+crate::implement_widget_local_event_handlers!(
+    Choice,
+    ChoiceEvent,
+    ChoiceEventData,
+    Selected => selection_changed, EventType::COMMAND_CHOICE_SELECTED
+);
+
+impl WindowEvents for Choice {}

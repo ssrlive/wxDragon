@@ -2,7 +2,7 @@
 //! Safe wrapper for wxScrollBar.
 //!
 
-use crate::event::WxEvtHandler;
+use crate::event::ScrollEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -109,3 +109,6 @@ widget_builder!(
         unsafe { ScrollBar::from_ptr(ptr) }
     }
 );
+
+// At the bottom of the file, add the ScrollEvents trait implementation
+impl ScrollEvents for ScrollBar {}

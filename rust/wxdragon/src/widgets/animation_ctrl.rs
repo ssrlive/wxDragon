@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -114,3 +114,6 @@ widget_builder!(
 
 // Implement common widget traits
 implement_widget_traits_with_target!(AnimationCtrl, window, Window);
+
+// After implement_widget_traits_with_target
+impl WindowEvents for AnimationCtrl {}

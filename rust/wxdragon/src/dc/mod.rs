@@ -59,21 +59,21 @@ widget_style_enum!(
 );
 
 pub mod client_dc;
-pub mod paint_dc;
-pub mod window_dc;
 pub mod memory_dc;
+pub mod paint_dc;
 pub mod screen_dc;
+pub mod window_dc;
 
 pub use client_dc::ClientDC;
-pub use paint_dc::PaintDC;
-pub use window_dc::WindowDC;
 pub use memory_dc::MemoryDC;
+pub use paint_dc::PaintDC;
 pub use screen_dc::ScreenDC;
+pub use window_dc::WindowDC;
 
 // Re-export for convenience
 pub use crate::bitmap::Bitmap;
-pub use crate::font::Font;
 pub use crate::color::Colour;
+pub use crate::font::Font;
 
 /// Common trait implemented by all device context types
 pub trait DeviceContext {
@@ -203,11 +203,16 @@ pub trait DeviceContext {
             let mut width = 0;
             let mut height = 0;
             unsafe {
-                wxdragon_sys::wxd_DC_GetTextExtent(self.dc_ptr(), c_text.as_ptr(), &mut width, &mut height);
+                wxdragon_sys::wxd_DC_GetTextExtent(
+                    self.dc_ptr(),
+                    c_text.as_ptr(),
+                    &mut width,
+                    &mut height,
+                );
             }
             (width, height)
         } else {
             (0, 0)
         }
     }
-} 
+}

@@ -1,5 +1,5 @@
 use crate::color::{colours, Colour};
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -22,6 +22,36 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by ColourPickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ColourPickerCtrlEvent {
+    /// Emitted when the user selects a colour
+    ColourChanged,
+}
+
+/// Event data for ColourPickerCtrl events
+#[derive(Debug)]
+pub struct ColourPickerCtrlEventData {
+    event: Event,
+}
+
+impl ColourPickerCtrlEventData {
+    /// Create a new ColourPickerCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the colour that was selected
+    pub fn get_colour(&self) -> Option<Colour> {
+        if self.event.is_null() {
+            return None;
+        }
+        // Directly call the FFI function
+        let c_colour = unsafe { ffi::wxd_ColourPickerEvent_GetColour(self.event.0) };
+        Some(Colour::from(c_colour))
+    }
+}
 
 // --- ColourPickerCtrl Widget ---
 
@@ -51,6 +81,17 @@ impl ColourPickerCtrl {
         };
     }
 }
+
+// Implement event handlers for ColourPickerCtrl
+crate::implement_widget_local_event_handlers!(
+    ColourPickerCtrl,
+    ColourPickerCtrlEvent,
+    ColourPickerCtrlEventData,
+    ColourChanged => colour_changed, EventType::COLOURPICKER_CHANGED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for ColourPickerCtrl {}
 
 widget_builder!(
     name: ColourPickerCtrl,

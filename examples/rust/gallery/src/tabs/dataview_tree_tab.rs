@@ -1,26 +1,27 @@
 //! Tab for demonstrating DataViewTreeCtrl.
 
-use wxdragon::prelude::*;
-use wxdragon::widgets::dataview::{
-    DataViewTreeCtrl, DataViewItem, DataViewColumn,
-    DataViewIconTextRenderer, DataViewCellMode
-};
-use wxdragon::widgets::dataview::enums::{DataViewAlign, DataViewColumnFlags};
-use wxdragon::widgets::dataview::variant::VariantType;
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
+use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
 use wxdragon::bitmap::Bitmap;
 use wxdragon::geometry::Size;
+use wxdragon::prelude::*;
+use wxdragon::widgets::dataview::enums::{DataViewAlign, DataViewColumnFlags};
+use wxdragon::widgets::dataview::variant::VariantType;
+use wxdragon::widgets::dataview::{
+    DataViewCellMode, DataViewColumn, DataViewIconTextRenderer, DataViewItem, DataViewTreeCtrl,
+};
+use wxdragon::widgets::imagelist::ImageList;
 use wxdragon::widgets::static_text::StaticText;
 
 // Helper function to create a valid bitmap for this tab
 fn create_icon(art_id: ArtId) -> Bitmap {
-    ArtProvider::get_bitmap(art_id, ArtClient::MessageBox, Some(Size::new(16, 16)))
-        .unwrap_or_else(|| {
+    ArtProvider::get_bitmap(art_id, ArtClient::MessageBox, Some(Size::new(16, 16))).unwrap_or_else(
+        || {
             // Fallback if ArtProvider fails for some reason
-            let fallback_rgba = [0,0,0,255]; // Black square
-            Bitmap::from_rgba(&fallback_rgba, 1,1).expect("Failed to create ultimate fallback bitmap")
-        })
+            let fallback_rgba = [0, 0, 0, 255]; // Black square
+            Bitmap::from_rgba(&fallback_rgba, 1, 1)
+                .expect("Failed to create ultimate fallback bitmap")
+        },
+    )
 }
 
 pub struct DataViewTreeTabControls {
@@ -41,33 +42,40 @@ pub fn create_dataview_tree_tab(parent: &impl WxWidget) -> DataViewTreeTabContro
     let icon_folder = create_icon(ArtId::Folder);
     let icon_file = create_icon(ArtId::NormalFile);
     let icon_settings = create_icon(ArtId::HelpSettings);
-    
+
     let idx_folder = image_list.add_bitmap(&icon_folder);
     let idx_file = image_list.add_bitmap(&icon_file);
     let idx_settings = image_list.add_bitmap(&icon_settings);
 
-    let dvc_tree = DataViewTreeCtrl::builder(&panel)
-        .build();
+    let dvc_tree = DataViewTreeCtrl::builder(&panel).build();
 
     // Create all column objects first
-    let expander_renderer = DataViewIconTextRenderer::new(VariantType::IconText, DataViewCellMode::Inert, DataViewAlign::Left);
+    let expander_renderer = DataViewIconTextRenderer::new(
+        VariantType::IconText,
+        DataViewCellMode::Inert,
+        DataViewAlign::Left,
+    );
     let expander_col = DataViewColumn::new(
-        "Hierarchy",                // Header text for the tree column
-        &expander_renderer,         // Renderer
-        0,                          // Model column 0 (for the main item text/icon)
-        200,                        // Initial width
-        DataViewAlign::Left,        // Alignment
-        DataViewColumnFlags::Resizable // Flags (make it resizable)
+        "Hierarchy",                    // Header text for the tree column
+        &expander_renderer,             // Renderer
+        0,                              // Model column 0 (for the main item text/icon)
+        200,                            // Initial width
+        DataViewAlign::Left,            // Alignment
+        DataViewColumnFlags::Resizable, // Flags (make it resizable)
     );
 
-    let aux_renderer = DataViewIconTextRenderer::new(VariantType::IconText, DataViewCellMode::Inert, DataViewAlign::Left);
+    let aux_renderer = DataViewIconTextRenderer::new(
+        VariantType::IconText,
+        DataViewCellMode::Inert,
+        DataViewAlign::Left,
+    );
     let aux_col = DataViewColumn::new(
-        "Auxiliary Info (IconText)", // Initial title, will be overridden
-        &aux_renderer,             // renderer
-        1,                           // model_column
-        150,                         // width
-        DataViewAlign::Left,         // align
-        DataViewColumnFlags::Resizable // flags
+        "Auxiliary Info (IconText)",    // Initial title, will be overridden
+        &aux_renderer,                  // renderer
+        1,                              // model_column
+        150,                            // width
+        DataViewAlign::Left,            // align
+        DataViewColumnFlags::Resizable, // flags
     );
 
     // Add columns in order
@@ -96,8 +104,9 @@ pub fn create_dataview_tree_tab(parent: &impl WxWidget) -> DataViewTreeTabContro
     let sub_cat_b1 = dvc_tree.append_container(&cat_b, "Sub-Category B.1", idx_folder, idx_folder);
     dvc_tree.append_item(&sub_cat_b1, "Item B.1.1 (File)", idx_file);
     dvc_tree.append_item(&cat_b, "Item B.2 (File)", idx_file);
-    
-    let _cat_c = dvc_tree.append_container(&root_item, "Category C (Empty)", idx_folder, idx_folder);
+
+    let _cat_c =
+        dvc_tree.append_container(&root_item, "Category C (Empty)", idx_folder, idx_folder);
 
     dvc_tree.expand(&cat_a);
     dvc_tree.expand(&cat_b);
@@ -106,7 +115,5 @@ pub fn create_dataview_tree_tab(parent: &impl WxWidget) -> DataViewTreeTabContro
     sizer.add(&dvc_tree, 1, SizerFlag::All | SizerFlag::Expand, 10);
     panel.set_sizer(sizer, true);
 
-    DataViewTreeTabControls {
-        panel,
-    }
+    DataViewTreeTabControls { panel }
 }

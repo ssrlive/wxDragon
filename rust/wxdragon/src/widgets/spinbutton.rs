@@ -1,6 +1,6 @@
 //! Safe wrapper for wxSpinButton.
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -22,6 +22,45 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by SpinButton
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpinButtonEvent {
+    /// Emitted when the up arrow is clicked
+    SpinUp,
+    /// Emitted when the down arrow is clicked
+    SpinDown,
+    /// Emitted when the value changes via either arrow
+    Spin,
+}
+
+/// Event data for a SpinButton event
+#[derive(Debug)]
+pub struct SpinButtonEventData {
+    event: Event,
+}
+
+impl SpinButtonEventData {
+    /// Create a new SpinButtonEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the integer value associated with this event
+    pub fn get_int(&self) -> Option<i32> {
+        self.event.get_int()
+    }
+}
 
 /// Represents a wxSpinButton widget.
 #[derive(Clone)]
@@ -126,3 +165,16 @@ widget_builder!(
         spin_button
     }
 );
+
+// Use the implement_widget_local_event_handlers macro to implement event handling
+crate::implement_widget_local_event_handlers!(
+    SpinButton,
+    SpinButtonEvent,
+    SpinButtonEventData,
+    SpinUp => spin_up, EventType::SPIN_UP,
+    SpinDown => spin_down, EventType::SPIN_DOWN,
+    Spin => spin, EventType::SPIN
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for SpinButton {}

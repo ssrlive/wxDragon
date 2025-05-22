@@ -1,7 +1,7 @@
 //!
 //! Safe wrapper for wxSplitterWindow.
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents, WxEvtHandler};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::WxWidget;
@@ -25,6 +25,50 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by SplitterWindow
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SplitterEvent {
+    /// Emitted when sash position has been changed
+    SashPositionChanged,
+    /// Emitted while the sash is being dragged
+    SashPositionChanging,
+    /// Emitted when the splitter is double-clicked
+    DoubleClicked,
+    /// Emitted when the splitter is unsplit
+    Unsplit,
+}
+
+/// Event data for a SplitterWindow event
+#[derive(Debug)]
+pub struct SplitterEventData {
+    event: Event,
+}
+
+impl SplitterEventData {
+    /// Create a new SplitterEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the sash position
+    pub fn get_sash_position(&self) -> Option<i32> {
+        if self.event.is_null() {
+            return None;
+        }
+        Some(unsafe { ffi::wxd_SplitterEvent_GetSashPosition(self.event.0) })
+    }
+}
 
 widget_builder!(
     name: SplitterWindow,
@@ -162,3 +206,17 @@ impl Drop for SplitterWindow {
         // Child widgets are typically managed by their parent in wxWidgets
     }
 }
+
+// Use the implement_widget_local_event_handlers macro to implement event handling
+crate::implement_widget_local_event_handlers!(
+    SplitterWindow,
+    SplitterEvent,
+    SplitterEventData,
+    SashPositionChanged => sash_position_changed, EventType::SPLITTER_SASH_POS_CHANGED,
+    SashPositionChanging => sash_position_changing, EventType::SPLITTER_SASH_POS_CHANGING,
+    DoubleClicked => double_clicked, EventType::SPLITTER_DOUBLECLICKED,
+    Unsplit => unsplit, EventType::SPLITTER_UNSPLIT
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for SplitterWindow {}

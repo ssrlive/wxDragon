@@ -5,7 +5,6 @@ use crate::widget_style_enum;
 use crate::window::WxWidget;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
-use std::ptr;
 use wxdragon_sys as ffi;
 
 // Define FileDialogStyle enum using the widget_style_enum macro
@@ -35,7 +34,7 @@ pub struct FileDialog {
 
 impl FileDialog {
     /// Creates a new builder for a FileDialog.
-    pub fn builder<'a>(parent: Option<&'a dyn WxWidget>) -> FileDialogBuilder<'a> {
+    pub fn builder<'a>(parent: &'a dyn WxWidget) -> FileDialogBuilder<'a> {
         FileDialogBuilder::new(parent)
     }
 
@@ -335,7 +334,7 @@ impl Drop for FileDialog {
 
 // --- FileDialogBuilder ---
 pub struct FileDialogBuilder<'a> {
-    parent: Option<&'a dyn WxWidget>,
+    parent: &'a dyn WxWidget,
     message: String,
     default_dir: String,
     default_file: String,
@@ -346,7 +345,7 @@ pub struct FileDialogBuilder<'a> {
 }
 
 impl<'a> FileDialogBuilder<'a> {
-    pub fn new(parent: Option<&'a dyn WxWidget>) -> Self {
+    pub fn new(parent: &'a dyn WxWidget) -> Self {
         FileDialogBuilder {
             parent,
             message: "Choose a file".to_string(), // Default message
@@ -401,7 +400,11 @@ impl<'a> FileDialogBuilder<'a> {
         let c_default_file =
             CString::new(self.default_file).expect("CString::new failed for default_file");
         let c_wildcard = CString::new(self.wildcard).expect("CString::new failed for wildcard");
-        let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "FileDialog requires a valid parent window pointer."
+        );
 
         let ptr = unsafe {
             ffi::wxd_FileDialog_Create(

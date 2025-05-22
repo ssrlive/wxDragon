@@ -89,13 +89,18 @@ pub use choice::{Choice, ChoiceBuilder};
 pub use colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 pub use combobox::{ComboBox, ComboBoxBuilder};
 pub use command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
+pub use dataview::{
+    DataViewAlign, DataViewCellMode, DataViewColumn, DataViewCtrl, DataViewCtrlBuilder,
+    DataViewListCtrl, DataViewListCtrlBuilder, DataViewListModel, DataViewModel, DataViewStyle,
+    DataViewTreeCtrl, DataViewTreeCtrlBuilder, Variant,
+};
 pub use font_picker_ctrl::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlStyle};
 pub use frame::{Frame, FrameBuilder};
 pub use gauge::{Gauge, GaugeBuilder};
 pub use hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};
 pub use list_ctrl::{ListCtrl, ListCtrlBuilder};
 pub use listbox::{ListBox, ListBoxBuilder};
-pub use media_ctrl::{MediaCtrl, MediaCtrlBuilder, MediaState, MediaCtrlPlayerControls};
+pub use media_ctrl::{MediaCtrl, MediaCtrlBuilder, MediaCtrlPlayerControls, MediaState};
 pub use notebook::{Notebook, NotebookBuilder};
 pub use panel::{Panel, PanelBuilder};
 pub use radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
@@ -119,9 +124,6 @@ pub use toolbar::ToolBar;
 pub use treebook::Treebook;
 pub use treebook::TreebookBuilder;
 pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
-pub use dataview::{DataViewCtrl, DataViewCtrlBuilder, DataViewListCtrl, DataViewListCtrlBuilder,
-                   DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewStyle, DataViewModel,
-                   DataViewListModel, DataViewColumn, Variant, DataViewCellMode, DataViewAlign};
 
 // Re-export ImageList
 pub use imagelist::ImageList;

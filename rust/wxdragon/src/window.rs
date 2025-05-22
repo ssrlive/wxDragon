@@ -1,8 +1,8 @@
 use crate::event::WxEvtHandler;
 use crate::font::Font;
+use crate::geometry::{Point, Size};
 use crate::sizers::WxSizer;
 use wxdragon_sys as ffi;
-use crate::geometry::{Point, Size};
 
 /// Represents a pointer to any wxDragon window object.
 /// This is typically used as a base struct or in trait objects.
@@ -193,9 +193,13 @@ pub trait WxWidget {
     }
 
     fn set_font(&self, font: &Font) {
+        // Create a new Font object owned by the widget to avoid ownership issues
+        let font_copy = font.to_owned();
         unsafe {
-            ffi::wxd_Window_SetFont(self.handle_ptr(), font.as_ptr());
+            ffi::wxd_Window_SetFont(self.handle_ptr(), font_copy.as_ptr());
         }
+        // Intentionally leak the font as the C++ side now owns it
+        std::mem::forget(font_copy);
     }
 
     /// Gets the font currently used for this widget.
@@ -206,12 +210,12 @@ pub trait WxWidget {
         if handle.is_null() {
             return None;
         }
-        
+
         let font_ptr = unsafe { ffi::wxd_Window_GetFont(handle) };
         if font_ptr.is_null() {
             return None;
         }
-        
+
         // Create a Font object that takes ownership of the returned font pointer
         Some(unsafe { crate::font::Font::from_ptr(font_ptr, true) })
     }
@@ -251,10 +255,16 @@ pub trait WxWidget {
     fn get_size(&self) -> Size {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            Size { width: -1, height: -1 }
+            Size {
+                width: -1,
+                height: -1,
+            }
         } else {
             let size = unsafe { ffi::wxd_Window_GetSize(handle) };
-            Size { width: size.width, height: size.height }
+            Size {
+                width: size.width,
+                height: size.height,
+            }
         }
     }
 
@@ -270,15 +280,15 @@ pub trait WxWidget {
     fn set_size_with_pos(&self, x: i32, y: i32, width: i32, height: i32) {
         let handle = self.handle_ptr();
         if !handle.is_null() {
-            unsafe { 
+            unsafe {
                 ffi::wxd_Window_SetSizeWithPos(
-                    handle, 
-                    x, 
-                    y, 
-                    width, 
-                    height, 
-                    ffi::WXD_SIZE_AUTO as i32
-                ) 
+                    handle,
+                    x,
+                    y,
+                    width,
+                    height,
+                    ffi::WXD_SIZE_AUTO as i32,
+                )
             }
         }
     }
@@ -295,10 +305,16 @@ pub trait WxWidget {
     fn get_client_size(&self) -> Size {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            Size { width: -1, height: -1 }
+            Size {
+                width: -1,
+                height: -1,
+            }
         } else {
             let size = unsafe { ffi::wxd_Window_GetClientSize(handle) };
-            Size { width: size.width, height: size.height }
+            Size {
+                width: size.width,
+                height: size.height,
+            }
         }
     }
 
@@ -306,10 +322,16 @@ pub trait WxWidget {
     fn get_min_size(&self) -> Size {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            Size { width: -1, height: -1 }
+            Size {
+                width: -1,
+                height: -1,
+            }
         } else {
             let size = unsafe { ffi::wxd_Window_GetMinSize(handle) };
-            Size { width: size.width, height: size.height }
+            Size {
+                width: size.width,
+                height: size.height,
+            }
         }
     }
 
@@ -340,9 +362,12 @@ pub trait WxWidget {
         if handle.is_null() {
             return pt; // Return the same point if the handle is null
         }
-        
+
         let result = unsafe { ffi::wxd_Window_ClientToScreen(handle, pt.into()) };
-        Point { x: result.x, y: result.y }
+        Point {
+            x: result.x,
+            y: result.y,
+        }
     }
 
     /// Converts screen coordinates to client coordinates.
@@ -351,9 +376,35 @@ pub trait WxWidget {
         if handle.is_null() {
             return pt; // Return the same point if the handle is null
         }
-        
+
         let result = unsafe { ffi::wxd_Window_ScreenToClient(handle, pt.into()) };
-        Point { x: result.x, y: result.y }
+        Point {
+            x: result.x,
+            y: result.y,
+        }
+    }
+
+    /// Gets the window label (title or text).
+    /// Returns `None` if the label is not set, cannot be converted to UTF-8, or an error occurs.
+    fn get_label(&self) -> Option<String> {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return None;
+        }
+        let c_str_ptr = unsafe { ffi::wxd_Window_GetLabel(handle) };
+        if c_str_ptr.is_null() {
+            return None; // No label set or error in C++
+        }
+        let rust_string = unsafe {
+            // Create a CStr reference to the C string data.
+            let c_str = std::ffi::CStr::from_ptr(c_str_ptr);
+            // Convert to a Rust String. to_string_lossy().into_owned() handles invalid UTF-8.
+            let s = c_str.to_string_lossy().into_owned();
+            // IMPORTANT: Free the string allocated by C++ using the provided wxd_free_string function.
+            ffi::wxd_free_string(c_str_ptr);
+            s
+        };
+        Some(rust_string)
     }
 
     // Other common methods (SetSize, GetSize, etc.) can be added here

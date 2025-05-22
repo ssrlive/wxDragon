@@ -5,8 +5,6 @@
 
 // --- wxAnimationCtrl ---
 
-extern "C" {
-
 WXD_EXPORTED wxd_AnimationCtrl_t* wxd_AnimationCtrl_Create(
     wxd_Window_t* parent, 
     wxd_Id id, 
@@ -93,5 +91,3 @@ WXD_EXPORTED bool wxd_AnimationCtrl_LoadFromBytes(wxd_AnimationCtrl_t* self, con
         return false;
     }
 }
-
-} // extern "C" 

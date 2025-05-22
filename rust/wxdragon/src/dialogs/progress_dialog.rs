@@ -30,7 +30,7 @@ pub struct ProgressDialog {
 
 /// Builder for ProgressDialog
 pub struct ProgressDialogBuilder<'a, W: WxWidget> {
-    parent: Option<&'a W>,
+    parent: &'a W,
     title: String,
     message: String,
     maximum: i32,
@@ -40,7 +40,7 @@ pub struct ProgressDialogBuilder<'a, W: WxWidget> {
 impl ProgressDialog {
     /// Creates a builder for a progress dialog.
     pub fn builder<'a, W: WxWidget>(
-        parent: Option<&'a W>,
+        parent: &'a W,
         title: &str,
         message: &str,
         maximum: i32,
@@ -209,7 +209,11 @@ impl<'a, W: WxWidget> ProgressDialogBuilder<'a, W> {
     pub fn build(self) -> ProgressDialog {
         let c_title = CString::new(self.title).expect("CString::new failed for title");
         let c_message = CString::new(self.message).expect("CString::new failed for message");
-        let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "ProgressDialog requires a valid parent window pointer."
+        );
 
         let ptr = unsafe {
             ffi::wxd_ProgressDialog_Create(

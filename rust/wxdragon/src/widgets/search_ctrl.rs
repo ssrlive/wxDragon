@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, TextEvents, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -21,6 +21,43 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by SearchCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SearchCtrlEvent {
+    /// Emitted when the search button is clicked
+    SearchButtonClicked,
+    /// Emitted when the cancel button is clicked
+    CancelButtonClicked,
+}
+
+/// Event data for a SearchCtrl event
+#[derive(Debug)]
+pub struct SearchCtrlEventData {
+    event: Event,
+}
+
+impl SearchCtrlEventData {
+    /// Create a new SearchCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the current text in the search control
+    pub fn get_string(&self) -> Option<String> {
+        self.event.get_string()
+    }
+}
 
 // --- SearchCtrl --- //
 
@@ -134,3 +171,16 @@ widget_builder!(
         unsafe { SearchCtrl::from_ptr(raw_ptr) }
     }
 );
+
+// Implement SearchCtrl-specific event handlers
+crate::implement_widget_local_event_handlers!(
+    SearchCtrl,
+    SearchCtrlEvent,
+    SearchCtrlEventData,
+    SearchButtonClicked => search_button_clicked, EventType::COMMAND_SEARCHCTRL_SEARCH_BTN,
+    CancelButtonClicked => cancel_button_clicked, EventType::COMMAND_SEARCHCTRL_CANCEL_BTN
+);
+
+// Implement standard WindowEvents and TextEvents traits
+impl WindowEvents for SearchCtrl {}
+impl TextEvents for SearchCtrl {}

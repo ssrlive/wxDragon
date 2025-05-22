@@ -1,14 +1,12 @@
 //! Simple demo for various wxDragon widgets, including DataViewCtrl.
 
-use wxdragon::prelude::*;
-use wxdragon::widgets::{
-    DataViewCtrl, DataViewListModel, DataViewStyle, DataViewAlign
-};
-use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
-use wxdragon::art_provider::{ArtProvider, ArtId, ArtClient};
+use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
 use wxdragon::bitmap::Bitmap;
-use wxdragon::geometry::Size;
 use wxdragon::datetime::DateTime;
+use wxdragon::geometry::Size;
+use wxdragon::prelude::*;
+use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
+use wxdragon::widgets::{DataViewAlign, DataViewCtrl, DataViewListModel, DataViewStyle};
 
 // Main application
 fn main() {
@@ -35,42 +33,94 @@ fn main() {
             .build();
 
         // Add columns with different renderers
-        dvc.append_text_column("ID", 0, 60, DataViewAlign::Left, DataViewColumnFlags::Resizable);
-        dvc.append_text_column("Name", 1, 180, DataViewAlign::Left, DataViewColumnFlags::Resizable);
-        dvc.append_text_column("Department", 2, 150, DataViewAlign::Left, DataViewColumnFlags::Resizable);
-        dvc.append_toggle_column("Active", 3, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
+        dvc.append_text_column(
+            "ID",
+            0,
+            60,
+            DataViewAlign::Left,
+            DataViewColumnFlags::Resizable,
+        );
+        dvc.append_text_column(
+            "Name",
+            1,
+            180,
+            DataViewAlign::Left,
+            DataViewColumnFlags::Resizable,
+        );
+        dvc.append_text_column(
+            "Department",
+            2,
+            150,
+            DataViewAlign::Left,
+            DataViewColumnFlags::Resizable,
+        );
+        dvc.append_toggle_column(
+            "Active",
+            3,
+            80,
+            DataViewAlign::Center,
+            DataViewColumnFlags::Resizable,
+        );
         dvc.append_progress_column("Performance", 4, 120, DataViewColumnFlags::Resizable);
-        dvc.append_bitmap_column("Icon", 5, 80, DataViewAlign::Center, DataViewColumnFlags::Resizable);
-        dvc.append_date_column("Hire Date", 6, 120, DataViewAlign::Center, DataViewColumnFlags::Resizable);
-        dvc.append_spin_column("Hourly Rate", 7, 100, DataViewAlign::Right, 10, 100, 5, DataViewColumnFlags::Resizable);
-        
+        dvc.append_bitmap_column(
+            "Icon",
+            5,
+            80,
+            DataViewAlign::Center,
+            DataViewColumnFlags::Resizable,
+        );
+        dvc.append_date_column(
+            "Hire Date",
+            6,
+            120,
+            DataViewAlign::Center,
+            DataViewColumnFlags::Resizable,
+        );
+        dvc.append_spin_column(
+            "Hourly Rate",
+            7,
+            100,
+            DataViewAlign::Right,
+            10,
+            100,
+            5,
+            DataViewColumnFlags::Resizable,
+        );
+
         // Choices renderer
         let status_choices = ["Full-time", "Part-time", "Contract"];
-        dvc.append_choice_column("Status", 8, 120, DataViewAlign::Left, &status_choices, DataViewColumnFlags::Resizable);
+        dvc.append_choice_column(
+            "Status",
+            8,
+            120,
+            DataViewAlign::Left,
+            &status_choices,
+            DataViewColumnFlags::Resizable,
+        );
 
         // Create and set up the model
         let model = DataViewListModel::new();
-        
+
         // Define columns in the model
-        model.append_column("ID");               // 0: Text
-        model.append_column("Name");             // 1: Text
-        model.append_column("Department");       // 2: Text
-        model.append_column("Active");           // 3: Toggle
-        model.append_column("Performance");      // 4: Progress
-        model.append_column("Icon");             // 5: Bitmap
-        model.append_column("Hire Date");        // 6: Date
-        model.append_column("Hourly Rate");      // 7: Spin
-        model.append_column("Status");           // 8: Choice
-        
+        model.append_column("ID"); // 0: Text
+        model.append_column("Name"); // 1: Text
+        model.append_column("Department"); // 2: Text
+        model.append_column("Active"); // 3: Toggle
+        model.append_column("Performance"); // 4: Progress
+        model.append_column("Icon"); // 5: Bitmap
+        model.append_column("Hire Date"); // 6: Date
+        model.append_column("Hourly Rate"); // 7: Spin
+        model.append_column("Status"); // 8: Choice
+
         // Associate model with control
         dvc.associate_model(&model);
-        
+
         // Add example data
         add_employee_data(&model);
 
         // Add DataViewCtrl to sizer
         sizer.add(&dvc, 1, SizerFlag::All | SizerFlag::Expand, 10);
-        
+
         // Set panel sizer
         panel.set_sizer(sizer, true);
 
@@ -83,11 +133,16 @@ fn main() {
 // Add sample data
 fn add_employee_data(model: &DataViewListModel) {
     // Get some bitmaps from ArtProvider for the demo
-    let user_icon = ArtProvider::get_bitmap(ArtId::HelpSettings, ArtClient::MessageBox, Some(Size::new(16, 16))).unwrap_or_else(|| {
+    let user_icon = ArtProvider::get_bitmap(
+        ArtId::HelpSettings,
+        ArtClient::MessageBox,
+        Some(Size::new(16, 16)),
+    )
+    .unwrap_or_else(|| {
         // Fallback if icon not found
         Bitmap::from_rgba(&[255, 255, 255, 255], 1, 1).unwrap()
     });
-    
+
     // Employee 1
     model.append_row();
     model.set_value(0, 0, "001");
@@ -100,7 +155,7 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(0, 6, dt1);
     model.set_value(0, 7, 65i64);
     model.set_value(0, 8, "Full-time");
-    
+
     // Employee 2
     model.append_row();
     model.set_value(1, 0, "002");
@@ -113,7 +168,7 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(1, 6, dt2);
     model.set_value(1, 7, 72i64);
     model.set_value(1, 8, "Part-time");
-    
+
     // Employee 3
     model.append_row();
     model.set_value(2, 0, "003");
@@ -126,7 +181,7 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(2, 6, dt3);
     model.set_value(2, 7, 58i64);
     model.set_value(2, 8, "Contract");
-    
+
     // Employee 4
     model.append_row();
     model.set_value(3, 0, "004");
@@ -139,7 +194,7 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(3, 6, dt4);
     model.set_value(3, 7, 80i64);
     model.set_value(3, 8, "Full-time");
-    
+
     // Employee 5
     model.append_row();
     model.set_value(4, 0, "005");
@@ -152,7 +207,7 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(4, 6, dt5);
     model.set_value(4, 7, 60i64);
     model.set_value(4, 8, "Contract");
-    
+
     // Employee 6
     model.append_row();
     model.set_value(5, 0, "006");
@@ -165,4 +220,4 @@ fn add_employee_data(model: &DataViewListModel) {
     model.set_value(5, 6, dt6);
     model.set_value(5, 7, 50i64);
     model.set_value(5, 8, "Contract");
-} 
+}

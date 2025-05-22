@@ -2,7 +2,7 @@ use crate::dc::DeviceContext;
 use crate::window::WxWidget;
 
 /// A device context to draw on the client area of a window.
-/// 
+///
 /// ClientDC can be used outside of paint events, but when handling paint events,
 /// you should use PaintDC instead.
 pub struct ClientDC {
@@ -11,7 +11,7 @@ pub struct ClientDC {
 
 impl ClientDC {
     /// Create a new ClientDC for the specified window
-    /// 
+    ///
     /// # Arguments
     /// * `window` - The window to draw on
     pub fn new<W: WxWidget>(window: &W) -> Self {
@@ -33,4 +33,4 @@ impl Drop for ClientDC {
             wxdragon_sys::wxd_ClientDC_Destroy(self.dc_ptr);
         }
     }
-} 
+}

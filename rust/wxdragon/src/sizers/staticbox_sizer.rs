@@ -1,8 +1,8 @@
 use std::ffi::CString;
 use std::ops::Deref;
 
-use crate::sizers::base::{Sizer, Orientation};
-use crate::sizers::{WxSizer as WxSizerTrait};
+use crate::sizers::base::{Orientation, Sizer};
+use crate::sizers::WxSizer as WxSizerTrait;
 use crate::window::WxWidget;
 use crate::StaticBox;
 use wxdragon_sys as ffi;

@@ -1,6 +1,7 @@
 //! Safe wrapper for wxSpinCtrl.
 
-use crate::event::WxEvtHandler;
+use crate::event::event_data::CommandEventData;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -79,6 +80,49 @@ impl SpinCtrl {
         unsafe { ffi::wxd_SpinCtrl_GetMax(self.as_ptr()) }
     }
 }
+
+/// Events that can be emitted by a `SpinCtrl`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpinCtrlEvent {
+    /// The SpinCtrl's value has changed.
+    ValueChanged,
+}
+
+/// Event data for a `SpinCtrl::ValueChanged` event.
+#[derive(Debug)]
+pub struct SpinCtrlEventData {
+    /// The base command event data.
+    pub base: CommandEventData,
+}
+
+impl SpinCtrlEventData {
+    /// Creates a new `SpinCtrlEventData`.
+    pub fn new(event: Event) -> Self {
+        Self {
+            base: CommandEventData::new(event),
+        }
+    }
+
+    /// Gets the current value of the SpinCtrl from the event.
+    pub fn get_value(&self) -> i32 {
+        // For wxSpinCtrl, the event's GetInt() method returns the current value.
+        self.base.get_int().unwrap_or(0)
+    }
+
+    // get_position() is an alias for get_value() for SpinCtrl
+    pub fn get_position(&self) -> i32 {
+        self.get_value()
+    }
+}
+
+// Use the implement_widget_local_event_handlers macro
+crate::implement_widget_local_event_handlers!(
+    SpinCtrl, SpinCtrlEvent, SpinCtrlEventData,
+    ValueChanged => value_changed, EventType::SPINCTRL
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for SpinCtrl {}
 
 // Apply common trait implementations
 implement_widget_traits_with_target!(SpinCtrl, window, Window);

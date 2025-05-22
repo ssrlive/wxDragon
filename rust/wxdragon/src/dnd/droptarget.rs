@@ -103,7 +103,9 @@ impl<'a, W: WxWidget> TextDropTargetBuilder<'a, W> {
     /// Create the TextDropTarget with the configured callbacks.
     pub fn build(self) -> TextDropTarget {
         // Ensure we have a text drop callback
-        let on_drop_text = self.on_drop_text.expect("on_drop_text callback is required");
+        let on_drop_text = self
+            .on_drop_text
+            .expect("on_drop_text callback is required");
 
         // Create a struct to hold all our callbacks
         let callbacks = TextDropTargetCallbacks {
@@ -242,7 +244,9 @@ impl<'a, W: WxWidget> FileDropTargetBuilder<'a, W> {
     /// Create the FileDropTarget with the configured callbacks.
     pub fn build(self) -> FileDropTarget {
         // Ensure we have a files drop callback
-        let on_drop_files = self.on_drop_files.expect("on_drop_files callback is required");
+        let on_drop_files = self
+            .on_drop_files
+            .expect("on_drop_files callback is required");
 
         // Create a struct to hold all our callbacks
         let callbacks = FileDropTargetCallbacks {
@@ -298,7 +302,7 @@ extern "C" fn text_on_enter_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_enter {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -318,7 +322,7 @@ extern "C" fn text_on_drag_over_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_drag_over {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -333,23 +337,19 @@ extern "C" fn text_on_leave_trampoline(data_ptr: *mut c_void) {
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_leave {
         callback();
     }
 }
 
-extern "C" fn text_on_drop_trampoline(
-    x: i32,
-    y: i32,
-    data_ptr: *mut c_void,
-) -> bool {
+extern "C" fn text_on_drop_trampoline(x: i32, y: i32, data_ptr: *mut c_void) -> bool {
     if data_ptr.is_null() {
         return false;
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_drop {
         callback(x, y)
     } else {
@@ -368,7 +368,7 @@ extern "C" fn text_on_data_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_data {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -389,7 +389,7 @@ extern "C" fn text_on_drop_text_trampoline(
 
     let text_str = unsafe { CStr::from_ptr(text).to_string_lossy().into_owned() };
     let callbacks = unsafe { &mut *(data_ptr as *mut TextDropTargetCallbacks) };
-    
+
     (callbacks.on_drop_text)(&text_str, x, y)
 }
 
@@ -406,7 +406,7 @@ extern "C" fn file_on_enter_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_enter {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -426,7 +426,7 @@ extern "C" fn file_on_drag_over_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_drag_over {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -441,23 +441,19 @@ extern "C" fn file_on_leave_trampoline(data_ptr: *mut c_void) {
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_leave {
         callback();
     }
 }
 
-extern "C" fn file_on_drop_trampoline(
-    x: i32,
-    y: i32,
-    data_ptr: *mut c_void,
-) -> bool {
+extern "C" fn file_on_drop_trampoline(x: i32, y: i32, data_ptr: *mut c_void) -> bool {
     if data_ptr.is_null() {
         return false;
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_drop {
         callback(x, y)
     } else {
@@ -476,7 +472,7 @@ extern "C" fn file_on_data_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     if let Some(ref mut callback) = callbacks.on_data {
         let rust_result = callback(x, y, DragResult::from(def_result as i32));
         rust_result as i32 as ffi::wxd_DragResult
@@ -521,6 +517,6 @@ extern "C" fn file_on_drop_files_trampoline(
     }
 
     let callbacks = unsafe { &mut *(data_ptr as *mut FileDropTargetCallbacks) };
-    
+
     (callbacks.on_drop_files)(filenames, x, y)
 }

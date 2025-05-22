@@ -4,7 +4,7 @@
 use std::ffi::c_longlong;
 use wxdragon_sys as ffi;
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::font::Font;
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
@@ -24,6 +24,36 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by FontPickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FontPickerCtrlEvent {
+    /// Emitted when the font is changed
+    FontChanged,
+}
+
+/// Event data for a FontChanged event
+#[derive(Debug)]
+pub struct FontChangedEventData {
+    event: Event,
+}
+
+impl FontChangedEventData {
+    /// Create a new FontChangedEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+}
 
 // --- FontPickerCtrl ---
 #[derive(Clone)]
@@ -47,7 +77,7 @@ impl FontPickerCtrl {
             if font_ptr.is_null() {
                 None
             } else {
-                // Font::from_ptr should take ownership (true) and handle drop via wxd_Font_Destroy
+                // The C++ code creates a new wxFont that we take ownership of
                 Some(Font::from_ptr(font_ptr, true))
             }
         }
@@ -55,12 +85,17 @@ impl FontPickerCtrl {
 
     /// Sets the currently selected font.
     pub fn set_selected_font(&self, font: &Font) {
+        // Create a new font to ensure proper ownership
+        let font_copy = font.to_owned();
         unsafe {
+            // The C++ code makes a copy of the font, so we can just pass the pointer
             ffi::wxd_FontPickerCtrl_SetSelectedFont(
                 self.window.as_ptr() as *mut ffi::wxd_FontPickerCtrl_t,
-                font.as_ptr(), // Font::as_ptr() should provide const wxd_Font_t*
+                font_copy.as_ptr(),
             );
         }
+        // Intentionally leak the font as the C++ side now owns it
+        std::mem::forget(font_copy);
     }
 
     /// Creates a FontPickerCtrl from a raw pointer.
@@ -109,3 +144,14 @@ widget_builder!(
 
 // Use the implement_widget_traits_with_target macro to implement traits
 implement_widget_traits_with_target!(FontPickerCtrl, window, Window);
+
+// Use the implement_widget_local_event_handlers macro to implement event handling
+crate::implement_widget_local_event_handlers!(
+    FontPickerCtrl,
+    FontPickerCtrlEvent,
+    FontChangedEventData,
+    FontChanged => font_changed, EventType::FONT_PICKER_CHANGED
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for FontPickerCtrl {}

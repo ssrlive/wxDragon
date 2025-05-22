@@ -1,7 +1,7 @@
 //!
 //! Safe wrapper for wxStatusBar.
 
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents; // Add WindowEvents import
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -224,3 +224,5 @@ impl<'a> StatusBarBuilder<'a> {
         status_bar
     }
 }
+
+impl WindowEvents for StatusBar {}

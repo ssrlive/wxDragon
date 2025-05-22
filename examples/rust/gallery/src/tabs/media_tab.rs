@@ -1,4 +1,5 @@
 use image::GenericImageView;
+use wxdragon::event::WindowEvents;
 use wxdragon::prelude::*;
 use wxdragon::Bitmap;
 
@@ -13,7 +14,7 @@ pub struct MediaControls {
 impl MediaControls {
     pub fn bind_events(&self) {
         // Bind events for media controls if any
-        self.animation_ctrl.bind(EventType::LEFT_DOWN, |_event| {
+        self.animation_ctrl.on_mouse_left_down( |_event| {
             println!("AnimationCtrl clicked - this event might not be standard for it, just for testing.");
         });
     }
@@ -55,7 +56,12 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
         println!("Failed to load animation from bytes.");
     }
 
-    sizer.add(&animation_ctrl, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::All, 10);
+    sizer.add(
+        &animation_ctrl,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        10,
+    );
 
     let info_text = StaticText::builder(&panel)
         .with_label("Animation loaded from embedded bytes. Dancing Ferris should appear above.")
@@ -78,14 +84,29 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
                 let bmp_label = StaticText::builder(&panel)
                     .with_label("StaticBitmap (simple.png from bytes):")
                     .build();
-                hbox_bitmap_example.add(&bmp_label, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
-                hbox_bitmap_example.add(&static_bitmap_ctrl, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
+                hbox_bitmap_example.add(
+                    &bmp_label,
+                    0,
+                    SizerFlag::AlignCenterVertical | SizerFlag::All,
+                    5,
+                );
+                hbox_bitmap_example.add(
+                    &static_bitmap_ctrl,
+                    0,
+                    SizerFlag::AlignCenterVertical | SizerFlag::All,
+                    5,
+                );
             } else {
                 println!("[MediaTab] Failed to create Bitmap object for StaticBitmap.");
                 let bmp_error_label = StaticText::builder(&panel)
                     .with_label("StaticBitmap: Error creating Bitmap obj")
                     .build();
-                hbox_bitmap_example.add(&bmp_error_label, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
+                hbox_bitmap_example.add(
+                    &bmp_error_label,
+                    0,
+                    SizerFlag::AlignCenterVertical | SizerFlag::All,
+                    5,
+                );
             }
         }
         Err(e) => {
@@ -93,7 +114,12 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
             let bmp_error_label = StaticText::builder(&panel)
                 .with_label("StaticBitmap: Failed to load from bytes")
                 .build();
-            hbox_bitmap_example.add(&bmp_error_label, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
+            hbox_bitmap_example.add(
+                &bmp_error_label,
+                0,
+                SizerFlag::AlignCenterVertical | SizerFlag::All,
+                5,
+            );
         }
     }
     sizer.add_sizer(&hbox_bitmap_example, 0, SizerFlag::All, 10);

@@ -2,7 +2,7 @@ use crate::dc::DeviceContext;
 use crate::window::WxWidget;
 
 /// A device context to draw on a window including both the client and non-client areas.
-/// 
+///
 /// WindowDC allows drawing on the entire window area, including borders, title bar, etc.
 /// For drawing only in the client area, use ClientDC instead.
 pub struct WindowDC {
@@ -11,7 +11,7 @@ pub struct WindowDC {
 
 impl WindowDC {
     /// Create a new WindowDC for the specified window
-    /// 
+    ///
     /// # Arguments
     /// * `window` - The window to draw on
     pub fn new<W: WxWidget>(window: &W) -> Self {
@@ -33,4 +33,4 @@ impl Drop for WindowDC {
             wxdragon_sys::wxd_WindowDC_Destroy(self.dc_ptr);
         }
     }
-} 
+}

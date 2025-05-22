@@ -3,7 +3,7 @@ use std::ptr;
 use wxdragon_sys as ffi;
 
 use crate::datetime::DateTime;
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
 use crate::widget_builder;
@@ -20,6 +20,36 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by TimePickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TimePickerEvent {
+    /// Emitted when the time value is changed
+    TimeChanged,
+}
+
+/// Event data for a TimePickerCtrl event
+#[derive(Debug)]
+pub struct TimePickerEventData {
+    event: Event,
+}
+
+impl TimePickerEventData {
+    /// Create a new TimePickerEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+}
 
 // --- wxTimePickerCtrl ---
 #[derive(Clone)]
@@ -93,4 +123,15 @@ widget_builder!(
 );
 
 // Use the implement_widget_traits macro to implement traits
-implement_widget_traits_with_target!(TimePickerCtrl, window, Window); 
+implement_widget_traits_with_target!(TimePickerCtrl, window, Window);
+
+// Use the implement_widget_local_event_handlers macro to implement event handling
+crate::implement_widget_local_event_handlers!(
+    TimePickerCtrl,
+    TimePickerEvent,
+    TimePickerEventData,
+    TimeChanged => time_changed, EventType::TIME_CHANGED
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for TimePickerCtrl {}

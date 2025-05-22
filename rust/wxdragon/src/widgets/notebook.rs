@@ -1,14 +1,14 @@
 //!
 //! Safe wrapper for wxNotebook.
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
-use crate::window::{Window, WxWidget};
 use crate::widgets::imagelist::ImageList;
+use crate::window::{Window, WxWidget};
 use std::ffi::CString;
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
@@ -202,7 +202,26 @@ impl Notebook {
         }
     }
 
-    // Add other methods like GetPageCount, GetPageText, ChangeSelection, etc. if needed.
+    /// Gets the number of pages in the notebook.
+    pub fn get_page_count(&self) -> usize {
+        unsafe { ffi::wxd_Notebook_GetPageCount(self.window.as_ptr() as *mut ffi::wxd_Notebook_t) }
+    }
+
+    /// Returns the window at the given page position.
+    /// Returns `None` if the page index is out of bounds.
+    pub fn get_page(&self, index: usize) -> Option<Window> {
+        unsafe {
+            let ptr = ffi::wxd_Notebook_GetPage(
+                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
+                index as usize,
+            );
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Window::from_ptr(ptr as *mut ffi::wxd_Window_t))
+            }
+        }
+    }
 }
 
 // Apply common trait implementations for Notebook
@@ -230,3 +249,61 @@ widget_builder!(
         unsafe { Notebook::from_ptr(notebook_ptr) }
     }
 );
+
+/// Events that can be emitted by a `Notebook`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NotebookEvent {
+    /// A notebook page has been changed.
+    PageChanged,
+}
+
+/// Event data for a `Notebook::PageChanged` event.
+#[derive(Debug)]
+pub struct NotebookPageChangedEvent {
+    /// The base event data.
+    pub base: Event,
+}
+
+impl NotebookPageChangedEvent {
+    /// Creates new `NotebookPageChangedEvent` from a base `Event`.
+    pub fn new(base_event: Event) -> Self {
+        Self { base: base_event }
+    }
+
+    /// Gets the page that has been selected.
+    /// For a `PageChanged` event, this is the new page.
+    pub fn get_selection(&self) -> Option<i32> {
+        if self.base.is_null() {
+            return None;
+        }
+        let val = unsafe { ffi::wxd_NotebookEvent_GetSelection(self.base.0) };
+        if val == ffi::WXD_NOT_FOUND as i32 {
+            None
+        } else {
+            Some(val)
+        }
+    }
+
+    /// Gets the page that was selected before the change.
+    /// For a `PageChanged` event, this is the old page.
+    pub fn get_old_selection(&self) -> Option<i32> {
+        if self.base.is_null() {
+            return None;
+        }
+        let val = unsafe { ffi::wxd_NotebookEvent_GetOldSelection(self.base.0) };
+        if val == ffi::WXD_NOT_FOUND as i32 {
+            None
+        } else {
+            Some(val)
+        }
+    }
+}
+
+// Use the implement_widget_local_event_handlers macro for notebook events
+crate::implement_widget_local_event_handlers!(
+    Notebook, NotebookEvent, NotebookPageChangedEvent,
+    PageChanged => page_changed, EventType::NOTEBOOK_PAGE_CHANGED
+);
+
+// Add WindowEvents implementation
+impl WindowEvents for Notebook {}

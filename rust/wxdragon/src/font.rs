@@ -78,7 +78,7 @@ impl Default for FontWeight {
 }
 
 /// Wrapper for wxFont.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Font {
     ptr: *mut ffi::wxd_Font_t,
     owned: bool, // Track if this instance owns the pointer
@@ -239,6 +239,32 @@ impl Font {
         }
     }
 
+    /// Creates an owned clone of this font.
+    ///
+    /// This creates a new C++ wxFont object that is a deep copy of the original,
+    /// which is useful when you need to pass a font to a function that takes ownership.
+    pub fn to_owned(&self) -> Self {
+        if self.ptr.is_null() {
+            return Self {
+                ptr: std::ptr::null_mut(),
+                owned: true,
+            };
+        }
+
+        // Create a new Font object by cloning this one
+        let new_font = Self::new_with_details(
+            self.get_point_size(),
+            self.get_family() as i32,
+            self.get_style() as i32,
+            self.get_weight() as i32,
+            self.is_underlined(),
+            &self.get_face_name(),
+        );
+
+        // If for some reason we couldn't clone, return a default font
+        new_font.unwrap_or_else(|| Self::new())
+    }
+
     pub fn builder() -> FontBuilder {
         FontBuilder::default()
     }
@@ -253,8 +279,10 @@ impl Default for Font {
 impl Drop for Font {
     fn drop(&mut self) {
         if self.owned && !self.ptr.is_null() {
+            // Set the pointer to null after destroying to prevent use-after-free
+            let ptr = std::mem::replace(&mut self.ptr, std::ptr::null_mut());
             unsafe {
-                ffi::wxd_Font_Destroy(self.ptr);
+                ffi::wxd_Font_Destroy(ptr);
             }
         }
     }

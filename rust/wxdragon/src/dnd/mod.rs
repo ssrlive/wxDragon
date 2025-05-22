@@ -3,13 +3,13 @@
 //! This module provides classes for implementing drag and drop operations
 //! in wxDragon applications, following the wxWidgets drag and drop pattern.
 
-pub mod droptarget;
-pub mod dropsource;
 pub mod dataobject;
+pub mod dropsource;
+pub mod droptarget;
 
-pub use droptarget::{TextDropTarget, FileDropTarget};
+pub use dataobject::{DataObject, FileDataObject, TextDataObject};
 pub use dropsource::DropSource;
-pub use dataobject::{DataObject, TextDataObject, FileDataObject};
+pub use droptarget::{FileDropTarget, TextDropTarget};
 
 use std::fmt;
 
@@ -28,7 +28,7 @@ pub enum DragResult {
     /// Cancel the drag.
     Cancel = 4,
     /// Error in drag operation.
-    Error = 5
+    Error = 5,
 }
 
 impl Default for DragResult {

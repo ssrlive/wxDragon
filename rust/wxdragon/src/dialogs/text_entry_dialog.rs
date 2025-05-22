@@ -3,7 +3,6 @@ use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 use crate::window::WxWidget;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
-use std::ptr;
 use wxdragon_sys as ffi;
 
 // Define style enum using the macro
@@ -33,7 +32,7 @@ pub struct TextEntryDialog {
 impl TextEntryDialog {
     /// Creates a new builder for a TextEntryDialog.
     pub fn builder<'a>(
-        parent: Option<&'a dyn WxWidget>,
+        parent: &'a dyn WxWidget,
         message: &str,
         caption: &str,
     ) -> TextEntryDialogBuilder<'a> {
@@ -115,7 +114,7 @@ impl Drop for TextEntryDialog {
 
 // --- TextEntryDialogBuilder ---
 pub struct TextEntryDialogBuilder<'a> {
-    parent: Option<&'a dyn WxWidget>,
+    parent: &'a dyn WxWidget,
     message: String,
     caption: String,
     default_value: String,
@@ -125,7 +124,7 @@ pub struct TextEntryDialogBuilder<'a> {
 }
 
 impl<'a> TextEntryDialogBuilder<'a> {
-    pub fn new(parent: Option<&'a dyn WxWidget>, message: &str, caption: &str) -> Self {
+    pub fn new(parent: &'a dyn WxWidget, message: &str, caption: &str) -> Self {
         TextEntryDialogBuilder {
             parent,
             message: message.to_string(),
@@ -168,7 +167,11 @@ impl<'a> TextEntryDialogBuilder<'a> {
         let c_caption = CString::new(self.caption).expect("CString::new failed for caption");
         let c_default_value =
             CString::new(self.default_value).expect("CString::new failed for default_value");
-        let parent_ptr = self.parent.map_or(ptr::null_mut(), |p| p.handle_ptr());
+        let parent_ptr = self.parent.handle_ptr();
+        assert!(
+            !parent_ptr.is_null(),
+            "TextEntryDialog requires a valid parent window pointer."
+        );
 
         let ptr = unsafe {
             ffi::wxd_TextEntryDialog_Create(

@@ -3,6 +3,13 @@
 
 #include "../wxd_types.h"
 
+#ifndef __cplusplus
+// Provide a C-compatible typedef for wxEventType for bindgen, 
+// as it's used as a return type in C API functions parsed by bindgen.
+// The actual C++ definition comes from <wx/event.h> via wxd_types.h for C++ compilation.
+typedef int wxEventType;
+#endif
+
 // --- Event Handling & Data Access --- 
 WXD_EXPORTED void wxd_EvtHandler_Bind(
     wxd_EvtHandler_t* handler, 
@@ -11,9 +18,10 @@ WXD_EXPORTED void wxd_EvtHandler_Bind(
     void* rust_closure_ptr             
 );
 
-WXD_EXPORTED wxd_Id wxd_Event_GetId(wxd_Event_t* event);
+WXD_EXPORTED int wxd_Event_GetId(wxd_Event_t* event);
 WXD_EXPORTED wxd_Window_t* wxd_Event_GetEventObject(wxd_Event_t* event);
 WXD_EXPORTED void wxd_Event_Skip(wxd_Event_t* event, bool skip);
+WXD_EXPORTED wxEventType wxd_Event_GetEventType(wxd_Event_t* event);
 
 WXD_EXPORTED int wxd_CommandEvent_GetString(wxd_Event_t* event, char* buffer, int buffer_len);
 WXD_EXPORTED bool wxd_CommandEvent_IsChecked(wxd_Event_t* event);
@@ -31,8 +39,11 @@ WXD_EXPORTED int wxd_SplitterEvent_GetSashPosition(wxd_Event_t* event);
 
 WXD_EXPORTED wxd_Colour_t wxd_ColourPickerEvent_GetColour(wxd_Event_t* event);
 
+// Corrected Tree Event Data Accessors
 WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetItem(wxd_Event_t* event);
 WXD_EXPORTED int wxd_TreeEvent_GetLabel(wxd_Event_t* event, char* buffer, int buffer_len);
+WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetOldItem(wxd_Event_t* event);
+WXD_EXPORTED int wxd_TreeEvent_IsEditCancelled(wxd_Event_t* event); // Returns bool as int (0 or 1)
 
 WXD_EXPORTED int32_t wxd_ListEvent_GetItemIndex(wxd_Event_t* event);
 WXD_EXPORTED int wxd_ListEvent_GetColumn(wxd_Event_t* event);
@@ -52,5 +63,37 @@ WXD_EXPORTED void drop_rust_closure_box(void* ptr);
 // Rust callback for cleanup notifier
 WXD_EXPORTED void notify_rust_of_cleanup(wxd_Window_t* win_ptr);
 
+// CalendarEvent specific
+WXD_EXPORTED wxd_DateTime_t* wxd_CalendarEvent_GetDate(wxd_Event_t* event);
+
+// Event type checking functions - these return non-zero if the event is of the specified type
+WXD_EXPORTED int wxd_IsMouseButtonEvent(wxd_Event_t* event);
+WXD_EXPORTED int wxd_IsMouseMotionEvent(wxd_Event_t* event);
+WXD_EXPORTED int wxd_IsKeyboardEvent(wxd_Event_t* event);
+WXD_EXPORTED int wxd_IsSizeEvent(wxd_Event_t* event);
+
+// Gets the event's raw type (for debugging)
+WXD_EXPORTED int wxd_Event_GetRawType(wxd_Event_t* event);
+
+// Forward declaration for wxd_TreeItemId_t
+// This is already in wxd_types.h, but harmless to have here if it helps bindgen temporarily
+// However, it should ideally only be in wxd_types.h
+// typedef struct wxd_TreeItemId_s wxd_TreeItemId_t; 
+// Commenting out as it should be in wxd_types.h
+
+// The WXDEventTypeCEnum is defined in wxd_types.h, so it should NOT be redefined here.
+
+// --- Event Binding API ---
+
+/// Type for closure callbacks
+
+// Function to get the selected client data from a command event
+WXD_EXPORTED void* wxd_CommandEvent_GetClientData(wxd_Event_t* self);
+
+// CheckListBox specific event functions
+WXD_EXPORTED int32_t wxd_CheckListBoxEvent_GetSelection(wxd_Event_t* self);
+
+// Notebook specific event functions
+WXD_EXPORTED int32_t wxd_NotebookEvent_GetSelection(wxd_Event_t* self);
 
 #endif // WXD_EVENT_API_H 

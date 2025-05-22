@@ -1,7 +1,7 @@
 //!
 //! Safe wrapper for wxScrolledWindow.
 
-use crate::event::WxEvtHandler;
+use crate::event::{ScrollEvents, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -148,3 +148,6 @@ widget_builder!(
         unsafe { ScrolledWindow::from_ptr(ptr) }
     }
 );
+
+impl WindowEvents for ScrolledWindow {}
+impl ScrollEvents for ScrolledWindow {}

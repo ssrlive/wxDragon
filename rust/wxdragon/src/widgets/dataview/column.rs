@@ -1,9 +1,9 @@
 //! DataViewColumn implementation.
 
+use super::enums::{DataViewAlign, DataViewColumnFlags};
+use super::renderer::DataViewRenderer;
 use std::ffi::CString;
 use wxdragon_sys as ffi;
-use super::renderer::DataViewRenderer;
-use super::enums::{DataViewAlign, DataViewColumnFlags};
 
 /// A column in a DataViewCtrl.
 ///
@@ -24,7 +24,14 @@ impl DataViewColumn {
     /// * `width` - The column width (in pixels)
     /// * `align` - The alignment of the column content
     /// * `flags` - Column flags specifying behavior (e.g., resizable, sortable)
-    pub fn new(title: &str, renderer: &dyn DataViewRenderer, model_column: usize, width: i32, align: DataViewAlign, flags: DataViewColumnFlags) -> Self {
+    pub fn new(
+        title: &str,
+        renderer: &dyn DataViewRenderer,
+        model_column: usize,
+        width: i32,
+        align: DataViewAlign,
+        flags: DataViewColumnFlags,
+    ) -> Self {
         let title_cstr = CString::new(title).unwrap();
         let handle = unsafe {
             // FFI function now takes 6 arguments, including flags as int.
@@ -34,12 +41,12 @@ impl DataViewColumn {
                 model_column as i32, // FFI expects int
                 width,
                 align.bits() as i32, // FFI expects int (align.bits() is i64)
-                flags.bits() as i32  // FFI expects int (flags.bits() is i64)
+                flags.bits() as i32, // FFI expects int (flags.bits() is i64)
             )
         };
         Self { handle }
     }
-    
+
     /// Creates a DataViewColumn from a raw pointer.
     ///
     /// # Safety
@@ -71,9 +78,7 @@ impl DataViewColumn {
 
     /// Checks if the column can be resized by the user.
     pub fn is_resizeable(&self) -> bool {
-        unsafe {
-            ffi::wxd_DataViewColumn_IsResizeable(self.handle)
-        }
+        unsafe { ffi::wxd_DataViewColumn_IsResizeable(self.handle) }
     }
 
     /// Sets whether the column can be sorted by clicking its header.
@@ -85,8 +90,6 @@ impl DataViewColumn {
 
     /// Checks if the column can be sorted by clicking its header.
     pub fn is_sortable(&self) -> bool {
-        unsafe {
-            ffi::wxd_DataViewColumn_IsSortable(self.handle)
-        }
+        unsafe { ffi::wxd_DataViewColumn_IsSortable(self.handle) }
     }
-} 
+}

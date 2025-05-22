@@ -4,7 +4,7 @@
 use std::ffi::{c_longlong, CString};
 use wxdragon_sys as ffi;
 
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*;
 use crate::widget_builder;
@@ -23,6 +23,47 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by DirPickerCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DirPickerCtrlEvent {
+    /// Emitted when the directory is changed
+    DirChanged,
+}
+
+/// Event data for DirPickerCtrl events
+#[derive(Debug)]
+pub struct DirPickerCtrlEventData {
+    event: Event,
+}
+
+impl DirPickerCtrlEventData {
+    /// Create a new DirPickerCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Get the path that was selected
+    pub fn get_path(&self) -> String {
+        // First, get the window that triggered this event
+        if let Some(window_obj) = self.event.get_event_object() {
+            // We need to find the DirPickerCtrl that corresponds to this window.
+            // In wxdragon, we can create a DirPickerCtrl with the Window's handle pointer
+            unsafe {
+                let dir_picker = DirPickerCtrl::from_ptr(
+                    window_obj.handle_ptr() as *mut ffi::wxd_DirPickerCtrl_t
+                );
+                return dir_picker.get_path();
+            }
+        }
+        String::new()
+    }
+}
 
 // --- DirPickerCtrl ---
 #[derive(Clone)]
@@ -74,6 +115,17 @@ impl DirPickerCtrl {
         }
     }
 }
+
+// Implement event handlers for DirPickerCtrl
+crate::implement_widget_local_event_handlers!(
+    DirPickerCtrl,
+    DirPickerCtrlEvent,
+    DirPickerCtrlEventData,
+    DirChanged => dir_changed, EventType::DIR_PICKER_CHANGED
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for DirPickerCtrl {}
 
 // Use the widget_builder macro to generate the DirPickerCtrlBuilder implementation
 widget_builder!(

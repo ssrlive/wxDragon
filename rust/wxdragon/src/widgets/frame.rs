@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size, DEFAULT_POSITION};
 use crate::id::Id;
 use crate::id::ID_ANY;
@@ -36,6 +36,40 @@ widget_style_enum!(
 );
 
 /// Represents a wxFrame.
+///
+/// # Lifetime Management
+/// The main application frame is typically created within the `wxdragon::main` closure
+/// and its lifetime is extended by calling `handle.preserve(frame.clone())`.
+/// This preserved frame is automatically cleaned up when the application exits.
+///
+/// For secondary frames or frames managed manually (e.g., created and shown
+/// dynamically after the main loop has started), it is crucial to explicitly
+/// call the `.destroy()` method (available via the `WxWidget` trait) when the
+/// frame is no longer needed. This ensures that the underlying C++ wxFrame object
+/// and its associated resources (including event handlers and Rust closures)
+/// are properly deallocated.
+///
+/// ```no_run
+/// # use wxdragon::prelude::*;
+/// # wxdragon::main(|handle| {
+/// # let main_frame = Frame::builder().build();
+/// // Example of a manually managed frame
+/// let secondary_frame = Frame::builder()
+///     .with_title("Secondary Window")
+///     .build();
+/// secondary_frame.show(true);
+/// // ... use secondary_frame ...
+///
+/// // When done with secondary_frame, explicitly destroy it:
+/// secondary_frame.destroy();
+/// // After calling destroy(), `secondary_frame` should not be used further.
+/// # handle.preserve(main_frame);
+/// # true
+/// # });
+/// ```
+/// Calling `.close()` on a frame initiates the closing process, which typically also
+/// leads to the frame's destruction by wxWidgets, unless the close event is vetoed.
+/// `.destroy()` provides a more direct way to ensure destruction.
 #[derive(Clone)]
 pub struct Frame {
     window: Window, // Composition: Frame uses a Window internally
@@ -288,6 +322,29 @@ impl Frame {
 
     pub fn is_maximized(&self) -> bool {
         unsafe { ffi::wxd_Frame_IsMaximized(self.window.as_ptr() as *mut ffi::wxd_Frame_t) }
+    }
+}
+
+// Implement WindowEvents trait for Frame
+impl WindowEvents for Frame {}
+
+// Add event binding methods to Frame
+impl Frame {
+    /// Bind a handler to window events using the underlying window
+    pub(crate) fn bind_window_event<F>(&self, event_type: crate::event::EventType, handler: F)
+    where
+        F: FnMut(crate::event::Event) + 'static,
+    {
+        // Use the bind_internal method provided by the WxEvtHandler trait
+        <Self as crate::event::WxEvtHandler>::bind_internal(self, event_type, handler);
+    }
+
+    /// Bind a handler to menu events
+    pub fn on_menu<F>(&self, handler: F)
+    where
+        F: FnMut(crate::event::Event) + 'static,
+    {
+        self.bind_window_event(crate::event::EventType::MENU, handler);
     }
 }
 

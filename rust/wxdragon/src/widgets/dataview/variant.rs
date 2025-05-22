@@ -1,8 +1,8 @@
 //! VariantType implementation.
 
+use crate::{Bitmap, DateTime};
 use std::ffi::CString;
 use wxdragon_sys as ffi;
-use crate::{DateTime, Bitmap};
 
 /// Represents the type of data stored in a variant.
 ///
@@ -77,7 +77,7 @@ impl Variant {
     }
 
     /// Gets the raw pointer to the native wxd_Variant_t.
-    /// 
+    ///
     /// IMPORTANT: Caller must ensure the returned pointer is freed using
     /// wxd_Variant_Free when no longer needed to avoid memory leaks.
     /// This function allocates heap memory for both the variant structure
@@ -88,60 +88,59 @@ impl Variant {
             type_: ffi::WXD_VARIANT_TYPE_INVALID as i32,
             data: unsafe { std::mem::zeroed() },
         });
-        
+
         // Set the value based on the variant type
         match self {
             Variant::Bool(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_BOOL as i32;
                 variant.data.bool_val = *value;
-            },
+            }
             Variant::Int32(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_INT32 as i32;
                 variant.data.int32_val = *value;
-            },
+            }
             Variant::Int64(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_INT64 as i32;
                 variant.data.int64_val = *value;
-            },
+            }
             Variant::Double(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_DOUBLE as i32;
                 variant.data.double_val = *value;
-            },
+            }
             Variant::String(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_STRING as i32;
-                variant.data.string_val = CString::new(value.as_str()).unwrap_or_default().into_raw();
-            },
+                variant.data.string_val =
+                    CString::new(value.as_str()).unwrap_or_default().into_raw();
+            }
             Variant::DateTime(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_DATETIME as i32;
                 // Convert DateTime to raw datetime struct
-                variant.data.datetime_val = unsafe {
-                    *(value.as_ptr())
-                };
-            },
+                variant.data.datetime_val = unsafe { *(value.as_ptr()) };
+            }
             Variant::Bitmap(value) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED as i32;
                 variant.data.bitmap_val = value.as_ptr();
-            },
+            }
             Variant::BitmapBorrowed(ptr) => {
                 variant.type_ = ffi::WXD_VARIANT_TYPE_BITMAP_RUST_BORROWED as i32;
                 variant.data.bitmap_val = *ptr;
-            },
+            }
         }
-        
+
         // Leak the Box to ensure the memory lives long enough
         Box::into_raw(variant)
     }
-    
+
     /// Gets a mutable raw pointer to the native wxd_Variant_t.
     ///
     /// This is primarily used by event.rs for event data.
-    /// 
+    ///
     /// IMPORTANT: Caller must ensure the returned pointer is freed using
     /// wxd_Variant_Free when no longer needed to avoid memory leaks.
     pub fn as_raw_mut(&self) -> *mut ffi::wxd_Variant_t {
         self.as_raw() as *mut _
     }
-    
+
     /// Consumes the variant and transfers ownership to C++.
     /// Returns a raw pointer that must be freed by C++ code using wxd_Variant_Free.
     ///
@@ -150,7 +149,7 @@ impl Variant {
     pub fn into_raw(self) -> *mut ffi::wxd_Variant_t {
         self.as_raw() as *mut _
     }
-    
+
     /// Creates a Variant from a raw pointer, taking ownership and freeing the C++ resources.
     ///
     /// # Safety
@@ -160,17 +159,19 @@ impl Variant {
         if ptr.is_null() {
             return None;
         }
-        
+
         let variant_ref = &*ptr;
         let result = match variant_ref.type_ {
-            t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => 
-                Variant::Bool(variant_ref.data.bool_val),
-            t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => 
-                Variant::Int32(variant_ref.data.int32_val),
-            t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => 
-                Variant::Int64(variant_ref.data.int64_val),
-            t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => 
-                Variant::Double(variant_ref.data.double_val),
+            t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => Variant::Bool(variant_ref.data.bool_val),
+            t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => {
+                Variant::Int32(variant_ref.data.int32_val)
+            }
+            t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => {
+                Variant::Int64(variant_ref.data.int64_val)
+            }
+            t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => {
+                Variant::Double(variant_ref.data.double_val)
+            }
             t if t == ffi::WXD_VARIANT_TYPE_STRING as i32 => {
                 if variant_ref.data.string_val.is_null() {
                     Variant::String(String::new())
@@ -179,12 +180,12 @@ impl Variant {
                     let string = c_str.to_string_lossy().into_owned();
                     Variant::String(string)
                 }
-            },
+            }
             t if t == ffi::WXD_VARIANT_TYPE_DATETIME as i32 => {
                 // Create a DateTime from the raw data
                 let dt = crate::DateTime::from_raw(variant_ref.data.datetime_val);
                 Variant::DateTime(dt)
-            },
+            }
             t if t == ffi::WXD_VARIANT_TYPE_BITMAP as i32 => {
                 if variant_ref.data.bitmap_val.is_null() {
                     // Since there's no default constructor, create a minimal 1x1 bitmap
@@ -195,7 +196,9 @@ impl Variant {
                         None => {
                             // If even this fails, we're in trouble, but let's try to recover
                             // by using a default variant type instead of failing completely
-                            eprintln!("Warning: Failed to create empty bitmap for null bitmap pointer");
+                            eprintln!(
+                                "Warning: Failed to create empty bitmap for null bitmap pointer"
+                            );
                             Variant::String("".to_string())
                         }
                     }
@@ -207,20 +210,20 @@ impl Variant {
                     // of the variant_ref in memory that will be freed by wxd_Variant_Free
                     Variant::Bitmap(bitmap)
                 }
-            },
+            }
             _ => {
                 // Invalid type, free the memory and return None
                 ffi::wxd_Variant_Free(ptr);
                 return None;
             }
         };
-        
+
         // Free the C++ resources
         ffi::wxd_Variant_Free(ptr);
-        
+
         Some(result)
     }
-    
+
     /// Gets the type of the variant
     pub fn get_type(&self) -> VariantType {
         match self {
@@ -328,4 +331,4 @@ impl<'a> From<&'a Bitmap> for Variant {
     fn from(value: &'a Bitmap) -> Self {
         Variant::BitmapBorrowed(value.as_borrowable_ptr())
     }
-} 
+}

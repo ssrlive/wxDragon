@@ -1,6 +1,18 @@
 #ifndef WXD_TYPES_H
 #define WXD_TYPES_H
 
+#ifdef __cplusplus
+// Include essential wxWidgets headers for type definitions
+#include <wx/defs.h>      // For wxEventType, wxWindowID, etc.
+#include <wx/event.h>     // For wxEvent, wxCommandEvent, wxMouseEvent, wxKeyEvent etc.
+#include <wx/gdicmn.h>    // For wxPoint, wxSize, wxRect
+#include <wx/colour.h>    // For wxColour
+#include <wx/datetime.h>  // For wxDateTime
+#include <wx/variant.h>   // For wxVariant
+// For DataView related types
+#include <wx/dataview.h>  // For wxDataViewItem, wxDataViewModel, etc.
+#endif
+
 // Use standard C types
 #include <stdbool.h> 
 #include <stdint.h> // For integer types if needed
@@ -78,6 +90,10 @@ typedef enum {
     WXD_EVENT_TYPE_MENU = 7,
     WXD_EVENT_TYPE_LEFT_DOWN = 8,
     WXD_EVENT_TYPE_LEFT_UP = 9,
+    WXD_EVENT_TYPE_RIGHT_DOWN = 131,
+    WXD_EVENT_TYPE_RIGHT_UP = 132,
+    WXD_EVENT_TYPE_MIDDLE_DOWN = 133,
+    WXD_EVENT_TYPE_MIDDLE_UP = 134,
     WXD_EVENT_TYPE_MOTION = 10,
     WXD_EVENT_TYPE_MOUSEWHEEL = 11,
     WXD_EVENT_TYPE_KEY_DOWN = 12,
@@ -120,6 +136,10 @@ typedef enum {
     WXD_EVENT_TYPE_COMMAND_HYPERLINK = 49,
     WXD_EVENT_TYPE_SPINCTRLDOUBLE = 50,
     WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED = 51,
+    WXD_EVENT_TYPE_CALENDAR_DOUBLECLICKED = 120,
+    WXD_EVENT_TYPE_CALENDAR_MONTH_CHANGED = 121,
+    WXD_EVENT_TYPE_CALENDAR_YEAR_CHANGED = 122,
+    WXD_EVENT_TYPE_CALENDAR_WEEKDAY_CLICKED = 123,
     WXD_EVENT_TYPE_SCROLL_TOP = 52,
     WXD_EVENT_TYPE_SCROLL_BOTTOM = 53,
     WXD_EVENT_TYPE_SCROLL_LINEUP = 54,
@@ -176,7 +196,44 @@ typedef enum {
     WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK = 102,
     WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED = 103,
     WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED = 104,
-    WXD_EVENT_TYPE_MAX
+
+    // New TreeCtrl Event Types
+    WXD_EVENT_TYPE_TREE_SEL_CHANGING = 105,      // wxEVT_TREE_SEL_CHANGING
+    WXD_EVENT_TYPE_TREE_ITEM_COLLAPSING = 106,   // wxEVT_TREE_ITEM_COLLAPSING
+    WXD_EVENT_TYPE_TREE_ITEM_COLLAPSED = 107,    // wxEVT_TREE_ITEM_COLLAPSED
+    WXD_EVENT_TYPE_TREE_ITEM_EXPANDING = 108,    // wxEVT_TREE_ITEM_EXPANDING
+    WXD_EVENT_TYPE_TREE_ITEM_EXPANDED = 109,     // wxEVT_TREE_ITEM_EXPANDED
+    WXD_EVENT_TYPE_TREE_ITEM_RIGHT_CLICK = 110,  // wxEVT_TREE_ITEM_RIGHT_CLICK
+    WXD_EVENT_TYPE_TREE_ITEM_MIDDLE_CLICK = 111, // wxEVT_TREE_ITEM_MIDDLE_CLICK
+    WXD_EVENT_TYPE_TREE_KEY_DOWN = 112,          // wxEVT_TREE_KEY_DOWN
+    WXD_EVENT_TYPE_TREE_DELETE_ITEM = 113,       // wxEVT_TREE_DELETE_ITEM
+    WXD_EVENT_TYPE_TREE_ITEM_MENU = 114,         // wxEVT_TREE_ITEM_MENU
+    WXD_EVENT_TYPE_TREE_BEGIN_DRAG = 115,        // wxEVT_TREE_BEGIN_DRAG
+    WXD_EVENT_TYPE_TREE_BEGIN_RDRAG = 116,       // wxEVT_TREE_BEGIN_RDRAG
+    WXD_EVENT_TYPE_TREE_END_DRAG = 117,          // wxEVT_TREE_END_DRAG
+    WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK = 118, // wxEVT_TREE_STATE_IMAGE_CLICK
+    WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED = 119, // wxEVT_LISTBOX_DCLICK
+
+    // ADDED: Additional event types missing from enum
+    WXD_EVENT_TYPE_TOOL_ENTER = 124, // ToolBar Enter event
+    WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP = 125, // TreeCtrl tooltip event
+    WXD_EVENT_TYPE_ANY = 126, // Generic event type
+    
+    // ADDED: Window event types
+    WXD_EVENT_TYPE_MOVE = 127, // Window move event
+    WXD_EVENT_TYPE_ERASE = 128, // Window erase background event
+    WXD_EVENT_TYPE_SET_FOCUS = 129, // Window set focus event
+    WXD_EVENT_TYPE_KILL_FOCUS = 130, // Window kill focus event
+
+    // AUI Manager event types
+    WXD_EVENT_TYPE_AUI_PANE_BUTTON = 135, // wxEVT_AUI_PANE_BUTTON
+    WXD_EVENT_TYPE_AUI_PANE_CLOSE = 136, // wxEVT_AUI_PANE_CLOSE
+    WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE = 137, // wxEVT_AUI_PANE_MAXIMIZE
+    WXD_EVENT_TYPE_AUI_PANE_RESTORE = 138, // wxEVT_AUI_PANE_RESTORE
+    WXD_EVENT_TYPE_AUI_PANE_ACTIVATED = 139, // wxEVT_AUI_PANE_ACTIVATED
+    WXD_EVENT_TYPE_AUI_RENDER = 140, // wxEVT_AUI_RENDER
+
+    WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;
 
 typedef int64_t wxd_Style_t;
@@ -206,7 +263,6 @@ typedef struct wxd_ToggleButton_t wxd_ToggleButton_t;
 typedef struct wxd_RadioBox_t wxd_RadioBox_t;
 typedef struct wxd_BitmapComboBox_t wxd_BitmapComboBox_t;
 typedef struct wxd_TreeCtrl_t wxd_TreeCtrl_t;
-typedef struct wxd_TreeItemId_t wxd_TreeItemId_t;
 typedef struct wxd_TreeItemData_t wxd_TreeItemData_t;
 typedef struct wxd_StaticBox_t wxd_StaticBox_t;
 typedef struct wxd_Gauge_t wxd_Gauge_t;
@@ -349,6 +405,30 @@ typedef void wxd_ImageList_t;      // Added
 typedef struct wxd_Icon_t wxd_Icon_t; // Assuming this pattern from Bitmap_t
 
 // DataView opaque types
+// ... existing code ...
+
+// For wxd_TreeItemId_t, wxTreeItemId internally holds a void* m_pItem.
+// We will pass this void* directly as an opaque pointer type for Rust.
+// struct wxd_TreeItemId_s; // Remove old forward declaration
+// typedef struct wxd_TreeItemId_s wxd_TreeItemId_t; // Remove old typedef
+typedef struct wxd_TreeItemId_Opaque_ForBindgen wxd_TreeItemId_t; // Define as opaque struct for bindgen
+
+// Define wxd_DropResult enum (ensure this is defined if used)
+// ... existing code ...
+
+// --- Opaque and FFI Struct Definitions ---
+// Moved from wxd_event_api.h to ensure it's defined before use in event.cpp
+#ifdef __cplusplus
+struct wxd_Event_t { wxEvent* event; };
+#else
+typedef struct wxd_Event_t wxd_Event_t;
+#endif
+
+typedef struct wxd_App_t wxd_App_t;
+typedef struct wxd_Window_t wxd_Window_t;
+// typedef struct wxd_Event_t wxd_Event_t; // Now defined above
+typedef struct wxd_EvtHandler_t wxd_EvtHandler_t;
+typedef struct wxd_Control_t wxd_Control_t;
 // ... existing code ...
 
 #endif // WXD_TYPES_H 

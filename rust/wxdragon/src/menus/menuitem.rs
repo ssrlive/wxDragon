@@ -35,6 +35,7 @@ impl From<ItemKind> for i32 {
 /// Represents a wxMenuItem.
 /// Note: This is usually a non-owning wrapper, as wxMenu manages item lifetime.
 pub struct MenuItem {
+    #[allow(dead_code)]
     ptr: *mut ffi::wxd_MenuItem_t, // Non-owning pointer
 }
 
@@ -49,7 +50,8 @@ impl MenuItem {
     /// Returns the raw pointer.
     /// # Safety
     /// The caller must ensure the pointer is used correctly.
-    pub unsafe fn as_ptr(&self) -> *mut ffi::wxd_MenuItem_t {
+    #[allow(dead_code)]
+    pub(crate) unsafe fn as_ptr(&self) -> *mut ffi::wxd_MenuItem_t {
         self.ptr
     }
 

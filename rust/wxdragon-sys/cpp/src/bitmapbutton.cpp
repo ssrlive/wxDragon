@@ -50,29 +50,32 @@ WXD_EXPORTED wxd_Bitmap_t* wxd_BitmapButton_GetBitmapLabel(wxd_BitmapButton_t* s
     if (!self) return nullptr;
     wxBitmapButton* btn = reinterpret_cast<wxBitmapButton*>(self);
     const wxBitmap& bmp = btn->GetBitmapLabel();
-    return bmp.IsOk() ? const_cast<wxd_Bitmap_t*>(reinterpret_cast<const wxd_Bitmap_t*>(&bmp)) : nullptr;
+    if (!bmp.IsOk()) return nullptr;
+    return (wxd_Bitmap_t*)new wxBitmap(bmp); // Return a heap-allocated copy
 }
 
 WXD_EXPORTED wxd_Bitmap_t* wxd_BitmapButton_GetBitmapDisabled(wxd_BitmapButton_t* self) {
     if (!self) return nullptr;
     wxBitmapButton* btn = reinterpret_cast<wxBitmapButton*>(self);
     const wxBitmap& bmp = btn->GetBitmapDisabled();
-    return bmp.IsOk() ? const_cast<wxd_Bitmap_t*>(reinterpret_cast<const wxd_Bitmap_t*>(&bmp)) : nullptr;
+    if (!bmp.IsOk()) return nullptr;
+    return (wxd_Bitmap_t*)new wxBitmap(bmp); // Return a heap-allocated copy
 }
 
 WXD_EXPORTED wxd_Bitmap_t* wxd_BitmapButton_GetBitmapFocus(wxd_BitmapButton_t* self) {
     if (!self) return nullptr;
     wxBitmapButton* btn = reinterpret_cast<wxBitmapButton*>(self);
     const wxBitmap& bmp = btn->GetBitmapFocus();
-    return bmp.IsOk() ? const_cast<wxd_Bitmap_t*>(reinterpret_cast<const wxd_Bitmap_t*>(&bmp)) : nullptr;
+    if (!bmp.IsOk()) return nullptr;
+    return (wxd_Bitmap_t*)new wxBitmap(bmp); // Return a heap-allocated copy
 }
 
 WXD_EXPORTED wxd_Bitmap_t* wxd_BitmapButton_GetBitmapHover(wxd_BitmapButton_t* self) {
     if (!self) return nullptr;
     wxBitmapButton* btn = reinterpret_cast<wxBitmapButton*>(self);
     const wxBitmap& bmp = btn->GetBitmapCurrent(); // wxWidgets uses GetBitmapCurrent for hover
-    return bmp.IsOk() ? const_cast<wxd_Bitmap_t*>(reinterpret_cast<const wxd_Bitmap_t*>(&bmp)) : nullptr;
+    if (!bmp.IsOk()) return nullptr;
+    return (wxd_Bitmap_t*)new wxBitmap(bmp); // Return a heap-allocated copy
 }
-
 
 } // extern "C" 

@@ -83,7 +83,7 @@ extern "C" {
 #include "widgets/wxd_menu.h"
 #include "widgets/wxd_bitmap.h"
 #include "widgets/wxd_artprovider.h"
-#include "widgets/wxd_calendarctrl.h"
+#include "widgets/wxd_calendar_ctrl.h"
 
 // Other widgets
 #include "widgets/wxd_pickers.h"

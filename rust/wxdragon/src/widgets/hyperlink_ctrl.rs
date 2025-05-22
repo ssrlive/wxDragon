@@ -3,7 +3,7 @@ use std::os::raw::c_longlong;
 use wxdragon_sys as ffi;
 
 use crate::color::Colour;
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -24,6 +24,49 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by HyperlinkCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HyperlinkCtrlEvent {
+    /// Emitted when the hyperlink is clicked
+    Clicked,
+}
+
+/// Event data for HyperlinkCtrl events
+#[derive(Debug)]
+pub struct HyperlinkCtrlEventData {
+    event: Event,
+}
+
+impl HyperlinkCtrlEventData {
+    /// Create a new HyperlinkCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Get the URL associated with the hyperlink control
+    pub fn get_url(&self) -> Option<String> {
+        // To get the URL, we need to find the HyperlinkCtrl that triggered this event
+        if let Some(window_obj) = self.event.get_event_object() {
+            // Create a HyperlinkCtrl from the window pointer
+            unsafe {
+                let hyperlink = HyperlinkCtrl::from_ptr(
+                    window_obj.handle_ptr() as *mut ffi::wxd_HyperlinkCtrl_t
+                );
+                let url = hyperlink.get_url();
+                if !url.is_empty() {
+                    return Some(url);
+                }
+            }
+        }
+        None
+    }
+}
 
 // --- HyperlinkCtrl --- //
 #[derive(Clone)]
@@ -148,6 +191,17 @@ impl HyperlinkCtrl {
         }
     }
 }
+
+// Implement event handlers for HyperlinkCtrl
+crate::implement_widget_local_event_handlers!(
+    HyperlinkCtrl,
+    HyperlinkCtrlEvent,
+    HyperlinkCtrlEventData,
+    Clicked => clicked, EventType::COMMAND_HYPERLINK
+);
+
+// Implement WindowEvents for standard window events
+impl WindowEvents for HyperlinkCtrl {}
 
 // Use the widget_builder macro to generate the HyperlinkCtrlBuilder implementation
 widget_builder!(

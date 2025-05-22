@@ -1,4 +1,4 @@
-use crate::event::WxEvtHandler;
+use crate::event::{Event, EventType, WindowEvents};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -24,6 +24,33 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by SpinCtrlDouble
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpinCtrlDoubleEvent {
+    /// Emitted when the value is changed
+    ValueChanged,
+    /// Emitted when the user presses Enter
+    Enter,
+}
+
+/// Event data for SpinCtrlDouble events
+#[derive(Debug)]
+pub struct SpinCtrlDoubleEventData {
+    event: Event,
+}
+
+impl SpinCtrlDoubleEventData {
+    /// Create a new SpinCtrlDoubleEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+}
 
 // --- SpinCtrlDouble --- //
 
@@ -84,6 +111,18 @@ impl SpinCtrlDouble {
         unsafe { ffi::wxd_SpinCtrlDouble_GetDigits(self.as_ptr()) }
     }
 }
+
+// Implement event handlers for SpinCtrlDouble
+crate::implement_widget_local_event_handlers!(
+    SpinCtrlDouble,
+    SpinCtrlDoubleEvent,
+    SpinCtrlDoubleEventData,
+    ValueChanged => value_changed, EventType::SPINCTRLDOUBLE,
+    Enter => enter, EventType::TEXT_ENTER
+);
+
+// Implement WindowEvents to get standard window events
+impl WindowEvents for SpinCtrlDouble {}
 
 // Apply common trait implementations
 implement_widget_traits_with_target!(SpinCtrlDouble, window, Window);

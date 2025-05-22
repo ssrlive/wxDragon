@@ -1,7 +1,9 @@
 //!
 //! Safe wrapper for wxTextCtrl.
 
-use crate::event::WxEvtHandler;
+use crate::event::TextEvents;
+use crate::event::WindowEvents;
+use crate::event::{Event, EventType};
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -36,6 +38,43 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+/// Events emitted by TextCtrl
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TextCtrlEvent {
+    /// Emitted when the text in the control changes
+    TextChanged,
+    /// Emitted when the user presses Enter in the control
+    TextEnter,
+}
+
+/// Event data for a TextCtrl event
+#[derive(Debug)]
+pub struct TextCtrlEventData {
+    event: Event,
+}
+
+impl TextCtrlEventData {
+    /// Create a new TextCtrlEventData from a generic Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Get the ID of the control that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Skip this event (allow it to be processed by the parent window)
+    pub fn skip(&self, skip: bool) {
+        self.event.skip(skip);
+    }
+
+    /// Get the current text in the control
+    pub fn get_string(&self) -> Option<String> {
+        self.event.get_string()
+    }
+}
 
 /// Represents a wxTextCtrl widget.
 #[derive(Clone)]
@@ -131,20 +170,14 @@ impl TextCtrl {
     /// Clears the text in the control.
     pub fn clear(&self) {
         unsafe {
-            ffi::wxd_TextCtrl_Clear(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            );
+            ffi::wxd_TextCtrl_Clear(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t);
         }
     }
 
-    /// Returns whether the text control has been modified by the user since the last 
+    /// Returns whether the text control has been modified by the user since the last
     /// time MarkDirty() or DiscardEdits() was called.
     pub fn is_modified(&self) -> bool {
-        unsafe {
-            ffi::wxd_TextCtrl_IsModified(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
-        }
+        unsafe { ffi::wxd_TextCtrl_IsModified(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t) }
     }
 
     /// Marks the control as modified or unmodified.
@@ -152,7 +185,7 @@ impl TextCtrl {
         unsafe {
             ffi::wxd_TextCtrl_SetModified(
                 self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
-                modified
+                modified,
             );
         }
     }
@@ -162,27 +195,21 @@ impl TextCtrl {
         unsafe {
             ffi::wxd_TextCtrl_SetEditable(
                 self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
-                editable
+                editable,
             );
         }
     }
 
     /// Returns true if the control is editable.
     pub fn is_editable(&self) -> bool {
-        unsafe {
-            ffi::wxd_TextCtrl_IsEditable(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
-        }
+        unsafe { ffi::wxd_TextCtrl_IsEditable(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t) }
     }
 
     /// Gets the insertion point of the control.
     /// The insertion point is the position at which the caret is currently positioned.
     pub fn get_insertion_point(&self) -> i64 {
         unsafe {
-            ffi::wxd_TextCtrl_GetInsertionPoint(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
+            ffi::wxd_TextCtrl_GetInsertionPoint(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t)
         }
     }
 
@@ -191,19 +218,19 @@ impl TextCtrl {
         unsafe {
             ffi::wxd_TextCtrl_SetInsertionPoint(
                 self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
-                pos
+                pos,
             );
         }
     }
 
     /// Sets the maximum number of characters that may be entered in the control.
-    /// 
+    ///
     /// If `len` is 0, the maximum length limit is removed.
     pub fn set_max_length(&self, len: usize) {
         unsafe {
             ffi::wxd_TextCtrl_SetMaxLength(
                 self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t,
-                len as i64
+                len as i64,
             );
         }
     }
@@ -211,28 +238,18 @@ impl TextCtrl {
     /// Returns the last position in the control.
     pub fn get_last_position(&self) -> i64 {
         unsafe {
-            ffi::wxd_TextCtrl_GetLastPosition(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
+            ffi::wxd_TextCtrl_GetLastPosition(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t)
         }
     }
 
     /// Returns true if this is a multi-line text control.
     pub fn is_multiline(&self) -> bool {
-        unsafe {
-            ffi::wxd_TextCtrl_IsMultiLine(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
-        }
+        unsafe { ffi::wxd_TextCtrl_IsMultiLine(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t) }
     }
 
     /// Returns true if this is a single-line text control.
     pub fn is_single_line(&self) -> bool {
-        unsafe {
-            ffi::wxd_TextCtrl_IsSingleLine(
-                self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t
-            )
-        }
+        unsafe { ffi::wxd_TextCtrl_IsSingleLine(self.window.as_ptr() as *mut ffi::wxd_TextCtrl_t) }
     }
 }
 
@@ -258,3 +275,16 @@ widget_builder!(
         )
     }
 );
+
+// Implement TextCtrl-specific event handlers using the standard macro
+crate::implement_widget_local_event_handlers!(
+    TextCtrl,
+    TextCtrlEvent,
+    TextCtrlEventData,
+    TextChanged => text_changed, EventType::TEXT,
+    TextEnter => text_enter, EventType::TEXT_ENTER
+);
+
+// Implement standard events traits
+impl TextEvents for TextCtrl {}
+impl WindowEvents for TextCtrl {}

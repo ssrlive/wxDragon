@@ -2,76 +2,42 @@
 //! Safe wrapper for wxBitmapButton.
 
 use crate::bitmap::Bitmap;
-use crate::event::WxEvtHandler;
+use crate::event::button_events::ButtonEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
+use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
+use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
-use std::ops::{BitOr, BitOrAssign, Deref, DerefMut};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
 
-// wxBitmapButton styles (Combine with wxBU_ from Button if needed)
-pub const BU_LEFT: i64 = ffi::WXD_BU_LEFT;
-pub const BU_TOP: i64 = ffi::WXD_BU_TOP;
-pub const BU_RIGHT: i64 = ffi::WXD_BU_RIGHT;
-pub const BU_BOTTOM: i64 = ffi::WXD_BU_BOTTOM;
-pub const BU_EXACTFIT: i64 = ffi::WXD_BU_EXACTFIT;
-pub const BORDER_NONE: i64 = ffi::WXD_BORDER_NONE;
-pub const BU_NOTEXT: i64 = ffi::WXD_BU_NOTEXT;
-
-/// Style flags for `BitmapButton`.
-///
-/// These flags can be combined using the bitwise OR operator (`|`).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum BitmapButtonStyle {
-    /// Default style (no specific alignment or flags).
-    Default = 0,
-    /// Align the bitmap and/or label to the left.
-    Left = BU_LEFT,
-    /// Align the bitmap and/or label to the top.
-    Top = BU_TOP,
-    /// Align the bitmap and/or label to the right.
-    Right = BU_RIGHT,
-    /// Align the bitmap and/or label to the bottom.
-    Bottom = BU_BOTTOM,
-    /// Button size will be adjusted to exactly fit the bitmap.
-    ExactFit = BU_EXACTFIT,
-    /// Do not display a label (useful for bitmap-only buttons).
-    NoText = BU_NOTEXT,
-    /// No border.
-    BorderNone = BORDER_NONE,
-}
-
-impl BitmapButtonStyle {
-    /// Returns the raw integer value of the style.
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl BitOr for BitmapButtonStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for BitmapButtonStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        unsafe {
-            *self = std::mem::transmute(self.bits() | rhs.bits());
-        }
-    }
-}
+// Define BitmapButtonStyle using the widget_style_enum macro
+widget_style_enum!(
+    name: BitmapButtonStyle,
+    doc: "Style flags for BitmapButton.",
+    variants: {
+        Default: 0, "Default style (no specific alignment or flags).",
+        Left: ffi::WXD_BU_LEFT, "Align the bitmap and/or label to the left.",
+        Top: ffi::WXD_BU_TOP, "Align the bitmap and/or label to the top.",
+        Right: ffi::WXD_BU_RIGHT, "Align the bitmap and/or label to the right.",
+        Bottom: ffi::WXD_BU_BOTTOM, "Align the bitmap and/or label to the bottom.",
+        ExactFit: ffi::WXD_BU_EXACTFIT, "Button size will be adjusted to exactly fit the bitmap.",
+        NoText: ffi::WXD_BU_NOTEXT, "Do not display a label (useful for bitmap-only buttons).",
+        BorderNone: ffi::WXD_BORDER_NONE, "No border."
+    },
+    default_variant: Default
+);
 
 /// Represents a wxBitmapButton widget.
 /// This is a button that displays a bitmap instead of a text label.
 pub struct BitmapButton {
     window: Window, // Inherits basic window properties
 }
+
+// Implement ButtonEvents trait for BitmapButton
+impl ButtonEvents for BitmapButton {}
 
 impl BitmapButton {
     /// Creates a new BitmapButton builder.
@@ -181,36 +147,4 @@ widget_builder!(
     }
 );
 
-// --- Trait Implementations ---
-
-impl WxWidget for BitmapButton {
-    fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {
-        self.window.handle_ptr()
-    }
-}
-
-impl Deref for BitmapButton {
-    type Target = Window;
-    fn deref(&self) -> &Self::Target {
-        &self.window
-    }
-}
-
-impl DerefMut for BitmapButton {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.window
-    }
-}
-
-impl WxEvtHandler for BitmapButton {
-    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
-        self.window.get_event_handler_ptr()
-    }
-}
-
-// No explicit Drop implementation needed - child widget managed by parent
-impl Drop for BitmapButton {
-    fn drop(&mut self) {
-        // Child widgets are managed by their parent in wxWidgets
-    }
-}
+implement_widget_traits_with_target!(BitmapButton, window, Window);

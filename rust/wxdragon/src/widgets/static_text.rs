@@ -1,6 +1,6 @@
 //! Safe wrapper for wxStaticText.
 
-use crate::event::WxEvtHandler;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::window::{Window, WxWidget};
@@ -118,3 +118,5 @@ impl StaticText {
 
 // Use the macro to implement all the standard traits
 implement_widget_traits_with_target!(StaticText, window, Window);
+
+impl WindowEvents for StaticText {}

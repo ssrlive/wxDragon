@@ -1,8 +1,8 @@
+use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
 use wxdragon::id::ID_ANY;
 use wxdragon::prelude::*;
-use wxdragon::widgets::toolbar::ToolBarStyle;
 use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::art_provider::{ArtId, ArtClient, ArtProvider};
+use wxdragon::widgets::toolbar::ToolBarStyle;
 
 mod tabs;
 use tabs::advanced_tab::create_advanced_tab;
@@ -10,8 +10,8 @@ use tabs::aui_tab::create_aui_tab;
 use tabs::basic_tab::create_basic_tab;
 use tabs::book_controls_tab::create_book_controls_tab;
 use tabs::color_tab::create_color_tab;
-use tabs::dataview_virtual_tab::create_dataview_virtual_tab;
 use tabs::dataview_tree_tab::create_dataview_tree_tab;
+use tabs::dataview_virtual_tab::create_dataview_virtual_tab;
 use tabs::dialog_tab::create_dialog_tab;
 use tabs::lists_tab::create_lists_tab;
 use tabs::media_tab::create_media_tab;
@@ -63,7 +63,9 @@ fn main() {
 
         let mut image_ids: Vec<i32> = Vec::new();
 
-        if let Some(bmp_info) = ArtProvider::get_bitmap(ArtId::Information, ArtClient::Menu, Some(Size::new(16,16))) {
+        if let Some(bmp_info) =
+            ArtProvider::get_bitmap(ArtId::Information, ArtClient::Menu, Some(Size::new(16, 16)))
+        {
             let idx = image_list.add_bitmap(&bmp_info);
             if idx != -1 {
                 image_ids.push(idx);
@@ -73,7 +75,9 @@ fn main() {
         } else {
             eprintln!("Failed to get ArtId::Information for Notebook");
         }
-        if let Some(bmp_question) = ArtProvider::get_bitmap(ArtId::Question, ArtClient::Menu, Some(Size::new(16,16))) {
+        if let Some(bmp_question) =
+            ArtProvider::get_bitmap(ArtId::Question, ArtClient::Menu, Some(Size::new(16, 16)))
+        {
             let idx = image_list.add_bitmap(&bmp_question);
             if idx != -1 {
                 image_ids.push(idx);
@@ -83,7 +87,9 @@ fn main() {
         } else {
             eprintln!("Failed to get ArtId::Question for Notebook");
         }
-        if let Some(bmp_warning) = ArtProvider::get_bitmap(ArtId::Warning, ArtClient::Menu, Some(Size::new(16,16))) {
+        if let Some(bmp_warning) =
+            ArtProvider::get_bitmap(ArtId::Warning, ArtClient::Menu, Some(Size::new(16, 16)))
+        {
             let idx = image_list.add_bitmap(&bmp_warning);
             if idx != -1 {
                 image_ids.push(idx);
@@ -93,7 +99,7 @@ fn main() {
         } else {
             eprintln!("Failed to get ArtId::Warning for Notebook");
         }
-        
+
         if !image_ids.is_empty() {
             notebook.set_image_list(image_list);
         } else {
@@ -155,17 +161,42 @@ fn main() {
             Some(id)
         };
 
-        notebook.add_page(&basic_controls.panel, "Basic Controls", true, next_image_id());
+        notebook.add_page(
+            &basic_controls.panel,
+            "Basic Controls",
+            true,
+            next_image_id(),
+        );
         notebook.add_page(&list_controls.panel, "Lists", false, next_image_id());
         notebook.add_page(&advanced_splitter, "Advanced", false, next_image_id());
-        notebook.add_page(&book_controls.tab_panel, "Book Controls", false, next_image_id());
+        notebook.add_page(
+            &book_controls.tab_panel,
+            "Book Controls",
+            false,
+            next_image_id(),
+        );
         notebook.add_page(&dialog_controls.panel, "Dialogs", false, next_image_id());
         notebook.add_page(&media_controls.panel, "Media", false, next_image_id());
-        notebook.add_page(&tree_controls.panel, "Tree Controls", false, next_image_id());
+        notebook.add_page(
+            &tree_controls.panel,
+            "Tree Controls",
+            false,
+            next_image_id(),
+        );
         notebook.add_page(&aui_controls.panel, "AUI", false, next_image_id());
         notebook.add_page(&color_controls.panel, "Color", false, next_image_id());
-        notebook.add_page(&dataview_virtual_controls.panel, "DataView Virtual", false, next_image_id());
-        notebook.add_page(&dataview_tree_controls.panel, "DataView Tree", false, next_image_id());
+        notebook.add_page(
+            &dataview_virtual_controls.panel,
+            "DataView Virtual",
+            false,
+            next_image_id(),
+        );
+        notebook.add_page(
+            &dataview_tree_controls.panel,
+            "DataView Tree",
+            false,
+            next_image_id(),
+        );
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
@@ -174,18 +205,9 @@ fn main() {
 
         // --- Bind Event Handlers ---
 
-        // Bind tab-specific events
-        basic_controls.bind_events();
-        advanced_controls.bind_events();
-        book_controls.bind_events();
-        dialog_controls.bind_events(&frame);
-        media_controls.bind_events();
-        tree_controls.bind_events();
-        aui_controls.bind_events();
-
-        // Menu & Toolbar Event Handlers
+        // Menu event handler using the new API
         let frame_clone_for_menu = frame.clone();
-        frame.bind(EventType::MENU, move |event: Event| match event.get_id() {
+        frame.on_menu(move |event| match event.get_id() {
             id if id == ID_EXIT => {
                 println!("Menu/Toolbar: Exit clicked!");
                 frame_clone_for_menu.close();
@@ -208,12 +230,72 @@ fn main() {
             }
         });
 
-        // Notebook Page Changed Event
-        notebook.bind(EventType::NOTEBOOK_PAGE_CHANGED, |event| {
-            if let Some(selection) = event.get_selection() {
-                println!("Notebook page changed to: {}", selection);
-            }
+        // Notebook page changed event using the new API
+        let notebook_clone_page_changed = notebook.clone();
+        let frame_clone_page_changed = frame.clone();
+        notebook.on_page_changed(move |event_data| {
+            let new_page_index = event_data.get_selection().unwrap_or(0);
+            let old_page_index = event_data.get_old_selection().unwrap_or(0);
+
+            let new_page_text = notebook_clone_page_changed
+                .get_page(new_page_index as usize)
+                .map_or_else(
+                    || "<unknown page>".to_string(),
+                    |p| p.get_label().unwrap_or_default(),
+                );
+            let old_page_text = notebook_clone_page_changed
+                .get_page(old_page_index as usize)
+                .map_or_else(
+                    || "<unknown page>".to_string(),
+                    |p| p.get_label().unwrap_or_default(),
+                );
+
+            println!(
+                "Notebook PageChanged: New={}, Old={}, NewLabel='{}', OldLabel='{}'",
+                new_page_index, old_page_index, new_page_text, old_page_text
+            );
+            frame_clone_page_changed.set_status_text(
+                &format!(
+                    "Switched from tab '{}' to '{}'",
+                    old_page_text, new_page_text
+                ),
+                0,
+            );
         });
+
+        // Second notebook event binding for page changing
+        let notebook_clone_page_changing = notebook.clone();
+        notebook.on_page_changed(move |event_data| {
+            let new_page_index = event_data.get_selection().unwrap_or(0);
+            let old_page_index = event_data.get_old_selection().unwrap_or(0);
+
+            let new_page_text = notebook_clone_page_changing
+                .get_page(new_page_index as usize)
+                .map_or_else(
+                    || "<unknown page>".to_string(),
+                    |p| p.get_label().unwrap_or_default(),
+                );
+            let old_page_text = notebook_clone_page_changing
+                .get_page(old_page_index as usize)
+                .map_or_else(
+                    || "<unknown page>".to_string(),
+                    |p| p.get_label().unwrap_or_default(),
+                );
+
+            println!(
+                "Notebook PageChanging: New={}, Old={}, NewLabel='{}', OldLabel='{}'",
+                new_page_index, old_page_index, new_page_text, old_page_text
+            );
+        });
+
+        // Bind tab-specific events
+        basic_controls.bind_events();
+        advanced_controls.bind_events();
+        book_controls.bind_events();
+        dialog_controls.bind_events(&frame);
+        media_controls.bind_events();
+        tree_controls.bind_events();
+        aui_controls.bind_events();
 
         // --- Final Setup ---
         frame.show(true);

@@ -11,7 +11,7 @@ fn main() {
 
         let button = Button::builder(&frame).with_label("Click me").build();
 
-        button.bind(EventType::COMMAND_BUTTON_CLICKED, |_| {
+        button.on_click(|_| {
             println!("Button clicked");
         });
 

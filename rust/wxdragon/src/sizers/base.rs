@@ -115,7 +115,13 @@ impl Sizer {
     ) -> &Self {
         let child_ptr = child_sizer.as_sizer_ptr();
         unsafe {
-            ffi::wxd_Sizer_AddSizer(self.as_sizer_ptr(), child_ptr, proportion, flag.bits() as i32, border);
+            ffi::wxd_Sizer_AddSizer(
+                self.as_sizer_ptr(),
+                child_ptr,
+                proportion,
+                flag.bits() as i32,
+                border,
+            );
         }
         self
     }

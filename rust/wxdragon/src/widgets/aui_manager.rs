@@ -1,3 +1,4 @@
+use crate::event::{Event, EventType, WxEvtHandler};
 use crate::prelude::*;
 use crate::window::Window;
 use std::ffi::CString;
@@ -331,6 +332,13 @@ pub struct AuiManager {
     _marker: PhantomData<()>,
 }
 
+// Implement WxEvtHandler for AuiManager to allow event binding
+impl WxEvtHandler for AuiManager {
+    unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
+        self.ptr as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
 impl AuiManager {
     /// Create a new AuiManager builder, which requires a parent window to build
     pub fn builder(parent: &impl WxWidget) -> AuiManagerBuilder {
@@ -441,3 +449,113 @@ impl Drop for AuiManager {
 
 // Re-export PaneInfo to make it easier to use
 pub use PaneInfo as AuiPaneInfo;
+
+// Add enum for AuiManager events
+/// Events specific to AuiManager
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AuiManagerEvent {
+    /// Fired when a button is clicked on a pane
+    PaneButton,
+    /// Fired when a pane close button is clicked
+    PaneClose,
+    /// Fired when a pane is maximized
+    PaneMaximize,
+    /// Fired when a maximized pane is restored
+    PaneRestore,
+    /// Fired when a pane is activated
+    PaneActivated,
+    /// Fired when the AUI manager is rendering
+    Render,
+}
+
+/// Event data for AuiManager events
+#[derive(Debug)]
+pub struct AuiManagerEventData {
+    /// The raw event from wxWidgets
+    event: Event,
+}
+
+impl AuiManagerEventData {
+    /// Create a new AuiManagerEventData from an Event
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Gets the ID associated with this event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+
+    /// Gets the pane affected by this event.
+    /// This will return the Window associated with the pane if available.
+    pub fn get_pane(&self) -> Option<Window> {
+        self.event.get_event_object()
+    }
+
+    /// Skip this event (allow default processing to occur)
+    pub fn skip(&self) {
+        self.event.skip(true);
+    }
+}
+
+// Implement event handling for AuiManager
+impl AuiManager {
+    /// Bind a handler for the pane button event
+    pub fn on_pane_button<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_PANE_BUTTON, callback);
+    }
+
+    /// Bind a handler for the pane close event
+    pub fn on_pane_close<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_PANE_CLOSE, callback);
+    }
+
+    /// Bind a handler for the pane maximize event
+    pub fn on_pane_maximize<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_PANE_MAXIMIZE, callback);
+    }
+
+    /// Bind a handler for the pane restore event
+    pub fn on_pane_restore<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_PANE_RESTORE, callback);
+    }
+
+    /// Bind a handler for the pane activated event
+    pub fn on_pane_activated<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_PANE_ACTIVATED, callback);
+    }
+
+    /// Bind a handler for the render event
+    pub fn on_render<F>(&self, callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_aui_event(EventType::AUI_RENDER, callback);
+    }
+
+    // Internal helper to bind AUI events
+    fn bind_aui_event<F>(&self, event_type: EventType, mut callback: F)
+    where
+        F: FnMut(AuiManagerEventData) + 'static,
+    {
+        self.bind_internal(event_type, move |event| {
+            let data = AuiManagerEventData::new(event);
+            callback(data);
+        });
+    }
+}

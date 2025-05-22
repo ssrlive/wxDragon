@@ -9,6 +9,9 @@ WXD_EXPORTED bool wxd_Notebook_AddPage(wxd_Notebook_t* self, wxd_Window_t* page,
 WXD_EXPORTED int wxd_Notebook_GetSelection(wxd_Notebook_t* self);
 WXD_EXPORTED int wxd_Notebook_SetSelection(wxd_Notebook_t* self, int page);
 
+WXD_EXPORTED size_t wxd_Notebook_GetPageCount(wxd_Notebook_t* self);
+WXD_EXPORTED wxd_Window_t* wxd_Notebook_GetPage(wxd_Notebook_t* self, size_t n);
+
 // Event data accessors (if specific to Notebook events beyond general wxEvent)
 // Example: if wxNotebookEvent has specific data not in wxBookCtrlEvent
 // WXD_EXPORTED int wxd_NotebookEvent_GetSomethingSpecific(wxd_Event_t* event);
