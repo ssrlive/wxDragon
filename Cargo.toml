@@ -16,7 +16,7 @@ resolver = "2" # Keep resolver = "2"
 
 [workspace.package]
 authors = ["Allen Dang <allengnr@gmail.com>"] #
-version = "0.2.0" # This will be the default version for workspace members
+version = "0.3.0" # This will be the default version for workspace members
 edition = "2021"
 license = "MIT OR Apache-2.0" # Or your chosen license (e.g., "MIT")
 repository = "https://github.com/AllenDang/wxDragon"
