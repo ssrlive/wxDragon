@@ -3,10 +3,13 @@ use crate::window::WxWidget;
 use wxdragon_sys as ffi;
 
 pub mod colour_dialog;
+pub mod dir_dialog;
 pub mod file_dialog;
 pub mod font_dialog;
 pub mod message_dialog;
+pub mod multi_choice_dialog;
 pub mod progress_dialog;
+pub mod single_choice_dialog;
 pub mod text_entry_dialog;
 
 // Opaque C pointer for wxDialog

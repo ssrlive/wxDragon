@@ -248,7 +248,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [x] `wxCalendarCtrl`
         *   [ ] `wxGLCanvas`
         *   [ ] `wxHtmlWindow`
-        *   [ ] `wxMediaCtrl`
+        *   [x] `wxMediaCtrl`
         *   [x] `wxNotificationMessage`
         *   [ ] `wxRichToolTip`
         *   [ ] `wxSplashScreen`
@@ -272,10 +272,13 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [x] `wxDialog` (base class)
     *   [x] `wxMessageDialog`
     *   [x] `wxFileDialog`
+    *   [x] `wxDirDialog`
     *   [x] `wxColourDialog`
     *   [x] `wxFontDialog`
     *   [x] `wxTextEntryDialog`
     *   [x] `wxProgressDialog`
+    *   [x] `wxSingleChoiceDialog`
+    *   [x] `wxMultiChoiceDialog`
     *   [ ] `wxSplashScreen` (*Moved here, also related to Other*)
     *   [ ] `wxWizard` (*Moved here, also related to Other*)
 *   **Event Handling Expansion:**

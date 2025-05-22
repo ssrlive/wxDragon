@@ -3,10 +3,13 @@ use wxdragon::prelude::*;
 use std::thread;
 use std::time::Duration;
 use wxdragon::dialogs::colour_dialog::ColourDialog;
+use wxdragon::dialogs::dir_dialog::{DirDialog, DirDialogStyle};
 use wxdragon::dialogs::file_dialog::{FileDialog, FileDialogStyle};
 use wxdragon::dialogs::font_dialog::FontDialog;
 use wxdragon::dialogs::message_dialog::{MessageDialog, MessageDialogStyle};
+use wxdragon::dialogs::multi_choice_dialog::MultiChoiceDialog;
 use wxdragon::dialogs::progress_dialog::{ProgressDialog, ProgressDialogStyle};
+use wxdragon::dialogs::single_choice_dialog::SingleChoiceDialog;
 use wxdragon::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogStyle};
 use wxdragon::widgets::notification_message::{NotificationMessage, NotificationStyle};
 use wxdragon::widgets::panel::PanelStyle;
@@ -41,6 +44,13 @@ pub struct DialogTabControls {
     // Added for NotificationMessage
     pub show_notification_btn: Button,
     pub notification_status_label: StaticText,
+    // Added for SingleChoiceDialog
+    pub show_single_choice_dialog_btn: Button,
+    pub single_choice_dialog_status_label: StaticText,
+    // Added for MultiChoiceDialog
+    pub show_multi_choice_dialog_btn: Button,
+    pub multi_choice_dialog_status_label: StaticText,
+    pub dlg_dir_button: Button,
 }
 
 pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabControls {
@@ -354,6 +364,85 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     );
     grid_sizer.add_sizer(&notification_sizer, 1, SizerFlag::Expand, 0);
 
+    // --- SingleChoiceDialog ---
+    let single_choice_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Single Choice Dialog:")
+        .build();
+    let show_single_choice_dialog_btn = Button::builder(&dialog_panel)
+        .with_label("Show Choices")
+        .build();
+    show_single_choice_dialog_btn.set_tooltip("Click to show a single choice dialog.");
+    let single_choice_dialog_status_label = StaticText::builder(&dialog_panel)
+        .with_label("Choice: None yet")
+        .build();
+
+    grid_sizer.add(&single_choice_dialog_label, 0, label_flags, 0);
+    let single_choice_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    // Event binding will be handled in bind_events()
+    single_choice_sizer.add(
+        &show_single_choice_dialog_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
+    single_choice_sizer.add_spacer(10);
+    single_choice_sizer.add(
+        &single_choice_dialog_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
+    grid_sizer.add_sizer(&single_choice_sizer, 1, SizerFlag::Expand, 0);
+
+    // --- MultiChoiceDialog ---
+    let multi_choice_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Multi Choice Dialog:")
+        .build();
+    let show_multi_choice_dialog_btn = Button::builder(&dialog_panel)
+        .with_label("Show Multi Choices")
+        .build();
+    show_multi_choice_dialog_btn.set_tooltip("Click to show a multi choice dialog.");
+    let multi_choice_dialog_status_label = StaticText::builder(&dialog_panel)
+        .with_label("Choices: None yet")
+        .build();
+
+    grid_sizer.add(&multi_choice_dialog_label, 0, label_flags, 0);
+    let multi_choice_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    // Event binding will be handled in bind_events()
+    multi_choice_sizer.add(
+        &show_multi_choice_dialog_btn,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
+    multi_choice_sizer.add_spacer(10);
+    multi_choice_sizer.add(
+        &multi_choice_dialog_status_label,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        2,
+    );
+    grid_sizer.add_sizer(&multi_choice_sizer, 1, SizerFlag::Expand, 0);
+
+    // Create a button for directory dialog
+    let dir_dialog_label = StaticText::builder(&dialog_panel)
+        .with_label("Dir Dialog:")
+        .build();
+    let dlg_dir_button = Button::builder(&dialog_panel)
+        .with_label("Choose Directory")
+        .build();
+    
+    // Add the directory dialog to the grid sizer
+    grid_sizer.add(&dir_dialog_label, 0, label_flags, 0);
+    let dir_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    dir_dialog_sizer.add(
+        &dlg_dir_button,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        2,
+    );
+    grid_sizer.add_sizer(&dir_dialog_sizer, 1, SizerFlag::Expand, 0);
+
     main_sizer.add_sizer(&grid_sizer, 1, SizerFlag::Expand | SizerFlag::All, 10);
     dialog_panel.set_sizer(main_sizer, true);
     dialog_panel.fit(); // Fit the panel to its contents
@@ -383,6 +472,11 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
         font_picker_status_label,
         show_notification_btn,
         notification_status_label,
+        show_single_choice_dialog_btn,
+        single_choice_dialog_status_label,
+        show_multi_choice_dialog_btn,
+        multi_choice_dialog_status_label,
+        dlg_dir_button,
     }
 }
 
@@ -644,6 +738,94 @@ impl DialogTabControls {
             println!("{}", font_desc);
         });
 
-        // Note: Notification message event binding has been temporarily removed
+        // SingleChoiceDialog button
+        let frame_clone_choice = frame.clone();
+        let status_label_clone_choice = self.single_choice_dialog_status_label.clone();
+        self.show_single_choice_dialog_btn.on_click(move |_event| {
+            let choices = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White"];
+            
+            let dialog = SingleChoiceDialog::builder(
+                &frame_clone_choice,
+                "Please select a color:",
+                "Color Choice",
+                &choices,
+            ).build();
+            
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(selection) = dialog.get_string_selection() {
+                    status_label_clone_choice.set_label(&format!("Choice: {}", selection));
+                    println!("SingleChoiceDialog: Selected '{}'", selection);
+                    
+                    // Alternatively, get selection index
+                    let index = dialog.get_selection();
+                    println!("SingleChoiceDialog: Selected index {}", index);
+                } else {
+                    status_label_clone_choice.set_label("Choice: None selected");
+                    println!("SingleChoiceDialog: No selection retrieved");
+                }
+            } else {
+                status_label_clone_choice.set_label("Choice: Cancelled");
+                println!("SingleChoiceDialog: Cancelled");
+            }
+        });
+
+        // MultiChoiceDialog button
+        let frame_clone_multi = frame.clone();
+        let status_label_clone_multi = self.multi_choice_dialog_status_label.clone();
+        self.show_multi_choice_dialog_btn.on_click(move |_event| {
+            let choices = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White"];
+            
+            let dialog = MultiChoiceDialog::builder(
+                &frame_clone_multi,
+                "Please select one or more colors:",
+                "Multiple Color Choices",
+                &choices,
+            ).build();
+            
+            // Set some initial selections if desired
+            dialog.set_selections(&[0, 2]); // Select Red and Blue initially
+            
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                let selections = dialog.get_selections();
+                let string_selections = dialog.get_string_selections();
+                
+                if !selections.is_empty() {
+                    let indices_str = selections.iter().map(|i| i.to_string()).collect::<Vec<String>>().join(", ");
+                    let strings_str = string_selections.join(", ");
+                    
+                    status_label_clone_multi.set_label(&format!("Choices: {}", strings_str));
+                    println!("MultiChoiceDialog: Selected indices [{}]", indices_str);
+                    println!("MultiChoiceDialog: Selected strings [{}]", strings_str);
+                } else {
+                    status_label_clone_multi.set_label("Choices: None selected");
+                    println!("MultiChoiceDialog: No selections made");
+                }
+            } else {
+                status_label_clone_multi.set_label("Choices: Cancelled");
+                println!("MultiChoiceDialog: Cancelled");
+            }
+        });
+
+        // Dir Dialog Button
+        let frame_clone_dir = frame.clone();
+        self.dlg_dir_button.on_click(move |_| {
+            let dialog = DirDialog::builder(
+                &frame_clone_dir,
+                "Choose a directory",
+                ""
+            )
+            .with_style(DirDialogStyle::Default as i64 | DirDialogStyle::MustExist as i64)
+            .build();
+            
+            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+                if let Some(path) = dialog.get_path() {
+                    println!("Directory: {}", path);
+                } else {
+                    println!("Directory: None selected");
+                }
+            } else {
+                println!("Directory Dialog canceled");
+            }
+        });
     }
 }

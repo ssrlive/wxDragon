@@ -90,4 +90,29 @@ WXD_EXPORTED wxd_DateTime_t wxd_DateTime_Now();
 WXD_EXPORTED wxd_DateTime_t wxd_DateTime_FromComponents(int year, unsigned short month, short day, short hour, short minute, short second);
 WXD_EXPORTED bool wxd_DateTime_IsValid(const wxd_DateTime_t* dt);
 
+// --- SingleChoiceDialog ---
+WXD_EXPORTED wxd_SingleChoiceDialog_t* wxd_SingleChoiceDialog_Create(wxd_Window_t* parent, const char* message, 
+                                                                     const char* caption, wxd_ArrayString_t* choices,
+                                                                     wxd_Style_t style, int x, int y, int width, int height);
+WXD_EXPORTED int wxd_SingleChoiceDialog_GetSelection(wxd_SingleChoiceDialog_t* self);
+WXD_EXPORTED void wxd_SingleChoiceDialog_SetSelection(wxd_SingleChoiceDialog_t* self, int selection);
+WXD_EXPORTED int wxd_SingleChoiceDialog_GetStringSelection(wxd_SingleChoiceDialog_t* self, char* buffer, int bufLen);
+
+// --- MultiChoiceDialog ---
+WXD_EXPORTED wxd_MultiChoiceDialog_t* wxd_MultiChoiceDialog_Create(wxd_Window_t* parent, const char* message,
+                                                                   const char* caption, wxd_ArrayString_t* choices,
+                                                                   wxd_Style_t style, int x, int y, int width, int height);
+WXD_EXPORTED void wxd_MultiChoiceDialog_GetSelections(wxd_MultiChoiceDialog_t* self, int* selections, int* count);
+WXD_EXPORTED void wxd_MultiChoiceDialog_SetSelections(wxd_MultiChoiceDialog_t* self, const int* selections, int count);
+WXD_EXPORTED void wxd_MultiChoiceDialog_GetStringSelections(wxd_MultiChoiceDialog_t* self, wxd_ArrayString_t* selections);
+
+// --- DirDialog ---
+WXD_EXPORTED wxd_DirDialog_t* wxd_DirDialog_Create(wxd_Window_t* parent, const char* message, 
+                                                 const char* defaultPath, wxd_Style_t style,
+                                                 int x, int y, int width, int height);
+WXD_EXPORTED int wxd_DirDialog_GetPath(wxd_DirDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED void wxd_DirDialog_SetPath(wxd_DirDialog_t* self, const char* path);
+WXD_EXPORTED int wxd_DirDialog_GetMessage(wxd_DirDialog_t* self, char* buffer, int bufLen);
+WXD_EXPORTED void wxd_DirDialog_SetMessage(wxd_DirDialog_t* self, const char* message);
+
 #endif // WXD_DIALOGS_H 
