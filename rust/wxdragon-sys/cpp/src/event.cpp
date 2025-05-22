@@ -31,6 +31,10 @@
 #include <wx/grid.h>
 #include "../src/wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK, etc.
 #include <wx/aui/framemanager.h> // ADDED: For wxEVT_AUI_* constants
+#include <wx/dynarray.h>     // For wxEVT_REARRANGE_LIST
+#include <wx/log.h>
+#include <wx/utils.h>
+#include <wx/rearrangectrl.h> // ADDED: For wxEVT_REARRANGE_LIST
 
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
 
@@ -841,6 +845,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_AUI_RENDER, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST:
+            wx_handler->Bind(wxEVT_COMMAND_LISTBOX_SELECTED, functor);
+            bound = true;
+            break;
         default:
             wxLogWarning("wxd_EvtHandler_Bind: Unsupported WXDEventTypeCEnum value %d for handler %p.", (int)eventTypeC, wx_handler);
             bound = false;
@@ -1024,6 +1032,8 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_AUI_PANE_RESTORE: return wxEVT_AUI_PANE_RESTORE;
         case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED: return wxEVT_AUI_PANE_ACTIVATED;
         case WXD_EVENT_TYPE_AUI_RENDER: return wxEVT_AUI_RENDER;
+        // RearrangeList event
+        case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST: return wxEVT_COMMAND_LISTBOX_SELECTED;
         default: return wxEVT_NULL;
     }
 }

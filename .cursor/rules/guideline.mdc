@@ -1,7 +1,7 @@
 ---
-description: 
+description: general guideline for wxDragon development
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Guideline for wxDragon Development:
 

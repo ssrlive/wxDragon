@@ -10,6 +10,7 @@ use wxdragon::widgets::imagelist::ImageList;
 use wxdragon::widgets::list_ctrl::{image_list_type, ListColumnFormat, ListCtrl, ListCtrlStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;
 use wxdragon::widgets::panel::PanelStyle;
+use wxdragon::widgets::rearrangelist::{RearrangeList, RearrangeListStyle};
 use wxdragon::widgets::{
     Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText,
 };
@@ -43,6 +44,8 @@ pub struct ListsTabControls {
     pub list_ctrl_status_label: StaticText,
     pub editable_listbox: EditableListBox,
     pub editable_listbox_status_label: StaticText,
+    pub rearrangelist: RearrangeList,
+    pub rearrangelist_status_label: StaticText,
 }
 
 pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls {
@@ -269,6 +272,39 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         .with_label("EditableListBox: Use buttons to modify list")
         .build();
 
+    // --- ADDED: RearrangeList Example ---
+    let rearrangelist_items = vec![
+        "First Item".to_string(),
+        "Second Item".to_string(),
+        "Third Item".to_string(),
+        "Fourth Item".to_string(),
+        "Fifth Item".to_string(),
+    ];
+    
+    // Initial order with some items checked and some unchecked
+    // Positive values = checked items, Negative values = unchecked (using bitwise complement)
+    let initial_order = vec![0, !1, 2, !3, 4]; // 0,2,4 checked; 1,3 unchecked
+    
+    let rearrangelist = RearrangeList::builder(&panel)
+        .with_id(id::ID_HIGHEST + 10)
+        .with_items(rearrangelist_items)
+        .with_order(initial_order)
+        .with_style(RearrangeListStyle::Default)
+        .build();
+    
+    let rearrangelist_status_label = StaticText::builder(&panel)
+        .with_label("RearrangeList: Use selection or buttons to modify")
+        .build();
+    
+    // Add buttons to interact with the RearrangeList
+    let rearrangelist_button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    
+    let move_up_button = Button::builder(&panel).with_label("Move Up").build();
+    let move_down_button = Button::builder(&panel).with_label("Move Down").build();
+    
+    rearrangelist_button_sizer.add(&move_up_button, 0, SizerFlag::All, 5);
+    rearrangelist_button_sizer.add(&move_down_button, 0, SizerFlag::All, 5);
+
     // --- Sizer for *inner_list_panel* ---
     let list_sizer_main = BoxSizer::builder(Orientation::Vertical).build();
     let list_row_sizer = BoxSizer::builder(Orientation::Horizontal).build();
@@ -352,6 +388,30 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     );
     list_sizer_main.add_sizer(
         &editable_listbox_sizer,
+        1,
+        SizerFlag::Expand | SizerFlag::All,
+        5,
+    );
+
+    // Add RearrangeList and its status label
+    let rearrangelist_sizer = BoxSizer::builder(Orientation::Vertical).build();
+    rearrangelist_sizer.add(&rearrangelist, 1, SizerFlag::Expand | SizerFlag::All, 5);
+    rearrangelist_sizer.add_sizer(
+        &rearrangelist_button_sizer,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
+    rearrangelist_sizer.add(
+        &rearrangelist_status_label,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
+    
+    // Add RearrangeList sizer after EditableListBox
+    list_sizer_main.add_sizer(
+        &rearrangelist_sizer,
         1,
         SizerFlag::Expand | SizerFlag::All,
         5,
@@ -620,6 +680,68 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         }
     });
 
+    // RearrangeList Event Binding
+    let rearrangelist_status_label_clone = rearrangelist_status_label.clone();
+    let rearrangelist_clone = rearrangelist.clone();
+    rearrangelist.on_selected(move |event_data| {
+        if let Some(index) = event_data.get_selection() {
+            let is_checked = rearrangelist_clone.is_checked(index);
+            let item_text = rearrangelist_clone.get_string(index).unwrap_or_else(|| "<unknown>".to_string());
+            rearrangelist_status_label_clone.set_label(&format!(
+                "Selected: {} ('{}' {})",
+                index,
+                item_text,
+                if is_checked { "Checked" } else { "Unchecked" }
+            ));
+        }
+    });
+    
+    let rearrangelist_status_label_clone = rearrangelist_status_label.clone();
+    let rearrangelist_clone = rearrangelist.clone();
+    rearrangelist.on_toggled(move |event_data| {
+        if let Some(index) = event_data.get_selection() {
+            let is_checked = rearrangelist_clone.is_checked(index);
+            let item_text = rearrangelist_clone.get_string(index).unwrap_or_else(|| "<unknown>".to_string());
+            rearrangelist_status_label_clone.set_label(&format!(
+                "Toggled: {} ('{}' is now {})",
+                index,
+                item_text,
+                if is_checked { "Checked" } else { "Unchecked" }
+            ));
+        }
+    });
+    
+    let rearrangelist_status_label_clone = rearrangelist_status_label.clone();
+    let rearrangelist_clone = rearrangelist.clone();
+    rearrangelist.on_rearranged(move |_| {
+        let order = rearrangelist_clone.get_current_order();
+        rearrangelist_status_label_clone.set_label(&format!(
+            "Rearranged: current order is {:?}",
+            order
+        ));
+    });
+    
+    // Button event handlers for RearrangeList
+    let rearrangelist_clone = rearrangelist.clone();
+    let rearrangelist_status_label_clone = rearrangelist_status_label.clone();
+    move_up_button.on_click(move |_| {
+        if rearrangelist_clone.move_current_up() {
+            rearrangelist_status_label_clone.set_label("Moved item up");
+        } else {
+            rearrangelist_status_label_clone.set_label("Could not move item up");
+        }
+    });
+    
+    let rearrangelist_clone = rearrangelist.clone();
+    let rearrangelist_status_label_clone = rearrangelist_status_label.clone();
+    move_down_button.on_click(move |_| {
+        if rearrangelist_clone.move_current_down() {
+            rearrangelist_status_label_clone.set_label("Moved item down");
+        } else {
+            rearrangelist_status_label_clone.set_label("Could not move item down");
+        }
+    });
+
     // Return the controls struct
     ListsTabControls {
         panel: scrolled_list_window,
@@ -635,5 +757,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         list_ctrl_status_label,
         editable_listbox,
         editable_listbox_status_label,
+        rearrangelist,
+        rearrangelist_status_label,
     }
 }

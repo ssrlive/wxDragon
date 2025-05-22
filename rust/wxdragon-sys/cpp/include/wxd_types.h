@@ -10,6 +10,7 @@
 #include <wx/datetime.h>  // For wxDateTime
 #include <wx/variant.h>   // For wxVariant
 #include <wx/bmpbndl.h>   // For wxBitmapBundle
+#include <wx/rearrangectrl.h> // For wxRearrangeList
 // For DataView related types
 #include <wx/dataview.h>  // For wxDataViewItem, wxDataViewModel, etc.
 #endif
@@ -234,6 +235,9 @@ typedef enum {
     WXD_EVENT_TYPE_AUI_PANE_ACTIVATED = 139, // wxEVT_AUI_PANE_ACTIVATED
     WXD_EVENT_TYPE_AUI_RENDER = 140, // wxEVT_AUI_RENDER
 
+    // ADDED: RearrangeList event
+    WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST = 141, // Event for RearrangeList when items are rearranged
+
     WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;
 
@@ -314,6 +318,8 @@ typedef struct wxd_FontPickerCtrl_t wxd_FontPickerCtrl_t;
 typedef struct wxd_NotificationMessage_t wxd_NotificationMessage_t;
 typedef struct wxd_FileCtrl_t wxd_FileCtrl_t;
 typedef struct wxd_MediaCtrl_t wxd_MediaCtrl_t;
+typedef struct wxd_RearrangeList_t wxd_RearrangeList_t;
+typedef struct wxd_EditableListBox_t wxd_EditableListBox_t;
 
 typedef struct wxd_AuiMDIParentFrame_t wxd_AuiMDIParentFrame_t;
 typedef struct wxd_AuiMDIChildFrame_t wxd_AuiMDIChildFrame_t;
@@ -369,8 +375,6 @@ typedef enum {
     WXD_DRAG_CANCEL = 4,    // wxDragCancel - Cancel the drag
     WXD_DRAG_ERROR = 5      // wxDragError - Error in drag operation
 } wxd_DragResult;
-
-typedef struct wxd_EditableListBox_s* wxd_EditableListBox_t;
 
 // Define a long integer type for positions, lengths, etc.
 typedef long long wxd_Long_t;

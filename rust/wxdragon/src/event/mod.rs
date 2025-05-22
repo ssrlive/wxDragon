@@ -33,9 +33,6 @@ pub use tree_events::{TreeEvent, TreeEventData, TreeEvents};
 // Re-export scroll events for easier access
 pub use scroll_events::{ScrollEvent, ScrollEventData, ScrollEvents};
 
-// Re-export FFI EventType alias and specific EVT_ constants
-// pub use ffi::{EventType as EventTypeInt, EVT_COMMAND_BUTTON_CLICKED, EVT_CHECKBOX, EVT_CLOSE_WINDOW, EVT_MENU, EVT_TEXT, EVT_TEXT_ENTER};
-
 // Re-export the stable C enum for use in the safe wrapper
 pub use ffi::WXDEventTypeCEnum;
 
@@ -84,6 +81,9 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED);
     pub const COMMAND_TOGGLEBUTTON_CLICKED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED);
+    // ADDED: RearrangeList event type
+    pub const COMMAND_REARRANGE_LIST: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST);
     // ADDED: TreeCtrl event types
     pub const TREE_BEGIN_LABEL_EDIT: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT);

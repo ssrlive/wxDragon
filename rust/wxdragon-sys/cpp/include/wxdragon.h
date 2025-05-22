@@ -117,6 +117,8 @@ extern "C" {
 // #include "widgets/wxd_dataviewcolumn.h"
 // #include "widgets/wxd_dataviewrenderer.h"
 
+#include "widgets/wxd_rearrangelist.h"
+
 #ifdef __cplusplus
 } // extern "C"
 

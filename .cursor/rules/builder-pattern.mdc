@@ -1,7 +1,7 @@
 ---
-description: 
+description: wxDragon implements the Builder pattern for widget creation to provide a clean, fluent API. There are standard macros to reduce boilerplate code.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Widget Pattern Macros in wxDragon
 

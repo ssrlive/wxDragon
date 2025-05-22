@@ -1,7 +1,7 @@
 ---
-description: 
+description: wxDragon provides several macros to help standardize widget implementations and reduce code duplication. 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # wxDragon Widget Implementation Macros
 

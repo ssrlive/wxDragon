@@ -1,7 +1,7 @@
 ---
-description: 
+description: When implementing C++ code in wxDragon, always use fixed-width integer types from `<cstdint>` instead of platform-dependent types like `long`.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # C++ Integer Types for Cross-Platform Compatibility
 
