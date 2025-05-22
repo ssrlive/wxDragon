@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.3.0
+
+### New Features
+- Added DataViewCtrl support with various components:
+  - DataViewTreeCtrl for hierarchical data display
+  - DataViewVirtualListModel for efficient large dataset handling
+  - Multiple renderer types (text, toggle, progress, bitmap, etc.)
+- Added image support for Button widget
+- Added ImageList support for Notebook and TreeCtrl
+- Added get_bitmap functionality to StaticBitmap widget
+- Added more functions to FileDialog
+
+### Enhancements
+- Comprehensive event system refactoring with three-tier approach:
+  - Window events common to all widgets
+  - Category-specific events for related controls
+  - Widget-specific event handlers
+- Added type-safe event data via strongly-typed wrappers
+- Added event handlers for checkboxes, choice controls, color pickers and more
+- Added more DataView-related functions
+
+### Refactoring
+- Refactored SizerFlag constants to use enums for better type safety
+- Removed all raw pointer constants (*.PTR) in favor of safer alternatives
+- Removed libc dependency from wxdragon
+- Updated C++ event infrastructure with proper ownership management
+
+### Bug Fixes
+- Fixed bitmap issue with DataViewVirtualListModel
+- Fixed potential memory leak in variant handling
+
 ## 0.2.0
 
 ### New Features
