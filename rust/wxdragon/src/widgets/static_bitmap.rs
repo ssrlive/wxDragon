@@ -36,15 +36,18 @@ impl StaticBitmap {
     /// Creates a new StaticBitmap with a bitmap.
     pub fn new_with_bitmap(parent: &dyn WxWidget, id: Id, bitmap: &Bitmap) -> Self {
         let name_cstr = CString::new("StaticBitmap").unwrap_or_default();
-        
+
         unsafe {
             let ptr = ffi::wxd_StaticBitmap_CreateWithBitmap(
                 parent.handle_ptr(),
                 id as c_int,
                 bitmap.as_ptr(),
                 ffi::wxd_Point { x: -1, y: -1 }, // DEFAULT_POSITION
-                ffi::wxd_Size { width: -1, height: -1 }, // DEFAULT_SIZE
-                0, // Default style
+                ffi::wxd_Size {
+                    width: -1,
+                    height: -1,
+                }, // DEFAULT_SIZE
+                0,                               // Default style
                 name_cstr.as_ptr(),
             );
 
@@ -91,7 +94,7 @@ impl StaticBitmap {
     }
 
     /// Sets or replaces the bitmap bundle shown in the control.
-    /// 
+    ///
     /// Using a bitmap bundle allows for better DPI scaling on high-resolution displays.
     pub fn set_bitmap_bundle(&self, bundle: &BitmapBundle) {
         unsafe {
@@ -164,7 +167,7 @@ widget_builder!(
                 return StaticBitmap::from_ptr(ptr);
             }
         }
-        
+
         panic!("Either bitmap or bitmap_bundle must be set for StaticBitmap");
     }
 );

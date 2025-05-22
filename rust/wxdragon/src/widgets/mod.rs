@@ -106,7 +106,9 @@ pub use notebook::{Notebook, NotebookBuilder};
 pub use panel::{Panel, PanelBuilder};
 pub use radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
 pub use radiobox::RadioBox;
-pub use rearrangelist::{RearrangeList, RearrangeListEvent, RearrangeListEventData, RearrangeListStyle};
+pub use rearrangelist::{
+    RearrangeList, RearrangeListEvent, RearrangeListEventData, RearrangeListStyle,
+};
 pub use scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 pub use scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};
 pub use search_ctrl::{SearchCtrl, SearchCtrlBuilder};

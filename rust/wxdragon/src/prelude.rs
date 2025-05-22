@@ -171,11 +171,11 @@ pub use crate::font::{Font, FontBuilder, FontFamily, FontStyle, FontWeight}; // 
 pub use crate::font_data::FontData;
 
 // --- Drag and Drop ---
+pub use crate::data_object::{BitmapDataObject, DataFormat};
 pub use crate::dnd::{
     DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
     TextDropTarget,
 };
-pub use crate::data_object::{BitmapDataObject, DataFormat};
 
 // --- Painting & DeviceContexts ---
 pub use crate::dc::{

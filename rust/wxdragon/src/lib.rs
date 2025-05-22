@@ -22,11 +22,11 @@ pub mod id;
 pub mod menus;
 pub mod prelude;
 pub mod sizers;
+pub mod timer;
 pub mod types;
 pub mod utils;
 pub mod widgets;
 pub mod window;
-pub mod timer;
 
 // Re-export common utilities
 pub use utils::WxdArrayString;
@@ -167,5 +167,3 @@ pub use dc::{
 
 // Re-export Timer functionality
 pub use timer::Timer;
-
-

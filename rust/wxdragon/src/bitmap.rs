@@ -23,14 +23,14 @@ impl Bitmap {
         if width == 0 || height == 0 {
             return None;
         }
-        
+
         // Create a transparent RGBA buffer
         let data_len = (width * height * 4) as usize;
         let mut data = Vec::with_capacity(data_len);
         for _ in 0..data_len {
             data.push(0); // All zeros for a fully transparent bitmap
         }
-        
+
         Self::from_rgba(&data, width, height)
     }
 

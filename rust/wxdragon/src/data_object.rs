@@ -56,7 +56,7 @@ impl DataObjectBase {
     pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_DataObject_t {
         self.ptr
     }
-    
+
     /// Flags the object as having transferred ownership to another component
     /// (like clipboard). After this call, the Drop implementation will not
     /// free the underlying C++ object.
@@ -199,7 +199,7 @@ impl FileDataObject {
     pub fn get_file_count(&self) -> usize {
         unsafe {
             ffi::wxd_FileDataObject_GetFileCount(
-                self.data_object.as_ptr() as *mut ffi::wxd_FileDataObject_t,
+                self.data_object.as_ptr() as *mut ffi::wxd_FileDataObject_t
             ) as usize
         }
     }
@@ -298,10 +298,12 @@ impl BitmapDataObject {
 
     /// Gets the bitmap from the data object.
     pub fn get_bitmap(&self) -> Option<crate::bitmap::Bitmap> {
-        let ptr = unsafe { ffi::wxd_BitmapDataObject_GetBitmap(
-            self.data_object.as_ptr() as *mut ffi::wxd_BitmapDataObject_t
-        ) };
-        
+        let ptr = unsafe {
+            ffi::wxd_BitmapDataObject_GetBitmap(
+                self.data_object.as_ptr() as *mut ffi::wxd_BitmapDataObject_t
+            )
+        };
+
         if ptr.is_null() {
             None
         } else {
@@ -346,4 +348,4 @@ impl TransferOwnership for BitmapDataObject {
     fn transfer_ownership(&mut self) {
         self.data_object.transfer_ownership();
     }
-} 
+}

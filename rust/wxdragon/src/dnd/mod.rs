@@ -11,7 +11,7 @@ mod droptarget;
 pub use dropsource::DropSource;
 pub use droptarget::{FileDropTarget, TextDropTarget};
 // Re-export data objects from the main module
-pub use crate::data_object::{DataObject, FileDataObject, TextDataObject, BitmapDataObject};
+pub use crate::data_object::{BitmapDataObject, DataObject, FileDataObject, TextDataObject};
 
 use std::fmt;
 
@@ -21,19 +21,19 @@ use std::fmt;
 pub enum DragResult {
     /// No effect (drag target didn't accept the data).
     None = 0,
-    
+
     /// The data was copied.
     Copy = 1,
-    
+
     /// The data was moved (ownership transferred).
     Move = 2,
-    
+
     /// Link to the data.
     Link = 3,
-    
+
     /// The drag operation was canceled by the user.
     Cancel = 4,
-    
+
     /// Error in the drag operation.
     Error = 5,
 }

@@ -6,8 +6,8 @@ use crate::prelude::*; // Use prelude
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget}; // Make sure WxEvtHandler is imported // Added
-                                                                             // Remove specific imports covered by prelude
-                                                                             // use crate::{Id, Point, Size};
+                                       // Remove specific imports covered by prelude
+                                       // use crate::{Id, Point, Size};
 use crate::event::WindowEvents;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;

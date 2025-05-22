@@ -127,7 +127,12 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
     // SVG Demo
     let svg_sizer = BoxSizer::builder(Orientation::Horizontal).build();
     let svg_info_text = StaticText::builder(&panel).with_label("SVG icon").build();
-    svg_sizer.add(&svg_info_text, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
+    svg_sizer.add(
+        &svg_info_text,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        5,
+    );
 
     let svg_icon_bytes = include_bytes!("../../asset/icon_baby.svg");
     let svg_icon_bundle = BitmapBundle::from_svg_data(svg_icon_bytes, Size::new(64, 64)).unwrap();
@@ -136,7 +141,12 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
         .with_size(Size::new(24, 24))
         .build();
 
-    svg_sizer.add(&static_bitmap_ctrl, 0, SizerFlag::AlignCenterVertical| SizerFlag::All, 5);
+    svg_sizer.add(
+        &static_bitmap_ctrl,
+        0,
+        SizerFlag::AlignCenterVertical | SizerFlag::All,
+        5,
+    );
 
     sizer.add_sizer(&svg_sizer, 0, SizerFlag::All, 10);
 

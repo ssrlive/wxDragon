@@ -203,7 +203,11 @@ impl ArtProvider {
     ///
     /// Returns `Option<BitmapBundle>` which can render the icon/bitmap at various DPI scales.
     /// Returns `None` if no matching art is found or an error occurs.
-    pub fn get_bitmap_bundle(id: ArtId, client: ArtClient, size: Option<Size>) -> Option<BitmapBundle> {
+    pub fn get_bitmap_bundle(
+        id: ArtId,
+        client: ArtClient,
+        size: Option<Size>,
+    ) -> Option<BitmapBundle> {
         let c_id = match CString::new(id.as_str()) {
             Ok(s) => s,
             Err(_) => return None,
@@ -300,9 +304,7 @@ impl ArtProvider {
 
         let window_ptr = window.map_or(std::ptr::null_mut(), |w| w.handle_ptr());
 
-        let size = unsafe { 
-            ffi::wxd_ArtProvider_GetNativeSizeHint(c_client.as_ptr(), window_ptr) 
-        };
+        let size = unsafe { ffi::wxd_ArtProvider_GetNativeSizeHint(c_client.as_ptr(), window_ptr) };
         Size::from(size)
     }
 

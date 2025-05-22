@@ -1,8 +1,8 @@
 //!
 //! Safe wrapper for wxBitmapBundle.
 
-use std::path::Path;
 use std::ffi::CString;
+use std::path::Path;
 use wxdragon_sys as ffi;
 
 use crate::bitmap::Bitmap;
@@ -82,17 +82,14 @@ impl BitmapBundle {
         if bitmaps.is_empty() {
             return Self::new();
         }
-        
+
         // Create an array of pointers to the bitmaps
-        let mut bitmap_ptrs: Vec<*mut ffi::wxd_Bitmap_t> = bitmaps
-            .iter()
-            .map(|bmp| bmp.as_ptr())
-            .collect();
-        
-        let ptr = unsafe { 
-            ffi::wxd_BitmapBundle_FromBitmaps(bitmap_ptrs.as_mut_ptr(), bitmaps.len())
-        };
-        
+        let mut bitmap_ptrs: Vec<*mut ffi::wxd_Bitmap_t> =
+            bitmaps.iter().map(|bmp| bmp.as_ptr()).collect();
+
+        let ptr =
+            unsafe { ffi::wxd_BitmapBundle_FromBitmaps(bitmap_ptrs.as_mut_ptr(), bitmaps.len()) };
+
         BitmapBundle {
             ptr,
             is_owned: true,
@@ -112,9 +109,9 @@ impl BitmapBundle {
             Some(Ok(s)) => s,
             _ => return None,
         };
-        
+
         let size: ffi::wxd_Size = default_size.into();
-        
+
         let ptr = unsafe { ffi::wxd_BitmapBundle_FromSVGFile(c_path.as_ptr(), size) };
         if ptr.is_null() {
             None
@@ -139,9 +136,9 @@ impl BitmapBundle {
             Ok(s) => s,
             Err(_) => return None,
         };
-        
+
         let size: ffi::wxd_Size = default_size.into();
-        
+
         let ptr = unsafe { ffi::wxd_BitmapBundle_FromSVGText(c_svg.as_ptr(), size) };
         if ptr.is_null() {
             None
@@ -165,17 +162,11 @@ impl BitmapBundle {
         if data.is_empty() {
             return None;
         }
-        
+
         let size: ffi::wxd_Size = default_size.into();
-        
-        let ptr = unsafe { 
-            ffi::wxd_BitmapBundle_FromSVGData(
-                data.as_ptr(),
-                data.len(),
-                size
-            ) 
-        };
-        
+
+        let ptr = unsafe { ffi::wxd_BitmapBundle_FromSVGData(data.as_ptr(), data.len(), size) };
+
         if ptr.is_null() {
             None
         } else {
@@ -199,9 +190,9 @@ impl BitmapBundle {
     /// None if the bundle is invalid or couldn't create a bitmap.
     pub fn get_bitmap(&self, size: Size) -> Option<Bitmap> {
         let wxd_size: ffi::wxd_Size = size.into();
-        
+
         let bitmap_ptr = unsafe { ffi::wxd_BitmapBundle_GetBitmap(self.ptr, wxd_size) };
-        
+
         if bitmap_ptr.is_null() {
             None
         } else {
@@ -222,10 +213,9 @@ impl BitmapBundle {
     /// # Returns
     /// None if the bundle is invalid, the window is invalid, or a bitmap couldn't be created.
     pub fn get_bitmap_for(&self, window: &dyn WxWidget) -> Option<Bitmap> {
-        let bitmap_ptr = unsafe { 
-            ffi::wxd_BitmapBundle_GetBitmapFor(self.ptr, window.handle_ptr())
-        };
-        
+        let bitmap_ptr =
+            unsafe { ffi::wxd_BitmapBundle_GetBitmapFor(self.ptr, window.handle_ptr()) };
+
         if bitmap_ptr.is_null() {
             None
         } else {
@@ -252,9 +242,7 @@ impl BitmapBundle {
     /// # Arguments
     /// * `scale` - The scale factor (1.0 = 100%, 2.0 = 200%, etc.)
     pub fn get_preferred_bitmap_size_at_scale(&self, scale: f64) -> Size {
-        let size = unsafe { 
-            ffi::wxd_BitmapBundle_GetPreferredBitmapSizeAtScale(self.ptr, scale)
-        };
+        let size = unsafe { ffi::wxd_BitmapBundle_GetPreferredBitmapSizeAtScale(self.ptr, scale) };
         Size::from(size)
     }
 
@@ -266,7 +254,7 @@ impl BitmapBundle {
     /// # Arguments
     /// * `window` - The window where the bitmap will be displayed.
     pub fn get_preferred_bitmap_size_for(&self, window: &dyn WxWidget) -> Size {
-        let size = unsafe { 
+        let size = unsafe {
             ffi::wxd_BitmapBundle_GetPreferredBitmapSizeFor(self.ptr, window.handle_ptr())
         };
         Size::from(size)
@@ -317,4 +305,4 @@ impl Default for BitmapBundle {
     fn default() -> Self {
         Self::new()
     }
-} 
+}

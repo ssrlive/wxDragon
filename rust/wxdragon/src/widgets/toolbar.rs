@@ -241,7 +241,13 @@ impl ToolBar {
     /// * `label` - Label shown if `TB_TEXT` style is used.
     /// * `bundle` - The bitmap bundle containing icons at various resolutions.
     /// * `short_help` - Short help string (tooltip).
-    pub fn add_tool_bundle(&self, tool_id: Id, label: &str, bundle: &BitmapBundle, short_help: &str) -> bool {
+    pub fn add_tool_bundle(
+        &self,
+        tool_id: Id,
+        label: &str,
+        bundle: &BitmapBundle,
+        short_help: &str,
+    ) -> bool {
         let c_label = CString::new(label).unwrap_or_default();
         let c_short_help = CString::new(short_help).unwrap_or_default();
 

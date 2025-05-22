@@ -1,7 +1,7 @@
 use crate::dialogs::Dialog;
 use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::window::WxWidget;
 use crate::utils::WxdArrayString;
+use crate::window::WxWidget;
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
@@ -101,11 +101,11 @@ impl MultiChoiceDialog {
     /// Returns an empty vector if no selections were made or the dialog was cancelled.
     pub fn get_string_selections(&self) -> Vec<String> {
         let selections = WxdArrayString::new();
-        
+
         unsafe {
             ffi::wxd_MultiChoiceDialog_GetStringSelections(self.as_ptr(), selections.as_ptr());
         }
-        
+
         selections.into_vec()
     }
 }
@@ -136,7 +136,12 @@ pub struct MultiChoiceDialogBuilder<'a> {
 }
 
 impl<'a> MultiChoiceDialogBuilder<'a> {
-    pub fn new(parent: &'a dyn WxWidget, message: &str, caption: &str, choices: &[&'a str]) -> Self {
+    pub fn new(
+        parent: &'a dyn WxWidget,
+        message: &str,
+        caption: &str,
+        choices: &[&'a str],
+    ) -> Self {
         MultiChoiceDialogBuilder {
             parent,
             message: message.to_string(),
@@ -193,4 +198,4 @@ impl<'a> MultiChoiceDialogBuilder<'a> {
         }
         unsafe { MultiChoiceDialog::from_ptr(ptr) }
     }
-} 
+}

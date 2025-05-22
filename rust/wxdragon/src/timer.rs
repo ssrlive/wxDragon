@@ -70,7 +70,7 @@ impl<T: WxEvtHandler> Timer<T> {
         if !self.owner_ptr.is_null() {
             // Create a WxEvtHandler wrapper from the bare pointer
             let handler = TimerOwnerWrapper(self.owner_ptr);
-            
+
             // Use bind_internal from the WxEvtHandler trait via the wrapper
             handler.bind_internal(EventType::TIMER, callback);
         }
@@ -144,4 +144,4 @@ impl WxEvtHandler for TimerOwnerWrapper {
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t {
         self.0
     }
-} 
+}

@@ -79,60 +79,52 @@ impl RearrangeList {
     }
 
     /// Gets the current order of items in the list.
-    /// 
+    ///
     /// The returned vector contains values that represent both the order and checked state of items:
     /// - Positive values (n) represent checked items at the original position n.
     /// - Negative values (~n) represent unchecked items at the original position n.
     pub fn get_current_order(&self) -> Vec<i32> {
         unsafe {
             let count = self.get_count() as usize;
-            
+
             // Create a buffer to receive the order array
             let mut buffer: Vec<i32> = vec![0; count];
-            
+
             // Call the C API to fill the buffer
             ffi::wxd_RearrangeList_GetCurrentOrder(
                 self.window.as_ptr() as *mut _,
                 buffer.as_mut_ptr(),
                 count as i32,
             );
-            
+
             buffer
         }
     }
 
     /// Move the currently selected item one position up.
-    /// 
+    ///
     /// Returns true if the item was moved, false if it couldn't be moved
     /// (e.g., if it's already at the top).
     pub fn move_current_up(&self) -> bool {
-        unsafe {
-            ffi::wxd_RearrangeList_MoveCurrentUp(self.window.as_ptr() as *mut _)
-        }
+        unsafe { ffi::wxd_RearrangeList_MoveCurrentUp(self.window.as_ptr() as *mut _) }
     }
 
     /// Move the currently selected item one position down.
-    /// 
+    ///
     /// Returns true if the item was moved, false if it couldn't be moved
     /// (e.g., if it's already at the bottom).
     pub fn move_current_down(&self) -> bool {
-        unsafe {
-            ffi::wxd_RearrangeList_MoveCurrentDown(self.window.as_ptr() as *mut _)
-        }
+        unsafe { ffi::wxd_RearrangeList_MoveCurrentDown(self.window.as_ptr() as *mut _) }
     }
 
     /// Check if the currently selected item can be moved up.
     pub fn can_move_current_up(&self) -> bool {
-        unsafe {
-            ffi::wxd_RearrangeList_CanMoveCurrentUp(self.window.as_ptr() as *mut _)
-        }
+        unsafe { ffi::wxd_RearrangeList_CanMoveCurrentUp(self.window.as_ptr() as *mut _) }
     }
 
     /// Check if the currently selected item can be moved down.
     pub fn can_move_current_down(&self) -> bool {
-        unsafe {
-            ffi::wxd_RearrangeList_CanMoveCurrentDown(self.window.as_ptr() as *mut _)
-        }
+        unsafe { ffi::wxd_RearrangeList_CanMoveCurrentDown(self.window.as_ptr() as *mut _) }
     }
 
     /// Gets the index of the currently selected item.
@@ -207,8 +199,7 @@ impl RearrangeList {
             // Cast the *mut wxd_Window_t to *mut wxd_RearrangeList_t for the FFI call
             let list_ptr = self.window.0 as *mut ffi::wxd_RearrangeList_t;
             ffi::wxd_RearrangeList_Check(
-                list_ptr,
-                index, // FFI function now takes u32 (unsigned int in C++)
+                list_ptr, index, // FFI function now takes u32 (unsigned int in C++)
                 check,
             );
             // No pointer update needed as the control is not recreated.
@@ -289,4 +280,4 @@ widget_builder!(
     }
 );
 
-implement_widget_traits_with_target!(RearrangeList, window, Window); 
+implement_widget_traits_with_target!(RearrangeList, window, Window);

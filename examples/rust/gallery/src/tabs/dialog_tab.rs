@@ -431,7 +431,7 @@ pub fn create_dialog_tab(notebook: &Notebook, _frame: &Frame) -> DialogTabContro
     let dlg_dir_button = Button::builder(&dialog_panel)
         .with_label("Choose Directory")
         .build();
-    
+
     // Add the directory dialog to the grid sizer
     grid_sizer.add(&dir_dialog_label, 0, label_flags, 0);
     let dir_dialog_sizer = BoxSizer::builder(Orientation::Horizontal).build();
@@ -742,20 +742,23 @@ impl DialogTabControls {
         let frame_clone_choice = frame.clone();
         let status_label_clone_choice = self.single_choice_dialog_status_label.clone();
         self.show_single_choice_dialog_btn.on_click(move |_event| {
-            let choices = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White"];
-            
+            let choices = [
+                "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White",
+            ];
+
             let dialog = SingleChoiceDialog::builder(
                 &frame_clone_choice,
                 "Please select a color:",
                 "Color Choice",
                 &choices,
-            ).build();
-            
+            )
+            .build();
+
             if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
                 if let Some(selection) = dialog.get_string_selection() {
                     status_label_clone_choice.set_label(&format!("Choice: {}", selection));
                     println!("SingleChoiceDialog: Selected '{}'", selection);
-                    
+
                     // Alternatively, get selection index
                     let index = dialog.get_selection();
                     println!("SingleChoiceDialog: Selected index {}", index);
@@ -773,26 +776,33 @@ impl DialogTabControls {
         let frame_clone_multi = frame.clone();
         let status_label_clone_multi = self.multi_choice_dialog_status_label.clone();
         self.show_multi_choice_dialog_btn.on_click(move |_event| {
-            let choices = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White"];
-            
+            let choices = [
+                "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Black", "White",
+            ];
+
             let dialog = MultiChoiceDialog::builder(
                 &frame_clone_multi,
                 "Please select one or more colors:",
                 "Multiple Color Choices",
                 &choices,
-            ).build();
-            
+            )
+            .build();
+
             // Set some initial selections if desired
             dialog.set_selections(&[0, 2]); // Select Red and Blue initially
-            
+
             if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
                 let selections = dialog.get_selections();
                 let string_selections = dialog.get_string_selections();
-                
+
                 if !selections.is_empty() {
-                    let indices_str = selections.iter().map(|i| i.to_string()).collect::<Vec<String>>().join(", ");
+                    let indices_str = selections
+                        .iter()
+                        .map(|i| i.to_string())
+                        .collect::<Vec<String>>()
+                        .join(", ");
                     let strings_str = string_selections.join(", ");
-                    
+
                     status_label_clone_multi.set_label(&format!("Choices: {}", strings_str));
                     println!("MultiChoiceDialog: Selected indices [{}]", indices_str);
                     println!("MultiChoiceDialog: Selected strings [{}]", strings_str);
@@ -809,14 +819,10 @@ impl DialogTabControls {
         // Dir Dialog Button
         let frame_clone_dir = frame.clone();
         self.dlg_dir_button.on_click(move |_| {
-            let dialog = DirDialog::builder(
-                &frame_clone_dir,
-                "Choose a directory",
-                ""
-            )
-            .with_style(DirDialogStyle::Default as i64 | DirDialogStyle::MustExist as i64)
-            .build();
-            
+            let dialog = DirDialog::builder(&frame_clone_dir, "Choose a directory", "")
+                .with_style(DirDialogStyle::Default as i64 | DirDialogStyle::MustExist as i64)
+                .build();
+
             if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
                 if let Some(path) = dialog.get_path() {
                     println!("Directory: {}", path);

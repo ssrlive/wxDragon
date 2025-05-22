@@ -1,7 +1,7 @@
 use crate::dialogs::Dialog;
 use crate::geometry::{Point, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-use crate::window::WxWidget;
 use crate::utils::WxdArrayString;
+use crate::window::WxWidget;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
@@ -134,7 +134,12 @@ pub struct SingleChoiceDialogBuilder<'a> {
 }
 
 impl<'a> SingleChoiceDialogBuilder<'a> {
-    pub fn new(parent: &'a dyn WxWidget, message: &str, caption: &str, choices: &[&'a str]) -> Self {
+    pub fn new(
+        parent: &'a dyn WxWidget,
+        message: &str,
+        caption: &str,
+        choices: &[&'a str],
+    ) -> Self {
         SingleChoiceDialogBuilder {
             parent,
             message: message.to_string(),
@@ -191,4 +196,4 @@ impl<'a> SingleChoiceDialogBuilder<'a> {
         }
         unsafe { SingleChoiceDialog::from_ptr(ptr) }
     }
-} 
+}

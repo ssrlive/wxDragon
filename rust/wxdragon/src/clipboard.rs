@@ -4,20 +4,20 @@ use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
 /// A struct representing the system clipboard.
-/// 
+///
 /// The clipboard can be used to copy data to or paste data from.
 /// It's typically accessed via the global `Clipboard::get()` method.
-/// 
+///
 /// # Example
 /// ```rust,no_run
 /// use wxdragon::prelude::*;
-/// 
+///
 /// // Set text to clipboard
 /// let clipboard = Clipboard::get();
 /// if clipboard.set_text("Hello, Clipboard!") {
 ///     println!("Text copied to clipboard");
 /// }
-/// 
+///
 /// // Get text from clipboard
 /// if let Some(text) = clipboard.get_text() {
 ///     println!("Clipboard text: {}", text);
@@ -60,46 +60,52 @@ impl Clipboard {
     }
 
     /// Add data to the clipboard
-    /// 
+    ///
     /// # Safety
     /// This method transfers ownership of the data object to the clipboard if successful.
     /// The data object should no longer be used after a successful call.
-    pub fn add_data<T: DataObject + crate::data_object::TransferOwnership>(&self, data: &mut T) -> bool {
+    pub fn add_data<T: DataObject + crate::data_object::TransferOwnership>(
+        &self,
+        data: &mut T,
+    ) -> bool {
         if self.ptr.is_null() {
             return false;
         }
-        
+
         let data_ptr = data.as_data_object_ptr();
         let success = unsafe { ffi::wxd_Clipboard_AddData(self.ptr, data_ptr) };
-        
+
         if success {
             // In wxWidgets, wxClipboard::AddData takes ownership of the data object
             // So we mark the Rust object as having transferred ownership
             data.transfer_ownership();
         }
-        
+
         success
     }
 
     /// Set data to the clipboard (clears the clipboard first, then adds data)
-    /// 
+    ///
     /// # Safety
     /// This method transfers ownership of the data object to the clipboard if successful.
     /// The data object should no longer be used after a successful call.
-    pub fn set_data<T: DataObject + crate::data_object::TransferOwnership>(&self, data: &mut T) -> bool {
+    pub fn set_data<T: DataObject + crate::data_object::TransferOwnership>(
+        &self,
+        data: &mut T,
+    ) -> bool {
         if self.ptr.is_null() {
             return false;
         }
-        
+
         let data_ptr = data.as_data_object_ptr();
         let success = unsafe { ffi::wxd_Clipboard_SetData(self.ptr, data_ptr) };
-        
+
         if success {
             // In wxWidgets, wxClipboard::SetData takes ownership of the data object
             // So we mark the Rust object as having transferred ownership
             data.transfer_ownership();
         }
-        
+
         success
     }
 
@@ -155,7 +161,7 @@ impl Clipboard {
         if self.ptr.is_null() {
             return false;
         }
-        
+
         // Create a CString, handling null bytes gracefully
         let c_text = match CString::new(text) {
             Ok(s) => s,
@@ -165,7 +171,7 @@ impl Clipboard {
                 CString::new(filtered).unwrap_or_else(|_| CString::new("").unwrap())
             }
         };
-        
+
         unsafe { ffi::wxd_Clipboard_SetText(self.ptr, c_text.as_ptr()) }
     }
 
@@ -208,12 +214,12 @@ impl<'a> ClipboardLocker<'a> {
             None
         }
     }
-    
+
     /// Returns true if the clipboard was successfully opened
     pub fn is_valid(&self) -> bool {
         self.clipboard.is_opened()
     }
-    
+
     /// Gets the reference to the wrapped clipboard
     pub fn clipboard(&self) -> &Clipboard {
         self.clipboard
@@ -228,4 +234,4 @@ impl<'a> Drop for ClipboardLocker<'a> {
 
 // No need for Drop implementation since we're not allocating resources
 // that need to be cleaned up when the Clipboard instance is dropped.
-// The clipboard itself is a global resource. 
+// The clipboard itself is a global resource.
