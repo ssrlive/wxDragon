@@ -5,20 +5,20 @@ pub mod aui_mdi_child_frame;
 pub mod aui_mdi_parent_frame;
 pub mod aui_notebook;
 pub mod aui_toolbar;
-pub mod bitmapbutton;
-pub mod bitmapcombobox;
+pub mod bitmap_button;
+pub mod bitmap_combobox;
 pub mod button;
 pub mod calendar_ctrl;
 pub mod checkbox;
 pub mod checklistbox;
 pub mod choice;
-pub mod colourpickerctrl;
+pub mod colour_picker_ctrl;
 pub mod combobox;
 pub mod command_link_button;
 pub mod dataview;
-pub mod datepickerctrl;
+pub mod date_picker_ctrl;
 pub mod dir_picker_ctrl;
-pub mod editablelistbox;
+pub mod editable_listbox;
 pub mod file_ctrl;
 pub mod file_picker_ctrl;
 pub mod font_picker_ctrl;
@@ -40,15 +40,15 @@ pub mod search_ctrl;
 pub mod slider;
 pub mod spinbutton;
 pub mod spinctrl;
-pub mod spinctrldouble;
-pub mod splitterwindow;
+pub mod spinctrl_double;
+pub mod splitter_window;
 pub mod static_bitmap;
 pub mod static_line;
 pub mod static_text;
 pub mod staticbox;
 pub mod statusbar;
 pub mod textctrl;
-pub mod timepickerctrl;
+pub mod time_picker_ctrl;
 pub mod togglebutton;
 pub mod toolbar;
 pub mod treebook;
@@ -57,11 +57,11 @@ pub mod treectrl;
 // Add ImageList module
 pub mod imagelist;
 
-pub use datepickerctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
+pub use date_picker_ctrl::{DatePickerCtrl, DatePickerCtrlBuilder};
 
 pub use dir_picker_ctrl::{DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle};
 
-pub use editablelistbox::{EditableListBox, EditableListBoxBuilder, EditableListBoxStyle};
+pub use editable_listbox::{EditableListBox, EditableListBoxBuilder, EditableListBoxStyle};
 
 pub use file_ctrl::{FileCtrl, FileCtrlBuilder, FileCtrlStyle};
 
@@ -69,7 +69,7 @@ pub use file_picker_ctrl::{FilePickerCtrl, FilePickerCtrlBuilder, FilePickerCtrl
 
 pub use notification_message::*;
 
-pub use timepickerctrl::{TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle};
+pub use time_picker_ctrl::{TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle};
 
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
@@ -79,14 +79,14 @@ pub use aui_mdi_child_frame::*;
 pub use aui_mdi_parent_frame::*;
 pub use aui_notebook::*;
 pub use aui_toolbar::{AuiToolBar, AuiToolBarBuilder, ItemKind};
-pub use bitmapbutton::{BitmapButton, BitmapButtonBuilder};
-pub use bitmapcombobox::{BitmapComboBox, BitmapComboBoxBuilder};
+pub use bitmap_button::{BitmapButton, BitmapButtonBuilder};
+pub use bitmap_combobox::{BitmapComboBox, BitmapComboBoxBuilder};
 pub use button::{Button, ButtonBuilder};
 pub use calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};
 pub use checkbox::{CheckBox, CheckBoxBuilder};
 pub use checklistbox::{CheckListBox, CheckListBoxBuilder};
 pub use choice::{Choice, ChoiceBuilder};
-pub use colourpickerctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
+pub use colour_picker_ctrl::{ColourPickerCtrl, ColourPickerCtrlBuilder};
 pub use combobox::{ComboBox, ComboBoxBuilder};
 pub use command_link_button::{CommandLinkButton, CommandLinkButtonBuilder};
 pub use dataview::{
@@ -111,8 +111,8 @@ pub use search_ctrl::{SearchCtrl, SearchCtrlBuilder};
 pub use slider::{Slider, SliderBuilder};
 pub use spinbutton::{SpinButton, SpinButtonBuilder};
 pub use spinctrl::{SpinCtrl, SpinCtrlBuilder};
-pub use spinctrldouble::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
-pub use splitterwindow::{SplitterWindow, SplitterWindowBuilder};
+pub use spinctrl_double::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
+pub use splitter_window::{SplitterWindow, SplitterWindowBuilder};
 pub use static_bitmap::{StaticBitmap, StaticBitmapBuilder};
 pub use static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use static_text::{StaticText, StaticTextBuilder, StaticTextStyle};

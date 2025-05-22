@@ -74,9 +74,9 @@ pub use widgets::spinbutton::{SpinButton, SpinButtonBuilder};
 // ADDED: Re-export Notebook
 pub use widgets::notebook::{Notebook, NotebookBuilder};
 // ADDED: Re-export SplitterWindow
-pub use widgets::splitterwindow::{SplitterWindow, SplitterWindowBuilder};
+pub use widgets::splitter_window::{SplitterWindow, SplitterWindowBuilder};
 // ADDED: Re-export BitmapButton
-pub use widgets::bitmapbutton::{BitmapButton, BitmapButtonBuilder};
+pub use widgets::bitmap_button::{BitmapButton, BitmapButtonBuilder};
 // ADDED: Re-export ScrolledWindow
 pub use widgets::scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};
 // ADDED: Re-export StatusBar
@@ -118,7 +118,7 @@ pub use widgets::hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};
 pub use widgets::activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
 
 // ADDED: Re-export SpinCtrlDouble
-pub use widgets::spinctrldouble::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
+pub use widgets::spinctrl_double::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
 
 // ADDED: Re-export CalendarCtrl
 pub use widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder};

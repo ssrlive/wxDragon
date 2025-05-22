@@ -5,7 +5,7 @@ use wxdragon::prelude::*;
 use wxdragon::widgets::checklistbox::CheckListBoxStyle;
 use wxdragon::widgets::choice::ChoiceStyle;
 use wxdragon::widgets::combobox::ComboBoxStyle;
-use wxdragon::widgets::editablelistbox::{EditableListBox, EditableListBoxStyle};
+use wxdragon::widgets::editable_listbox::{EditableListBox, EditableListBoxStyle};
 use wxdragon::widgets::imagelist::ImageList;
 use wxdragon::widgets::list_ctrl::{image_list_type, ListColumnFormat, ListCtrl, ListCtrlStyle};
 use wxdragon::widgets::listbox::ListBoxStyle;

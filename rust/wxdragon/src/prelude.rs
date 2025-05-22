@@ -31,14 +31,14 @@ pub use crate::widgets::aui_mdi_child_frame::{AuiMdiChildFrame, AuiMdiChildFrame
 pub use crate::widgets::aui_mdi_parent_frame::{AuiMdiParentFrame, AuiMdiParentFrameBuilder};
 pub use crate::widgets::aui_notebook::{AuiNotebook, AuiNotebookBuilder, AuiNotebookStyle}; // Added Style
 pub use crate::widgets::aui_toolbar::{AuiToolBar, AuiToolBarBuilder, AuiToolBarStyle}; // Added Style
-pub use crate::widgets::bitmapbutton::{BitmapButton, BitmapButtonBuilder, BitmapButtonStyle}; // Added Style
-pub use crate::widgets::bitmapcombobox::{BitmapComboBox, BitmapComboBoxBuilder}; // Style is ComboBoxStyle
+pub use crate::widgets::bitmap_button::{BitmapButton, BitmapButtonBuilder, BitmapButtonStyle}; // Added Style
+pub use crate::widgets::bitmap_combobox::{BitmapComboBox, BitmapComboBoxBuilder}; // Style is ComboBoxStyle
 pub use crate::widgets::button::{Button, ButtonBuilder, ButtonStyle};
 pub use crate::widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder, CalendarCtrlStyle};
 pub use crate::widgets::checkbox::{CheckBox, CheckBoxBuilder, CheckBoxStyle};
 pub use crate::widgets::checklistbox::{CheckListBox, CheckListBoxBuilder, CheckListBoxStyle}; // Added Style
 pub use crate::widgets::choice::{Choice, ChoiceBuilder, ChoiceStyle};
-pub use crate::widgets::colourpickerctrl::{
+pub use crate::widgets::colour_picker_ctrl::{
     ColourPickerCtrl, ColourPickerCtrlBuilder, ColourPickerCtrlStyle,
 };
 pub use crate::widgets::combobox::{ComboBox, ComboBoxBuilder, ComboBoxStyle};
@@ -63,13 +63,13 @@ pub use crate::widgets::dataview::{
     DataViewTreeCtrlBuilder,
     Variant,
 };
-pub use crate::widgets::datepickerctrl::{
+pub use crate::widgets::date_picker_ctrl::{
     DatePickerCtrl, DatePickerCtrlBuilder, DatePickerCtrlStyle,
 };
 pub use crate::widgets::dir_picker_ctrl::{
     DirPickerCtrl, DirPickerCtrlBuilder, DirPickerCtrlStyle,
 };
-pub use crate::widgets::editablelistbox::{
+pub use crate::widgets::editable_listbox::{
     EditableListBox, EditableListBoxBuilder, EditableListBoxStyle,
 };
 pub use crate::widgets::file_ctrl::{FileCtrl, FileCtrlBuilder, FileCtrlStyle};
@@ -119,10 +119,10 @@ pub use crate::widgets::search_ctrl::{SearchCtrl, SearchCtrlBuilder, SearchCtrlS
 pub use crate::widgets::slider::{Slider, SliderBuilder, SliderStyle};
 pub use crate::widgets::spinbutton::{SpinButton, SpinButtonBuilder, SpinButtonStyle};
 pub use crate::widgets::spinctrl::{SpinCtrl, SpinCtrlBuilder, SpinCtrlStyle};
-pub use crate::widgets::spinctrldouble::{
+pub use crate::widgets::spinctrl_double::{
     SpinCtrlDouble, SpinCtrlDoubleBuilder, SpinCtrlDoubleStyle,
 };
-pub use crate::widgets::splitterwindow::{
+pub use crate::widgets::splitter_window::{
     SplitterWindow,
     SplitterWindowBuilder,
     SplitterWindowStyle,
@@ -134,7 +134,7 @@ pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextS
 pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder, StaticBoxStyle}; // Added Style
 pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
 pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
-pub use crate::widgets::timepickerctrl::{
+pub use crate::widgets::time_picker_ctrl::{
     TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle,
 };
 pub use crate::widgets::togglebutton::{ToggleButton, ToggleButtonBuilder, ToggleButtonStyle};
