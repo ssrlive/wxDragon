@@ -2,53 +2,30 @@
 //! Safe wrapper for wxToolBar.
 
 use crate::bitmap::Bitmap;
+use crate::bitmap_bundle::BitmapBundle;
 use crate::event::{Event, EventType, WindowEvents, WxEvtHandler};
 use crate::id::Id;
 use crate::menus::ItemKind; // Reuse ItemKind for tool types
 use crate::window::{Window, WxWidget};
 use std::ffi::CString;
-use std::ops::{BitOr, BitOrAssign};
 use std::os::raw::c_int;
 use wxdragon_sys as ffi;
 
 // --- ToolBarStyle Enum ---
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(i64)]
-pub enum ToolBarStyle {
-    Default = ffi::WXD_TB_HORIZONTAL, // Default to Horizontal (e.g., value 4)
-    Vertical = ffi::WXD_TB_VERTICAL,
-    Text = ffi::WXD_TB_TEXT,           // Show text labels
-    NoIcons = ffi::WXD_TB_NOICONS,     // Show text only, no icons
-    NoDivider = ffi::WXD_TB_NODIVIDER, // No divider between groups
-    Flat = ffi::WXD_TB_FLAT,           // Flat toolbar look
-    Dockable = ffi::WXD_TB_DOCKABLE,   // Can be dragged and docked
-                                       // Add other styles like TB_RIGHT, TB_BOTTOM if FFI constants exist
-}
-
-impl ToolBarStyle {
-    pub fn bits(self) -> i64 {
-        self as i64
-    }
-}
-
-impl Default for ToolBarStyle {
-    fn default() -> Self {
-        ToolBarStyle::Default
-    }
-}
-
-impl BitOr for ToolBarStyle {
-    type Output = Self;
-    fn bitor(self, rhs: Self) -> Self::Output {
-        unsafe { std::mem::transmute(self.bits() | rhs.bits()) }
-    }
-}
-
-impl BitOrAssign for ToolBarStyle {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = unsafe { std::mem::transmute(self.bits() | rhs.bits()) };
-    }
-}
+widget_style_enum!(
+    name: ToolBarStyle,
+    doc: "Style flags for ToolBar widgets.",
+    variants: {
+        Default: ffi::WXD_TB_HORIZONTAL, "Default style, horizontal toolbar.",
+        Vertical: ffi::WXD_TB_VERTICAL, "Vertical toolbar.",
+        Text: ffi::WXD_TB_TEXT, "Show text labels for tools.",
+        NoIcons: ffi::WXD_TB_NOICONS, "Show text only, no icons.",
+        NoDivider: ffi::WXD_TB_NODIVIDER, "No divider between tool groups.",
+        Flat: ffi::WXD_TB_FLAT, "Flat toolbar look.",
+        Dockable: ffi::WXD_TB_DOCKABLE, "Toolbar can be dragged and docked."
+    },
+    default_variant: Default
+);
 
 /// Events for ToolBar
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -253,6 +230,68 @@ impl ToolBar {
                 tool_id,
                 c_help.as_ptr(),
             );
+        }
+    }
+
+    /// Adds a normal tool to the toolbar using a BitmapBundle instead of a Bitmap.
+    /// This is preferred for high-DPI support.
+    ///
+    /// # Arguments
+    /// * `tool_id` - ID for the tool, used in event handling.
+    /// * `label` - Label shown if `TB_TEXT` style is used.
+    /// * `bundle` - The bitmap bundle containing icons at various resolutions.
+    /// * `short_help` - Short help string (tooltip).
+    pub fn add_tool_bundle(&self, tool_id: Id, label: &str, bundle: &BitmapBundle, short_help: &str) -> bool {
+        let c_label = CString::new(label).unwrap_or_default();
+        let c_short_help = CString::new(short_help).unwrap_or_default();
+
+        unsafe {
+            ffi::wxd_ToolBar_AddToolWithBundles(
+                self.window.as_ptr() as *mut _,
+                tool_id,
+                c_label.as_ptr(),
+                bundle.as_ptr(),
+                std::ptr::null_mut(), // No disabled bitmap bundle
+                c_short_help.as_ptr(),
+                std::ptr::null(), // No long help
+            )
+        }
+    }
+
+    /// Adds a normal tool to the toolbar with more options, using BitmapBundle.
+    ///
+    /// # Arguments
+    /// * `tool_id` - ID for the tool, used in event handling.
+    /// * `label` - Label shown if `TB_TEXT` style is used.
+    /// * `bundle` - The bitmap bundle for the tool's normal state.
+    /// * `bundle_disabled` - Optional bitmap bundle for the tool's disabled state.
+    /// * `kind` - Type of tool (normal, check, radio).
+    /// * `short_help` - Short help string (tooltip).
+    /// * `long_help` - Long help string (status bar).
+    pub fn add_tool_bundle_raw(
+        &self,
+        tool_id: Id,
+        label: &str,
+        bundle: &BitmapBundle,
+        bundle_disabled: Option<&BitmapBundle>,
+        short_help: &str,
+        long_help: &str,
+    ) -> bool {
+        let c_label = CString::new(label).unwrap_or_default();
+        let c_short_help = CString::new(short_help).unwrap_or_default();
+        let c_long_help = CString::new(long_help).unwrap_or_default();
+        let bundle_disabled_ptr = bundle_disabled.map_or(std::ptr::null_mut(), |b| b.as_ptr());
+
+        unsafe {
+            ffi::wxd_ToolBar_AddToolWithBundles(
+                self.window.as_ptr() as *mut _,
+                tool_id,
+                c_label.as_ptr(),
+                bundle.as_ptr(),
+                bundle_disabled_ptr,
+                c_short_help.as_ptr(),
+                c_long_help.as_ptr(),
+            )
         }
     }
 }

@@ -40,6 +40,20 @@ impl BitmapBundle {
         }
     }
 
+    /// Creates a BitmapBundle from an existing pointer, taking ownership of it.
+    ///
+    /// This is primarily for internal use when receiving a bundle from wxWidgets.
+    ///
+    /// # Safety
+    /// The pointer must be a valid wxBitmapBundle pointer that can be owned
+    /// and eventually destroyed by Rust.
+    pub fn from_ptr_owned(ptr: *mut ffi::wxd_BitmapBundle_t) -> Self {
+        BitmapBundle {
+            ptr,
+            is_owned: true,
+        }
+    }
+
     /// Creates a bitmap bundle from a single bitmap.
     ///
     /// This is primarily for backward compatibility with APIs that used to take a wxBitmap.

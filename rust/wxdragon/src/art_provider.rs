@@ -2,7 +2,9 @@
 //! Provides access to wxArtProvider for stock art (icons, bitmaps).
 
 use crate::bitmap::Bitmap;
+use crate::bitmap_bundle::BitmapBundle;
 use crate::geometry::Size;
+use crate::window::WxWidget;
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
@@ -188,6 +190,129 @@ impl ArtProvider {
             // The bitmap is created by wxWidgets and ownership is transferred to Rust
             Some(Bitmap::from_ptr_owned(bitmap_ptr))
         }
+    }
+
+    /// Retrieves a stock bitmap bundle with multiple resolutions.
+    ///
+    /// This is preferred over get_bitmap for better high-DPI support.
+    ///
+    /// # Arguments
+    /// * `id` - The art ID (e.g., `ART_FILE_OPEN`, `ART_ERROR`).
+    /// * `client` - The art client ID (e.g., `ART_BUTTON`, `ART_MENU`).
+    /// * `size` - Optional desired size. If `None`, default size is requested (`-1, -1`).
+    ///
+    /// Returns `Option<BitmapBundle>` which can render the icon/bitmap at various DPI scales.
+    /// Returns `None` if no matching art is found or an error occurs.
+    pub fn get_bitmap_bundle(id: ArtId, client: ArtClient, size: Option<Size>) -> Option<BitmapBundle> {
+        let c_id = match CString::new(id.as_str()) {
+            Ok(s) => s,
+            Err(_) => return None,
+        };
+        let c_client = match CString::new(client.as_str()) {
+            Ok(s) => s,
+            Err(_) => return None,
+        };
+
+        let ffi_size = size.map_or_else(
+            || ffi::wxd_Size {
+                width: -1,
+                height: -1,
+            },
+            |s| s.into(),
+        );
+
+        let bundle_ptr = unsafe {
+            ffi::wxd_ArtProvider_GetBitmapBundle(c_id.as_ptr(), c_client.as_ptr(), ffi_size)
+        };
+
+        if bundle_ptr.is_null() {
+            None
+        } else {
+            Some(BitmapBundle::from_ptr_owned(bundle_ptr))
+        }
+    }
+
+    /// Returns a suitable size hint for the given client in device-independent pixels (DIPs).
+    ///
+    /// # Arguments
+    /// * `client` - The art client to get the size hint for.
+    ///
+    /// Returns the size in DIPs that the topmost art provider recommends for the given client.
+    pub fn get_dip_size_hint(client: ArtClient) -> Size {
+        let c_client = match CString::new(client.as_str()) {
+            Ok(s) => s,
+            Err(_) => return Size::new(0, 0),
+        };
+
+        let size = unsafe { ffi::wxd_ArtProvider_GetDIPSizeHint(c_client.as_ptr()) };
+        Size::from(size)
+    }
+
+    /// Returns a suitable size hint for the given client.
+    ///
+    /// # Arguments
+    /// * `client` - The art client to get the size hint for.
+    /// * `window` - Optional window to scale the size for. If `None`, uses the default display scale.
+    ///
+    /// Returns the size (scaled for the display or window) that the art provider recommends.
+    pub fn get_size_hint(client: ArtClient, window: Option<&dyn WxWidget>) -> Size {
+        let c_client = match CString::new(client.as_str()) {
+            Ok(s) => s,
+            Err(_) => return Size::new(0, 0),
+        };
+
+        let window_ptr = window.map_or(std::ptr::null_mut(), |w| w.handle_ptr());
+
+        let size = unsafe { ffi::wxd_ArtProvider_GetSizeHint(c_client.as_ptr(), window_ptr) };
+        Size::from(size)
+    }
+
+    /// Returns the native icon size for the specified client in DIPs.
+    ///
+    /// # Arguments
+    /// * `client` - The art client to get the native size for.
+    ///
+    /// Returns the platform's native size for the specified client in DIPs, or a default size
+    /// if there is no commonly used default or the client is not recognized.
+    pub fn get_native_dip_size_hint(client: ArtClient) -> Size {
+        let c_client = match CString::new(client.as_str()) {
+            Ok(s) => s,
+            Err(_) => return Size::new(0, 0),
+        };
+
+        let size = unsafe { ffi::wxd_ArtProvider_GetNativeDIPSizeHint(c_client.as_ptr()) };
+        Size::from(size)
+    }
+
+    /// Returns the native icon size for the specified client, scaled for a window.
+    ///
+    /// # Arguments
+    /// * `client` - The art client to get the native size for.
+    /// * `window` - Optional window to scale the size for. If `None`, uses the default display scale.
+    ///
+    /// Returns the platform's native size for the specified client, scaled appropriately for
+    /// the display or window.
+    pub fn get_native_size_hint(client: ArtClient, window: Option<&dyn WxWidget>) -> Size {
+        let c_client = match CString::new(client.as_str()) {
+            Ok(s) => s,
+            Err(_) => return Size::new(0, 0),
+        };
+
+        let window_ptr = window.map_or(std::ptr::null_mut(), |w| w.handle_ptr());
+
+        let size = unsafe { 
+            ffi::wxd_ArtProvider_GetNativeSizeHint(c_client.as_ptr(), window_ptr) 
+        };
+        Size::from(size)
+    }
+
+    /// Returns true if the platform uses native icons provider that should take
+    /// precedence over any customizations.
+    ///
+    /// This is true for any platform that has user-customizable icon themes,
+    /// such as GTK.
+    pub fn has_native_provider() -> bool {
+        unsafe { ffi::wxd_ArtProvider_HasNativeProvider() }
     }
 }
 
