@@ -288,22 +288,3 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
 *   **Documentation:**
     *   [ ] Improve C API docs (doxygen?).
     *   [ ] Rust API docs (rustdoc).
-
-# Guideline for wxDragon Development:
-
-When implementing any new feature (widget, sizer, event, etc.), prioritize safety and consistency across all layers, ensuring a clean separation of concerns and performing incremental build checks:
-
-## Constant Handling:
-. **Event Types:**
-    . If a new event binding is needed, add a new variant to the `WXDEventTypeCEnum` in `rust/wxdragon-sys/cpp/include/wxdragon.h` (assigning a **stable** integer value).
-    . Update the `switch` statement in `rust/wxdragon-sys/cpp/src/event.cpp`'s `wxd_EvtHandler_Bind` function to map it to the corresponding `wxEVT_XXX` constant.
-    . Add a corresponding constant to the Rust `EventType` enum in `rust/wxdragon/src/event.rs`.
-. **Other Constants (Styles, IDs, Flags) - For Maintainers:**
-    . Identify needed `wxXXX` constants (e.g., `wxTAB_TRAVERSAL`, `wxLB_SORT`, `wxID_OK`).
-    . Add their C++ names (e.g., "wxTAB_TRAVERSAL", "wxLB_SORT") to the `constants_to_extract` vector in `rust/wxdragon-sys/cpp/tools/const_extractor/main.cpp`.
-    . **Generation Process (Maintainer Task):**
-        1. For each target platform (e.g., Windows, Linux, macOS), build wxWidgets and the `const_extractor` tool for that platform.
-        2. Run the compiled `const_extractor` against that platform's wxWidgets build.
-        3. Save the output into the corresponding platform-specific file in `rust/wxdragon-sys/src/generated_constants/` (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`). These files should generate `pub const WXD_XXX` constants.
-        4. Commit these updated pre-generated files to the repository.
-    . **Usage in Safe Wrapper:** Use the `WXD_XXX` constants (which will be available via `wxdragon_sys::WXD_XXX` after `
