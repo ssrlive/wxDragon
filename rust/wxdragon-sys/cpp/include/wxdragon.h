@@ -85,6 +85,9 @@ extern "C" {
 #include "widgets/wxd_artprovider.h"
 #include "widgets/wxd_calendar_ctrl.h"
 
+// Graphics
+#include "graphics/wxd_bitmapbundle.h"
+
 // Other widgets
 #include "widgets/wxd_pickers.h"
 #include "widgets/wxd_file_ctrl.h"

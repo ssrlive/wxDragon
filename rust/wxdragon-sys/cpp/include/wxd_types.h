@@ -9,6 +9,7 @@
 #include <wx/colour.h>    // For wxColour
 #include <wx/datetime.h>  // For wxDateTime
 #include <wx/variant.h>   // For wxVariant
+#include <wx/bmpbndl.h>   // For wxBitmapBundle
 // For DataView related types
 #include <wx/dataview.h>  // For wxDataViewItem, wxDataViewModel, etc.
 #endif
@@ -430,5 +431,7 @@ typedef struct wxd_Window_t wxd_Window_t;
 typedef struct wxd_EvtHandler_t wxd_EvtHandler_t;
 typedef struct wxd_Control_t wxd_Control_t;
 // ... existing code ...
+
+typedef struct wxd_BitmapBundle_t wxd_BitmapBundle_t;
 
 #endif // WXD_TYPES_H 

@@ -8,4 +8,8 @@ WXD_EXPORTED wxd_StaticBitmap_t* wxd_StaticBitmap_CreateWithBitmap(wxd_Window_t*
 WXD_EXPORTED void wxd_StaticBitmap_SetBitmap(wxd_StaticBitmap_t* self, wxd_Bitmap_t* bitmap);
 WXD_EXPORTED wxd_Bitmap_t* wxd_StaticBitmap_GetBitmap(wxd_StaticBitmap_t* self);
 
+// BitmapBundle support
+WXD_EXPORTED wxd_StaticBitmap_t* wxd_StaticBitmap_CreateWithBitmapBundle(wxd_Window_t* parent, wxd_Id id, wxd_BitmapBundle_t* bundle);
+WXD_EXPORTED void wxd_StaticBitmap_SetBitmapBundle(wxd_StaticBitmap_t* staticBitmap, wxd_BitmapBundle_t* bundle);
+
 #endif // WXD_STATICBITMAP_H 

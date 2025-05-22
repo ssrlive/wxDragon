@@ -117,4 +117,45 @@ WXD_EXPORTED void wxd_ToolBar_SetToolShortHelp(wxd_ToolBar_t* self, wxd_Id toolI
     wxToolBar* tb = reinterpret_cast<wxToolBar*>(self);
     if (!tb) return;
     tb->SetToolShortHelp(toolId, wxString::FromUTF8(helpString ? helpString : ""));
+}
+
+// BitmapBundle support
+WXD_EXPORTED bool wxd_ToolBar_AddToolWithBundle(wxd_ToolBar_t* toolbar, wxd_Id id, const char* label, wxd_BitmapBundle_t* bitmap) {
+    if (!toolbar) return false;
+    
+    wxToolBar* tb = reinterpret_cast<wxToolBar*>(toolbar);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bitmap);
+    wxString wx_label = wxString::FromUTF8(label ? label : "");
+    
+    wxToolBarToolBase* tool = tb->AddTool(
+        id,
+        wx_label,
+        bundlePtr ? *bundlePtr : wxBitmapBundle()
+    );
+    
+    return tool != nullptr;
+}
+
+WXD_EXPORTED bool wxd_ToolBar_AddToolWithBundles(wxd_ToolBar_t* toolbar, wxd_Id id, const char* label, wxd_BitmapBundle_t* bitmap, wxd_BitmapBundle_t* bitmapDisabled, const char* shortHelp, const char* longHelp) {
+    if (!toolbar) return false;
+    
+    wxToolBar* tb = reinterpret_cast<wxToolBar*>(toolbar);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bitmap);
+    wxBitmapBundle* disabledBundlePtr = reinterpret_cast<wxBitmapBundle*>(bitmapDisabled);
+    
+    wxString wx_label = wxString::FromUTF8(label ? label : "");
+    wxString wx_shortHelp = wxString::FromUTF8(shortHelp ? shortHelp : "");
+    wxString wx_longHelp = wxString::FromUTF8(longHelp ? longHelp : "");
+    
+    wxToolBarToolBase* tool = tb->AddTool(
+        id,
+        wx_label,
+        bundlePtr ? *bundlePtr : wxBitmapBundle(),
+        disabledBundlePtr ? *disabledBundlePtr : wxBitmapBundle(),
+        wxITEM_NORMAL,
+        wx_shortHelp,
+        wx_longHelp
+    );
+    
+    return tool != nullptr;
 } 

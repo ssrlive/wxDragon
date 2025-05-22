@@ -1,4 +1,5 @@
 use crate::bitmap::Bitmap;
+use crate::bitmap_bundle::BitmapBundle;
 use crate::event::button_events::ButtonEvents; // Added ButtonEvents import
 use crate::implement_widget_traits_with_target;
 use crate::prelude::*; // Use prelude
@@ -194,6 +195,64 @@ impl Button {
         }
     }
 
+    // --- BitmapBundle Methods ---
+
+    /// Sets the bitmap bundle to be displayed by the button.
+    pub fn set_bitmap_bundle(&self, bundle: &BitmapBundle, dir: ButtonBitmapPosition) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapBundle(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bundle.as_ptr(),
+                dir as i32,
+            );
+        }
+    }
+
+    /// Sets the bitmap bundle for the label (main bitmap, default position Left).
+    pub fn set_bitmap_bundle_label(&self, bundle: &BitmapBundle) {
+        self.set_bitmap_bundle(bundle, ButtonBitmapPosition::Left);
+    }
+
+    /// Sets the bitmap bundle for the disabled state.
+    pub fn set_bitmap_bundle_disabled(&self, bundle: &BitmapBundle) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapBundleDisabled(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bundle.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap bundle for the focused state.
+    pub fn set_bitmap_bundle_focus(&self, bundle: &BitmapBundle) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapBundleFocus(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bundle.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap bundle for the hover state.
+    pub fn set_bitmap_bundle_hover(&self, bundle: &BitmapBundle) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapBundleHover(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bundle.as_ptr(),
+            );
+        }
+    }
+
+    /// Sets the bitmap bundle for the pressed state.
+    pub fn set_bitmap_bundle_pressed(&self, bundle: &BitmapBundle) {
+        unsafe {
+            ffi::wxd_Button_SetBitmapBundlePressed(
+                self.window.as_ptr() as *mut ffi::wxd_Button_t,
+                bundle.as_ptr(),
+            );
+        }
+    }
+
     // Getters return Option<Bitmap> and are unowned due to C++ FFI returning direct or null pointers.
     // The C++ FFI getters are currently placeholders returning nullptr.
     // When implemented, they might return unowned pointers, requiring Bitmap::from_ptr_unowned.
@@ -267,7 +326,13 @@ widget_builder!(
         bitmap_disabled: Option<Bitmap> = None,
         bitmap_focus: Option<Bitmap> = None,
         bitmap_current: Option<Bitmap> = None,
-        bitmap_pressed: Option<Bitmap> = None
+        bitmap_pressed: Option<Bitmap> = None,
+        // BitmapBundle fields
+        bitmap_bundle_label: Option<BitmapBundle> = None,
+        bitmap_bundle_disabled: Option<BitmapBundle> = None,
+        bitmap_bundle_focus: Option<BitmapBundle> = None,
+        bitmap_bundle_hover: Option<BitmapBundle> = None,
+        bitmap_bundle_pressed: Option<BitmapBundle> = None
     },
     build_impl: |slf| {
         let parent_ptr = slf.parent.handle_ptr();
@@ -280,24 +345,37 @@ widget_builder!(
             slf.style.bits(),
         );
 
-        if let Some(ref bmp) = slf.bitmap_label {
+        // Prioritize BitmapBundle over Bitmap if both are set
+        if let Some(ref bundle) = slf.bitmap_bundle_label {
+            button.set_bitmap_bundle(bundle, slf.bitmap_position.unwrap_or_default());
+        } else if let Some(ref bmp) = slf.bitmap_label {
             button.set_bitmap(bmp, slf.bitmap_position.unwrap_or_default());
         }
-        if let Some(ref bmp) = slf.bitmap_disabled {
+
+        if let Some(ref bundle) = slf.bitmap_bundle_disabled {
+            button.set_bitmap_bundle_disabled(bundle);
+        } else if let Some(ref bmp) = slf.bitmap_disabled {
             button.set_bitmap_disabled(bmp);
         }
-        if let Some(ref bmp) = slf.bitmap_focus {
+
+        if let Some(ref bundle) = slf.bitmap_bundle_focus {
+            button.set_bitmap_bundle_focus(bundle);
+        } else if let Some(ref bmp) = slf.bitmap_focus {
             button.set_bitmap_focus(bmp);
         }
-        if let Some(ref bmp) = slf.bitmap_current {
+
+        if let Some(ref bundle) = slf.bitmap_bundle_hover {
+            button.set_bitmap_bundle_hover(bundle);
+        } else if let Some(ref bmp) = slf.bitmap_current {
             button.set_bitmap_current(bmp);
         }
-        if let Some(ref bmp) = slf.bitmap_pressed {
+
+        if let Some(ref bundle) = slf.bitmap_bundle_pressed {
+            button.set_bitmap_bundle_pressed(bundle);
+        } else if let Some(ref bmp) = slf.bitmap_pressed {
             button.set_bitmap_pressed(bmp);
         }
-        // Note: Bitmaps are passed by reference. If the underlying setters stored them
-        // or if Bitmap was not Clone and ownership was needed, this would need adjustment.
-        // Currently, set_bitmap takes &Bitmap, and Bitmap is Clone.
+
         button
     }
 );

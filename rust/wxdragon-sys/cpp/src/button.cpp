@@ -132,3 +132,39 @@ wxd_Bitmap_t* wxd_Button_GetBitmapPressed(wxd_Button_t* self) {
 }
 
 } // extern "C"
+
+// BitmapBundle support implementations
+WXD_EXPORTED void wxd_Button_SetBitmapBundle(wxd_Button_t* button, wxd_BitmapBundle_t* bundle, wxd_Direction_t dir) {
+    if (!button) return;
+    wxButton* btn = reinterpret_cast<wxButton*>(button);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+    btn->SetBitmap(bundle ? *bundlePtr : wxBitmapBundle(), static_cast<wxDirection>(dir));
+}
+
+WXD_EXPORTED void wxd_Button_SetBitmapBundleDisabled(wxd_Button_t* button, wxd_BitmapBundle_t* bundle) {
+    if (!button) return;
+    wxButton* btn = reinterpret_cast<wxButton*>(button);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+    btn->SetBitmapDisabled(bundle ? *bundlePtr : wxBitmapBundle());
+}
+
+WXD_EXPORTED void wxd_Button_SetBitmapBundleFocus(wxd_Button_t* button, wxd_BitmapBundle_t* bundle) {
+    if (!button) return;
+    wxButton* btn = reinterpret_cast<wxButton*>(button);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+    btn->SetBitmapFocus(bundle ? *bundlePtr : wxBitmapBundle());
+}
+
+WXD_EXPORTED void wxd_Button_SetBitmapBundlePressed(wxd_Button_t* button, wxd_BitmapBundle_t* bundle) {
+    if (!button) return;
+    wxButton* btn = reinterpret_cast<wxButton*>(button);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+    btn->SetBitmapPressed(bundle ? *bundlePtr : wxBitmapBundle());
+}
+
+WXD_EXPORTED void wxd_Button_SetBitmapBundleHover(wxd_Button_t* button, wxd_BitmapBundle_t* bundle) {
+    if (!button) return;
+    wxButton* btn = reinterpret_cast<wxButton*>(button);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+    btn->SetBitmapCurrent(bundle ? *bundlePtr : wxBitmapBundle());
+}

@@ -30,4 +30,11 @@ WXD_EXPORTED wxd_Bitmap_t* wxd_Button_GetBitmapFocus(wxd_Button_t* self);
 WXD_EXPORTED wxd_Bitmap_t* wxd_Button_GetBitmapCurrent(wxd_Button_t* self);
 WXD_EXPORTED wxd_Bitmap_t* wxd_Button_GetBitmapPressed(wxd_Button_t* self);
 
+// BitmapBundle support
+WXD_EXPORTED void wxd_Button_SetBitmapBundle(wxd_Button_t* button, wxd_BitmapBundle_t* bundle, wxd_Direction_t dir);
+WXD_EXPORTED void wxd_Button_SetBitmapBundleDisabled(wxd_Button_t* button, wxd_BitmapBundle_t* bundle);
+WXD_EXPORTED void wxd_Button_SetBitmapBundleFocus(wxd_Button_t* button, wxd_BitmapBundle_t* bundle);
+WXD_EXPORTED void wxd_Button_SetBitmapBundlePressed(wxd_Button_t* button, wxd_BitmapBundle_t* bundle);
+WXD_EXPORTED void wxd_Button_SetBitmapBundleHover(wxd_Button_t* button, wxd_BitmapBundle_t* bundle);
+
 #endif // WXD_BUTTON_H 

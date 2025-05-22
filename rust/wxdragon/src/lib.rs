@@ -6,6 +6,7 @@ pub mod macros;
 pub mod app;
 pub mod art_provider;
 pub mod bitmap;
+pub mod bitmap_bundle;
 pub mod color;
 pub mod datetime;
 pub mod dc;
@@ -84,6 +85,8 @@ pub use widgets::statusbar::{StatusBar, StatusBarBuilder};
 pub use widgets::toolbar::ToolBar;
 // ADDED: Re-export Bitmap
 pub use bitmap::Bitmap;
+// ADDED: Re-export BitmapBundle
+pub use bitmap_bundle::BitmapBundle;
 // ADDED: Re-export ListCtrl
 pub use crate::widgets::list_ctrl::{
     ListCtrl, ListCtrlBuilder, ListCtrlStyle, ListItemState, ListNextItemFlag,

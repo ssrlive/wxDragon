@@ -2,8 +2,7 @@ use image::GenericImageView;
 use wxdragon::event::WindowEvents;
 use wxdragon::prelude::*;
 use wxdragon::Bitmap;
-
-const ANIMATION_BYTES: &[u8] = include_bytes!("../../../../../asset/dancing-ferris.gif"); // CORRECTED Path relative to this media_tab.rs file
+use wxdragon::BitmapBundle;
 
 pub struct MediaControls {
     pub panel: Panel,
@@ -24,8 +23,9 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
     let panel = Panel::builder(notebook).build();
     let sizer = BoxSizer::builder(Orientation::Vertical).build();
 
+    let animation_bytes = include_bytes!("../../asset/dancing-ferris.gif");
     // Determine animation size
-    let animation_size = match image::load_from_memory(ANIMATION_BYTES) {
+    let animation_size = match image::load_from_memory(animation_bytes) {
         Ok(anim_image) => {
             let (w, h) = anim_image.dimensions();
             println!("Loaded animation dimensions: {}x{}", w, h);
@@ -45,7 +45,7 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
         .with_size(animation_size) // Use determined or fallback size
         .build();
 
-    if animation_ctrl.load_from_bytes(ANIMATION_BYTES) {
+    if animation_ctrl.load_from_bytes(animation_bytes) {
         println!("Animation loaded from bytes successfully.");
         if animation_ctrl.play() {
             println!("Animation started successfully from bytes.");
@@ -123,6 +123,22 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
         }
     }
     sizer.add_sizer(&hbox_bitmap_example, 0, SizerFlag::All, 10);
+
+    // SVG Demo
+    let svg_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    let svg_info_text = StaticText::builder(&panel).with_label("SVG icon").build();
+    svg_sizer.add(&svg_info_text, 0, SizerFlag::AlignCenterVertical | SizerFlag::All, 5);
+
+    let svg_icon_bytes = include_bytes!("../../asset/icon_baby.svg");
+    let svg_icon_bundle = BitmapBundle::from_svg_data(svg_icon_bytes, Size::new(64, 64)).unwrap();
+    let static_bitmap_ctrl = StaticBitmap::builder(&panel)
+        .with_bitmap_bundle(Some(svg_icon_bundle))
+        .with_size(Size::new(24, 24))
+        .build();
+
+    svg_sizer.add(&static_bitmap_ctrl, 0, SizerFlag::AlignCenterVertical| SizerFlag::All, 5);
+
+    sizer.add_sizer(&svg_sizer, 0, SizerFlag::All, 10);
 
     // Finalize layout
     panel.set_sizer(sizer, true);
