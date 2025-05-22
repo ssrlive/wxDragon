@@ -9,6 +9,7 @@ members = [
     "examples/rust/mediaplayer",
     "examples/rust/dataview_demo",
     "examples/rust/events_test",
+    "examples/rust/clipboard_test",
     # Add other examples if they are separate crates
 ]
 

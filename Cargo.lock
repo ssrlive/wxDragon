@@ -168,6 +168,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "clipboard_test"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
 name = "cmake"
 version = "0.1.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"

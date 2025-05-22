@@ -7,7 +7,9 @@ pub mod app;
 pub mod art_provider;
 pub mod bitmap;
 pub mod bitmap_bundle;
+pub mod clipboard;
 pub mod color;
+pub mod data_object;
 pub mod datetime;
 pub mod dc;
 pub mod dialogs;
@@ -149,6 +151,12 @@ pub use dnd::{
     DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
     TextDropTarget,
 };
+
+// Re-export data object functionality
+pub use data_object::{BitmapDataObject, DataFormat};
+
+// Re-export clipboard functionality
+pub use clipboard::{Clipboard, ClipboardLocker};
 
 // Re-export Device Context functionality
 pub use dc::{

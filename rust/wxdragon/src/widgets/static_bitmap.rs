@@ -22,6 +22,7 @@ widget_style_enum!(
 );
 
 /// Represents a wxStaticBitmap widget, used to display a bitmap.
+#[derive(Clone)]
 pub struct StaticBitmap {
     window: Window,
 }

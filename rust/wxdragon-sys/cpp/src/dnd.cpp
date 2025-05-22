@@ -35,6 +35,8 @@ extern "C" WXDRAGON_API void wxd_TextDataObject_SetText(wxd_TextDataObject_t* ob
 }
 
 // FileDataObject
+// These functions are now defined in dataobject.cpp
+/*
 extern "C" WXDRAGON_API wxd_FileDataObject_t* wxd_FileDataObject_Create() {
     return reinterpret_cast<wxd_FileDataObject_t*>(new wxFileDataObject());
 }
@@ -67,6 +69,7 @@ extern "C" WXDRAGON_API void wxd_FileDataObject_AddFile(wxd_FileDataObject_t* ob
     wxString wx_filename = wxString::FromUTF8(filename);
     file_obj->AddFile(wx_filename);
 }
+*/
 
 // --- DropSource implementations --- 
 

@@ -118,6 +118,8 @@ extern "C" {
 // #include "widgets/wxd_dataviewrenderer.h"
 
 #include "widgets/wxd_rearrangelist.h"
+#include "core/wxd_clipboard.h"
+#include "core/wxd_dataobject.h"
 
 #ifdef __cplusplus
 } // extern "C"

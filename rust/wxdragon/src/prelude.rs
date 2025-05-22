@@ -1,5 +1,6 @@
 // --- Core Types & Traits ---
 pub use crate::app::main;
+pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
 pub use crate::event::{Event, EventType, WxEvtHandler};
@@ -174,6 +175,7 @@ pub use crate::dnd::{
     DataObject, DragResult, DropSource, FileDataObject, FileDropTarget, TextDataObject,
     TextDropTarget,
 };
+pub use crate::data_object::{BitmapDataObject, DataFormat};
 
 // --- Painting & DeviceContexts ---
 pub use crate::dc::{

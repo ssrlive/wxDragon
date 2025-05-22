@@ -320,6 +320,7 @@ typedef struct wxd_FileCtrl_t wxd_FileCtrl_t;
 typedef struct wxd_MediaCtrl_t wxd_MediaCtrl_t;
 typedef struct wxd_RearrangeList_t wxd_RearrangeList_t;
 typedef struct wxd_EditableListBox_t wxd_EditableListBox_t;
+typedef struct wxd_Clipboard_t wxd_Clipboard_t;
 
 typedef struct wxd_AuiMDIParentFrame_t wxd_AuiMDIParentFrame_t;
 typedef struct wxd_AuiMDIChildFrame_t wxd_AuiMDIChildFrame_t;
@@ -336,6 +337,7 @@ typedef struct wxd_AuiToolBar_t wxd_AuiToolBar_t;
 typedef struct wxd_DataObject_t wxd_DataObject_t;
 typedef struct wxd_TextDataObject_t wxd_TextDataObject_t;
 typedef struct wxd_FileDataObject_t wxd_FileDataObject_t;
+typedef struct wxd_BitmapDataObject_t wxd_BitmapDataObject_t;
 typedef struct wxd_DropSource_t wxd_DropSource_t;
 typedef struct wxd_DropTarget_t wxd_DropTarget_t;
 typedef struct wxd_TextDropTarget_t wxd_TextDropTarget_t;

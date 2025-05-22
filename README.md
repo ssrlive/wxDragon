@@ -216,7 +216,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
         *   [ ] `wxOwnerDrawnComboBox`
         *   [ ] `wxPropertyGrid`
         *   [ ] `wxPropertyGridManager`
-        *   [ ] `wxRearrangeCtrl`
+        *   [x] `wxRearrangeCtrl`
         *   [ ] `wxSimpleHtmlListBox`
         *   [ ] `wxTreeListCtrl`
     *   **Picker Controls:**

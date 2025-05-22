@@ -3,13 +3,15 @@
 //! This module provides classes for implementing drag and drop operations
 //! in wxDragon applications, following the wxWidgets drag and drop pattern.
 
-pub mod dataobject;
-pub mod dropsource;
-pub mod droptarget;
+mod dropsource;
+mod droptarget;
+// Use the main data_object module instead of our own implementation
+// mod dataobject;
 
-pub use dataobject::{DataObject, FileDataObject, TextDataObject};
 pub use dropsource::DropSource;
 pub use droptarget::{FileDropTarget, TextDropTarget};
+// Re-export data objects from the main module
+pub use crate::data_object::{DataObject, FileDataObject, TextDataObject, BitmapDataObject};
 
 use std::fmt;
 
@@ -17,43 +19,48 @@ use std::fmt;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum DragResult {
-    /// No drag operation.
+    /// No effect (drag target didn't accept the data).
     None = 0,
-    /// Copy the data.
+    
+    /// The data was copied.
     Copy = 1,
-    /// Move the data.
+    
+    /// The data was moved (ownership transferred).
     Move = 2,
+    
     /// Link to the data.
     Link = 3,
-    /// Cancel the drag.
+    
+    /// The drag operation was canceled by the user.
     Cancel = 4,
-    /// Error in drag operation.
+    
+    /// Error in the drag operation.
     Error = 5,
 }
 
-impl Default for DragResult {
-    fn default() -> Self {
-        DragResult::None
-    }
-}
-
 impl From<i32> for DragResult {
-    fn from(result: i32) -> Self {
-        match result {
+    fn from(value: i32) -> Self {
+        match value {
             0 => DragResult::None,
             1 => DragResult::Copy,
             2 => DragResult::Move,
             3 => DragResult::Link,
             4 => DragResult::Cancel,
-            5 => DragResult::Error,
-            _ => DragResult::None,
+            _ => DragResult::Error,
         }
     }
 }
 
-impl From<DragResult> for i32 {
-    fn from(result: DragResult) -> Self {
-        result as i32
+impl Into<i32> for DragResult {
+    fn into(self) -> i32 {
+        match self {
+            DragResult::None => 0,
+            DragResult::Copy => 1,
+            DragResult::Move => 2,
+            DragResult::Link => 3,
+            DragResult::Cancel => 4,
+            DragResult::Error => 5,
+        }
     }
 }
 
