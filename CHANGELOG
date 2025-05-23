@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.4.0
+
+### New Features
+- Added XRC (XML Resource) support for loading UI definitions from XML files
+- Added Clipboard support with full text, file, and bitmap functionality
+- Added Timer widget for scheduled events and callbacks
+- Added BitmapBundle support for high-DPI displays and multiple image resolutions
+- Added RearrangeList widget for reorderable list controls
+- Added new dialog widgets:
+  - DirDialog for directory selection
+  - SingleChoiceDialog for single item selection
+  - MultiChoiceDialog for multiple item selection
+
+### Enhancements
+- Enhanced Button widget with BitmapBundle support for better image handling
+- Enhanced StaticBitmap widget with BitmapBundle support
+- Enhanced Toolbar widget with BitmapBundle support for high-DPI icons
+- Enhanced ArtProvider with additional functions and capabilities
+- Improved cross-compilation support from macOS to Windows
+
+### Refactoring
+- Unified file naming conventions across the codebase
+- Improved data object architecture for clipboard and drag-and-drop operations
+- Enhanced build system for better cross-platform compatibility
+
+### Examples
+- Added clipboard_test example demonstrating clipboard functionality
+- Added simple_xrc_test example showing XRC usage
+- Updated gallery example with new widgets and features
+
 ## 0.3.0
 
 ### New Features

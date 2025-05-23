@@ -1793,7 +1793,7 @@ checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 
 [[package]]
 name = "wxdragon"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bitflags 2.9.0",
  "lazy_static",
@@ -1804,7 +1804,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-macros"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "proc-macro2",
  "quick-xml",
@@ -1814,7 +1814,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-sys"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bindgen",
  "bzip2",
