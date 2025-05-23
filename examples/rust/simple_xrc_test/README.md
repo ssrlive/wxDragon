@@ -15,19 +15,19 @@ This example demonstrates wxDragon's `include_xrc!` macro family, which embeds X
 ### `include_xrc!`
 For Frame root objects:
 ```rust
-wxdragon::include_xrc!("file.xrc", StructName, root = root_name);
+wxdragon::include_xrc!("file.xrc", StructName);
 ```
 
 ### `include_xrc_dialog!`
 For Dialog root objects:
 ```rust
-wxdragon::include_xrc_dialog!("file.xrc", StructName, root = root_name);
+wxdragon::include_xrc_dialog!("file.xrc", StructName);
 ```
 
 ### `include_xrc_panel!`
 For Panel root objects:
 ```rust
-wxdragon::include_xrc_panel!("file.xrc", StructName, root = root_name);
+wxdragon::include_xrc_panel!("file.xrc", StructName);
 ```
 
 ## Generated API
@@ -43,24 +43,21 @@ Each macro generates a struct with:
 
 ```rust
 // Define the UI struct from embedded XRC
-wxdragon::include_xrc!("ui.xrc", MyUI, root = main_frame);
+wxdragon::include_xrc!("ui.xrc", MyUI);
 
 fn main() {
     wxdragon::main(|_| {
         // Create UI from embedded XRC
-        let ui = MyUI::new::<wxdragon::widgets::Frame>(None)
-            .expect("Failed to load UI");
+        let ui = MyUI::new();
         
         // Access the embedded XRC data
         println!("XRC size: {} bytes", MyUI::XRC_DATA.len());
         
-        // Find child controls
-        if let Some(button) = ui.main_frame.find_child_by_xrc_name::<wxdragon::widgets::Button>("my_button") {
-            // Use the button...
-        }
+        ui.button.on_click(|_| {
+            // add event logic
+        });
         
         ui.main_frame.show(true);
-        wxdragon::set_top_window(&ui.main_frame);
     });
 }
 ```
@@ -72,11 +69,5 @@ fn main() {
 3. **Type safety**: Generated structs provide compile-time type checking
 4. **Performance**: No file I/O at runtime
 5. **Versioning**: XRC content is locked to the specific build
-
-## Files in this Example
-
-- `test_frame.xrc` - Frame-based UI definition
-- `example_dialog.xrc` - Dialog-based UI definition
-- `src/main.rs` - Demonstration of both frame and dialog embedding
 
 Run with: `cargo run -p simple_xrc_test` 
