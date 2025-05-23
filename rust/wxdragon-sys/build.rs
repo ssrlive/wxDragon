@@ -9,6 +9,7 @@ fn main() {
     println!("cargo:rerun-if-changed=cpp/include/wxd_types.h");
     println!("cargo:rerun-if-changed=cpp/include/core/wxd_app.h");
     println!("cargo:rerun-if-changed=cpp/include/core/wxd_window_base.h");
+    println!("cargo:rerun-if-changed=cpp/include/core/wxd_xrc.h");
     println!("cargo:rerun-if-changed=cpp/include/dialogs/wxd_dialogs.h");
     println!("cargo:rerun-if-changed=cpp/include/events/wxd_event_api.h");
     println!("cargo:rerun-if-changed=cpp/include/sizers/wxd_sizers.h");
@@ -240,6 +241,7 @@ fn main() {
         // If macOS also has d suffix for debug, this section would need similar conditional logic
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_adv-3.2");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_aui-3.2");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_gl-3.2");
@@ -248,6 +250,7 @@ fn main() {
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_propgrid-3.2");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.2");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.2");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.2");
         println!("cargo:rustc-link-lib=static=wxjpeg-3.2");
         println!("cargo:rustc-link-lib=static=wxpng-3.2");
         println!("cargo:rustc-link-lib=static=wxtiff-3.2");
@@ -284,6 +287,8 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxmsw32ud_propgrid");
             println!("cargo:rustc-link-lib=static=wxmsw32ud_stc");
             println!("cargo:rustc-link-lib=static=wxmsw32ud_webview");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_xrc");
+            println!("cargo:rustc-link-lib=static=wxbase32ud_xml");
             println!("cargo:rustc-link-lib=static=wxbase32ud");
             println!("cargo:rustc-link-lib=static=wxpngd");
             println!("cargo:rustc-link-lib=static=wxtiffd");
@@ -291,6 +296,7 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxregexud");
             println!("cargo:rustc-link-lib=static=wxzlibd");
             println!("cargo:rustc-link-lib=static=wxscintillad");
+            println!("cargo:rustc-link-lib=static=wxexpatd");
         } else {
             println!("info: Using RELEASE linking flags for Windows (GNU) based on user-provided ll output.");
             // wxWidgets release libraries from user-provided ll output
@@ -303,6 +309,8 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxmsw32u_propgrid");
             println!("cargo:rustc-link-lib=static=wxmsw32u_stc");
             println!("cargo:rustc-link-lib=static=wxmsw32u_webview");
+            println!("cargo:rustc-link-lib=static=wxmsw32u_xrc");
+            println!("cargo:rustc-link-lib=static=wxbase32u_xml");
             println!("cargo:rustc-link-lib=static=wxbase32u");
             println!("cargo:rustc-link-lib=static=wxtiff");
             println!("cargo:rustc-link-lib=static=wxjpeg");
@@ -310,6 +318,7 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxregexu");
             println!("cargo:rustc-link-lib=static=wxzlib");
             println!("cargo:rustc-link-lib=static=wxscintilla");
+            println!("cargo:rustc-link-lib=static=wxexpat");
         }
 
         // System libraries (same for debug and release)

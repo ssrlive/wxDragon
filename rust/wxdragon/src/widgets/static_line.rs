@@ -68,3 +68,6 @@ widget_builder!(
 implement_widget_traits_with_target!(StaticLine, window, Window);
 
 impl WindowEvents for StaticLine {}
+
+// Add XRC Support - enables StaticLine to be created from XRC-managed pointers
+impl_xrc_support!(StaticLine, { window });

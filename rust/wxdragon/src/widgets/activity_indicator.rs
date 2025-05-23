@@ -99,3 +99,6 @@ widget_builder!(
 implement_widget_traits_with_target!(ActivityIndicator, window, Window);
 
 impl WindowEvents for ActivityIndicator {}
+
+// Add XRC Support - enables ActivityIndicator to be created from XRC-managed pointers
+impl_xrc_support!(ActivityIndicator, { window });

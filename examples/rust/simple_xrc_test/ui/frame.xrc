@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
+  <object class="wxFrame" name="main_frame">
+    <size>500,300</size>
+    <style>wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL</style>
+    <title>wxDragon XRC Demo</title>
+    <centered>1</centered>
+
+    <!-- MenuBar -->
+    <object class="wxMenuBar" name="main_menubar">
+      <object class="wxMenu" name="file_menu">
+        <label>&amp;File</label>
+        <object class="wxMenuItem" name="menu_new">
+          <label>&amp;New\tCtrl+N</label>
+          <help>Create a new file</help>
+        </object>
+        <object class="wxMenuItem" name="menu_open">
+          <label>&amp;Open\tCtrl+O</label>
+          <help>Open an existing file</help>
+        </object>
+        <object class="separator"/>
+        <object class="wxMenuItem" name="menu_exit">
+          <label>E&amp;xit\tCtrl+Q</label>
+          <help>Exit the application</help>
+        </object>
+      </object>
+      <object class="wxMenu" name="help_menu">
+        <label>&amp;Help</label>
+        <object class="wxMenuItem" name="menu_about">
+          <label>&amp;About\tF1</label>
+          <help>Show information about this application</help>
+        </object>
+      </object>
+    </object>
+
+    <!-- Toolbar -->
+    <object class="wxToolBar" name="main_toolbar">
+      <style>wxTB_HORIZONTAL|wxTB_TEXT</style>
+      <bitmapsize>16,16</bitmapsize>
+      <margins>2,2</margins>
+      <packing>0</packing>
+      <separation>0</separation>
+      <object class="tool" name="m_tool_up">
+        <label>Up</label>
+        <tooltip></tooltip>
+        <longhelp></longhelp>
+        <bitmap stock_id="wxART_GO_UP" stock_client="wxART_TOOLBAR">undefined.png</bitmap>
+      </object>
+      <object class="tool" name="m_tool_down">
+        <label>Down</label>
+        <tooltip></tooltip>
+        <longhelp></longhelp>
+        <bitmap stock_id="wxART_GO_DOWN" stock_client="wxART_TOOLBAR">undefined.png</bitmap>
+      </object>
+      <object class="tool" name="m_tool_help">
+        <label>help</label>
+        <tooltip></tooltip>
+        <longhelp></longhelp>
+        <bitmap stock_id="wxART_HELP" stock_client="wxART_TOOLBAR">undefined.png</bitmap>
+      </object>
+    </object>
+    
+    <!-- StatusBar -->
+    <object class="wxStatusBar" name="main_statusbar">
+      <fields>3</fields>
+      <widths>-1,150,100</widths>
+    </object>
+    
+    <object class="wxPanel" name="main_panel">
+      <style>wxTAB_TRAVERSAL</style>
+      <object class="wxBoxSizer" name="bSizer2">
+        <orient>wxVERTICAL</orient>
+        <object class="sizeritem">
+          <flag>wxALL</flag>
+          <border>5</border>
+          <option>0</option>
+          <object class="wxStaticText" name="title_label">
+            <label>wxDragon XRC Components Demo</label>
+            <wrap>-1</wrap>
+          </object>
+        </object>
+        <object class="sizeritem">
+          <flag>wxEXPAND | wxALL</flag>
+          <border>5</border>
+          <option>1</option>
+          <object class="wxPanel" name="content_panel">
+            <style>wxTAB_TRAVERSAL</style>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+</resource>

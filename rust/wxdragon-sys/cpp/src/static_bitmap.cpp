@@ -96,4 +96,41 @@ WXD_EXPORTED wxd_Bitmap_t* wxd_StaticBitmap_GetBitmap(wxd_StaticBitmap_t* self) 
     // Return a copy, as the internal one might be changed or deleted
     wxBitmap* newBmp = new wxBitmap(currentBmp);
     return reinterpret_cast<wxd_Bitmap_t*>(newBmp);
+}
+
+/**
+ * @brief Creates a static bitmap control displaying a wxBitmapBundle.
+ */
+WXD_EXPORTED wxd_StaticBitmap_t* wxd_StaticBitmap_CreateWithBitmapBundle(
+    wxd_Window_t* parent, 
+    wxd_Id id, 
+    wxd_BitmapBundle_t* bundle
+) {
+    wxWindow* parentWin = reinterpret_cast<wxWindow*>(parent);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+
+    if (!parentWin) {
+        wxLogError("wxd_StaticBitmap_CreateWithBitmapBundle: Parent window is null.");
+        return nullptr;
+    }
+
+    wxStaticBitmap* statBmp = new wxStaticBitmap(
+        parentWin,
+        id,
+        bundle ? *bundlePtr : wxBitmapBundle()
+    );
+
+    return reinterpret_cast<wxd_StaticBitmap_t*>(statBmp);
+}
+
+/**
+ * @brief Sets the bitmap bundle for the static bitmap control.
+ */
+WXD_EXPORTED void wxd_StaticBitmap_SetBitmapBundle(wxd_StaticBitmap_t* self, wxd_BitmapBundle_t* bundle) {
+    wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+    wxBitmapBundle* bundlePtr = reinterpret_cast<wxBitmapBundle*>(bundle);
+
+    if (!statBmp) return;
+
+    statBmp->SetBitmap(bundle ? *bundlePtr : wxBitmapBundle());
 } 

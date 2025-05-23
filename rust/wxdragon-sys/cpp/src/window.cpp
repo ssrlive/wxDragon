@@ -84,6 +84,13 @@ WXD_EXPORTED void wxd_Window_Fit(wxd_Window_t* window) {
     }
 }
 
+WXD_EXPORTED void wxd_Window_Layout(wxd_Window_t* window) {
+    wxWindow* win = (wxWindow*)window;
+    if (win) {
+        win->Layout();
+    }
+}
+
 WXD_EXPORTED wxd_Size wxd_Window_GetBestSize(wxd_Window_t* window) {
     wxWindow* win = (wxWindow*)window;
     wxd_Size result = { -1, -1 }; // Default invalid size

@@ -307,3 +307,6 @@ crate::implement_widget_local_event_handlers!(
 
 // Add WindowEvents implementation
 impl WindowEvents for Notebook {}
+
+// Add XRC Support - enables Notebook to be created from XRC-managed pointers
+impl_xrc_support!(Notebook, { window });

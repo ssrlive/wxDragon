@@ -220,17 +220,30 @@ impl Frame {
         }
     }
 
-    // Method to set the menu bar
-    pub fn set_menu_bar(&self, menubar: MenuBar) {
-        let menubar_ptr = unsafe { menubar.as_ptr() };
-        // Forget wrapper as Frame takes ownership
-        std::mem::forget(menubar);
+    /// Sets the menu bar for this frame.
+    /// The frame takes ownership of the menu bar.
+    pub fn set_menu_bar(&self, menu_bar: MenuBar) {
+        let menu_bar_ptr = unsafe { menu_bar.as_ptr() };
+        // Forget the menu bar wrapper as the frame takes ownership
+        std::mem::forget(menu_bar);
         unsafe {
-            ffi::wxd_Frame_SetMenuBar(self.window.as_ptr() as *mut ffi::wxd_Frame_t, menubar_ptr);
+            ffi::wxd_Frame_SetMenuBar(self.window.as_ptr() as *mut _, menu_bar_ptr);
         }
     }
 
-    // Method to close the frame
+    /// Gets the menu bar for this frame.
+    /// Returns None if no menu bar is set.
+    pub fn get_menu_bar(&self) -> Option<MenuBar> {
+        let menu_bar_ptr =
+            unsafe { ffi::wxd_Frame_GetMenuBar(self.window.as_ptr() as *mut ffi::wxd_Frame_t) };
+        if menu_bar_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { MenuBar::from_ptr(menu_bar_ptr) })
+        }
+    }
+
+    /// Closes the frame.
     pub fn close(&self) {
         unsafe {
             // false = don't force close, allow events like EVT_CLOSE_WINDOW
@@ -349,3 +362,10 @@ impl Frame {
 }
 
 implement_widget_traits_with_target!(Frame, window, Window);
+
+// XRC Support - enables Frame to be created from XRC-managed pointers
+impl_xrc_support!(Frame, {
+    window,
+    parent_ptr: std::ptr::null_mut(),
+    _marker: PhantomData
+});

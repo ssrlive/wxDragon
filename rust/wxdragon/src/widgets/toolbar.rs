@@ -69,6 +69,7 @@ impl ToolBarEventData {
 
 /// Represents a wxToolBar control.
 /// Toolbars generate `EventType::MENU` events on their parent window when a tool is clicked.
+#[derive(Clone)]
 pub struct ToolBar {
     window: Window, // Composition: ToolBar IS a Window (and Control)
 }
@@ -300,6 +301,25 @@ impl ToolBar {
             )
         }
     }
+
+    /// Gets a tool by its XRC name.
+    /// Returns a Tool wrapper that can be used for event binding and operations.
+    pub fn get_tool_by_name(&self, tool_name: &str) -> Option<crate::widgets::Tool> {
+        use crate::xrc::XmlResource;
+
+        // Get the XRC ID for this tool name
+        let tool_id = XmlResource::get_xrc_id(tool_name);
+
+        if tool_id != -1 {
+            Some(crate::widgets::Tool::new(
+                self.window,
+                tool_id,
+                tool_name.to_string(),
+            ))
+        } else {
+            None
+        }
+    }
 }
 
 // --- Trait Implementations ---
@@ -331,3 +351,7 @@ crate::implement_widget_local_event_handlers!(
 );
 
 impl WindowEvents for ToolBar {}
+
+// Add XRC support
+// XRC Support - enables ToolBar to be created from XRC-managed pointers
+impl_xrc_support!(ToolBar, { window });

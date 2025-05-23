@@ -271,3 +271,6 @@ crate::implement_widget_local_event_handlers!(
 );
 
 impl WindowEvents for ListBox {}
+
+// Add XRC Support - enables ListBox to be created from XRC-managed pointers
+impl_xrc_support!(ListBox, { window });

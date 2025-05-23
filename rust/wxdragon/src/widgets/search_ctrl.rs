@@ -184,3 +184,6 @@ crate::implement_widget_local_event_handlers!(
 // Implement standard WindowEvents and TextEvents traits
 impl WindowEvents for SearchCtrl {}
 impl TextEvents for SearchCtrl {}
+
+// Add XRC Support - enables SearchCtrl to be created from XRC-managed pointers
+impl_xrc_support!(SearchCtrl, { window });

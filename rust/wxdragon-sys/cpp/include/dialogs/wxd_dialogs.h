@@ -5,6 +5,7 @@
 
 // --- Dialog (Base) ---
 WXD_EXPORTED int wxd_Dialog_ShowModal(wxd_Dialog_t* self);
+WXD_EXPORTED void wxd_Dialog_EndModal(wxd_Dialog_t* self, int retCode);
 
 // --- MessageDialog ---
 WXD_EXPORTED wxd_MessageDialog_t* wxd_MessageDialog_Create(wxd_Window_t* parent, const char* message, const char* caption, wxd_Style_t style);

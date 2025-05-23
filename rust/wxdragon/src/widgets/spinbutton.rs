@@ -178,3 +178,6 @@ crate::implement_widget_local_event_handlers!(
 
 // Add WindowEvents implementation
 impl WindowEvents for SpinButton {}
+
+// Add XRC Support - enables SpinButton to be created from XRC-managed pointers
+impl_xrc_support!(SpinButton, { window });

@@ -1,4 +1,3 @@
-use super::DialogPtr; // Import DialogPtr from parent module
 use crate::dialogs::Dialog; // Use the Dialog from the parent module
 use crate::widget_style_enum;
 use crate::window::WxWidget; // Keep this
@@ -42,7 +41,7 @@ impl MessageDialog {
     /// The pointer must be a valid pointer to a wxMessageDialog.
     pub unsafe fn from_ptr(ptr: MessageDialogPtr) -> Self {
         MessageDialog {
-            dialog_base: Dialog::from_ptr(ptr as DialogPtr),
+            dialog_base: Dialog::from_ptr(ptr as *mut ffi::wxd_Dialog_t),
         }
     }
 

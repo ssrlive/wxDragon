@@ -216,54 +216,6 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(co
     return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
 }
 
-// Custom renderer implementation
-class WxDCustomRenderer : public wxDataViewCustomRenderer {
-private:
-    wxd_DataViewRenderer_RenderCallback m_callback;
-    void* m_user_data;
-    
-public:
-    WxDCustomRenderer(const wxString& varianttype,
-                     wxDataViewCellMode mode,
-                     int align,
-                     wxd_DataViewRenderer_RenderCallback callback,
-                     void* user_data) 
-        : wxDataViewCustomRenderer(varianttype, mode, align),
-          m_callback(callback),
-          m_user_data(user_data) {}
-          
-    virtual bool Render(wxRect cell, wxDC* dc, int state) override {
-        wxd_DC_t* dc_ptr = reinterpret_cast<wxd_DC_t*>(dc);
-        wxd_Rect rect = {cell.x, cell.y, cell.width, cell.height};
-        return m_callback(m_user_data, dc_ptr, &rect, state, 0); // Need to add item/column info
-    }
-    
-    virtual wxSize GetSize() const override {
-        // Default implementation
-        return wxSize(80, 20);
-    }
-};
-
-WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCustomRenderer_Create(
-    const char* varianttype, 
-    int64_t mode,
-    int64_t align,
-    wxd_DataViewRenderer_RenderCallback render_callback,
-    void* user_data) {
-    
-    if (!render_callback) return nullptr;
-    
-    wxString wxVarType = wxString::FromUTF8(varianttype ? varianttype : "string");
-    WxDCustomRenderer* renderer = new WxDCustomRenderer(
-        wxVarType, 
-        static_cast<wxDataViewCellMode>(mode),
-        static_cast<int>(align),
-        render_callback,
-        user_data);
-        
-    return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
-}
-
 // DataViewModel implementation
 class WxDDataViewModel : public wxDataViewModel {
 private:

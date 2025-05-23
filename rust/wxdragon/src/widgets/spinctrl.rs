@@ -176,3 +176,6 @@ impl<'a> SpinCtrlBuilder<'a> {
         self
     }
 }
+
+// Add XRC Support - enables SpinCtrl to be created from XRC-managed pointers
+impl_xrc_support!(SpinCtrl, { window });

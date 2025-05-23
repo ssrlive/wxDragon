@@ -118,20 +118,6 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewChoiceRenderer_Create(const cha
 
 WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(const char* varianttype, int64_t mode, int64_t align);
 
-// Custom renderer callback type
-typedef bool (*wxd_DataViewRenderer_RenderCallback)(void* user_data, 
-                                                  wxd_DC_t* dc, 
-                                                  wxd_Rect* cell, 
-                                                  int64_t item, 
-                                                  int64_t column);
-
-WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCustomRenderer_Create(
-    const char* varianttype, 
-    int64_t mode,
-    int64_t align,
-    wxd_DataViewRenderer_RenderCallback render_callback,
-    void* user_data);
-
 // Model callback types
 typedef uint64_t (*wxd_DataViewModel_GetColumnCountCallback)(void* user_data);
 typedef uint64_t (*wxd_DataViewModel_GetRowCountCallback)(void* user_data);

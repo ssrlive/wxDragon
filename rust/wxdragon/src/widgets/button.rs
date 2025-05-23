@@ -383,6 +383,12 @@ widget_builder!(
 // Apply common trait implementations for Button
 implement_widget_traits_with_target!(Button, window, Window);
 
+// XRC Support - enables Button to be created from XRC-managed pointers
+impl_xrc_support!(Button, {
+    window,
+    parent_ptr: std::ptr::null_mut()
+});
+
 // Define the ButtonStyle enum using the widget_style_enum macro
 widget_style_enum!(
     name: ButtonStyle,

@@ -112,3 +112,6 @@ widget_builder!(
 
 // At the bottom of the file, add the ScrollEvents trait implementation
 impl ScrollEvents for ScrollBar {}
+
+// Add XRC Support - enables ScrollBar to be created from XRC-managed pointers
+impl_xrc_support!(ScrollBar, { window });

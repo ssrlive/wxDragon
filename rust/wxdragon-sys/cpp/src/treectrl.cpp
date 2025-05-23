@@ -287,6 +287,35 @@ WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetItem(wxd_Event_t* event) {
     return WXD_WRAP_TREE_ITEM_ID(id);
 }
 
+// Get the old item from a tree event (for selection change events)
+WXD_EXPORTED wxd_TreeItemId_t* wxd_TreeEvent_GetOldItem(wxd_Event_t* event) {
+    wxTreeEvent* treeEvent = GetTreeEvent(event);
+    if (!treeEvent) return nullptr;
+    
+    wxTreeItemId oldItemId = treeEvent->GetOldItem();
+    if (!oldItemId.IsOk()) return nullptr;
+    
+    wxTreeItemId* id = new wxTreeItemId(oldItemId);
+    return WXD_WRAP_TREE_ITEM_ID(id);
+}
+
+// Get the label from a tree event (for label editing events)
+WXD_EXPORTED int wxd_TreeEvent_GetLabel(wxd_Event_t* event, char* buffer, int buffer_len) {
+    wxTreeEvent* treeEvent = GetTreeEvent(event);
+    if (!treeEvent || !buffer || buffer_len <= 0) return -1;
+    
+    wxString label = treeEvent->GetLabel();
+    return wxd_cpp_utils::copy_wxstring_to_buffer(label, buffer, static_cast<size_t>(buffer_len));
+}
+
+// Check if label editing was cancelled
+WXD_EXPORTED int wxd_TreeEvent_IsEditCancelled(wxd_Event_t* event) {
+    wxTreeEvent* treeEvent = GetTreeEvent(event);
+    if (!treeEvent) return 0;
+    
+    return treeEvent->IsEditCancelled() ? 1 : 0;
+}
+
 // Helper to convert wxd_TreeItemIconType_t to wxTreeItemIcon
 static wxTreeItemIcon map_to_wx_tree_item_icon(wxd_TreeItemIconType_t which_wxd) {
     switch (which_wxd) {

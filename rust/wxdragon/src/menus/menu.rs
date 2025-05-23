@@ -2,6 +2,8 @@
 
 use crate::id::Id;
 use crate::menus::menuitem::{ItemKind, MenuItem};
+use crate::window::Window;
+use crate::xrc::XmlResource;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use wxdragon_sys as ffi;
@@ -33,6 +35,29 @@ impl Menu {
     /// Appends a separator.
     pub fn append_separator(&self) {
         self.append_separator_raw();
+    }
+
+    /// Gets a menu item by its XRC name.
+    /// Returns a MenuItem wrapper that can be used for event binding.
+    pub fn get_item_by_name(&self, parent_window: &Window, item_name: &str) -> Option<MenuItem> {
+        MenuItem::from_xrc_name(parent_window, item_name)
+    }
+
+    /// Special XRC loading method for menus.
+    /// This looks up the menu by name and creates a Menu wrapper.
+    pub fn from_xrc_name(menu_name: &str) -> Option<Self> {
+        // For now, we'll assume menus are loaded as part of menubar
+        // This might need to be extended if we support standalone menu loading
+        // Get the XRC resource to check if the menu exists
+        let menu_id = XmlResource::get_xrc_id(menu_name);
+
+        if menu_id != -1 {
+            // This is a placeholder - in practice, menus are usually loaded as part of menubars
+            // We might need to extend XRC support for standalone menus if needed
+            None
+        } else {
+            None
+        }
     }
 
     /// Returns the raw pointer.
@@ -171,5 +196,25 @@ impl MenuBuilder {
             }
         }
         menu
+    }
+}
+
+// Add XRC support
+impl crate::xrc::XrcSupport for Menu {
+    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        Self {
+            ptr: ptr as *mut ffi::wxd_Menu_t,
+        }
+    }
+}
+
+// Implement WxWidget for Menu (needed for XRC support)
+impl crate::window::WxWidget for Menu {
+    fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+        self.ptr as *mut wxdragon_sys::wxd_Window_t
+    }
+
+    fn get_id(&self) -> i32 {
+        -1 // Menus don't typically have IDs
     }
 }

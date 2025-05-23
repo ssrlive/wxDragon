@@ -59,11 +59,11 @@ message(STATUS "Defining wxdragon static library target")
 
 # Source files are relative to this CMakeLists.txt (rust/wxdragon-sys/cpp)
 # Use GLOB to find all .cpp files in the src directory automatically
-file(GLOB WXDRAGON_SOURCES "src/*.cpp")
+file(GLOB_RECURSE WXDRAGON_SOURCES "src/*.cpp")
 if(NOT WXDRAGON_SOURCES)
     message(FATAL_ERROR "No source files found in ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 endif()
-message(STATUS "wxDragon Sources (found via GLOB): ${WXDRAGON_SOURCES}")
+message(STATUS "wxDragon Sources (found via GLOB_RECURSE): ${WXDRAGON_SOURCES}")
 
 # Define the library using the discovered sources
 add_library(wxdragon STATIC ${WXDRAGON_SOURCES})
@@ -91,6 +91,9 @@ target_link_libraries(wxdragon PRIVATE
     wxstc
     wxhtml
     wxwebview
+    wxxml
+    wxxrc
+    wxexpat   # For XML parsing functionality
 )
 
 # If on MSVC, and wxWidgets was built with a different CRT, you might need to adjust

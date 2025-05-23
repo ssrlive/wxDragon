@@ -54,4 +54,49 @@ WXD_EXPORTED void wxd_MenuItem_Destroy(wxd_MenuItem_t* item) {
     // Consider logging a warning if called?
 }
 
+// --- MenuItem State Functions ---
+WXD_EXPORTED void wxd_MenuItem_SetLabel(wxd_MenuItem_t* item, const char* label) {
+    if (!item) return;
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    wx_item->SetItemLabel(wxString::FromUTF8(label ? label : ""));
+}
+
+WXD_EXPORTED char* wxd_MenuItem_GetLabel(wxd_MenuItem_t* item) {
+    if (!item) return strdup(""); // Return duplicated empty string to avoid NULL
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    wxString label = wx_item->GetItemLabel();
+    const wxScopedCharBuffer utf8_buf = label.ToUTF8();
+    if (utf8_buf.data()) {
+        return strdup(utf8_buf.data()); // Allocate and copy string
+    }
+    return strdup(""); // Return duplicated empty string if conversion fails
+}
+
+WXD_EXPORTED void wxd_MenuItem_Enable(wxd_MenuItem_t* item, bool enable) {
+    if (!item) return;
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    wx_item->Enable(enable);
+}
+
+WXD_EXPORTED bool wxd_MenuItem_IsEnabled(wxd_MenuItem_t* item) {
+    if (!item) return false;
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    return wx_item->IsEnabled();
+}
+
+WXD_EXPORTED void wxd_MenuItem_Check(wxd_MenuItem_t* item, bool check) {
+    if (!item) return;
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    // Only check if it's a checkable item (Check or Radio)
+    if (wx_item->IsCheckable()) {
+        wx_item->Check(check);
+    }
+}
+
+WXD_EXPORTED bool wxd_MenuItem_IsChecked(wxd_MenuItem_t* item) {
+    if (!item) return false;
+    wxMenuItem* wx_item = reinterpret_cast<wxMenuItem*>(item);
+    return wx_item->IsChecked();
+}
+
 } // extern "C" 

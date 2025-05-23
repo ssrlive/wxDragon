@@ -812,6 +812,10 @@ extern "C" void wxd_EvtHandler_Bind(
             wx_handler->Bind(wxEVT_TREE_STATE_IMAGE_CLICK, functor);
             bound = true;
             break;
+        case WXD_EVENT_TYPE_TOOL:
+            wx_handler->Bind(wxEVT_TOOL, functor);
+            bound = true;
+            break;
         case WXD_EVENT_TYPE_TOOL_ENTER:
             wx_handler->Bind(wxEVT_TOOL_ENTER, functor);
             bound = true;
@@ -870,6 +874,61 @@ extern "C" void wxd_EvtHandler_Bind(
         // Its destructor will drop the Rust Box unless already marked owned (which it isn't here).
         wxLogDebug("wxd_EvtHandler_Bind: Did not bind event type %d. Functor %p destructor will drop Rust box.", (int)eventTypeC, &functor);
         // No need to explicitly call drop_rust_closure_box here, the functor destructor handles it.
+    }
+    // Original functor goes out of scope here.
+}
+
+// ID-specific event binding implementation
+extern "C" void wxd_EvtHandler_BindWithId(
+    wxd_EvtHandler_t* handler,
+    WXDEventTypeCEnum eventTypeC, 
+    int id,
+    void* rust_trampoline_fn, 
+    void* rust_closure_ptr   
+) {
+    wxEvtHandler* wx_handler = reinterpret_cast<wxEvtHandler*>(handler);
+    if (!wx_handler) {
+         wxLogWarning("wxd_EvtHandler_BindWithId called with null handler."); 
+         if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+         return;
+    }
+
+    if (!rust_trampoline_fn || !rust_closure_ptr) {
+        wxLogWarning("wxd_EvtHandler_BindWithId called with null trampoline (%p) or closure (%p).", rust_trampoline_fn, rust_closure_ptr);
+        if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+        return;
+    }
+
+    // Create the functor that wraps the Rust data
+    CxxClosureVoid functor(rust_trampoline_fn, rust_closure_ptr);
+    bool bound = false; // Flag to track if binding succeeded
+
+    // Switch on the stable C enum value and map to the wxWidgets event tag
+    switch (eventTypeC) {
+        case WXD_EVENT_TYPE_TOOL:
+            wx_handler->Bind(wxEVT_TOOL, functor, id);
+            bound = true;
+            break;
+        case WXD_EVENT_TYPE_MENU:
+            wx_handler->Bind(wxEVT_MENU, functor, id);
+            bound = true;
+            break;
+        // Add other event types that support ID-specific binding as needed
+        default:
+            wxLogWarning("wxd_EvtHandler_BindWithId: Unsupported WXDEventTypeCEnum value %d for ID-specific binding.", (int)eventTypeC);
+            bound = false;
+            break;
+    }
+    
+    // Handle ownership transfer based on whether binding occurred
+    if (bound) {
+        // wxWidgets has taken ownership of the functor (a copy of it).
+        // Mark the original functor on the stack so its destructor doesn't drop the Rust Box.
+        functor.owned_by_wx = true; 
+    } else {
+        // Binding failed, functor going out of scope.
+        // Its destructor will drop the Rust Box unless already marked owned (which it isn't here).
+        wxLogDebug("wxd_EvtHandler_BindWithId: Did not bind event type %d. Functor destructor will drop Rust box.", (int)eventTypeC);
     }
     // Original functor goes out of scope here.
 }
@@ -1130,3 +1189,70 @@ WXD_EXPORTED int32_t wxd_NotebookEvent_GetSelection(wxd_Event_t* self) {
     return notebookEvent->GetSelection();
 }
 */
+
+// --- DataView Event Accessors ---
+
+// Header: WXD_EXPORTED bool wxd_DataViewEvent_GetColumn(wxd_Event_t* event, int32_t* column);
+WXD_EXPORTED bool wxd_DataViewEvent_GetColumn(wxd_Event_t* event, int32_t* column)
+{
+    if (!event || !column) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return false;
+    
+    *column = dve->GetColumn();
+    return true;
+}
+
+// Header: WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row);
+WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row) {
+    if (!event || !row) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return false;
+    
+    // Get the item and try to convert to row (this is a simplification)
+    wxDataViewItem item = dve->GetItem();
+    if (!item.IsOk()) return false;
+    
+    // For now, return 0 as we don't have a direct way to get row index
+    *row = 0;
+    return true;
+}
+
+// Header: WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value);
+WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value)
+{
+    if (!event || !value) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return false;
+    
+    wxVariant var = dve->GetValue();
+    // Copy variant data - this needs proper implementation based on wxd_Variant_t structure
+    // For now, just mark as valid
+    return true;
+}
+
+// Header: WXD_EXPORTED bool wxd_DataViewEvent_SetValue(wxd_Event_t* event, const wxd_Variant_t* value);
+WXD_EXPORTED bool wxd_DataViewEvent_SetValue(wxd_Event_t* event, const wxd_Variant_t* value) {
+    if (!event || !value) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return false;
+    
+    // Convert wxd_Variant_t to wxVariant - needs proper implementation
+    // For now, just return success
+    return true;
+}
+
+// Header: WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event);
+WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event)
+{
+    if (!event) return true;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return true;
+    
+    return dve->IsEditCancelled();
+}

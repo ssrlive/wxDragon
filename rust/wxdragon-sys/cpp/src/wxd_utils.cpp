@@ -1,6 +1,7 @@
 #include "wxd_utils.h"
 #include <cstring> // For strncpy, strlen
 #include <algorithm> // For std::min
+#include <cstdlib> // For strdup
 
 namespace wxd_cpp_utils {
 
@@ -30,6 +31,15 @@ size_t copy_wxstring_to_buffer(const wxString& str, char* buffer, size_t buffer_
     return source_len; // Return the original length of the UTF-8 string (excluding its null terminator)
 }
 
+}
+
+// Implementation of wxd_str_to_c_str function
+const char* wxd_str_to_c_str(const wxString& s) {
+    if (s.IsEmpty()) {
+        return strdup(""); // Return empty string, not nullptr
+    }
+    wxScopedCharBuffer utf8_buf = s.ToUTF8();
+    return strdup(utf8_buf.data()); // Caller must free with wxd_free_string
 }
 
 // --- Colour Conversion Helper Implementations ---

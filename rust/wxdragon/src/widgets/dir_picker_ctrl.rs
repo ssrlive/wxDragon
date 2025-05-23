@@ -127,6 +127,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for DirPickerCtrl {}
 
+// Add XRC Support - enables DirPickerCtrl to be created from XRC-managed pointers
+impl_xrc_support!(DirPickerCtrl, { window });
+
 // Use the widget_builder macro to generate the DirPickerCtrlBuilder implementation
 widget_builder!(
     name: DirPickerCtrl,

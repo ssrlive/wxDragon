@@ -360,3 +360,54 @@ macro_rules! __widget_builder_default {
         $expr
     };
 }
+
+/// Implements XrcSupport trait for a widget with custom field initialization
+///
+/// This macro generates the XrcSupport implementation for widgets, handling
+/// different field patterns that widgets may have.
+///
+/// # Parameters
+///
+/// * `widget_name` - The name of the widget struct
+/// * `fields` - Block containing field initialization expressions
+///
+/// # Example
+///
+/// ```ignore
+/// // For widgets with just a window field:
+/// impl_xrc_support!(TextCtrl, {
+///     window
+/// });
+///
+/// // For widgets with window and parent_ptr fields:
+/// impl_xrc_support!(Button, {
+///     window,
+///     parent_ptr: std::ptr::null_mut()
+/// });
+/// ```
+#[macro_export]
+macro_rules! impl_xrc_support {
+    // Handle the simple case where only window field is specified
+    ($widget_name:ident, { window }) => {
+        impl $crate::xrc::XrcSupport for $widget_name {
+            fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+                let window = unsafe { $crate::window::Window::from_ptr(ptr) };
+                Self { window }
+            }
+        }
+    };
+    // Handle the more complex case with additional fields
+    ($widget_name:ident, { window, $($field_name:ident: $field_value:expr),* $(,)? }) => {
+        impl $crate::xrc::XrcSupport for $widget_name {
+            fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+                let window = unsafe { $crate::window::Window::from_ptr(ptr) };
+                Self {
+                    window,
+                    $(
+                        $field_name: $field_value,
+                    )*
+                }
+            }
+        }
+    };
+}

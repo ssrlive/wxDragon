@@ -11,6 +11,7 @@ WXD_EXPORTED void wxd_Frame_SetTitle(wxd_Frame_t* frame, const char* title);
 WXD_EXPORTED void wxd_Frame_Centre(wxd_Frame_t* frame, wxd_Direction_t direction);
 WXD_EXPORTED void wxd_Frame_Close(wxd_Frame_t* frame, bool force);
 WXD_EXPORTED void wxd_Frame_SetMenuBar(wxd_Frame_t* frame, wxd_MenuBar_t* menubar);
+WXD_EXPORTED wxd_MenuBar_t* wxd_Frame_GetMenuBar(wxd_Frame_t* frame);
 WXD_EXPORTED void wxd_Frame_SetStatusBar(wxd_Frame_t* frame, wxd_StatusBar_t* statusBar);
 WXD_EXPORTED void wxd_Frame_SetToolBar(wxd_Frame_t* frame, wxd_ToolBar_t* toolBar);
 WXD_EXPORTED wxd_ToolBar_t* wxd_Frame_CreateToolBar(wxd_Frame_t* frame, wxd_Style_t style, wxd_Id id);

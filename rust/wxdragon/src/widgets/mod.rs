@@ -131,3 +131,7 @@ pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
 
 // Re-export ImageList
 pub use imagelist::ImageList;
+
+pub mod tool;
+
+pub use tool::Tool;

@@ -203,6 +203,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for HyperlinkCtrl {}
 
+// Add XRC Support - enables HyperlinkCtrl to be created from XRC-managed pointers
+impl_xrc_support!(HyperlinkCtrl, { window });
+
 // Use the widget_builder macro to generate the HyperlinkCtrlBuilder implementation
 widget_builder!(
     name: HyperlinkCtrl,

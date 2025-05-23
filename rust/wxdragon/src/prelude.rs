@@ -194,6 +194,4 @@ pub use crate::widgets::listbox::NOT_FOUND as LISTBOX_NOT_FOUND;
 pub use crate::widgets::combobox::NOT_FOUND as COMBOBOX_NOT_FOUND;
 // Example: NotificationMessage timeouts were already there
 
-// TODO: Review if other specific constants like wxALIGN_XXX or wxBORDER_XXX from base.rs (via sizers)
-// need more direct exposure or if SizerFlag covers most common uses.
-// For now, SizerFlag is the primary way to control alignment and borders in sizers.
+pub use crate::WindowXrcMethods;

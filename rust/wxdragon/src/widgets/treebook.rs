@@ -275,3 +275,6 @@ crate::implement_widget_local_event_handlers!(
 
 // Implement WindowEvents for standard window events
 impl WindowEvents for Treebook {}
+
+// Add XRC Support - enables Treebook to be created from XRC-managed pointers
+impl_xrc_support!(Treebook, { window });

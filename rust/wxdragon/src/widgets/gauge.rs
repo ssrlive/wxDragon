@@ -95,3 +95,6 @@ widget_builder!(
 implement_widget_traits_with_target!(Gauge, window, Window);
 
 impl WindowEvents for Gauge {}
+
+// Add XRC Support - enables Gauge to be created from XRC-managed pointers
+impl_xrc_support!(Gauge, { window });

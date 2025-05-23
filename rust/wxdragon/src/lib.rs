@@ -27,6 +27,7 @@ pub mod types;
 pub mod utils;
 pub mod widgets;
 pub mod window;
+pub mod xrc;
 
 // Re-export common utilities
 pub use utils::WxdArrayString;
@@ -167,3 +168,12 @@ pub use dc::{
 
 // Re-export Timer functionality
 pub use timer::Timer;
+
+// Re-export XRC functionality
+pub use xrc::{FromXrcPtr, WindowXrcMethods, XmlResource};
+
+// Re-export procedural macros from wxdragon-macros
+pub use wxdragon_macros::include_xrc;
+
+// Re-export XRC macros (these are macro_rules! macros, not procedural macros)
+// include_xrc_dialog!, include_xrc_panel! are available via #[macro_use]

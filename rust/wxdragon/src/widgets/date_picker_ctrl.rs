@@ -149,6 +149,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for DatePickerCtrl {}
 
+// Add XRC Support - enables DatePickerCtrl to be created from XRC-managed pointers
+impl_xrc_support!(DatePickerCtrl, { window });
+
 // Use the widget_builder macro to generate the DatePickerCtrlBuilder implementation
 widget_builder!(
     name: DatePickerCtrl,

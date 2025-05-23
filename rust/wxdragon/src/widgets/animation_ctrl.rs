@@ -117,3 +117,6 @@ implement_widget_traits_with_target!(AnimationCtrl, window, Window);
 
 // After implement_widget_traits_with_target
 impl WindowEvents for AnimationCtrl {}
+
+// Add XRC Support - enables AnimationCtrl to be created from XRC-managed pointers
+impl_xrc_support!(AnimationCtrl, { window });

@@ -200,7 +200,7 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
         DataViewColumnFlags::Resizable,
     );
 
-    let status_choices = vec!["Pending", "Active", "Inactive", "On Hold"];
+    let status_choices = vec!["Full-time", "Part-time", "Contract", "Intern"];
     dvc.append_choice_column(
         "Status",
         8,

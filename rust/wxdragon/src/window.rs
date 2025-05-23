@@ -89,6 +89,16 @@ pub trait WxWidget {
         }
     }
 
+    /// Forces the window to recalculate its layout using its sizer.
+    /// This is called when the window size changes to update the positions
+    /// and sizes of child widgets according to the sizer constraints.
+    fn layout(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Layout(handle) };
+        }
+    }
+
     /// Gets the window's sizer-calculated best size.
     fn get_best_size(&self) -> crate::geometry::Size {
         let handle = self.handle_ptr();

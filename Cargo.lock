@@ -1009,6 +1009,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "quick-xml"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1250,6 +1259,13 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "simple"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
+name = "simple_xrc_test"
 version = "0.1.0"
 dependencies = [
  "wxdragon",
@@ -1782,7 +1798,18 @@ dependencies = [
  "bitflags 2.9.0",
  "lazy_static",
  "paste",
+ "wxdragon-macros",
  "wxdragon-sys",
+]
+
+[[package]]
+name = "wxdragon-macros"
+version = "0.3.0"
+dependencies = [
+ "proc-macro2",
+ "quick-xml",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -176,3 +176,6 @@ widget_builder!(
 implement_widget_traits_with_target!(StaticBitmap, window, Window);
 
 impl WindowEvents for StaticBitmap {}
+
+// Add XRC Support - enables StaticBitmap to be created from XRC-managed pointers
+impl_xrc_support!(StaticBitmap, { window });

@@ -220,3 +220,10 @@ crate::implement_widget_local_event_handlers!(
 
 // Add WindowEvents implementation
 impl WindowEvents for SplitterWindow {}
+
+// XRC Support - enables SplitterWindow to be created from XRC-managed pointers
+impl crate::xrc::XrcSupport for SplitterWindow {
+    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        SplitterWindow(ptr as *mut ffi::wxd_SplitterWindow_t)
+    }
+}

@@ -226,3 +226,7 @@ impl<'a> StatusBarBuilder<'a> {
 }
 
 impl WindowEvents for StatusBar {}
+
+// Add XRC support
+// XRC Support - enables StatusBar to be created from XRC-managed pointers
+impl_xrc_support!(StatusBar, { window });

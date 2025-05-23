@@ -3,6 +3,7 @@
 
 use crate::bitmap::Bitmap;
 use crate::event::button_events::ButtonEvents;
+use crate::event::WindowEvents;
 use crate::geometry::{Point, Size};
 use crate::id::Id;
 use crate::implement_widget_traits_with_target;
@@ -38,6 +39,8 @@ pub struct BitmapButton {
 
 // Implement ButtonEvents trait for BitmapButton
 impl ButtonEvents for BitmapButton {}
+
+impl WindowEvents for BitmapButton {}
 
 impl BitmapButton {
     /// Creates a new BitmapButton builder.
@@ -148,3 +151,6 @@ widget_builder!(
 );
 
 implement_widget_traits_with_target!(BitmapButton, window, Window);
+
+// Add XRC Support - enables BitmapButton to be created from XRC-managed pointers
+impl_xrc_support!(BitmapButton, { window });

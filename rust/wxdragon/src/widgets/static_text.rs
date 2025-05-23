@@ -120,3 +120,6 @@ impl StaticText {
 implement_widget_traits_with_target!(StaticText, window, Window);
 
 impl WindowEvents for StaticText {}
+
+// XRC Support - enables StaticText to be created from XRC-managed pointers
+impl_xrc_support!(StaticText, { window });

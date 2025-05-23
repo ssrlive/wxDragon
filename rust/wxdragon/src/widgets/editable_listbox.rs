@@ -253,3 +253,6 @@ crate::implement_widget_local_event_handlers!(
 
 // Implement WindowEvents for standard window events
 impl crate::event::WindowEvents for EditableListBox {}
+
+// Add XRC Support - enables EditableListBox to be created from XRC-managed pointers
+impl_xrc_support!(EditableListBox, { window });

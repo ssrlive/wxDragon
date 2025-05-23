@@ -41,9 +41,9 @@ impl MultiChoiceDialog {
     /// Creates a new MultiChoiceDialog wrapper from a raw pointer.
     /// # Safety
     /// The pointer must be a valid pointer to a wxMultiChoiceDialog.
-    pub(crate) unsafe fn from_ptr(ptr: MultiChoiceDialogPtr) -> Self {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_MultiChoiceDialog_t) -> Self {
         MultiChoiceDialog {
-            dialog_base: Dialog::from_ptr(ptr as super::DialogPtr),
+            dialog_base: Dialog::from_ptr(ptr as *mut ffi::wxd_Dialog_t),
         }
     }
 

@@ -218,6 +218,7 @@ typedef enum {
     WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED = 119, // wxEVT_LISTBOX_DCLICK
 
     // ADDED: Additional event types missing from enum
+    WXD_EVENT_TYPE_TOOL = 123, // ToolBar Tool clicked event (wxEVT_TOOL)
     WXD_EVENT_TYPE_TOOL_ENTER = 124, // ToolBar Enter event
     WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP = 125, // TreeCtrl tooltip event
     WXD_EVENT_TYPE_ANY = 126, // Generic event type
@@ -327,6 +328,9 @@ typedef struct wxd_MediaCtrl_t wxd_MediaCtrl_t;
 typedef struct wxd_RearrangeList_t wxd_RearrangeList_t;
 typedef struct wxd_EditableListBox_t wxd_EditableListBox_t;
 typedef struct wxd_Clipboard_t wxd_Clipboard_t;
+
+// XRC-related opaque types
+typedef struct wxd_XmlResource_t wxd_XmlResource_t;
 
 typedef struct wxd_AuiMDIParentFrame_t wxd_AuiMDIParentFrame_t;
 typedef struct wxd_AuiMDIChildFrame_t wxd_AuiMDIChildFrame_t;

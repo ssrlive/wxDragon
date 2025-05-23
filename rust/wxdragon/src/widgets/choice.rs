@@ -238,3 +238,6 @@ crate::implement_widget_local_event_handlers!(
 );
 
 impl WindowEvents for Choice {}
+
+// Add XRC Support - enables Choice to be created from XRC-managed pointers
+impl_xrc_support!(Choice, { window });

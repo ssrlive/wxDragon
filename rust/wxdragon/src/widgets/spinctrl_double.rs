@@ -176,3 +176,6 @@ impl<'a> SpinCtrlDoubleBuilder<'a> {
         self
     }
 }
+
+// Add XRC Support - enables SpinCtrlDouble to be created from XRC-managed pointers
+impl_xrc_support!(SpinCtrlDouble, { window });

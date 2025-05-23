@@ -18,6 +18,12 @@ wxd_TextDataObject_t* wxd_TextDataObject_Create(const char* text) {
     return reinterpret_cast<wxd_TextDataObject_t*>(data_object);
 }
 
+void wxd_TextDataObject_Destroy(wxd_TextDataObject_t* obj) {
+    if (obj) {
+        delete reinterpret_cast<wxTextDataObject*>(obj);
+    }
+}
+
 int wxd_TextDataObject_GetText(wxd_TextDataObject_t* data_object, char* buffer, int buffer_len) {
     if (!data_object || !buffer || buffer_len <= 0) return -1;
     wxTextDataObject* wx_data_object = reinterpret_cast<wxTextDataObject*>(data_object);

@@ -83,3 +83,6 @@ widget_builder!(
 
 // Implement WindowEvents trait for Panel
 impl WindowEvents for Panel {}
+
+// XRC Support - enables Panel to be created from XRC-managed pointers
+impl_xrc_support!(Panel, { window });

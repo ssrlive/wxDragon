@@ -162,6 +162,9 @@ crate::implement_widget_local_event_handlers!(
 // Add WindowEvents implementation
 impl WindowEvents for CalendarCtrl {}
 
+// Add XRC Support - enables CalendarCtrl to be created from XRC-managed pointers
+impl_xrc_support!(CalendarCtrl, { window });
+
 // Use the widget_builder macro for CalendarCtrl
 widget_builder!(
     name: CalendarCtrl,

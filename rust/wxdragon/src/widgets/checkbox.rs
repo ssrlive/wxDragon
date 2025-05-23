@@ -59,6 +59,12 @@ impl CheckBox {
         }
     }
 
+    /// Returns `true` if the checkbox is checked, `false` otherwise.
+    /// Alias for `is_checked()` to match common widget patterns.
+    pub fn get_value(&self) -> bool {
+        self.is_checked()
+    }
+
     // Private unsafe constructor from raw pointer
     unsafe fn from_ptr(ptr: *mut ffi::wxd_CheckBox_t) -> Self {
         assert!(!ptr.is_null());
@@ -150,3 +156,6 @@ widget_builder!(
 
 // Implement common widget traits
 implement_widget_traits_with_target!(CheckBox, window, Window);
+
+// XRC Support - enables CheckBox to be created from XRC-managed pointers
+impl_xrc_support!(CheckBox, { window });

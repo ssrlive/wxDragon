@@ -90,4 +90,27 @@ WXD_EXPORTED wxd_DateTime_t* wxd_CalendarCtrl_GetDate(wxd_CalendarCtrl_t* self) 
     };
 }
 
+// Get the date from a calendar event
+WXD_EXPORTED wxd_DateTime_t* wxd_CalendarEvent_GetDate(wxd_Event_t* event) {
+    if (!event) return nullptr;
+    
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    if (!wx_event->IsKindOf(wxCLASSINFO(wxCalendarEvent))) return nullptr;
+    
+    wxCalendarEvent* cal_event = static_cast<wxCalendarEvent*>(wx_event);
+    const wxDateTime& dt = cal_event->GetDate();
+    
+    if (!dt.IsValid()) return nullptr;
+    
+    // Allocate on heap, Rust will take ownership and free
+    return new wxd_DateTime_t{
+        (short)dt.GetDay(wxDateTime::Local),
+        (unsigned short)(dt.GetMonth(wxDateTime::Local)), // Keep 0-indexed for consistency with other functions
+        dt.GetYear(wxDateTime::Local),
+        (short)dt.GetHour(wxDateTime::Local),
+        (short)dt.GetMinute(wxDateTime::Local),
+        (short)dt.GetSecond(wxDateTime::Local)
+    };
+}
+
 } // extern "C" 

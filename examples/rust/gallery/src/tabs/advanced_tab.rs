@@ -1,5 +1,6 @@
 use wxdragon::event::WindowEvents;
 use wxdragon::prelude::*;
+use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
 
 pub struct AdvancedTabControls {
     pub tree_ctrl: TreeCtrl,
@@ -16,7 +17,6 @@ pub struct AdvancedTabControls {
 pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabControls) {
     // Create a SplitterWindow instead of a Panel for this tab's main container
     let splitter = SplitterWindow::builder(notebook)
-        // .with_style(SP_LIVE_UPDATE | SP_BORDER | SP_3D) // Old - Commenting out for now
         .with_id(200) // Give splitter an ID
         .with_style(SplitterWindowStyle::LiveUpdate | SplitterWindowStyle::Default)
         .with_size(Size::new(400, 200))
@@ -28,13 +28,16 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
         .with_id(111)
         .with_style(TreeCtrlStyle::Default | TreeCtrlStyle::HasButtons | TreeCtrlStyle::LinesAtRoot)
         .build();
+
+    // Add items to the tree
     if let Some(root_id) = tree_ctrl.add_root("Root Node", None, None) {
         if let Some(child1_id) = tree_ctrl.append_item(&root_id, "Child 1", None, None) {
-            tree_ctrl.append_item(&child1_id, "Grandchild 1.1", None, None);
-            tree_ctrl.append_item(&child1_id, "Grandchild 1.2", None, None);
+            let _grandchild1 = tree_ctrl.append_item(&child1_id, "Grandchild 1.1", None, None);
+            let _grandchild2 = tree_ctrl.append_item(&child1_id, "Grandchild 1.2", None, None);
         }
-        tree_ctrl.append_item(&root_id, "Child 2", None, None);
+        let _child2 = tree_ctrl.append_item(&root_id, "Child 2", None, None);
     }
+
     let tree_status_label = StaticText::builder(&tree_panel)
         .with_label("Tree Selection: None")
         .build();
@@ -42,102 +45,129 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     // Sizer for Tree Panel
     let tree_sizer = BoxSizer::builder(Orientation::Vertical).build();
     tree_sizer.add(&tree_ctrl, 1, SizerFlag::Expand | SizerFlag::All, 5);
-    tree_sizer.add(&tree_status_label, 0, SizerFlag::Expand | SizerFlag::All, 5); // Expand label horizontally
+    tree_sizer.add(&tree_status_label, 0, SizerFlag::Expand | SizerFlag::All, 5);
     tree_panel.set_sizer(tree_sizer, true);
 
-    // Create Panel 2 (Right: Gauge, Slider, Spin)
+    // Create Panel 2 (Right: Controls)
     let controls_panel = Panel::builder(&splitter).build();
-
-    // Controls Panel Sizer
     let controls_sizer = BoxSizer::builder(Orientation::Vertical).build();
 
-    // --- Gauge section ---
-    // TODO: Re-evaluate create_section_title usage
-    // controls_sizer.add(&create_section_title(&controls_panel, "Gauge"), 0, SizerFlag::Expand | SizerFlag::All, 5);
-    let gauge = Gauge::builder(&controls_panel)
-        .with_id(112)
-        .with_range(100)
-        // .with_style(GA_HORIZONTAL | GA_SMOOTH) // Old - Commenting out for now
-        .with_style(GaugeStyle::Default | GaugeStyle::Smooth)
-        .with_size(Size::new(200, 25))
-        .build();
-    gauge.set_value(25);
-    let gauge_increase_btn = Button::builder(&controls_panel)
-        .with_label("Increase")
-        .build();
-    let gauge_reset_btn = Button::builder(&controls_panel).with_label("Reset").build();
-    let gauge_status_label = StaticText::builder(&controls_panel)
-        .with_label("Gauge Value: 25%")
-        .build();
+    // --- Gauge Controls section ---
+    let gauge_panel = Panel::builder(&controls_panel).build();
+    let gauge_sizer = BoxSizer::builder(Orientation::Vertical).build();
 
-    let gauge_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    gauge_sizer.add(&gauge, 1, SizerFlag::Expand | SizerFlag::All, 5);
-    let gauge_buttons_sizer = BoxSizer::builder(Orientation::Vertical).build();
-    gauge_buttons_sizer.add(&gauge_increase_btn, 0, SizerFlag::All, 2);
-    gauge_buttons_sizer.add(&gauge_reset_btn, 0, SizerFlag::All, 2);
-    gauge_sizer.add_sizer(
-        &gauge_buttons_sizer,
+    // Add a title
+    let gauge_title = StaticText::builder(&gauge_panel)
+        .with_label("Gauge Demo")
+        .build();
+    gauge_sizer.add_spacer(10);
+    gauge_sizer.add(
+        &gauge_title,
         0,
-        SizerFlag::All | SizerFlag::AlignCenterVertical,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
+
+    // Create the gauge
+    let gauge = Gauge::builder(&gauge_panel)
+        .with_range(100)
+        .with_size(Size::new(200, -1))
+        .build();
+
+    // Set initial value after creation since the builder doesn't have with_value
+    gauge.set_value(25);
+
+    gauge_sizer.add(&gauge, 0, SizerFlag::Expand | SizerFlag::All, 5);
+
+    // Create gauge control buttons
+    let gauge_button_sizer = BoxSizer::builder(Orientation::Horizontal).build();
+    let gauge_increase_btn = Button::builder(&gauge_panel)
+        .with_label("Increase (+10)")
+        .build();
+    let gauge_reset_btn = Button::builder(&gauge_panel).with_label("Reset").build();
+
+    gauge_button_sizer.add(&gauge_increase_btn, 0, SizerFlag::All, 5);
+    gauge_button_sizer.add(&gauge_reset_btn, 0, SizerFlag::All, 5);
+    gauge_sizer.add_sizer(&gauge_button_sizer, 0, SizerFlag::AlignCenterHorizontal, 0);
+
+    // Gauge status label
+    let gauge_status_label = StaticText::builder(&gauge_panel)
+        .with_label("Gauge Value: 25%")
+        .build();
     gauge_sizer.add(
         &gauge_status_label,
         0,
-        SizerFlag::All | SizerFlag::AlignCenterVertical,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
-    controls_sizer.add_sizer(&gauge_sizer, 0, SizerFlag::Expand | SizerFlag::All, 5);
 
-    // --- Slider and Spin section ---
-    // TODO: Re-evaluate create_section_title usage
-    // controls_sizer.add(&create_section_title(&controls_panel, "Slider & Spin"), 0, SizerFlag::Expand | SizerFlag::All, 5);
-    let slider_label_val = StaticText::builder(&controls_panel)
-        .with_label("Slider Value: 50")
-        .build();
-    let slider = Slider::builder(&controls_panel)
-        .with_id(113)
-        .with_value(50)
-        .with_min_value(0)
-        .with_max_value(200)
-        // .with_style(SL_HORIZONTAL | SL_LABELS) // Old - Commenting out for now
-        .with_style(SliderStyle::Default | SliderStyle::Labels)
-        .with_size(Size::new(-1, -1))
-        .build(); // Let slider expand
-    let spin_ctrl_label = StaticText::builder(&controls_panel)
-        .with_label("Spin Value: 10")
-        .build();
-    let spin_ctrl = SpinCtrl::builder(&controls_panel)
-        .with_id(114)
-        .with_range(0, 50)
-        .with_initial_value(10)
-        // .with_style(SP_ARROW_KEYS | SP_WRAP) // Old - Commenting out for now
-        .with_style(SpinCtrlStyle::Horizontal | SpinCtrlStyle::ArrowKeys | SpinCtrlStyle::Wrap)
-        .with_size(Size::new(80, -1))
-        .build();
+    gauge_panel.set_sizer(gauge_sizer, true);
 
-    let slider_spin_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-    slider_spin_sizer.add(&slider, 1, SizerFlag::Expand | SizerFlag::All, 5);
-    slider_spin_sizer.add(
-        &slider_label_val,
+    // --- Slider section ---
+    let slider_panel = Panel::builder(&controls_panel).build();
+    let slider_sizer = BoxSizer::builder(Orientation::Vertical).build();
+
+    let slider_title = StaticText::builder(&slider_panel)
+        .with_label("Slider Demo (Controls Gauge)")
+        .build();
+    slider_sizer.add_spacer(10);
+    slider_sizer.add(
+        &slider_title,
         0,
-        SizerFlag::All | SizerFlag::AlignCenterVertical,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
-    slider_spin_sizer.add_spacer(20);
-    slider_spin_sizer.add(
+
+    // Create the slider
+    let slider = Slider::builder(&slider_panel)
+        .with_value(25)
+        .with_min_value(0)
+        .with_max_value(100)
+        .with_size(Size::new(200, -1))
+        .build();
+    slider_sizer.add(&slider, 0, SizerFlag::Expand | SizerFlag::All, 5);
+    slider_panel.set_sizer(slider_sizer, true);
+
+    // --- SpinCtrl section ---
+    let spin_panel = Panel::builder(&controls_panel).build();
+    let spin_sizer = BoxSizer::builder(Orientation::Vertical).build();
+
+    let spin_title = StaticText::builder(&spin_panel)
+        .with_label("SpinCtrl Demo")
+        .build();
+    spin_sizer.add_spacer(10);
+    spin_sizer.add(
+        &spin_title,
+        0,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
+        5,
+    );
+
+    // Create the spin control
+    let spin_ctrl = SpinCtrl::builder(&spin_panel)
+        .with_initial_value(42)
+        .with_min_value(0)
+        .with_max_value(1000)
+        .build();
+    spin_sizer.add(
         &spin_ctrl,
         0,
-        SizerFlag::All | SizerFlag::AlignCenterVertical,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
-    slider_spin_sizer.add(
+
+    // SpinCtrl status label
+    let spin_ctrl_label = StaticText::builder(&spin_panel)
+        .with_label("Spin Value: 42")
+        .build();
+    spin_sizer.add(
         &spin_ctrl_label,
         0,
-        SizerFlag::All | SizerFlag::AlignCenterVertical,
+        SizerFlag::AlignCenterHorizontal | SizerFlag::All,
         5,
     );
-    controls_sizer.add_sizer(&slider_spin_sizer, 0, SizerFlag::Expand | SizerFlag::All, 5);
+
+    spin_panel.set_sizer(spin_sizer, true);
 
     // --- Drag and Drop Demo section ---
     let dnd_panel = Panel::builder(&controls_panel).build();
@@ -145,13 +175,17 @@ pub fn create_advanced_tab(notebook: &Notebook) -> (SplitterWindow, AdvancedTabC
     add_dnd_demo(&dnd_panel, &dnd_sizer);
     dnd_panel.set_sizer(dnd_sizer, true);
 
+    // Add all sections to the controls panel
+    controls_sizer.add(&gauge_panel, 0, SizerFlag::Expand | SizerFlag::All, 5);
+    controls_sizer.add(&slider_panel, 0, SizerFlag::Expand | SizerFlag::All, 5);
+    controls_sizer.add(&spin_panel, 0, SizerFlag::Expand | SizerFlag::All, 5);
     controls_sizer.add(&dnd_panel, 1, SizerFlag::Expand | SizerFlag::All, 5);
 
     controls_panel.set_sizer(controls_sizer, true);
 
     // Split the window
-    splitter.split_vertically(&tree_panel, &controls_panel, 150); // 150 pixels for the tree initially
-    splitter.set_minimum_pane_size(50); // Set minimum size for both panes
+    splitter.split_vertically(&tree_panel, &controls_panel, 250);
+    splitter.set_minimum_pane_size(50);
 
     // Return the splitter AND the controls struct
     (

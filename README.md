@@ -8,6 +8,8 @@ This project creates a manually crafted C wrapper around the wxWidgets C++ GUI l
 
 ## Usage
 
+### Programmatic Widget Creation
+
 Add *wxdragon* to your Cargo.toml.
 
 ```rust
@@ -42,6 +44,77 @@ fn main() {
     });
 }
 ```
+
+### XRC-Based UI Development
+
+wxDragon also supports XRC (XML Resource) files for declarative UI development with compile-time type safety.
+
+**1. Define your UI in XRC format (`ui/main.xrc`):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<resource>
+  <object class="wxFrame" name="main_frame">
+    <title>wxDragon XRC Demo</title>
+    <size>400,300</size>
+    <object class="wxPanel" name="main_panel">
+      <object class="wxButton" name="hello_button">
+        <label>Click Me!</label>
+        <pos>50,50</pos>
+      </object>
+      <object class="wxTextCtrl" name="input_field">
+        <value>Enter text here...</value>
+        <pos>50,100</pos>
+        <size>200,25</size>
+      </object>
+      <object class="wxStaticText" name="status_label">
+        <label>Ready</label>
+        <pos>50,150</pos>
+      </object>
+    </object>
+  </object>
+</resource>
+```
+
+**2. Use the `include_xrc!` macro to generate a typed UI struct:**
+```rust
+use wxdragon::prelude::*;
+
+// Generate MyUI struct with typed fields for all named widgets
+wxdragon::include_xrc!("ui/main.xrc", MyUI);
+
+fn main() {
+    wxdragon::main(|_| {
+        // Create UI instance - automatically loads XRC and finds all widgets
+        let ui = MyUI::new(None);
+        
+        // Access widgets with full type safety
+        let button = &ui.hello_button;      // Button
+        let input = &ui.input_field;        // TextCtrl  
+        let label = &ui.status_label;       // StaticText
+        let frame = &ui.main_frame;         // Frame (root object)
+        
+        // Bind events with closures
+        let label_clone = label.clone();
+        let input_clone = input.clone();
+        button.on_click(move |_| {
+            let text = input_clone.get_value();
+            label_clone.set_label(&format!("You entered: {}", text));
+            println!("Button clicked! Input: {}", text);
+        });
+        
+        // Show the window
+        frame.show(true);
+        frame.centre();
+    });
+}
+```
+
+**Key benefits of the XRC approach:**
+- **Declarative UI**: Define layouts in XML, separate from logic
+- **Compile-time safety**: Auto-generated structs with typed widget fields  
+- **No verbose syntax**: Just `MyUI::new()` instead of `MyUI::new::<Frame>()`
+- **Designer support**: XRC files can be created with visual designers
+- **Automatic widget discovery**: Macro finds all named widgets and generates appropriate Rust types
 
 ## Supported Platforms
 
@@ -283,8 +356,14 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     *   [ ] `wxWizard` (*Moved here, also related to Other*)
 *   **Event Handling Expansion:**
     *   [x] Add specific event data access (e.g., `event.get_string()`, `event.get_position()`, `event.get_checked()`, `event.get_key_code()`).
-*   **Refinements:**
-    *   [ ] Thread safety considerations (e.g., sending events between threads).
+*   **XRC Support:**
+    *   [x] Implement C++ bindings for `wxXmlResource` in `wxdragon-sys`.
+    *   [x] Create safe Rust wrappers for `wxXmlResource` in `wxdragon`.
+    *   [x] Develop `include_xrc!("file.xrc", UStructName)` procedural macro to generate Rust UI structs from XRC files.
+        *   [x] Compile-time XRC parsing.
+        *   [x] Mapping XRC widget classes to `wxDragon` types.
+        *   [x] Generation of struct with typed fields for named XRC widgets.
+        *   [x] Automatic loading of XRC and widget retrieval in the generated struct's constructor.
 *   **Documentation:**
     *   [ ] Improve C API docs (doxygen?).
     *   [ ] Rust API docs (rustdoc).

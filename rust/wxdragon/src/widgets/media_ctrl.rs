@@ -236,6 +236,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for MediaCtrl {}
 
+// Add XRC Support - enables MediaCtrl to be created from XRC-managed pointers
+impl_xrc_support!(MediaCtrl, { window });
+
 // Create the builder for MediaCtrl
 widget_builder!(
     name: MediaCtrl,

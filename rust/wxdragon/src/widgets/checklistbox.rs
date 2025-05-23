@@ -222,6 +222,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for CheckListBox {}
 
+// Add XRC Support - enables CheckListBox to be created from XRC-managed pointers
+impl_xrc_support!(CheckListBox, { window });
+
 widget_builder!(
     name: CheckListBox,
     parent_type: &'a dyn WxWidget,

@@ -12,4 +12,12 @@ WXD_EXPORTED wxd_MenuItem_t* wxd_Menu_Append(wxd_Menu_t* menu, wxd_Id id, const 
 WXD_EXPORTED void wxd_Menu_AppendSeparator(wxd_Menu_t* menu);
 WXD_EXPORTED void wxd_MenuItem_Destroy(wxd_MenuItem_t* item);
 
+// --- MenuItem State Functions ---
+WXD_EXPORTED void wxd_MenuItem_SetLabel(wxd_MenuItem_t* item, const char* label);
+WXD_EXPORTED char* wxd_MenuItem_GetLabel(wxd_MenuItem_t* item); // Caller must free with wxd_free_string
+WXD_EXPORTED void wxd_MenuItem_Enable(wxd_MenuItem_t* item, bool enable);
+WXD_EXPORTED bool wxd_MenuItem_IsEnabled(wxd_MenuItem_t* item);
+WXD_EXPORTED void wxd_MenuItem_Check(wxd_MenuItem_t* item, bool check);
+WXD_EXPORTED bool wxd_MenuItem_IsChecked(wxd_MenuItem_t* item);
+
 #endif // WXD_MENU_H 

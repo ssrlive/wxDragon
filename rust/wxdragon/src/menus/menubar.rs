@@ -1,6 +1,8 @@
 //! wxMenuBar wrapper
 
-use crate::menus::Menu;
+use crate::menus::{Menu, MenuItem};
+use crate::window::Window;
+use crate::xrc::XmlResource;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use wxdragon_sys as ffi;
@@ -15,6 +17,42 @@ impl MenuBar {
     /// Creates a new menu bar using the builder pattern.
     pub fn builder() -> MenuBarBuilder {
         MenuBarBuilder::new()
+    }
+
+    /// Creates a MenuBar wrapper from a raw pointer (for XRC loading).
+    /// # Safety
+    /// The pointer must be a valid wxMenuBar pointer.
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_MenuBar_t) -> Self {
+        Self { ptr }
+    }
+
+    /// Gets a menu item by its XRC name from any menu in this menubar.
+    /// Returns a MenuItem wrapper that can be used for event binding.
+    pub fn get_item_by_name(&self, parent_window: &Window, item_name: &str) -> Option<MenuItem> {
+        MenuItem::from_xrc_name(parent_window, item_name)
+    }
+
+    /// Special XRC loading method for menubars.
+    /// This looks up the menubar by name and creates a MenuBar wrapper.
+    pub fn from_xrc_name(menubar_name: &str) -> Option<Self> {
+        // Get the XRC resource and try to load the menubar
+        let xml_resource = XmlResource::get();
+
+        // Try to load the menubar from XRC
+        let name_c = CString::new(menubar_name).unwrap_or_default();
+        let ptr = unsafe {
+            ffi::wxd_XmlResource_LoadMenuBar(
+                xml_resource.as_ptr(),
+                std::ptr::null_mut(), // parent (null for menubar)
+                name_c.as_ptr(),
+            )
+        };
+
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { MenuBar::from_ptr(ptr) })
+        }
     }
 
     /// Returns the raw pointer.
@@ -80,5 +118,25 @@ impl MenuBarBuilder {
         }
 
         menubar
+    }
+}
+
+// Add XRC support
+impl crate::xrc::XrcSupport for MenuBar {
+    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        Self {
+            ptr: ptr as *mut ffi::wxd_MenuBar_t,
+        }
+    }
+}
+
+// Implement WxWidget for MenuBar (needed for XRC support)
+impl crate::window::WxWidget for MenuBar {
+    fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+        self.ptr as *mut wxdragon_sys::wxd_Window_t
+    }
+
+    fn get_id(&self) -> i32 {
+        -1 // MenuBars don't typically have IDs
     }
 }

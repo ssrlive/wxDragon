@@ -281,3 +281,6 @@ widget_builder!(
 );
 
 implement_widget_traits_with_target!(RearrangeList, window, Window);
+
+// Add XRC Support - enables RearrangeList to be created from XRC-managed pointers
+impl_xrc_support!(RearrangeList, { window });

@@ -93,6 +93,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents for standard window events
 impl WindowEvents for ColourPickerCtrl {}
 
+// Add XRC Support - enables ColourPickerCtrl to be created from XRC-managed pointers
+impl_xrc_support!(ColourPickerCtrl, { window });
+
 widget_builder!(
     name: ColourPickerCtrl,
     parent_type: &'a dyn WxWidget,

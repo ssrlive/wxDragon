@@ -33,7 +33,7 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewTreeCtrl_new(
     int id,
     wxd_Point pos_rust,
     wxd_Size size_rust,
-    long style,
+    int64_t style,
     wxd_Window_t* validator_ptr, // This parameter is not used by wxDataViewTreeCtrl constructor
     const char* name_str) // This parameter will be ignored for DVTC constructor
 {
@@ -50,7 +50,7 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewTreeCtrl_new(
         static_cast<wxWindowID>(id),
         wxd_cpp_utils::to_wx(pos_rust),
         wxd_cpp_utils::to_wx(size_rust),
-        style,
+        static_cast<long>(style),
         wxDefaultValidator // Pass default validator for the 6th argument
         // name_str is not passed to this constructor
     );

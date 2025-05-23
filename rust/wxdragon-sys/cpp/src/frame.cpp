@@ -66,6 +66,13 @@ WXD_EXPORTED void wxd_Frame_SetMenuBar(wxd_Frame_t* frame, wxd_MenuBar_t* menuba
     }
 }
 
+WXD_EXPORTED wxd_MenuBar_t* wxd_Frame_GetMenuBar(wxd_Frame_t* frame) {
+    if (!frame) return nullptr;
+    wxFrame* fr = reinterpret_cast<wxFrame*>(frame);
+    wxMenuBar* mb = fr->GetMenuBar();
+    return reinterpret_cast<wxd_MenuBar_t*>(mb);
+}
+
 WXD_EXPORTED void wxd_Frame_SetStatusBar(wxd_Frame_t* frame, wxd_StatusBar_t* statusBar) {
     if (frame && statusBar) {
         ((wxFrame*)frame)->SetStatusBar((wxStatusBar*)statusBar);

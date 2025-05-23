@@ -13,7 +13,7 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewTreeCtrl_new(
     int id,
     wxd_Point pos,
     wxd_Size size,
-    long style,
+    int64_t style,
     wxd_Window_t* validator, // Typically NULL for DataViewCtrl
     const char* name
 );

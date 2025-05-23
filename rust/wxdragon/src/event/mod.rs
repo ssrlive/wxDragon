@@ -306,6 +306,7 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK);
 
     // ToolBar Events
+    pub const TOOL: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TOOL);
     pub const TOOL_ENTER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TOOL_ENTER);
 
     // TreeCtrl Events
@@ -534,6 +535,37 @@ pub trait WxEvtHandler {
             ffi::wxd_EvtHandler_Bind(
                 handler_ptr,
                 event_type.as_c_enum(),
+                trampoline_c_void,
+                user_data,
+            );
+        }
+    }
+
+    // Internal implementation with ID support for tools and menu items
+    #[doc(hidden)]
+    fn bind_with_id_internal<F>(&self, event_type: EventType, id: i32, callback: F)
+    where
+        F: FnMut(Event) + 'static,
+    {
+        let handler_ptr = unsafe { self.get_event_handler_ptr() };
+        if handler_ptr.is_null() {
+            /* ... error handling ... */
+            return;
+        }
+
+        // Box simple FnMut(Event)
+        let boxed_callback: Box<Box<dyn FnMut(Event) + 'static>> = Box::new(Box::new(callback));
+        let user_data = Box::into_raw(boxed_callback) as *mut c_void;
+
+        type TrampolineFn = unsafe extern "C" fn(*mut c_void, *mut c_void);
+        let trampoline_ptr: TrampolineFn = rust_event_handler_trampoline;
+        let trampoline_c_void = trampoline_ptr as *mut c_void;
+
+        unsafe {
+            ffi::wxd_EvtHandler_BindWithId(
+                handler_ptr,
+                event_type.as_c_enum(),
+                id,
                 trampoline_c_void,
                 user_data,
             );

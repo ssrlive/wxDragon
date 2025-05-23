@@ -5,34 +5,12 @@
 
 // --- wxDataObject implementations --- 
 
-// TextDataObject
-extern "C" WXDRAGON_API wxd_TextDataObject_t* wxd_TextDataObject_Create(const char* text) {
-    wxString wx_text = WXD_STR_TO_WX_STRING_UTF8_NULL_OK(text);
-    return reinterpret_cast<wxd_TextDataObject_t*>(new wxTextDataObject(wx_text));
-}
-
-extern "C" WXDRAGON_API void wxd_TextDataObject_Destroy(wxd_TextDataObject_t* obj) {
-    if (obj) {
-        delete reinterpret_cast<wxTextDataObject*>(obj);
-    }
-}
-
-extern "C" WXDRAGON_API int wxd_TextDataObject_GetText(wxd_TextDataObject_t* obj, char* buffer, int buffer_len) {
-    if (!obj || !buffer || buffer_len <= 0) return -1;
-    
-    wxTextDataObject* text_obj = reinterpret_cast<wxTextDataObject*>(obj);
-    wxString text = text_obj->GetText();
-    
-    return wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, buffer_len);
-}
-
-extern "C" WXDRAGON_API void wxd_TextDataObject_SetText(wxd_TextDataObject_t* obj, const char* text) {
-    if (!obj || !text) return;
-    
-    wxTextDataObject* text_obj = reinterpret_cast<wxTextDataObject*>(obj);
-    wxString wx_text = WXD_STR_TO_WX_STRING_UTF8_NULL_OK(text);
-    text_obj->SetText(wx_text);
-}
+// TextDataObject functions are now implemented in dataobject.cpp to avoid duplicate symbols
+// The following functions are commented out:
+// - wxd_TextDataObject_Create
+// - wxd_TextDataObject_Destroy  
+// - wxd_TextDataObject_GetText
+// - wxd_TextDataObject_SetText
 
 // FileDataObject
 // These functions are now defined in dataobject.cpp

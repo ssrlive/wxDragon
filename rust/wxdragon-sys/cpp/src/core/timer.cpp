@@ -8,7 +8,6 @@ extern "C" {
 WXD_EXPORTED wxd_Timer_t* wxd_Timer_Create(wxd_EvtHandler_t* owner) {
     wxEvtHandler* wx_owner = reinterpret_cast<wxEvtHandler*>(owner);
     if (!wx_owner) {
-        wxLogWarning("wxd_Timer_Create called with null owner");
         return nullptr;
     }
     wxTimer* timer = new wxTimer(wx_owner);
@@ -53,11 +52,18 @@ WXD_EXPORTED int wxd_Timer_GetInterval(wxd_Timer_t* self) {
     return timer->GetInterval();
 }
 
-// Set the timer interval in milliseconds
+// Set the timer interval in milliseconds (restart with new interval if running)
 WXD_EXPORTED void wxd_Timer_SetInterval(wxd_Timer_t* self, int milliseconds) {
     if (!self) return;
     wxTimer* timer = reinterpret_cast<wxTimer*>(self);
-    timer->SetInterval(milliseconds);
+    bool wasRunning = timer->IsRunning();
+    bool oneShot = timer->IsOneShot();
+    
+    if (wasRunning) {
+        timer->Stop();
+        timer->Start(milliseconds, oneShot);
+    }
+    // If not running, the interval will be used on the next Start() call
 }
 
 } // extern "C" 

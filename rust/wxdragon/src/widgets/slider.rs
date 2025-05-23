@@ -119,3 +119,6 @@ widget_builder!(
 
 // At the bottom of the file, add the ScrollEvents trait implementation
 impl ScrollEvents for Slider {}
+
+// Add XRC Support - enables Slider to be created from XRC-managed pointers
+impl_xrc_support!(Slider, { window });

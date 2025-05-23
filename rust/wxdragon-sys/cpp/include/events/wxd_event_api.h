@@ -18,6 +18,9 @@ WXD_EXPORTED void wxd_EvtHandler_Bind(
     void* rust_closure_ptr             
 );
 
+// ID-specific event binding for tools and menu items
+WXD_EXPORTED void wxd_EvtHandler_BindWithId(wxd_EvtHandler_t* evt_handler, WXDEventTypeCEnum event_type, int id, void* callback, void* user_data);
+
 WXD_EXPORTED int wxd_Event_GetId(wxd_Event_t* event);
 WXD_EXPORTED wxd_Window_t* wxd_Event_GetEventObject(wxd_Event_t* event);
 WXD_EXPORTED void wxd_Event_Skip(wxd_Event_t* event, bool skip);

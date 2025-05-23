@@ -42,9 +42,9 @@ impl TextEntryDialog {
     /// Creates a new TextEntryDialog wrapper from a raw pointer.
     /// # Safety
     /// The pointer must be a valid pointer to a wxTextEntryDialog.
-    pub(crate) unsafe fn from_ptr(ptr: TextEntryDialogPtr) -> Self {
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_TextEntryDialog_t) -> Self {
         TextEntryDialog {
-            dialog_base: Dialog::from_ptr(ptr as super::DialogPtr),
+            dialog_base: Dialog::from_ptr(ptr as *mut ffi::wxd_Dialog_t),
         }
     }
 

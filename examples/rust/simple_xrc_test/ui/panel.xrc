@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
+  <object class="wxPanel" name="widget_panel">
+    <style>wxTAB_TRAVERSAL</style>
+    
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      
+      <!-- Title -->
+      <object class="sizeritem">
+        <flag>wxEXPAND|wxALL</flag>
+        <border>5</border>
+        <object class="wxStaticText" name="panel_title">
+          <label>Widget Showcase Panel</label>
+          <font>
+            <size>14</size>
+            <weight>bold</weight>
+          </font>
+        </object>
+      </object>
+      
+      <!-- Main content in horizontal layout -->
+      <object class="sizeritem">
+        <flag>wxEXPAND|wxALL</flag>
+        <border>5</border>
+        <proportion>1</proportion>
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          
+          <!-- Left column -->
+          <object class="sizeritem">
+            <flag>wxEXPAND|wxALL</flag>
+            <border>5</border>
+            <proportion>1</proportion>
+            <object class="wxStaticBoxSizer">
+              <label>Text Controls</label>
+              <orient>wxVERTICAL</orient>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxStaticText" name="text_label">
+                  <label>Enter text:</label>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxTextCtrl" name="input_text">
+                  <value>Sample text</value>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxTextCtrl" name="multiline_text">
+                  <value>Multi-line
+text control</value>
+                  <style>wxTE_MULTILINE</style>
+                  <size>-1,80</size>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxSearchCtrl" name="search_ctrl">
+                  <value>Search...</value>
+                </object>
+              </object>
+              
+            </object>
+          </object>
+          
+          <!-- Middle column -->
+          <object class="sizeritem">
+            <flag>wxEXPAND|wxALL</flag>
+            <border>5</border>
+            <proportion>1</proportion>
+            <object class="wxStaticBoxSizer">
+              <label>Selection Controls</label>
+              <orient>wxVERTICAL</orient>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxCheckBox" name="enable_check">
+                  <label>Enable features</label>
+                  <checked>1</checked>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxRadioButton" name="option1_radio">
+                  <label>Option 1</label>
+                  <value>1</value>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxRadioButton" name="option2_radio">
+                  <label>Option 2</label>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxComboBox" name="choice_combo">
+                  <content>
+                    <item>Choice 1</item>
+                    <item>Choice 2</item>
+                    <item>Choice 3</item>
+                  </content>
+                  <selection>0</selection>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxListBox" name="items_list">
+                  <content>
+                    <item>Item 1</item>
+                    <item>Item 2</item>
+                    <item>Item 3</item>
+                    <item>Item 4</item>
+                  </content>
+                  <size>-1,80</size>
+                </object>
+              </object>
+              
+            </object>
+          </object>
+          
+          <!-- Right column -->
+          <object class="sizeritem">
+            <flag>wxEXPAND|wxALL</flag>
+            <border>5</border>
+            <proportion>1</proportion>
+            <object class="wxStaticBoxSizer">
+              <label>Actions &amp; Controls</label>
+              <orient>wxVERTICAL</orient>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxButton" name="show_dialog_btn">
+                  <label>Show Dialog</label>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxButton" name="action_btn">
+                  <label>Test Action</label>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxToggleButton" name="toggle_btn">
+                  <label>Toggle</label>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxSlider" name="value_slider">
+                  <value>50</value>
+                  <min>0</min>
+                  <max>100</max>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxGauge" name="progress_gauge">
+                  <value>30</value>
+                  <range>100</range>
+                </object>
+              </object>
+              
+              <object class="sizeritem">
+                <flag>wxEXPAND|wxALL</flag>
+                <border>3</border>
+                <object class="wxSpinCtrl" name="number_spin">
+                  <value>10</value>
+                  <min>0</min>
+                  <max>100</max>
+                </object>
+              </object>
+              
+            </object>
+          </object>
+          
+        </object>
+      </object>
+      
+      <!-- Status area -->
+      <object class="sizeritem">
+        <flag>wxEXPAND|wxALL</flag>
+        <border>5</border>
+        <object class="wxStaticText" name="status_label">
+          <label>Ready - Click 'Show Dialog' to test dialog functionality</label>
+          <style>wxST_ELLIPSIZE_END</style>
+        </object>
+      </object>
+      
+    </object>
+  </object>
+</resource> 

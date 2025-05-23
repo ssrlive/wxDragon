@@ -937,3 +937,6 @@ crate::implement_widget_local_event_handlers!(
 
 // Implement WindowEvents for standard window events
 impl WindowEvents for ListCtrl {}
+
+// Add XRC Support - enables ListCtrl to be created from XRC-managed pointers
+impl_xrc_support!(ListCtrl, { window });

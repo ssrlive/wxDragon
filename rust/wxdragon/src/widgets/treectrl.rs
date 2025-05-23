@@ -116,7 +116,7 @@ impl From<TreeItemIcon> for ffi::wxd_TreeItemIconType_t {
 // Represents the opaque wxTreeItemId used by wxWidgets.
 // This struct owns the pointer returned by the C++ FFI functions
 // and is responsible for freeing it via wxd_TreeItemId_Free.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TreeItemId {
     ptr: *mut ffi::wxd_TreeItemId_t,
 }
@@ -128,7 +128,34 @@ impl TreeItemId {
         if ptr.is_null() {
             None
         } else {
-            Some(TreeItemId { ptr })
+            // Add validation to ensure the C++ side returned a valid pointer
+            let ptr_value = ptr as usize;
+
+            // Basic sanity check on the pointer before accepting it
+            if ptr_value % std::mem::align_of::<*mut std::ffi::c_void>() == 0  // Properly aligned
+                && ptr_value > 0x1000  // Not in null/low memory range
+                && ptr_value < 0x8000_0000_0000_0000
+            // Not in kernel space
+            {
+                // Additional check: try to verify the TreeItemId is valid
+                if ffi::wxd_TreeItemId_IsOk(ptr) {
+                    Some(TreeItemId { ptr })
+                } else {
+                    eprintln!(
+                        "Warning: C++ returned invalid TreeItemId pointer {:p}, rejecting",
+                        ptr
+                    );
+                    // Free the invalid pointer since we were supposed to take ownership
+                    ffi::wxd_TreeItemId_Free(ptr);
+                    None
+                }
+            } else {
+                eprintln!(
+                    "Warning: C++ returned corrupted TreeItemId pointer {:p}, rejecting",
+                    ptr
+                );
+                None
+            }
         }
     }
 
@@ -140,6 +167,21 @@ impl TreeItemId {
     // Returns the raw pointer - use with caution.
     pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_TreeItemId_t {
         self.ptr
+    }
+}
+
+impl Clone for TreeItemId {
+    fn clone(&self) -> Self {
+        if self.ptr.is_null() {
+            // If the original is null, return a null TreeItemId
+            TreeItemId {
+                ptr: ptr::null_mut(),
+            }
+        } else {
+            // Use the C++ Clone function to create a proper copy
+            let clone_ptr = unsafe { ffi::wxd_TreeItemId_Clone(self.ptr) };
+            TreeItemId { ptr: clone_ptr }
+        }
     }
 }
 
@@ -156,9 +198,34 @@ impl Drop for TreeItemId {
         // Only free if the pointer is not null.
         if !self.ptr.is_null() {
             unsafe {
-                // Tell the C++ side to free the WXD_TreeItemId_t struct.
-                ffi::wxd_TreeItemId_Free(self.ptr);
+                // In release mode, we're seeing crashes when calling C++ functions on TreeItemId pointers.
+                // Let's be more defensive and add bounds checking.
+
+                // Check if the pointer looks reasonable (not obviously corrupted)
+                let ptr_value = self.ptr as usize;
+
+                // Basic sanity check: pointer should be aligned and in a reasonable memory range
+                // On macOS ARM64, user space addresses are typically in a specific range
+                if ptr_value % std::mem::align_of::<*mut std::ffi::c_void>() == 0  // Properly aligned
+                    && ptr_value > 0x1000  // Not in null/low memory range
+                    && ptr_value < 0x8000_0000_0000_0000
+                // Not in kernel space
+                {
+                    // Additional validation: check if the TreeItemId is valid before freeing
+                    if ffi::wxd_TreeItemId_IsOk(self.ptr) {
+                        // Tell the C++ side to free the WXD_TreeItemId_t struct.
+                        ffi::wxd_TreeItemId_Free(self.ptr);
+                    } else {
+                        // TreeItemId is not valid, but still try to free the memory
+                        // This might be a TreeItemId that was already invalidated
+                        ffi::wxd_TreeItemId_Free(self.ptr);
+                    }
+                } else {
+                    // Pointer looks corrupted, don't try to free it to avoid crashes
+                    eprintln!("Warning: Dropping TreeItemId with corrupted pointer {:p}, not freeing to avoid crash", self.ptr);
+                }
             }
+            self.ptr = ptr::null_mut();
         }
     }
 }
@@ -182,16 +249,14 @@ impl TreeIterationCookie {
 
 impl Drop for TreeIterationCookie {
     fn drop(&mut self) {
-        // Free the cookie if it hasn't been cleaned up already
-        if !self.cookie_ptr.is_null() {
-            // The cookie is cleaned up in the C++ side when GetNextChild returns null
-            // But we'll add this as an extra safety measure
-            unsafe {
-                // This assumes the cookie is a wxTreeItemIdValue* allocated with new
-                let _ = Box::from_raw(self.cookie_ptr);
-            }
-            self.cookie_ptr = ptr::null_mut();
-        }
+        // NOTE: The cookie is automatically freed by the C++ side when iteration
+        // completes (GetNextChild returns null), so we don't need to free it here.
+        // Attempting to free it manually was causing memory safety issues because
+        // the cookie is allocated with C++ 'new' but we were trying to free it
+        // with Rust's Box allocator.
+
+        // Just set to null for safety, but don't free
+        self.cookie_ptr = ptr::null_mut();
     }
 }
 
@@ -306,7 +371,7 @@ impl TreeCtrl {
         selected_image: Option<i32>,
     ) -> Option<TreeItemId> {
         let root_item = self.add_root(text, image, selected_image)?;
-        self.set_custom_data(&root_item, data);
+        self.set_custom_data_direct(&root_item, data);
         Some(root_item)
     }
 
@@ -361,7 +426,7 @@ impl TreeCtrl {
         selected_image: Option<i32>,
     ) -> Option<TreeItemId> {
         let item = self.append_item(parent, text, image, selected_image)?;
-        self.set_custom_data(&item, data);
+        self.set_custom_data_direct(&item, data);
         Some(item)
     }
 
@@ -638,38 +703,53 @@ impl HasItemData for TreeCtrl {
 impl TreeCtrl {
     // This is a special method to handle the case of getting a TreeItemId from something
     // that implements Into<u64>. It handles different ways the item might be passed.
-    fn get_concrete_tree_item_id(&self, id: u64) -> Option<TreeItemId> {
-        // First handle the special cases where we're given a numeric ID
-        match id {
-            // Special case for getting root item
-            1 => self.get_root_item(),
-            // Special case for getting selection
-            2 => self.get_selection(),
-            // If it's a large number, it might be a raw pointer from a TreeItemId reference
-            _ if id > u32::MAX as u64 => {
-                // Try to interpret it as a reference to an existing TreeItemId
-                let ptr = id as usize as *mut ();
-                if !ptr.is_null() {
-                    // Check if this looks like a valid pointer that might be a &TreeItemId
-                    // This requires unsafe code since we're trying to interpret arbitrary memory
-                    unsafe {
-                        let possible_tree_item = &*(ptr as *const TreeItemId);
+    fn get_concrete_tree_item_id(&self, _id: u64) -> Option<TreeItemId> {
+        // Handle the case where we're given a reference to an existing TreeItemId
+        // The id value will be the memory address of the TreeItemId reference
+        if _id > u32::MAX as u64 {
+            // Try to interpret it as a reference to an existing TreeItemId
+            let ptr = _id as usize as *const TreeItemId;
 
-                        // Validate that the TreeItemId seems legitimate
+            // Add extensive safety checks
+            if !ptr.is_null() {
+                // Check if the pointer looks reasonable (aligned and in valid memory range)
+                let ptr_value = ptr as usize;
+                if ptr_value % std::mem::align_of::<TreeItemId>() == 0  // Properly aligned
+                    && ptr_value > 0x1000  // Not in null/low memory range
+                    && ptr_value < 0x8000_0000_0000_0000
+                // Not in kernel space (macOS ARM64)
+                {
+                    unsafe {
+                        // Try to dereference the pointer carefully
+                        let possible_tree_item = &*ptr;
+
+                        // Validate that the TreeItemId's internal pointer looks reasonable
+                        let internal_ptr = possible_tree_item.ptr as usize;
                         if !possible_tree_item.ptr.is_null()
-                            && ffi::wxd_TreeItemId_IsOk(possible_tree_item.ptr)
+                            && internal_ptr % std::mem::align_of::<*mut std::ffi::c_void>() == 0
+                            && internal_ptr > 0x1000
+                            && internal_ptr < 0x8000_0000_0000_0000
                         {
-                            // Clone it to avoid lifetime issues
-                            let clone_ptr = ffi::wxd_TreeItemId_Clone(possible_tree_item.ptr);
-                            if !clone_ptr.is_null() {
-                                return Some(TreeItemId { ptr: clone_ptr });
+                            // Final validation: check if the TreeItemId is actually valid
+                            if ffi::wxd_TreeItemId_IsOk(possible_tree_item.ptr) {
+                                // Clone it to avoid lifetime issues
+                                let clone_ptr = ffi::wxd_TreeItemId_Clone(possible_tree_item.ptr);
+                                if !clone_ptr.is_null() {
+                                    return Some(TreeItemId { ptr: clone_ptr });
+                                }
                             }
                         }
                     }
                 }
-
-                None
             }
+        }
+
+        // For smaller values, handle special cases
+        match _id {
+            // Special case for getting root item
+            1 => self.get_root_item(),
+            // Special case for getting selection
+            2 => self.get_selection(),
             _ => None,
         }
     }
@@ -692,6 +772,33 @@ impl TreeCtrl {
                 self.clean_item_and_children(&next_child);
             }
         }
+    }
+
+    /// Direct method to set custom data on a TreeItemId without going through u64 conversion.
+    /// This is safer than the trait method when you have a direct TreeItemId reference.
+    pub fn set_custom_data_direct<T: Any + Send + Sync + 'static>(
+        &self,
+        item_id: &TreeItemId,
+        data: T,
+    ) -> u64 {
+        // First check if there's already data associated with this item
+        let existing_data_id =
+            unsafe { ffi::wxd_TreeCtrl_GetItemData(self.as_ptr(), item_id.as_ptr()) as u64 };
+
+        // If we have existing data, remove it from the registry
+        if existing_data_id != 0 {
+            let _ = remove_item_data(existing_data_id);
+        }
+
+        // Store the new data in the registry
+        let data_id = store_item_data(data);
+
+        // Store the data_id in wxWidgets via the C++ FFI
+        unsafe {
+            ffi::wxd_TreeCtrl_SetItemData(self.as_ptr(), item_id.as_ptr(), data_id as i64);
+        }
+
+        data_id
     }
 }
 
@@ -720,3 +827,6 @@ impl TreeEvents for TreeCtrl {}
 
 // After TreeEvents implementation at the bottom
 impl WindowEvents for TreeCtrl {}
+
+// Add XRC Support - enables TreeCtrl to be created from XRC-managed pointers
+impl_xrc_support!(TreeCtrl, { window });

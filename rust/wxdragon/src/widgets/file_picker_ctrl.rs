@@ -113,6 +113,9 @@ crate::implement_widget_local_event_handlers!(
 // Implement WindowEvents to get standard window events
 impl WindowEvents for FilePickerCtrl {}
 
+// Add XRC Support - enables FilePickerCtrl to be created from XRC-managed pointers
+impl_xrc_support!(FilePickerCtrl, { window });
+
 // Use the widget_builder macro to generate the FilePickerCtrlBuilder implementation
 widget_builder!(
     name: FilePickerCtrl,
