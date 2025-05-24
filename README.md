@@ -49,6 +49,8 @@ fn main() {
 
 wxDragon also supports XRC (XML Resource) files for declarative UI development with compile-time type safety.
 
+You could use (wxFormBuilder)[https://github.com/wxFormBuilder/wxFormBuilder] as UI designer to generate XRC.
+
 **1. Define your UI in XRC format (`ui/main.xrc`):**
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
