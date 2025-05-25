@@ -4,6 +4,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
+    if env::var("DOCS_RS").is_ok() || (env::var("RUST_ANALYZER") == Ok("true".to_string())) {
+        return;
+    }
     println!("cargo:rerun-if-changed=cpp/CMakeLists.txt");
     println!("cargo:rerun-if-changed=cpp/include/wxdragon.h");
     println!("cargo:rerun-if-changed=cpp/include/wxd_types.h");
