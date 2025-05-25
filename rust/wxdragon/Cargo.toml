@@ -17,3 +17,8 @@ wxdragon-macros = { path = "../../rust/wxdragon-macros" }
 lazy_static = "1.4.0" 
 paste = "1.0.15"
 bitflags = "2.4.2"
+
+[features]
+default = []
+media-ctrl = ["wxdragon-sys/media-ctrl"]
+webview = ["wxdragon-sys/webview"]

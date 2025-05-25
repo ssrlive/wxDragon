@@ -28,6 +28,7 @@ pub mod hyperlink_ctrl;
 pub mod item_data;
 pub mod list_ctrl;
 pub mod listbox;
+#[cfg(feature = "media-ctrl")]
 pub mod media_ctrl;
 pub mod notebook;
 pub mod notification_message;
@@ -101,6 +102,7 @@ pub use gauge::{Gauge, GaugeBuilder};
 pub use hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};
 pub use list_ctrl::{ListCtrl, ListCtrlBuilder};
 pub use listbox::{ListBox, ListBoxBuilder};
+#[cfg(feature = "media-ctrl")]
 pub use media_ctrl::{MediaCtrl, MediaCtrlBuilder, MediaCtrlPlayerControls, MediaState};
 pub use notebook::{Notebook, NotebookBuilder};
 pub use panel::{Panel, PanelBuilder};

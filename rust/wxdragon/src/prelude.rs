@@ -97,6 +97,7 @@ pub use crate::widgets::list_ctrl::{
     // Events for ListCtrl are now in list_ctrl/event.rs, re-exported from list_ctrl/mod.rs
 }; // Added Events
 pub use crate::widgets::listbox::{ListBox, ListBoxBuilder, ListBoxStyle};
+#[cfg(feature = "media-ctrl")]
 pub use crate::widgets::media_ctrl::{
     MediaCtrl, MediaCtrlBuilder, MediaCtrlPlayerControls, MediaState,
 };

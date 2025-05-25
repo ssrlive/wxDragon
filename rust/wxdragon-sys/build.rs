@@ -117,6 +117,14 @@ fn main() {
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
 
+    if cfg!(feature = "media-ctrl") {
+        cmake_config.define("wxdUSE_MEDIACTRL", "ON");
+    }
+
+    if cfg!(feature = "webview") {
+        cmake_config.define("wxdUSE_WEBVIEW", "ON");
+    }
+
     // Set CMake build type based on Rust profile
     if is_debug {
         cmake_config.define("CMAKE_BUILD_TYPE", "Debug");
@@ -347,7 +355,37 @@ fn main() {
         println!("cargo:rustc-link-arg=-static-libstdc++");
         println!("cargo:rustc-link-arg=-static-libgcc");
     } else {
-        println!("info: Manual linking flags are currently only implemented for macOS and Windows (GNU). Build may fail on other platforms.");
+        println!("cargo:rustc-link-lib=xkbcommon");
+        let lib = pkg_config::Config::new()
+            .probe("gtk+-3.0")
+            .unwrap();
+        for l in lib.libs {
+            println!("cargo:rustc-link-lib={}", l);
+        }
+        println!("cargo:rustc-link-lib=X11");
+        println!("cargo:rustc-link-lib=png");
+        println!("cargo:rustc-link-lib=jpeg");
+        println!("cargo:rustc-link-lib=expat");
+        println!("cargo:rustc-link-lib=tiff");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.2");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
+        println!("cargo:rustc-link-lib=static=wxscintilla-3.2");
+        println!("cargo:rustc-link-lib=stdc++");
+
+        if cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.2");
+        }
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.2");
+        }
     }
 
     // --- 4. Bindgen Include Path Setup ---
