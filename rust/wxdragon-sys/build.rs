@@ -285,9 +285,9 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=AVFoundation");
         println!("cargo:rustc-link-lib=framework=AVKit");
         println!("cargo:rustc-link-lib=framework=CoreMedia");
-    } else if target_os == "windows" && target_env == "gnu" {
+    } else if target_os == "windows" {
         if is_debug {
-            println!("info: Using DEBUG linking flags for Windows (GNU).");
+            println!("info: Using DEBUG linking flags for Windows.");
             // wxWidgets debug libraries from user's ll output
             println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
@@ -352,11 +352,9 @@ fn main() {
         println!("cargo:rustc-link-lib=wininet");
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
-        println!("cargo:rustc-link-lib=static=stdc++");
-
-        // Add flags for static linking of libstdc++ and libgcc
-        println!("cargo:rustc-link-arg=-static-libstdc++");
-        println!("cargo:rustc-link-arg=-static-libgcc");
+        if target_env == "gnu" {
+            println!("cargo:rustc-link-lib=stdc++");
+        }
     } else {
         println!("cargo:rustc-link-lib=xkbcommon");
         let lib = pkg_config::Config::new()

@@ -30,6 +30,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install libclang
+      run: winget install LLVM.LLVM
     - name: Build
       run: cargo build
 
@@ -44,6 +46,6 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-cc mingw-w64-x86_64-cmake mingw-w64-x86_64-make mingw-w64-x86_64-rust --needed
+          install: git $MINGW_PACKAGE_PREFIX-cc $MINGW_PACKAGE_PREFIX-cmake $MINGW_PACKAGE_PREFIX-make $MINGW_PACKAGE_PREFIX-rust $MINGW_PACKAGE_PREFIX-clang --needed
       - name: Build
         run: cargo build
