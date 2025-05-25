@@ -32,7 +32,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build
       run: |
-        SET LIBCLANG_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin
+        SET LIBCLANG_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin"
         cargo build
 
   build-msys-mingw64:
