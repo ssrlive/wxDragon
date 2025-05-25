@@ -245,11 +245,10 @@ fn main() {
         // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib");
     }
 
-    println!("cargo:rustc-link-lib=static=wxdragon");
-
     if target_os == "macos" {
         // macOS linking flags (assuming release build for wxWidgets library names here)
         // If macOS also has d suffix for debug, this section would need similar conditional logic
+        println!("cargo:rustc-link-lib=static=wxdragon");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
@@ -287,7 +286,8 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=CoreMedia");
     } else if target_os == "windows" {
         if is_debug {
-            println!("info: Using DEBUG linking flags for Windows.");
+            println!("cargo:rustc-link-lib=static=wxdragond");
+            println!("info: Using DEBUG linking flags for Windows");
             // wxWidgets debug libraries from user's ll output
             println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
@@ -311,6 +311,7 @@ fn main() {
         } else {
             println!("info: Using RELEASE linking flags for Windows (GNU) based on user-provided ll output.");
             // wxWidgets release libraries from user-provided ll output
+            println!("cargo:rustc-link-lib=static=wxdragon");
             println!("cargo:rustc-link-lib=static=wxmsw32u_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32u_adv");
             println!("cargo:rustc-link-lib=static=wxmsw32u_core");
@@ -356,6 +357,7 @@ fn main() {
             println!("cargo:rustc-link-lib=stdc++");
         }
     } else {
+        println!("cargo:rustc-link-lib=static=wxdragon");
         println!("cargo:rustc-link-lib=xkbcommon");
         let lib = pkg_config::Config::new()
             .probe("gtk+-3.0")
