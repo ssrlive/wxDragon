@@ -206,9 +206,12 @@ _(Note: The `const_extractor` path and the exact location of the workspace `Carg
 
 #### MSVC
   An additional build tool is required: Ninja!
-  libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html). 
+  This can be installed using winget (or any of the current windows package managers):
+  ```
+  winget install --id=Ninja-build.Ninja  -e
+  ```
+  libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html), LLVM and libclang can also be installed through the Visual Studio Installer.
   Also verify that you have a windows sdk installed through your Visual Studio Installer. 
-  
 
 ## Cross-Compilation (macOS to Windows)
 
