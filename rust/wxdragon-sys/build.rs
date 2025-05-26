@@ -4,6 +4,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
+    if env::var("DOCS_RS").is_ok() || (env::var("RUST_ANALYZER") == Ok("true".to_string())) {
+        return;
+    }
     println!("cargo:rerun-if-changed=cpp/CMakeLists.txt");
     println!("cargo:rerun-if-changed=cpp/include/wxdragon.h");
     println!("cargo:rerun-if-changed=cpp/include/wxd_types.h");
@@ -116,6 +119,14 @@ fn main() {
     let libwxdragon_cmake_source_dir = PathBuf::from("cpp");
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
+
+    if cfg!(feature = "media-ctrl") {
+        cmake_config.define("wxdUSE_MEDIACTRL", "ON");
+    }
+
+    if cfg!(feature = "webview") {
+        cmake_config.define("wxdUSE_WEBVIEW", "ON");
+    }
 
     // Set CMake build type based on Rust profile
     if is_debug {
@@ -234,11 +245,10 @@ fn main() {
         // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib");
     }
 
-    println!("cargo:rustc-link-lib=static=wxdragon");
-
     if target_os == "macos" {
         // macOS linking flags (assuming release build for wxWidgets library names here)
         // If macOS also has d suffix for debug, this section would need similar conditional logic
+        println!("cargo:rustc-link-lib=static=wxdragon");
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
@@ -274,9 +284,10 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=AVFoundation");
         println!("cargo:rustc-link-lib=framework=AVKit");
         println!("cargo:rustc-link-lib=framework=CoreMedia");
-    } else if target_os == "windows" && target_env == "gnu" {
+    } else if target_os == "windows" {
         if is_debug {
-            println!("info: Using DEBUG linking flags for Windows (GNU).");
+            println!("cargo:rustc-link-lib=static=wxdragond");
+            println!("info: Using DEBUG linking flags for Windows");
             // wxWidgets debug libraries from user's ll output
             println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
@@ -300,6 +311,7 @@ fn main() {
         } else {
             println!("info: Using RELEASE linking flags for Windows (GNU) based on user-provided ll output.");
             // wxWidgets release libraries from user-provided ll output
+            println!("cargo:rustc-link-lib=static=wxdragon");
             println!("cargo:rustc-link-lib=static=wxmsw32u_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32u_adv");
             println!("cargo:rustc-link-lib=static=wxmsw32u_core");
@@ -341,13 +353,42 @@ fn main() {
         println!("cargo:rustc-link-lib=wininet");
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
-        println!("cargo:rustc-link-lib=static=stdc++");
-
-        // Add flags for static linking of libstdc++ and libgcc
-        println!("cargo:rustc-link-arg=-static-libstdc++");
-        println!("cargo:rustc-link-arg=-static-libgcc");
+        if target_env == "gnu" {
+            println!("cargo:rustc-link-lib=stdc++");
+        }
     } else {
-        println!("info: Manual linking flags are currently only implemented for macOS and Windows (GNU). Build may fail on other platforms.");
+        println!("cargo:rustc-link-lib=static=wxdragon");
+        println!("cargo:rustc-link-lib=xkbcommon");
+        let lib = pkg_config::Config::new()
+            .probe("gtk+-3.0")
+            .unwrap();
+        for l in lib.libs {
+            println!("cargo:rustc-link-lib={}", l);
+        }
+        println!("cargo:rustc-link-lib=X11");
+        println!("cargo:rustc-link-lib=png");
+        println!("cargo:rustc-link-lib=jpeg");
+        println!("cargo:rustc-link-lib=expat");
+        println!("cargo:rustc-link-lib=tiff");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.2");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
+        println!("cargo:rustc-link-lib=static=wxscintilla-3.2");
+        println!("cargo:rustc-link-lib=stdc++");
+
+        if cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.2");
+        }
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.2");
+        }
     }
 
     // --- 4. Bindgen Include Path Setup ---

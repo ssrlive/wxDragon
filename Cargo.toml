@@ -11,7 +11,7 @@ members = [
     "examples/rust/dc_example",
     "examples/rust/dnd_advanced",
     "examples/rust/clipboard_test",
-    "examples/rust/mediaplayer",
+    # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]
 

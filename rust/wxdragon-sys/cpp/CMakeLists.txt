@@ -18,18 +18,24 @@ message(STATUS "Using wxWidgets source from: ${WXWIDGETS_SOURCE_DIR}")
 
 # --- Configure wxWidgets Build Options (applied to the downloaded source) ---
 message(STATUS "Configuring wxWidgets build options...")
-set(wxBUILD_SHARED OFF CACHE BOOL "Build static libraries")
-set(wxBUILD_SAMPLES OFF CACHE BOOL "")
-set(wxBUILD_TESTS OFF CACHE BOOL "")
-set(wxBUILD_DEMOS OFF CACHE BOOL "")
-set(wxBUILD_BENCHMARKS OFF CACHE BOOL "")
-set(wxUSE_EXCEPTIONS ON CACHE BOOL "")
-set(wxUSE_GUI ON CACHE BOOL "")
-set(wxUSE_STC ON CACHE BOOL "")
-set(wxUSE_WEBVIEW ON CACHE BOOL "")
-set(wxUSE_OPENGL ON CACHE BOOL "")
-set(wxUSE_HTML ON CACHE BOOL "")
-set(wxUSE_MEDIACTRL ON CACHE BOOL "") 
+set(wxBUILD_SHARED OFF)
+set(wxBUILD_SAMPLES OFF)
+set(wxBUILD_TESTS OFF)
+set(wxBUILD_DEMOS OFF)
+set(wxBUILD_BENCHMARKS OFF)
+set(wxUSE_EXCEPTIONS ON)
+set(wxUSE_GUI ON)
+set(wxUSE_STC ON)
+set(wxUSE_OPENGL ON)
+set(wxUSE_HTML ON)
+option(wxdUSE_WEBVIEW "Use Media Ctrl widgets" OFF)
+if (wxdUSE_WEBVIEW)
+    set(wxUSE_WEBVIEW ON)
+endif()
+option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" OFF)
+if (wxdUSE_MEDIACTRL)
+    set(wxUSE_MEDIACTRL ON) 
+endif()
 
 # Platform-specific options
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -56,10 +62,107 @@ add_subdirectory(${WXWIDGETS_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/wxwidgets_b
 
 # --- Define wxDragon Library Target ---
 message(STATUS "Defining wxdragon static library target")
-
 # Source files are relative to this CMakeLists.txt (rust/wxdragon-sys/cpp)
-# Use GLOB to find all .cpp files in the src directory automatically
-file(GLOB_RECURSE WXDRAGON_SOURCES "src/*.cpp")
+set(WXDRAGON_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/activity_indicator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/app.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/array_string.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/art_provider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_manager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_child_frame.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_parent_frame.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_notebook.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_toolbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap_button.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmapbundle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmapbutton.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmapcombobox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/button.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/calendar_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/checkbox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/checklistbox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/choice.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/clipboard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/colourdialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/colourpickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/combobox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/commandlinkbutton.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataobject.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataview.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataviewtreectrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataviewvirtuallistmodel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dataviewvirtuallistmodel_custom.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datepickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/datetime.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dir_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dirpickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dnd.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/droptarget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/editablelistbox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/event.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/event.cpp.bak
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/file_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/file_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/filepickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/font_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/fontpickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/frame.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gauge.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hyperlink_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/imagelist.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/item.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/list_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/listbox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/menu.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/message_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/multi_choice_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/notebook.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/notificationmessage.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/panel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/progressdialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/radio_button.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/radiobox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rearrangelist.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrollbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scrolled_window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/search_ctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/single_choice_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sizer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/slider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/spinbutton.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/spinctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/spinctrldouble.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/splitterwindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/static_bitmap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/static_line.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/static_text.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/staticbox.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/statusbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/text_entry_dialog.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/textctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timepickerctrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/togglebutton.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/toolbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/treebook.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/treectrl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp
+)
+
+if (wxdUSE_MEDIACTRL)
+    list(APPEND ${WXDRAGON_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/media_ctrl.cpp)
+endif()
+if (wxdUSE_WEBVIEW)
+    # similarly append webview wrapper
+endif()
+
 if(NOT WXDRAGON_SOURCES)
     message(FATAL_ERROR "No source files found in ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 endif()

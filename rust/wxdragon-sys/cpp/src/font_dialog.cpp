@@ -101,7 +101,11 @@ bool wxd_Font_IsOk(wxd_Font_t* self) {
 
 WXD_EXPORTED bool wxd_Font_AddPrivateFont(const char* font_file_path) {
     if (!font_file_path) return false;
+#if wxUSE_PRIVATE_FONTS
     return wxFont::AddPrivateFont(WXD_STR_TO_WX_STRING_UTF8_NULL_OK(font_file_path));
+#else
+    return false;
+#endif
 }
 
 WXD_EXPORTED wxd_Font_t* wxd_Font_CreateEx(int point_size, int family, int style, int weight, bool underlined, const char* face_name) {

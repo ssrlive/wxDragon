@@ -136,6 +136,7 @@ pub use widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 // ADDED: Re-export ScrollBar
 pub use widgets::scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 
+#[cfg(feature = "media-ctrl")]
 // ADDED: Re-export MediaCtrl
 pub use widgets::media_ctrl::{MediaCtrl, MediaCtrlBuilder, MediaState};
 
