@@ -4,6 +4,8 @@
 #include "../include/wxdragon.h"
 #include "wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK and GET_WX_STRING_RESULT
 
+extern void wxd_ArrayString_AssignFromWxArrayString(wxd_ArrayString_t* target, const wxArrayString& source);
+
 // --- wxFileDialog ---
 
 WXD_EXPORTED wxd_FileDialog_t* wxd_FileDialog_Create(

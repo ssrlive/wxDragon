@@ -4,9 +4,6 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
-    if env::var("DOCS_RS").is_ok() || (env::var("RUST_ANALYZER") == Ok("true".to_string())) {
-        return;
-    }
     println!("cargo:rerun-if-changed=cpp/CMakeLists.txt");
     println!("cargo:rerun-if-changed=cpp/include/wxdragon.h");
     println!("cargo:rerun-if-changed=cpp/include/wxd_types.h");
@@ -32,7 +29,69 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
     let mut is_debug = profile == "debug";
+    let target = env::var("TARGET").unwrap();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
 
+    // --- 1. Bindgen Include Path Setup ---
+    println!("info: Setting up include paths for bindgen...");
+
+    let mut bindings_builder = bindgen::Builder::default()
+        .header("cpp/include/wxdragon.h")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
+
+    if target_os == "macos" {
+        // macOS bindgen args (assuming release for setup.h path for now)
+        bindings_builder = bindings_builder
+            .clang_arg("-D__WXOSX_COCOA__")
+            .clang_arg("-D__WXMAC__")
+            .clang_arg("-D__WXOSX__")
+            .clang_arg("-D_FILE_OFFSET_BITS=64");
+        if !is_debug {
+            // NDEBUG for release, _DEBUG for debug is common for wx
+            bindings_builder = bindings_builder.clang_arg("-DNDEBUG");
+        } else {
+            bindings_builder = bindings_builder
+                .clang_arg("-D_DEBUG")
+                .clang_arg("-DwxDEBUG_LEVEL=1");
+        }
+    } else if target_os == "windows" && target_env == "gnu" {
+        bindings_builder = bindings_builder
+            .clang_arg("-D__WXMSW__")
+            .clang_arg("-D_FILE_OFFSET_BITS=64")
+            .clang_arg("-DwxUSE_UNICODE=1");
+
+        if is_debug {
+            bindings_builder = bindings_builder
+                .clang_arg("-D_DEBUG")
+                .clang_arg("-DwxDEBUG_LEVEL=1");
+        } else {
+            bindings_builder = bindings_builder.clang_arg("-DNDEBUG");
+        }
+    } else {
+        println!("info: Manual bindgen Clang args are currently only implemented for macOS and Windows (GNU). Bindgen may use incomplete include paths on other platforms.");
+    }
+
+    bindings_builder = bindings_builder.clang_arg(format!("--target={}", target));
+
+    let bindings = bindings_builder
+        .generate()
+        .expect("Unable to generate bindings");
+
+    bindings
+        .write_to_file(out_dir.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
+
+    println!(
+        "info: Successfully generated FFI bindings to {:?}",
+        out_dir.join("bindings.rs")
+    );
+
+    if env::var("DOCS_RS").is_ok() || (env::var("RUST_ANALYZER") == Ok("true".to_string())) {
+        return;
+    }
+
+    // --- 2. Download and Extract wxWidgets Source ---
     let wx_version = "3.2.8";
     let wx_tarball_name = format!("wxWidgets-{}.tar.bz2", wx_version);
     let wx_download_url = format!(
@@ -42,8 +101,6 @@ fn main() {
 
     let tarball_dest_path = out_dir.join(&wx_tarball_name);
     let wx_extracted_source_path = out_dir.join(format!("wxWidgets-{}", wx_version));
-
-    // --- 1. Download and Extract wxWidgets Source ---
     if !wx_extracted_source_path.exists() {
         if !tarball_dest_path.exists() {
             println!(
@@ -115,10 +172,8 @@ fn main() {
         );
     }
 
-    // --- 2. Configure and Build libwxdragon (and wxWidgets) using CMake ---
+    // --- 3. Configure and Build libwxdragon (and wxWidgets) using CMake ---
     let libwxdragon_cmake_source_dir = PathBuf::from("cpp");
-    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
 
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
@@ -162,7 +217,7 @@ fn main() {
         wxwidgets_build_dir
     );
 
-    // --- 3. Linker Instructions ---
+    // --- 4. Linker Instructions ---
     println!(
         "cargo:rustc-link-search=native={}",
         lib_search_path.display()
@@ -403,72 +458,4 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.2");
         }
     }
-
-    // --- 4. Bindgen Include Path Setup ---
-    println!("info: Setting up include paths for bindgen...");
-    let wx_source_include_dir = wx_extracted_source_path.join("include");
-
-    let mut bindings_builder = bindgen::Builder::default()
-        .header("cpp/include/wxdragon.h")
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        .clang_arg(format!("-I{}", wx_source_include_dir.display()));
-
-    if target_os == "macos" {
-        // macOS bindgen args (assuming release for setup.h path for now)
-        let wx_setup_h_include_path =
-            wxwidgets_build_dir.join("lib/wx/include/osx_cocoa-unicode-static-3.2");
-        bindings_builder = bindings_builder
-            .clang_arg(format!("-I{}", wx_setup_h_include_path.display()))
-            .clang_arg("-D__WXOSX_COCOA__")
-            .clang_arg("-D__WXMAC__")
-            .clang_arg("-D__WXOSX__")
-            .clang_arg("-D_FILE_OFFSET_BITS=64");
-        if !is_debug {
-            // NDEBUG for release, _DEBUG for debug is common for wx
-            bindings_builder = bindings_builder.clang_arg("-DNDEBUG");
-        } else {
-            bindings_builder = bindings_builder
-                .clang_arg("-D_DEBUG")
-                .clang_arg("-DwxDEBUG_LEVEL=1");
-        }
-    } else if target_os == "windows" && target_env == "gnu" {
-        let wx_setup_h_parent_dir_segment = if is_debug {
-            "lib/gcc_x64_lib/mswud" // Path from user's tree output, contains wx/setup.h
-        } else {
-            "lib/gcc_x64_lib/mswu" // Path from user's tree output, contains wx/setup.h
-        };
-        let wx_setup_h_include_path = wxwidgets_build_dir.join(wx_setup_h_parent_dir_segment);
-
-        bindings_builder = bindings_builder
-            .clang_arg(format!("-I{}", wx_setup_h_include_path.display()))
-            .clang_arg("-D__WXMSW__")
-            .clang_arg("-D_FILE_OFFSET_BITS=64")
-            .clang_arg("-DwxUSE_UNICODE=1");
-
-        if is_debug {
-            bindings_builder = bindings_builder
-                .clang_arg("-D_DEBUG")
-                .clang_arg("-DwxDEBUG_LEVEL=1");
-        } else {
-            bindings_builder = bindings_builder.clang_arg("-DNDEBUG");
-        }
-    } else {
-        println!("info: Manual bindgen Clang args are currently only implemented for macOS and Windows (GNU). Bindgen may use incomplete include paths on other platforms.");
-    }
-
-    let target = env::var("TARGET").unwrap();
-    bindings_builder = bindings_builder.clang_arg(format!("--target={}", target));
-
-    let bindings = bindings_builder
-        .generate()
-        .expect("Unable to generate bindings");
-
-    bindings
-        .write_to_file(out_dir.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-
-    println!(
-        "info: Successfully generated FFI bindings to {:?}",
-        out_dir.join("bindings.rs")
-    );
 }

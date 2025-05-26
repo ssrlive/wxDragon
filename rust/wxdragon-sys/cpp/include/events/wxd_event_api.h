@@ -3,12 +3,11 @@
 
 #include "../wxd_types.h"
 
-#ifndef __cplusplus
-// Provide a C-compatible typedef for wxEventType for bindgen, 
-// as it's used as a return type in C API functions parsed by bindgen.
-// The actual C++ definition comes from <wx/event.h> via wxd_types.h for C++ compilation.
-typedef int wxEventType;
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+typedef int wxEventType;
 
 // --- Event Handling & Data Access --- 
 WXD_EXPORTED void wxd_EvtHandler_Bind(
@@ -98,5 +97,9 @@ WXD_EXPORTED int32_t wxd_CheckListBoxEvent_GetSelection(wxd_Event_t* self);
 
 // Notebook specific event functions
 WXD_EXPORTED int32_t wxd_NotebookEvent_GetSelection(wxd_Event_t* self);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WXD_EVENT_API_H 

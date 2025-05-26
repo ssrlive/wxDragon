@@ -1,20 +1,6 @@
 #ifndef WXD_TYPES_H
 #define WXD_TYPES_H
 
-#ifdef __cplusplus
-// Include essential wxWidgets headers for type definitions
-#include <wx/defs.h>      // For wxEventType, wxWindowID, etc.
-#include <wx/event.h>     // For wxEvent, wxCommandEvent, wxMouseEvent, wxKeyEvent etc.
-#include <wx/gdicmn.h>    // For wxPoint, wxSize, wxRect
-#include <wx/colour.h>    // For wxColour
-#include <wx/datetime.h>  // For wxDateTime
-#include <wx/variant.h>   // For wxVariant
-#include <wx/bmpbndl.h>   // For wxBitmapBundle
-#include <wx/rearrangectrl.h> // For wxRearrangeList
-// For DataView related types
-#include <wx/dataview.h>  // For wxDataViewItem, wxDataViewModel, etc.
-#endif
-
 // Use standard C types
 #include <stdbool.h> 
 #include <stdint.h> // For integer types if needed
@@ -435,11 +421,7 @@ typedef struct wxd_TreeItemId_Opaque_ForBindgen wxd_TreeItemId_t; // Define as o
 
 // --- Opaque and FFI Struct Definitions ---
 // Moved from wxd_event_api.h to ensure it's defined before use in event.cpp
-#ifdef __cplusplus
-struct wxd_Event_t { wxEvent* event; };
-#else
 typedef struct wxd_Event_t wxd_Event_t;
-#endif
 
 typedef struct wxd_App_t wxd_App_t;
 typedef struct wxd_Window_t wxd_Window_t;
