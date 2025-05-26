@@ -191,27 +191,27 @@ _(Note: The `const_extractor` path and the exact location of the workspace `Carg
       - Generate Rust FFI bindings (`bindings.rs`) using `bindgen` against `rust/wxdragon-sys/cpp/include/wxdragon.h` and the built wxWidgets headers.
       - Configure Cargo to link `libwxdragon.a` and the necessary wxWidgets libraries.
 
-### MacOS
-  Apart from the necessary build tools (CMake, Rust and the C++ compiler), the build requires no additional dependencies. wxDragon uses a hardcoded set of linker flags and bindgen include paths derived from `wx-config` for stability.
-
-#### Linux
-  wxDragon requires gtk+-3.0 which the build script finds via pkg-config. It also requires libclang to generate the bindings. This requires the user to install the development packages necessary to build wxWidgets. Which for debian-based distros:
-  ```bash
-  sudo apt-get install libclang-dev pkg-config libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev
-  ```
-
-### Windows
-#### GNU
-  If you're targeting the gnu toolchain, you will still need to install libclang which can be done using `pacman -S $MINGW_PACKAGE_PREFIX-clang`. This is necessary for generating the rust-bindgen bindings.
-
-#### MSVC
-  An additional build tool is required: Ninja!
-  This can be installed using winget (or any of the current windows package managers):
-  ```
-  winget install --id=Ninja-build.Ninja  -e
-  ```
-  libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html), LLVM and libclang can also be installed through the Visual Studio Installer.
-  Also verify that you have a windows sdk installed through your Visual Studio Installer. 
+    #### MacOS
+      Apart from the necessary build tools (CMake, Rust and the C++ compiler), the build requires no additional dependencies. wxDragon uses a hardcoded set of linker flags and bindgen include paths derived from `wx-config` for stability.
+    
+    #### Linux
+      wxDragon requires gtk+-3.0 which the build script finds via pkg-config. It also requires libclang to generate the bindings. This requires the user to install the development packages necessary to build wxWidgets. Which for debian-based distros:
+      ```bash
+      sudo apt-get install libclang-dev pkg-config libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev
+      ```
+    
+    #### Windows
+    ##### GNU
+      If you're targeting the gnu toolchain, you will still need to install libclang which can be done using `pacman -S $MINGW_PACKAGE_PREFIX-clang`. This is necessary for generating the rust-bindgen bindings.
+    
+    ##### MSVC
+      An additional build tool is required: Ninja!
+      This can be installed using winget (or any of the current windows package managers):
+      ```
+      winget install --id=Ninja-build.Ninja  -e
+      ```
+      libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html), LLVM and libclang can also be installed through the Visual Studio Installer.
+      Also verify that you have a windows sdk installed through your Visual Studio Installer. 
 
 ## Cross-Compilation (macOS to Windows)
 
