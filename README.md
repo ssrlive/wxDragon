@@ -190,8 +190,25 @@ _(Note: The `const_extractor` path and the exact location of the workspace `Carg
       - Copy the appropriate pre-generated platform-specific constants file (e.g., `wx_msw_constants.rs`) from `rust/wxdragon-sys/src/generated_constants/` to `$OUT_DIR/wx_other_constants.rs`.
       - Generate Rust FFI bindings (`bindings.rs`) using `bindgen` against `rust/wxdragon-sys/cpp/include/wxdragon.h` and the built wxWidgets headers.
       - Configure Cargo to link `libwxdragon.a` and the necessary wxWidgets libraries.
-      - **For macOS:** Uses a hardcoded set of linker flags and bindgen include paths derived from `wx-config` for stability.
-      - **For Linux/Windows:** Current build script has placeholders; full support for these platforms (e.g., via `pkg-config` on Linux) is pending.
+
+### MacOS
+  Apart from the necessary build tools (CMake, Rust and the C++ compiler), the build requires no additional dependencies. wxDragon uses a hardcoded set of linker flags and bindgen include paths derived from `wx-config` for stability.
+
+#### Linux
+  wxDragon requires gtk+-3.0 which the build script finds via pkg-config. It also requires libclang to generate the bindings. This requires the user to install the development packages necessary to build wxWidgets. Which for debian-based distros:
+  ```bash
+  sudo apt-get install libclang-dev pkg-config libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev
+  ```
+
+### Windows
+#### GNU
+  If you're targeting the gnu toolchain, you will still need to install libclang which can be done using `pacman -S $MINGW_PACKAGE_PREFIX-clang`. This is necessary for generating the rust-bindgen bindings.
+
+#### MSVC
+  An additional build tool is required: Ninja!
+  libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html). 
+  Also verify that you have a windows sdk installed through your Visual Studio Installer. 
+  
 
 ## Cross-Compilation (macOS to Windows)
 
@@ -235,7 +252,8 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     - Other Constants: Pre-generated platform-specific Rust files (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`) located in `rust/wxdragon-sys/src/generated_constants/`, copied to `$OUT_DIR/wx_other_constants.rs` by `build.rs`.
   - [x] `build.rs` supports incremental C++ builds.
   - [x] **macOS Build:** Uses hardcoded linker and bindgen flags for stability.
-  - [ ] **Linux/Windows Build:** Automated build support is under development.
+  - [x] **Linux Build:** Uses gtk+-3.0 which it finds via pkg-config. This requires additional installs of development packages and pkg-config on the system. Check the `Build Instructions` section.
+  - [x] **Windows Build:** Uses the current msw win32 backend. CMake currently builds wxWidgets for Release.
 - **`wxdragon-sys` Rust crate:**
   - [x] `bindgen` generates raw FFI bindings from `rust/wxdragon-sys/cpp/include/wxdragon.h`.
   - [x] `build.rs` correctly invokes CMake, downloads wxWidgets, copies pre-generated constants, and links libraries using a manual configuration for macOS.

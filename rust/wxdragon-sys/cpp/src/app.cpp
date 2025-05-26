@@ -151,17 +151,17 @@ void wxd_free_int_array(int* ptr) {
     }
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// #ifdef __cplusplus
+// extern "C" {
+// #endif
 
-    // Dummy implementations to avoid linker errors in case Rust doesn't define them
-    #pragma weak process_rust_callbacks
-    void process_rust_callbacks() {
-        // This is a weak symbol that will be replaced by the actual Rust implementation
-        // If the Rust implementation is not available, this will be used instead
-    }
+//     // Dummy implementations to avoid linker errors in case Rust doesn't define them
+//     #pragma weak process_rust_callbacks
+//     void process_rust_callbacks() {
+//         // This is a weak symbol that will be replaced by the actual Rust implementation
+//         // If the Rust implementation is not available, this will be used instead
+//     }
 
-#ifdef __cplusplus
-}
-#endif
+// #ifdef __cplusplus
+// }
+// #endif
