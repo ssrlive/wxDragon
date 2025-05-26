@@ -31,7 +31,7 @@ fn main() {
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
-    let is_debug = profile == "debug";
+    let mut is_debug = profile == "debug";
 
     let wx_version = "3.2.8";
     let wx_tarball_name = format!("wxWidgets-{}.tar.bz2", wx_version);
@@ -117,9 +117,12 @@ fn main() {
 
     // --- 2. Configure and Build libwxdragon (and wxWidgets) using CMake ---
     let libwxdragon_cmake_source_dir = PathBuf::from("cpp");
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
-
+    
     if cfg!(feature = "media-ctrl") {
         cmake_config.define("wxdUSE_MEDIACTRL", "ON");
     }
@@ -128,27 +131,20 @@ fn main() {
         cmake_config.define("wxdUSE_WEBVIEW", "ON");
     }
 
-    // Set CMake build type based on Rust profile
-    if is_debug {
-        cmake_config.define("CMAKE_BUILD_TYPE", "Debug");
-    } else {
-        cmake_config.define("CMAKE_BUILD_TYPE", "Release");
-    }
-
-    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
-
-    if target_os == "windows" && target_env == "gnu" {
-        
-    }
-
     if target_os == "windows" {
-        cmake_config.define("CMAKE_BUILD_TYPE", "Release");
+        is_debug = false;
         if target_env == "gnu" {
             // Potentially set MinGW toolchain for CMake if not automatically detected
         } else {
             cmake_config.generator("Ninja");
         }
+    }
+
+    // Set CMake build type based on Rust profile
+    if is_debug {
+        cmake_config.define("CMAKE_BUILD_TYPE", "Debug");
+    } else {
+        cmake_config.define("CMAKE_BUILD_TYPE", "Release");
     }
 
     let dst = cmake_config.build();
@@ -302,32 +298,32 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=AVKit");
         println!("cargo:rustc-link-lib=framework=CoreMedia");
     } else if target_os == "windows" {
-        // if is_debug {
-        //     println!("info: Using DEBUG linking flags for Windows");
-        //     // wxWidgets debug libraries from user's ll output
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_core");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_gl");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_html");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_media");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_propgrid");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_stc");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_webview");
-        //     println!("cargo:rustc-link-lib=static=wxmsw32ud_xrc");
-        //     println!("cargo:rustc-link-lib=static=wxbase32ud_xml");
-        //     println!("cargo:rustc-link-lib=static=wxbase32ud");
-        //     println!("cargo:rustc-link-lib=static=wxpngd");
-        //     println!("cargo:rustc-link-lib=static=wxtiffd");
-        //     println!("cargo:rustc-link-lib=static=wxjpegd");
-        //     println!("cargo:rustc-link-lib=static=wxregexud");
-        //     println!("cargo:rustc-link-lib=static=wxzlibd");
-        //     println!("cargo:rustc-link-lib=static=wxscintillad");
-        //     println!("cargo:rustc-link-lib=static=wxexpatd");
-        //     if target_env == "msvc" {
-        //         println!("cargo:rustc-link-lib=stdc++");
-        //     }
-        // } else {
+        if is_debug {
+            println!("info: Using DEBUG linking flags for Windows");
+            // wxWidgets debug libraries from user's ll output
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_core");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_gl");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_html");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_media");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_propgrid");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_stc");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_webview");
+            println!("cargo:rustc-link-lib=static=wxmsw32ud_xrc");
+            println!("cargo:rustc-link-lib=static=wxbase32ud_xml");
+            println!("cargo:rustc-link-lib=static=wxbase32ud");
+            println!("cargo:rustc-link-lib=static=wxpngd");
+            println!("cargo:rustc-link-lib=static=wxtiffd");
+            println!("cargo:rustc-link-lib=static=wxjpegd");
+            println!("cargo:rustc-link-lib=static=wxregexud");
+            println!("cargo:rustc-link-lib=static=wxzlibd");
+            println!("cargo:rustc-link-lib=static=wxscintillad");
+            println!("cargo:rustc-link-lib=static=wxexpatd");
+            if target_env == "msvc" {
+                println!("cargo:rustc-link-lib=stdc++");
+            }
+        } else {
             println!("info: Using RELEASE linking flags for Windows based on user-provided ll output.");
             // wxWidgets release libraries from user-provided ll output
             println!("cargo:rustc-link-lib=static=wxmsw32u_aui");
@@ -349,7 +345,7 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxzlib");
             println!("cargo:rustc-link-lib=static=wxscintilla");
             println!("cargo:rustc-link-lib=static=wxexpat");
-        // }
+        }
 
         // System libraries (same for debug and release)
         println!("cargo:rustc-link-lib=kernel32");
