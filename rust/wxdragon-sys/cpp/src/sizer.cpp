@@ -95,6 +95,77 @@ wxd_StaticBox_t* wxd_StaticBoxSizer_GetStaticBox(wxd_StaticBoxSizer_t *self) {
     return reinterpret_cast<wxd_StaticBox_t*>(wx_sizer->GetStaticBox());
 }
 
+// --- wxGridSizer ---
+wxd_GridSizer_t* wxd_GridSizer_Create(int rows, int cols, int vgap, int hgap) {
+    wxGridSizer* sizer = new wxGridSizer(rows, cols, vgap, hgap);
+    return reinterpret_cast<wxd_GridSizer_t*>(sizer);
+}
+
+wxd_GridSizer_t* wxd_GridSizer_CreateWithGap(int rows, int cols, int gap_width, int gap_height) {
+    wxGridSizer* sizer = new wxGridSizer(rows, cols, wxSize(gap_width, gap_height));
+    return reinterpret_cast<wxd_GridSizer_t*>(sizer);
+}
+
+void wxd_GridSizer_SetCols(wxd_GridSizer_t *self, int cols) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        wx_sizer->SetCols(cols);
+    }
+}
+
+void wxd_GridSizer_SetRows(wxd_GridSizer_t *self, int rows) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        wx_sizer->SetRows(rows);
+    }
+}
+
+void wxd_GridSizer_SetVGap(wxd_GridSizer_t *self, int gap) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        wx_sizer->SetVGap(gap);
+    }
+}
+
+void wxd_GridSizer_SetHGap(wxd_GridSizer_t *self, int gap) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        wx_sizer->SetHGap(gap);
+    }
+}
+
+int wxd_GridSizer_GetCols(wxd_GridSizer_t *self) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        return wx_sizer->GetCols();
+    }
+    return 0;
+}
+
+int wxd_GridSizer_GetRows(wxd_GridSizer_t *self) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        return wx_sizer->GetRows();
+    }
+    return 0;
+}
+
+int wxd_GridSizer_GetVGap(wxd_GridSizer_t *self) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        return wx_sizer->GetVGap();
+    }
+    return 0;
+}
+
+int wxd_GridSizer_GetHGap(wxd_GridSizer_t *self) {
+    if (self) {
+        wxGridSizer* wx_sizer = reinterpret_cast<wxGridSizer*>(self);
+        return wx_sizer->GetHGap();
+    }
+    return 0;
+}
+
 // --- wxFlexGridSizer ---
 wxd_FlexGridSizer_t *wxd_FlexGridSizer_Create(int rows, int cols, int vgap, int hgap) {
     wxFlexGridSizer* sizer = new wxFlexGridSizer(rows, cols, vgap, hgap);

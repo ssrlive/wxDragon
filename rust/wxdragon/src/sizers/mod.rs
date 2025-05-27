@@ -4,6 +4,7 @@
 pub mod base;
 pub mod box_sizer;
 pub mod flex_grid_sizer;
+pub mod grid_sizer;
 pub mod staticbox_sizer;
 pub mod wrap_sizer;
 
@@ -11,9 +12,9 @@ pub mod wrap_sizer;
 pub use base::{Orientation, Sizer, SizerFlag, WxSizer};
 pub use box_sizer::{BoxSizer, BoxSizerBuilder};
 pub use flex_grid_sizer::{
-    FlexGridSizer, FlexGridSizerBuilder, FLEX_GROWMODE_ALL, FLEX_GROWMODE_NONE,
-    FLEX_GROWMODE_SPECIFIED,
+    FlexGridSizer, FlexGridSizerBuilder, FlexGrowMode,
 };
+pub use grid_sizer::{GridSizer, GridSizerBuilder};
 pub use staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
 pub use wrap_sizer::{WrapSizer, WrapSizerBuilder, WrapSizerFlag};
 

@@ -285,6 +285,7 @@ typedef struct wxd_ActivityIndicator wxd_ActivityIndicator_t;
 typedef struct wxd_SpinCtrlDouble wxd_SpinCtrlDouble_t;
 typedef struct wxd_CalendarCtrl_t wxd_CalendarCtrl_t;
 typedef struct wxd_FlexGridSizer_t wxd_FlexGridSizer_t;
+typedef struct wxd_GridSizer_t wxd_GridSizer_t;
 typedef struct wxd_StaticBoxSizer_t wxd_StaticBoxSizer_t;
 typedef struct wxd_WrapSizer_t wxd_WrapSizer_t;
 typedef struct wxd_StaticBitmap_t wxd_StaticBitmap_t;

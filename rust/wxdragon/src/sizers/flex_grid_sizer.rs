@@ -4,10 +4,17 @@ use crate::sizers::WxSizer as WxSizerTrait;
 use std::ops::Deref;
 use wxdragon_sys as ffi;
 
-// Grow mode constants
-pub const FLEX_GROWMODE_NONE: i32 = ffi::WXD_FLEX_GROWMODE_NONE as i32;
-pub const FLEX_GROWMODE_SPECIFIED: i32 = ffi::WXD_FLEX_GROWMODE_SPECIFIED as i32;
-pub const FLEX_GROWMODE_ALL: i32 = ffi::WXD_FLEX_GROWMODE_ALL as i32;
+// --- FlexGridSizer Grow Mode ---
+widget_style_enum!(
+    name: FlexGrowMode,
+    doc: "Grow mode flags for FlexGridSizer.",
+    variants: {
+        None: ffi::WXD_FLEX_GROWMODE_NONE as i64, "Don't resize the cells in non-flexible direction at all.",
+        Specified: ffi::WXD_FLEX_GROWMODE_SPECIFIED as i64, "Uniformly resize only the specified ones (default).",
+        All: ffi::WXD_FLEX_GROWMODE_ALL as i64, "Uniformly resize all cells."
+    },
+    default_variant: Specified
+);
 
 #[derive(Clone)]
 pub struct FlexGridSizer {
@@ -54,9 +61,9 @@ impl FlexGridSizer {
         }
     }
 
-    pub fn set_non_flexible_grow_mode(&self, mode: i32) {
+    pub fn set_non_flexible_grow_mode(&self, mode: FlexGrowMode) {
         unsafe {
-            ffi::wxd_FlexGridSizer_SetNonFlexibleGrowMode(self.raw_specific_ptr, mode);
+            ffi::wxd_FlexGridSizer_SetNonFlexibleGrowMode(self.raw_specific_ptr, mode.bits() as i32);
         }
     }
 

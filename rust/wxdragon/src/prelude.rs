@@ -16,7 +16,9 @@ pub use crate::window::WxWidget;
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};
-pub use crate::sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder};
+pub use crate::sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder, FlexGrowMode};
+pub use crate::sizers::grid_sizer::{GridSizer, GridSizerBuilder};
+pub use crate::sizers::wrap_sizer::{WrapSizer, WrapSizerBuilder, WrapSizerFlag};
 pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
 // Sizer Flags/Constants
 pub use crate::sizers::base::{Orientation, SizerFlag};
