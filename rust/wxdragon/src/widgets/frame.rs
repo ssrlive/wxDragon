@@ -3,6 +3,7 @@ use crate::geometry::{Point, Size, DEFAULT_POSITION};
 use crate::id::Id;
 use crate::id::ID_ANY;
 use crate::menus::MenuBar; // ADDED: Import MenuBar
+use crate::bitmap::Bitmap; // ADDED: Import Bitmap
 use crate::widget_style_enum;
 use crate::widgets::statusbar::StatusBar; // ADDED Import
 use crate::widgets::toolbar::{ToolBar, ToolBarStyle}; // Added ToolBarStyle
@@ -335,6 +336,17 @@ impl Frame {
 
     pub fn is_maximized(&self) -> bool {
         unsafe { ffi::wxd_Frame_IsMaximized(self.window.as_ptr() as *mut ffi::wxd_Frame_t) }
+    }
+
+    /// Sets the frame's icon from a bitmap.
+    /// The bitmap will be converted to an icon internally.
+    pub fn set_icon(&self, bitmap: &Bitmap) {
+        unsafe {
+            ffi::wxd_Frame_SetIconFromBitmap(
+                self.window.as_ptr() as *mut ffi::wxd_Frame_t,
+                bitmap.as_ptr() as *mut ffi::wxd_Bitmap_t,
+            );
+        }
     }
 }
 

@@ -152,6 +152,22 @@ bool wxd_Frame_IsMaximized(wxd_Frame_t* frame) {
     return false;
 }
 
+void wxd_Frame_SetIconFromBitmap(wxd_Frame_t* frame, wxd_Bitmap_t* bitmap) {
+    if (!frame || !bitmap) return;
+    
+    wxFrame* wx_frame = reinterpret_cast<wxFrame*>(frame);
+    wxBitmap* wx_bitmap = reinterpret_cast<wxBitmap*>(bitmap);
+    
+    if (!wx_bitmap->IsOk()) return;
+    
+    // Convert wxBitmap to wxIcon and set it
+    wxIcon icon;
+    icon.CopyFromBitmap(*wx_bitmap);
+    if (icon.IsOk()) {
+        wx_frame->SetIcon(icon);
+    }
+}
+
 // If a general wxd_rust_string_free is needed for other cases, it would go here or in a common utils.cpp
 // For example:
 // extern "C" void wxd_rust_string_free(char* str) {

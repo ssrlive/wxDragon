@@ -23,5 +23,6 @@ WXD_EXPORTED void wxd_Frame_Iconize(wxd_Frame_t* frame, bool iconize);
 WXD_EXPORTED bool wxd_Frame_IsIconized(wxd_Frame_t* frame);
 WXD_EXPORTED void wxd_Frame_Maximize(wxd_Frame_t* frame, bool maximize);
 WXD_EXPORTED bool wxd_Frame_IsMaximized(wxd_Frame_t* frame);
+WXD_EXPORTED void wxd_Frame_SetIconFromBitmap(wxd_Frame_t* frame, wxd_Bitmap_t* bitmap);
 
 #endif // WXD_FRAME_H 
