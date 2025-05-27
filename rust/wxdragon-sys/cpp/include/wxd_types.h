@@ -17,6 +17,15 @@ typedef struct {
     int width, height;
 } wxd_Size;
 
+// GridBagSizer position and span types
+typedef struct {
+    int row, col;
+} wxd_GBPosition;
+
+typedef struct {
+    int rowspan, colspan;
+} wxd_GBSpan;
+
 typedef struct wxd_Rect {
     int x;
     int y;
@@ -286,6 +295,7 @@ typedef struct wxd_SpinCtrlDouble wxd_SpinCtrlDouble_t;
 typedef struct wxd_CalendarCtrl_t wxd_CalendarCtrl_t;
 typedef struct wxd_FlexGridSizer_t wxd_FlexGridSizer_t;
 typedef struct wxd_GridSizer_t wxd_GridSizer_t;
+typedef struct wxd_GridBagSizer_t wxd_GridBagSizer_t;
 typedef struct wxd_StaticBoxSizer_t wxd_StaticBoxSizer_t;
 typedef struct wxd_WrapSizer_t wxd_WrapSizer_t;
 typedef struct wxd_StaticBitmap_t wxd_StaticBitmap_t;

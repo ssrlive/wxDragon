@@ -38,4 +38,25 @@ WXD_EXPORTED wxd_StaticBox_t *wxd_StaticBoxSizer_GetStaticBox(wxd_StaticBoxSizer
 // --- WrapSizer ---
 WXD_EXPORTED wxd_WrapSizer_t* wxd_WrapSizer_Create(wxd_Orientation_t orient, int flags);
 
+// --- GridBagSizer ---
+WXD_EXPORTED wxd_GridBagSizer_t* wxd_GridBagSizer_Create(int vgap, int hgap);
+WXD_EXPORTED void wxd_GridBagSizer_AddWindow(wxd_GridBagSizer_t* sizer, wxd_Window_t* window, wxd_GBPosition pos, wxd_GBSpan span, int flag, int border);
+WXD_EXPORTED void wxd_GridBagSizer_AddSizer(wxd_GridBagSizer_t* sizer, wxd_Sizer_t* child_sizer, wxd_GBPosition pos, wxd_GBSpan span, int flag, int border);
+WXD_EXPORTED void wxd_GridBagSizer_AddSpacer(wxd_GridBagSizer_t* sizer, int width, int height, wxd_GBPosition pos, wxd_GBSpan span, int flag, int border);
+WXD_EXPORTED wxd_GBPosition wxd_GridBagSizer_GetItemPosition_Window(wxd_GridBagSizer_t* sizer, wxd_Window_t* window);
+WXD_EXPORTED wxd_GBPosition wxd_GridBagSizer_GetItemPosition_Sizer(wxd_GridBagSizer_t* sizer, wxd_Sizer_t* child_sizer);
+WXD_EXPORTED wxd_GBPosition wxd_GridBagSizer_GetItemPosition_Index(wxd_GridBagSizer_t* sizer, size_t index);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemPosition_Window(wxd_GridBagSizer_t* sizer, wxd_Window_t* window, wxd_GBPosition pos);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemPosition_Sizer(wxd_GridBagSizer_t* sizer, wxd_Sizer_t* child_sizer, wxd_GBPosition pos);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemPosition_Index(wxd_GridBagSizer_t* sizer, size_t index, wxd_GBPosition pos);
+WXD_EXPORTED wxd_GBSpan wxd_GridBagSizer_GetItemSpan_Window(wxd_GridBagSizer_t* sizer, wxd_Window_t* window);
+WXD_EXPORTED wxd_GBSpan wxd_GridBagSizer_GetItemSpan_Sizer(wxd_GridBagSizer_t* sizer, wxd_Sizer_t* child_sizer);
+WXD_EXPORTED wxd_GBSpan wxd_GridBagSizer_GetItemSpan_Index(wxd_GridBagSizer_t* sizer, size_t index);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemSpan_Window(wxd_GridBagSizer_t* sizer, wxd_Window_t* window, wxd_GBSpan span);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemSpan_Sizer(wxd_GridBagSizer_t* sizer, wxd_Sizer_t* child_sizer, wxd_GBSpan span);
+WXD_EXPORTED bool wxd_GridBagSizer_SetItemSpan_Index(wxd_GridBagSizer_t* sizer, size_t index, wxd_GBSpan span);
+WXD_EXPORTED wxd_Size wxd_GridBagSizer_GetEmptyCellSize(wxd_GridBagSizer_t* sizer);
+WXD_EXPORTED void wxd_GridBagSizer_SetEmptyCellSize(wxd_GridBagSizer_t* sizer, wxd_Size size);
+WXD_EXPORTED wxd_Size wxd_GridBagSizer_GetCellSize(wxd_GridBagSizer_t* sizer, int row, int col);
+
 #endif // WXD_SIZERS_H 

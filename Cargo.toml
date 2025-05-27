@@ -13,6 +13,7 @@ members = [
     "examples/rust/clipboard_test",
     "examples/rust/wrapsizer_test",
     "examples/rust/gridsizer_test",
+    "examples/rust/gridbagsizer_test",
     # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]
