@@ -19,11 +19,6 @@ WXD_EXPORTED int wxd_ArrayString_GetString(wxd_ArrayString_t* array, int index, 
 WXD_EXPORTED bool wxd_ArrayString_Add(wxd_ArrayString_t* self, const char* str);
 WXD_EXPORTED void wxd_ArrayString_Clear(wxd_ArrayString_t* self);
 
-// Helper function to populate a wxd_ArrayString_t from a wxArrayString
-#ifdef __cplusplus
-WXD_EXPORTED void wxd_ArrayString_AssignFromWxArrayString(wxd_ArrayString_t* target, const wxArrayString& source);
-#endif
-
 #ifdef __cplusplus
 }
 #endif

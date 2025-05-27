@@ -36,6 +36,8 @@
 #include <wx/utils.h>
 #include <wx/rearrangectrl.h> // ADDED: For wxEVT_REARRANGE_LIST
 
+struct wxd_Event_t { wxEvent* event; };
+
 // --- Internal C++ Structures/Classes (Not exposed in C API) ---
 
 // Define a hash function for std::pair<int, int>
