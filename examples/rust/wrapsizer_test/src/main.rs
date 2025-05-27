@@ -1,5 +1,4 @@
 use wxdragon::prelude::*;
-use wxdragon::sizers::{GridSizer, WrapSizer, WrapSizerFlag};
 
 fn main() {
     wxdragon::main(|_| {

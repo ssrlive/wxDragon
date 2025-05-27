@@ -1,8 +1,5 @@
-use image::GenericImageView;
-use wxdragon::event::WindowEvents;
 use wxdragon::prelude::*;
-use wxdragon::Bitmap;
-use wxdragon::BitmapBundle;
+use image::GenericImageView;
 
 pub struct MediaControls {
     pub panel: Panel,

@@ -1,14 +1,6 @@
 use std::sync::{Arc, Mutex};
-use wxdragon::dialogs::file_dialog::FileDialog;
-use wxdragon::dialogs::file_dialog::FileDialogStyle;
-use wxdragon::id::ID_OK;
 use wxdragon::prelude::*;
-use wxdragon::sizers::box_sizer::BoxSizer;
-use wxdragon::widgets::button::Button;
-use wxdragon::widgets::frame::Frame;
-use wxdragon::widgets::media_ctrl::MediaCtrl;
-use wxdragon::widgets::panel::Panel;
-use wxdragon::widgets::statusbar::StatusBar;
+
 struct MediaPlayerFrame {
     frame: Frame,
     media_ctrl: MediaCtrl,

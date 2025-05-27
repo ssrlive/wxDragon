@@ -1,8 +1,4 @@
-use wxdragon::color::colours;
-use wxdragon::font::FontWeight;
 use wxdragon::prelude::*;
-use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::scrolled_window::ScrolledWindowStyle;
 
 const SWATCH_SIZE: Size = Size {
     width: 35,

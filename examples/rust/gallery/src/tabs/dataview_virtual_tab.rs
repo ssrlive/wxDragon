@@ -1,15 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::bitmap::Bitmap;
-use wxdragon::datetime::DateTime;
-use wxdragon::geometry::Size;
 use wxdragon::prelude::*;
-use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
-use wxdragon::widgets::dataview::{
-    CustomDataViewVirtualListModel, DataViewAlign, DataViewCtrl, DataViewItemAttr, DataViewStyle,
-    Variant,
-};
+
 
 // Define a struct to hold our employee data
 #[derive(Clone)] // Added Clone for potential future use if Employee instances need to be copied

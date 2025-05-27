@@ -1,4 +1,3 @@
-use wxdragon::id::{ID_CANCEL, ID_OK};
 use wxdragon::prelude::*;
 
 // Load the frame XRC file

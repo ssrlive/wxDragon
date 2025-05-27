@@ -1,8 +1,4 @@
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::id::ID_ANY;
 use wxdragon::prelude::*;
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::widgets::toolbar::ToolBarStyle;
 
 mod tabs;
 use tabs::advanced_tab::create_advanced_tab;

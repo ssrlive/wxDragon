@@ -1,5 +1,4 @@
 use wxdragon::prelude::*;
-use wxdragon::widgets::panel::PanelStyle;
 
 pub struct BookControlsTab {
     pub tab_panel: Panel,

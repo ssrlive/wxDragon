@@ -1,14 +1,4 @@
-use wxdragon::dialogs::message_dialog::MessageDialogStyle;
 use wxdragon::prelude::*;
-use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::radiobox::RadioBoxStyle;
-use wxdragon::widgets::scrollbar::ScrollBarStyle;
-use wxdragon::widgets::search_ctrl::SearchCtrlStyle;
-use wxdragon::widgets::static_line::StaticLineStyle;
-use wxdragon::widgets::textctrl::TextCtrlStyle;
-
-use wxdragon::art_provider::ArtProvider;
-use wxdragon::bitmap::Bitmap;
 
 #[allow(dead_code)]
 pub struct BasicTabControls {

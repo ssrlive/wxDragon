@@ -1,4 +1,4 @@
-use wxdragon::{event::WindowEvents, prelude::*};
+use wxdragon::prelude::*;
 
 struct DrawingPanel {
     panel: Panel,

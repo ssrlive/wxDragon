@@ -2,17 +2,6 @@ use wxdragon::prelude::*;
 
 use std::thread;
 use std::time::Duration;
-use wxdragon::dialogs::colour_dialog::ColourDialog;
-use wxdragon::dialogs::dir_dialog::{DirDialog, DirDialogStyle};
-use wxdragon::dialogs::file_dialog::{FileDialog, FileDialogStyle};
-use wxdragon::dialogs::font_dialog::FontDialog;
-use wxdragon::dialogs::message_dialog::{MessageDialog, MessageDialogStyle};
-use wxdragon::dialogs::multi_choice_dialog::MultiChoiceDialog;
-use wxdragon::dialogs::progress_dialog::{ProgressDialog, ProgressDialogStyle};
-use wxdragon::dialogs::single_choice_dialog::SingleChoiceDialog;
-use wxdragon::dialogs::text_entry_dialog::{TextEntryDialog, TextEntryDialogStyle};
-use wxdragon::widgets::notification_message::{NotificationMessage, NotificationStyle};
-use wxdragon::widgets::panel::PanelStyle;
 
 #[allow(dead_code)]
 pub struct DialogTabControls {

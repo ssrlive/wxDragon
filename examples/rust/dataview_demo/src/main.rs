@@ -1,12 +1,6 @@
 //! Simple demo for various wxDragon widgets, including DataViewCtrl.
 
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::bitmap::Bitmap;
-use wxdragon::datetime::DateTime;
-use wxdragon::geometry::Size;
 use wxdragon::prelude::*;
-use wxdragon::widgets::dataview::enums::DataViewColumnFlags;
-use wxdragon::widgets::{DataViewAlign, DataViewCtrl, DataViewListModel, DataViewStyle};
 
 // Main application
 fn main() {

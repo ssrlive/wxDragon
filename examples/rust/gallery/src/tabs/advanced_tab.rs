@@ -1,6 +1,4 @@
-use wxdragon::event::WindowEvents;
 use wxdragon::prelude::*;
-use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
 
 pub struct AdvancedTabControls {
     pub tree_ctrl: TreeCtrl,

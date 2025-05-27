@@ -1,13 +1,4 @@
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::event::TreeEvents;
-use wxdragon::geometry::Size;
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::widgets::notebook::Notebook;
-use wxdragon::widgets::panel::{Panel, PanelStyle};
-use wxdragon::widgets::static_text::StaticText;
-use wxdragon::widgets::treectrl::{TreeCtrl, TreeCtrlStyle};
-use wxdragon::HasItemData;
-use wxdragon::{BoxSizer, Orientation, SizerFlag};
+use wxdragon::prelude::*;
 
 /// A custom data type to associate with tree items
 #[derive(Debug, Clone)]

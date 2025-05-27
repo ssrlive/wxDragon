@@ -1,23 +1,4 @@
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::geometry::Size;
-use wxdragon::id;
 use wxdragon::prelude::*;
-use wxdragon::widgets::checklistbox::CheckListBoxStyle;
-use wxdragon::widgets::choice::ChoiceStyle;
-use wxdragon::widgets::combobox::ComboBoxStyle;
-use wxdragon::widgets::editable_listbox::{EditableListBox, EditableListBoxStyle};
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::widgets::list_ctrl::{image_list_type, ListColumnFormat, ListCtrl, ListCtrlStyle};
-use wxdragon::widgets::listbox::ListBoxStyle;
-use wxdragon::widgets::panel::PanelStyle;
-use wxdragon::widgets::rearrangelist::{RearrangeList, RearrangeListStyle};
-use wxdragon::widgets::{
-    Button, CheckListBox, Choice, ComboBox, ListBox, ScrolledWindow, StaticText,
-};
-use wxdragon::HasItemData;
-use wxdragon::ListItemState;
-// TODO: Re-evaluate create_section_title usage
-// use crate::utils::create_section_title;
 
 // Define a custom data type for our list items
 #[derive(Clone)]
@@ -119,7 +100,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
 
     // --- ADDED: ListCtrl Example ---
     let list_ctrl = ListCtrl::builder(&panel)
-        .with_id(id::ID_HIGHEST + 7) // ID_LIST_CTRL
+        .with_id(ID_HIGHEST + 7) // ID_LIST_CTRL
         .with_style(
             ListCtrlStyle::Report
                 | ListCtrlStyle::SingleSel
@@ -286,7 +267,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let initial_order = vec![0, !1, 2, !3, 4]; // 0,2,4 checked; 1,3 unchecked
 
     let rearrangelist = RearrangeList::builder(&panel)
-        .with_id(id::ID_HIGHEST + 10)
+        .with_id(ID_HIGHEST + 10)
         .with_items(rearrangelist_items)
         .with_order(initial_order)
         .with_style(RearrangeListStyle::Default)

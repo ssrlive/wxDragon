@@ -1,16 +1,4 @@
-//! Tab for demonstrating DataViewTreeCtrl.
-
-use wxdragon::art_provider::{ArtClient, ArtId, ArtProvider};
-use wxdragon::bitmap::Bitmap;
-use wxdragon::geometry::Size;
 use wxdragon::prelude::*;
-use wxdragon::widgets::dataview::enums::{DataViewAlign, DataViewColumnFlags};
-use wxdragon::widgets::dataview::variant::VariantType;
-use wxdragon::widgets::dataview::{
-    DataViewCellMode, DataViewColumn, DataViewIconTextRenderer, DataViewItem, DataViewTreeCtrl,
-};
-use wxdragon::widgets::imagelist::ImageList;
-use wxdragon::widgets::static_text::StaticText;
 
 // Helper function to create a valid bitmap for this tab
 fn create_icon(art_id: ArtId) -> Bitmap {

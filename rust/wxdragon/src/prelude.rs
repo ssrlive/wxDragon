@@ -1,18 +1,19 @@
 // --- Core Types & Traits ---
-pub use crate::app::main;
+pub use crate::app::{main, set_top_window, call_after};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
 pub use crate::event::{Event, EventType, WxEvtHandler};
 // ADDED: Event category traits
-pub use crate::event::{ButtonEvents, ScrollEvents, TextEvents, TreeEvents};
+pub use crate::event::{ButtonEvents, ScrollEvents, TextEvents, TreeEvents, WindowEvents};
 // ADDED: Event Data Structs
 pub use crate::event::event_data::{CommandEventData, KeyEventData, MouseEventData};
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES}; // Added more standard IDs
+pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES, ID_HIGHEST};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
-pub use crate::window::WxWidget;
+pub use crate::utils::WxdArrayString;
+pub use crate::window::{Window, WxWidget};
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};
@@ -59,6 +60,7 @@ pub use crate::widgets::dataview::{
     DataViewCtrl,
     DataViewCtrlBuilder,
     DataViewItem,
+    DataViewItemAttr, // Added DataViewItemAttr
     // Events for DataView are now in dataview/event.rs, re-exported from dataview/mod.rs
     DataViewListCtrl,
     DataViewListCtrlBuilder,
@@ -68,7 +70,12 @@ pub use crate::widgets::dataview::{
     DataViewTreeCtrl,
     DataViewTreeCtrlBuilder,
     Variant,
+    VariantType, // Added VariantType
+    DataViewIconTextRenderer, // Added DataViewIconTextRenderer
+    CustomDataViewVirtualListModel, // Added CustomDataViewVirtualListModel
 };
+// Added DataView enums
+pub use crate::widgets::dataview::enums::DataViewColumnFlags;
 pub use crate::widgets::date_picker_ctrl::{
     DatePickerCtrl, DatePickerCtrlBuilder, DatePickerCtrlStyle,
 };
@@ -91,7 +98,7 @@ pub use crate::widgets::hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder, Hy
 // ADDED: ImageList
 pub use crate::widgets::imagelist::ImageList;
 // ADDED: ItemData trait
-pub use crate::widgets::item_data::HasItemData;
+pub use crate::widgets::item_data::{HasItemData, ItemData};
 pub use crate::widgets::list_ctrl::{
     ListColumnFormat,
     ListCtrl,
@@ -101,6 +108,8 @@ pub use crate::widgets::list_ctrl::{
     ListNextItemFlag,
     // Events for ListCtrl are now in list_ctrl/event.rs, re-exported from list_ctrl/mod.rs
 }; // Added Events
+// Added image_list_type for ListCtrl
+pub use crate::widgets::list_ctrl::image_list_type;
 pub use crate::widgets::listbox::{ListBox, ListBoxBuilder, ListBoxStyle};
 #[cfg(feature = "media-ctrl")]
 pub use crate::widgets::media_ctrl::{
@@ -118,6 +127,8 @@ pub use crate::widgets::notification_message::{
 pub use crate::widgets::panel::{Panel, PanelBuilder, PanelStyle};
 pub use crate::widgets::radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
 pub use crate::widgets::radiobox::{RadioBox, RadioBoxBuilder, RadioBoxStyle};
+// Added RearrangeList
+pub use crate::widgets::rearrangelist::{RearrangeList, RearrangeListBuilder, RearrangeListStyle};
 pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 pub use crate::widgets::scrolled_window::{
     ScrolledWindow, ScrolledWindowBuilder, ScrolledWindowStyle,
@@ -155,18 +166,25 @@ pub use crate::widgets::treectrl::{
 pub use crate::menus::menuitem::{ID_ABOUT, ID_EXIT, ID_SEPARATOR};
 pub use crate::menus::{ItemKind, Menu, MenuBar, MenuItem};
 
+// --- Widgets ItemKind (for toolbar) ---
+pub use crate::widgets::ItemKind as WidgetItemKind;
+
 // --- Bitmaps & Art ---
 pub use crate::art_provider::{ArtClient, ArtId, ArtProvider};
 pub use crate::bitmap::Bitmap;
+pub use crate::bitmap_bundle::BitmapBundle; // Added BitmapBundle
 
 // --- Dialogs ---
 pub use crate::dialogs::colour_dialog::{ColourDialog, ColourDialogBuilder}; // Added Builder
+pub use crate::dialogs::dir_dialog::{DirDialog, DirDialogBuilder, DirDialogStyle}; // Added DirDialog
 pub use crate::dialogs::file_dialog::{FileDialog, FileDialogBuilder, FileDialogStyle}; // Added Builder
 pub use crate::dialogs::font_dialog::{FontDialog, FontDialogBuilder}; // Added Builder
 pub use crate::dialogs::message_dialog::{MessageDialog, MessageDialogBuilder, MessageDialogStyle};
+pub use crate::dialogs::multi_choice_dialog::{MultiChoiceDialog, MultiChoiceDialogBuilder}; // Added MultiChoiceDialog
 pub use crate::dialogs::progress_dialog::{
     ProgressDialog, ProgressDialogBuilder, ProgressDialogStyle,
 }; // Added Builder
+pub use crate::dialogs::single_choice_dialog::{SingleChoiceDialog, SingleChoiceDialogBuilder}; // Added SingleChoiceDialog
 pub use crate::dialogs::text_entry_dialog::{
     TextEntryDialog, TextEntryDialogBuilder, TextEntryDialogStyle,
 };
@@ -191,7 +209,8 @@ pub use crate::dc::{
 
 // --- Application & Misc ---
 // pub use crate::app::App; // Commented out as per previous error, App is in main or app module
-pub use crate::id::ID_HIGHEST;
+pub use crate::timer::Timer; // Added Timer
+pub use crate::xrc::{FromXrcPtr, WindowXrcMethods, XmlResource}; // Added XRC functionality
 
 // --- Constants for specific widgets that might be commonly used ---
 // Example: ListBox specific constants
@@ -200,4 +219,4 @@ pub use crate::widgets::listbox::NOT_FOUND as LISTBOX_NOT_FOUND;
 pub use crate::widgets::combobox::NOT_FOUND as COMBOBOX_NOT_FOUND;
 // Example: NotificationMessage timeouts were already there
 
-pub use crate::WindowXrcMethods;
+// --- XRC Support ---

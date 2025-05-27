@@ -1,6 +1,4 @@
 use wxdragon::prelude::*;
-use wxdragon::widgets::aui_toolbar::AuiToolBarStyle;
-use wxdragon::widgets::{AuiManager, AuiPaneInfo, AuiToolBar, ItemKind, Notebook, Panel, TextCtrl};
 
 /// AUI tab controls for the gallery example
 pub struct AuiTabControls {
@@ -52,14 +50,14 @@ pub fn create_aui_tab(parent: &Notebook) -> AuiTabControls {
         1001,
         "Save Perspective",
         "Save the current layout",
-        ItemKind::Normal,
+        WidgetItemKind::Normal,
     );
     toolbar.add_separator();
     toolbar.add_tool(
         1002,
         "Load Perspective",
         "Restore a saved layout",
-        ItemKind::Normal,
+        WidgetItemKind::Normal,
     );
     toolbar.add_stretch_spacer(1); // Add stretch space to push tools to the left
 
