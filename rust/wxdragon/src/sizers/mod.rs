@@ -5,6 +5,7 @@ pub mod base;
 pub mod box_sizer;
 pub mod flex_grid_sizer;
 pub mod staticbox_sizer;
+pub mod wrap_sizer;
 
 // Re-export common types and constants
 pub use base::{Orientation, Sizer, SizerFlag, WxSizer};
@@ -14,6 +15,7 @@ pub use flex_grid_sizer::{
     FLEX_GROWMODE_SPECIFIED,
 };
 pub use staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
+pub use wrap_sizer::{WrapSizer, WrapSizerBuilder, WrapSizerFlag};
 
 // Note: Carefully check which constants are actually defined in box_sizer.rs
 // and ensure they match the ones re-exported here.

@@ -1773,6 +1773,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "wrapsizer_test"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
 name = "write16"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1786,7 +1793,7 @@ checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 
 [[package]]
 name = "wxdragon"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "bitflags 2.9.0",
  "lazy_static",
@@ -1797,7 +1804,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-macros"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "proc-macro2",
  "quick-xml",
@@ -1807,7 +1814,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-sys"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "bindgen",
  "bzip2",

@@ -9,6 +9,7 @@
 #include <wx/frame.h>
 #include <wx/dialog.h>
 #include <wx/sizer.h>
+#include <wx/wrapsizer.h>
 #include <wx/window.h>
 #include <wx/textctrl.h> // Needed for wxEVT_TEXT*
 #include <wx/listbox.h> // ADDED: Needed for ListBox styles
@@ -167,6 +168,11 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxBOTTOM", wxBOTTOM});
     constants_to_extract.push_back({"wxFIXED_MINSIZE", wxFIXED_MINSIZE});
     constants_to_extract.push_back({"wxRESERVE_SPACE_EVEN_IF_HIDDEN", wxRESERVE_SPACE_EVEN_IF_HIDDEN});
+
+    // WrapSizer Flags
+    constants_to_extract.push_back({"wxEXTEND_LAST_ON_EACH_LINE", wxEXTEND_LAST_ON_EACH_LINE});
+    constants_to_extract.push_back({"wxREMOVE_LEADING_SPACES", wxREMOVE_LEADING_SPACES});
+    constants_to_extract.push_back({"wxWRAPSIZER_DEFAULT_FLAGS", wxWRAPSIZER_DEFAULT_FLAGS});
 
     // Border Styles
     constants_to_extract.push_back({"wxBORDER_DEFAULT", wxBORDER_DEFAULT});

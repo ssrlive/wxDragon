@@ -23,4 +23,7 @@ WXD_EXPORTED wxd_StaticBoxSizer_t *wxd_StaticBoxSizer_Create_WithBox(wxd_StaticB
 WXD_EXPORTED wxd_StaticBoxSizer_t *wxd_StaticBoxSizer_Create_WithLabel(wxd_Orientation_t orient, wxd_Window_t* parent, const char* label);
 WXD_EXPORTED wxd_StaticBox_t *wxd_StaticBoxSizer_GetStaticBox(wxd_StaticBoxSizer_t *self);
 
+// --- WrapSizer ---
+WXD_EXPORTED wxd_WrapSizer_t* wxd_WrapSizer_Create(wxd_Orientation_t orient, int flags);
+
 #endif // WXD_SIZERS_H 

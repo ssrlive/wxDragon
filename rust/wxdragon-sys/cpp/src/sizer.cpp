@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
+#include <wx/wrapsizer.h>
 
 extern "C" {
 
@@ -131,6 +132,13 @@ void wxd_FlexGridSizer_SetNonFlexibleGrowMode(wxd_FlexGridSizer_t *self, int mod
         wxFlexGridSizer* wx_sizer = reinterpret_cast<wxFlexGridSizer*>(self);
         wx_sizer->SetNonFlexibleGrowMode(static_cast<wxFlexSizerGrowMode>(mode));
     }
+}
+
+// --- WrapSizer ---
+WXD_EXPORTED wxd_WrapSizer_t* wxd_WrapSizer_Create(wxd_Orientation_t orient, int flags) {
+    wxOrientation wx_orient = static_cast<wxOrientation>(orient);
+    wxWrapSizer* sizer = new wxWrapSizer(wx_orient, flags);
+    return reinterpret_cast<wxd_WrapSizer_t*>(sizer);
 }
 
 // --- Treebook ---
