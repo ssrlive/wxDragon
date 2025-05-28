@@ -360,13 +360,13 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     - [ ] `wxSplashScreen`
     - [x] `wxStatusBar`
     - [ ] `wxTaskBarIcon`
-    - [ ] `wxTimer`
+    - [x] `wxTimer`
     - [ ] `wxWebView`
     - [ ] `wxWizard`
 - **Sizers:**
   - [x] `wxBoxSizer`
   - [x] Expand `BoxSizer` methods (`AddSizer`, `AddSpacer`, `AddStretchSpacer`)
-  - [ ] `wxGridSizer`
+  - [x] `wxGridSizer`
   - [x] `wxFlexGridSizer`
   - [x] `wxStaticBoxSizer`
 - **Menus & Toolbars:**
