@@ -32,6 +32,10 @@ fn main() {
     let target = env::var("TARGET").unwrap();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    
+    // Detect cross-compilation from macOS to Windows
+    let host_os = std::env::consts::OS;
+    let is_macos_to_windows_gnu = host_os == "macos" && target_os == "windows" && target_env == "gnu";
 
     // --- 1. Bindgen Include Path Setup ---
     println!("info: Setting up include paths for bindgen...");
@@ -422,8 +426,23 @@ fn main() {
         println!("cargo:rustc-link-lib=wininet");
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
+        
+        // C++ runtime linking
         if target_env == "gnu" {
-            println!("cargo:rustc-link-lib=stdc++");
+            if is_macos_to_windows_gnu {
+                println!("info: Using static linking for cross-compilation from macOS to Windows GNU");
+                // Static linking for cross-compilation to avoid runtime dependencies
+                println!("cargo:rustc-link-lib=static=stdc++");
+                println!("cargo:rustc-link-lib=static=gcc");
+                println!("cargo:rustc-link-lib=static=gcc_eh");
+                println!("cargo:rustc-link-lib=static=pthread");
+                // Add linker arguments for fully static C++ runtime
+                println!("cargo:rustc-link-arg=-static-libgcc");
+                println!("cargo:rustc-link-arg=-static-libstdc++");
+            } else {
+                // Default dynamic linking for native Windows builds
+                println!("cargo:rustc-link-lib=stdc++");
+            }
         }
     } else {
         println!("cargo:rustc-link-lib=xkbcommon");
