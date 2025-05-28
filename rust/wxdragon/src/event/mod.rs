@@ -17,7 +17,7 @@ pub mod window_events;
 
 // Re-export window events for easier access
 pub use window_events::{
-    KeyboardEvent, MouseButtonEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
+    KeyboardEvent, MouseButtonEvent, MouseEnterEvent, MouseLeaveEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
     WindowSizeEvent,
 };
 
@@ -62,6 +62,8 @@ impl EventType {
     pub const MIDDLE_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MIDDLE_UP);
     pub const MOTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOTION);
     pub const MOUSEWHEEL: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOUSEWHEEL);
+    pub const ENTER_WINDOW: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_ENTER_WINDOW);
+    pub const LEAVE_WINDOW: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LEAVE_WINDOW);
     pub const KEY_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KEY_DOWN);
     pub const KEY_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KEY_UP);
     pub const CHAR: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CHAR);
@@ -523,9 +525,10 @@ pub trait WxEvtHandler {
             return;
         }
 
-        // UPDATED: Box simple FnMut(Event)
-        let boxed_callback: Box<Box<dyn FnMut(Event) + 'static>> = Box::new(Box::new(callback));
-        let user_data = Box::into_raw(boxed_callback) as *mut c_void;
+        // Double-box the callback to match trampoline expectations
+        let boxed_callback: Box<dyn FnMut(Event) + 'static> = Box::new(callback);
+        let double_boxed = Box::new(boxed_callback);
+        let user_data = Box::into_raw(double_boxed) as *mut c_void;
 
         type TrampolineFn = unsafe extern "C" fn(*mut c_void, *mut c_void);
         let trampoline_ptr: TrampolineFn = rust_event_handler_trampoline;
@@ -553,9 +556,10 @@ pub trait WxEvtHandler {
             return;
         }
 
-        // Box simple FnMut(Event)
-        let boxed_callback: Box<Box<dyn FnMut(Event) + 'static>> = Box::new(Box::new(callback));
-        let user_data = Box::into_raw(boxed_callback) as *mut c_void;
+        // Double-box the callback to match trampoline expectations
+        let boxed_callback: Box<dyn FnMut(Event) + 'static> = Box::new(callback);
+        let double_boxed = Box::new(boxed_callback);
+        let user_data = Box::into_raw(double_boxed) as *mut c_void;
 
         type TrampolineFn = unsafe extern "C" fn(*mut c_void, *mut c_void);
         let trampoline_ptr: TrampolineFn = rust_event_handler_trampoline;
@@ -576,7 +580,7 @@ pub trait WxEvtHandler {
 // --- FFI Trampoline & Drop Functions (Updated for Simple Event) ---
 
 /// Trampoline function: Called by C++.
-/// `user_data` is a raw pointer to `Box<Box<dyn FnMut(Event) + 'static>>`.
+/// `user_data` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
 #[no_mangle]
 pub unsafe extern "C" fn rust_event_handler_trampoline(
     user_data: *mut c_void,
@@ -587,7 +591,7 @@ pub unsafe extern "C" fn rust_event_handler_trampoline(
         return;
     }
 
-    // UPDATED: Cast to Box<dyn FnMut(Event)>
+    // Cast to Box<dyn FnMut(Event)> directly
     let closure_box = &mut *(user_data as *mut Box<dyn FnMut(Event) + 'static>);
     let event_ptr = event_ptr_cvoid as *mut ffi::wxd_Event_t;
 
@@ -601,12 +605,12 @@ pub unsafe extern "C" fn rust_event_handler_trampoline(
 }
 
 /// Function called by C++ to drop the Rust closure Box.
-/// `ptr` is a raw pointer to `Box<Box<dyn FnMut(Event) + 'static>>`.
+/// `ptr` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
 #[no_mangle]
 pub unsafe extern "C" fn drop_rust_closure_box(ptr: *mut c_void) {
     if !ptr.is_null() {
-        // UPDATED: Drop simple Box<Box<dyn FnMut(Event)>>
-        let _: Box<Box<dyn FnMut(Event) + 'static>> = Box::from_raw(ptr as *mut _);
+        // Drop the Box<dyn FnMut(Event)>
+        let _ = Box::from_raw(ptr as *mut Box<dyn FnMut(Event) + 'static>);
     } else { /* ... */
     }
 }

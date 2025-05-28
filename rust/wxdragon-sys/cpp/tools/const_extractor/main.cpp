@@ -554,6 +554,90 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxDATAVIEW_COL_REORDERABLE", wxDATAVIEW_COL_REORDERABLE});
     constants_to_extract.push_back({"wxDATAVIEW_COL_HIDDEN", wxDATAVIEW_COL_HIDDEN});
     
+    // DC Polygon fill styles
+    constants_to_extract.push_back({"wxODDEVEN_RULE", wxODDEVEN_RULE});
+    constants_to_extract.push_back({"wxWINDING_RULE", wxWINDING_RULE});
+    
+    // DC Flood fill styles
+    constants_to_extract.push_back({"wxFLOOD_SURFACE", wxFLOOD_SURFACE});
+    constants_to_extract.push_back({"wxFLOOD_BORDER", wxFLOOD_BORDER});
+    
+    // DC Logical functions
+    constants_to_extract.push_back({"wxCLEAR", wxCLEAR});
+    constants_to_extract.push_back({"wxXOR", wxXOR});
+    constants_to_extract.push_back({"wxINVERT", wxINVERT});
+    constants_to_extract.push_back({"wxOR_REVERSE", wxOR_REVERSE});
+    constants_to_extract.push_back({"wxAND_REVERSE", wxAND_REVERSE});
+    constants_to_extract.push_back({"wxCOPY", wxCOPY});
+    constants_to_extract.push_back({"wxAND", wxAND});
+    constants_to_extract.push_back({"wxAND_INVERT", wxAND_INVERT});
+    constants_to_extract.push_back({"wxNO_OP", wxNO_OP});
+    constants_to_extract.push_back({"wxNOR", wxNOR});
+    constants_to_extract.push_back({"wxEQUIV", wxEQUIV});
+    constants_to_extract.push_back({"wxSRC_INVERT", wxSRC_INVERT});
+    constants_to_extract.push_back({"wxOR_INVERT", wxOR_INVERT});
+    constants_to_extract.push_back({"wxNAND", wxNAND});
+    constants_to_extract.push_back({"wxOR", wxOR});
+    constants_to_extract.push_back({"wxSET", wxSET});
+    
+    // DC Map modes
+    constants_to_extract.push_back({"wxMM_TEXT", wxMM_TEXT});
+    constants_to_extract.push_back({"wxMM_LOMETRIC", wxMM_LOMETRIC});
+    constants_to_extract.push_back({"wxMM_TWIPS", wxMM_TWIPS});
+    constants_to_extract.push_back({"wxMM_METRIC", wxMM_METRIC});
+    
+    // Text alignment constants (only the unique ones not already defined)
+    constants_to_extract.push_back({"wxALIGN_INVALID", wxALIGN_INVALID});
+    // Note: Other wxALIGN_* constants already defined in the general alignment section above
+    
+    // Gradient direction constants
+    constants_to_extract.push_back({"wxNORTH", wxNORTH});
+    constants_to_extract.push_back({"wxSOUTH", wxSOUTH});
+    constants_to_extract.push_back({"wxEAST", wxEAST});
+    constants_to_extract.push_back({"wxWEST", wxWEST});
+    
+    // DC Brush and Pen styles (additional to basic ones)
+    constants_to_extract.push_back({"wxTRANSPARENT", wxTRANSPARENT});
+    constants_to_extract.push_back({"wxSOLID", wxSOLID});
+    
+    // Pen styles
+    constants_to_extract.push_back({"wxPENSTYLE_SOLID", wxPENSTYLE_SOLID});
+    constants_to_extract.push_back({"wxPENSTYLE_DOT", wxPENSTYLE_DOT});
+    constants_to_extract.push_back({"wxPENSTYLE_LONG_DASH", wxPENSTYLE_LONG_DASH});
+    constants_to_extract.push_back({"wxPENSTYLE_SHORT_DASH", wxPENSTYLE_SHORT_DASH});
+    constants_to_extract.push_back({"wxPENSTYLE_DOT_DASH", wxPENSTYLE_DOT_DASH});
+    constants_to_extract.push_back({"wxPENSTYLE_TRANSPARENT", wxPENSTYLE_TRANSPARENT});
+    constants_to_extract.push_back({"wxPENSTYLE_STIPPLE", wxPENSTYLE_STIPPLE});
+    constants_to_extract.push_back({"wxPENSTYLE_USER_DASH", wxPENSTYLE_USER_DASH});
+    constants_to_extract.push_back({"wxPENSTYLE_BDIAGONAL_HATCH", wxPENSTYLE_BDIAGONAL_HATCH});
+    constants_to_extract.push_back({"wxPENSTYLE_CROSSDIAG_HATCH", wxPENSTYLE_CROSSDIAG_HATCH});
+    constants_to_extract.push_back({"wxPENSTYLE_FDIAGONAL_HATCH", wxPENSTYLE_FDIAGONAL_HATCH});
+    constants_to_extract.push_back({"wxPENSTYLE_CROSS_HATCH", wxPENSTYLE_CROSS_HATCH});
+    constants_to_extract.push_back({"wxPENSTYLE_HORIZONTAL_HATCH", wxPENSTYLE_HORIZONTAL_HATCH});
+    constants_to_extract.push_back({"wxPENSTYLE_VERTICAL_HATCH", wxPENSTYLE_VERTICAL_HATCH});
+    
+    // Brush styles
+    constants_to_extract.push_back({"wxBRUSHSTYLE_SOLID", wxBRUSHSTYLE_SOLID});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_TRANSPARENT", wxBRUSHSTYLE_TRANSPARENT});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_BDIAGONAL_HATCH", wxBRUSHSTYLE_BDIAGONAL_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_CROSSDIAG_HATCH", wxBRUSHSTYLE_CROSSDIAG_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_FDIAGONAL_HATCH", wxBRUSHSTYLE_FDIAGONAL_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_CROSS_HATCH", wxBRUSHSTYLE_CROSS_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_HORIZONTAL_HATCH", wxBRUSHSTYLE_HORIZONTAL_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_VERTICAL_HATCH", wxBRUSHSTYLE_VERTICAL_HATCH});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_STIPPLE", wxBRUSHSTYLE_STIPPLE});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_STIPPLE_MASK_OPAQUE", wxBRUSHSTYLE_STIPPLE_MASK_OPAQUE});
+    constants_to_extract.push_back({"wxBRUSHSTYLE_STIPPLE_MASK", wxBRUSHSTYLE_STIPPLE_MASK});
+    
+    // Default coordinate value
+    constants_to_extract.push_back({"wxDefaultCoord", wxDefaultCoord});
+    
+    // Background styles
+    constants_to_extract.push_back({"wxBG_STYLE_ERASE", wxBG_STYLE_ERASE});
+    constants_to_extract.push_back({"wxBG_STYLE_SYSTEM", wxBG_STYLE_SYSTEM});
+    constants_to_extract.push_back({"wxBG_STYLE_PAINT", wxBG_STYLE_PAINT});
+    constants_to_extract.push_back({"wxBG_STYLE_COLOUR", wxBG_STYLE_COLOUR});
+    
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",
 

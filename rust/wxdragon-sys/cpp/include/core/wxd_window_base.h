@@ -45,4 +45,8 @@ WXD_EXPORTED void wxd_Window_SetFont(wxd_Window_t* self, const wxd_Font_t* font)
 WXD_EXPORTED wxd_Font_t* wxd_Window_GetFont(wxd_Window_t* self);
 WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self);
 
+// Background style functions
+WXD_EXPORTED void wxd_Window_SetBackgroundStyle(wxd_Window_t* window, int style);
+WXD_EXPORTED int wxd_Window_GetBackgroundStyle(wxd_Window_t* window);
+
 #endif // WXD_WINDOW_BASE_H 

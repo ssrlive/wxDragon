@@ -1,8 +1,8 @@
 [package]
-name = "dataview_demo"
+name = "custom_widget"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 wxdragon = { path = "../../../rust/wxdragon" }
-wxdragon-sys = { path = "../../../rust/wxdragon-sys" } 
+paste = "1.0" 

@@ -4,6 +4,47 @@ use crate::geometry::{Point, Size};
 use crate::sizers::WxSizer;
 use wxdragon_sys as ffi;
 
+/// Background style for windows, affecting how background painting is handled.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BackgroundStyle {
+    /// The background is erased automatically by the system.
+    /// This is the default for most controls and is suitable for most cases.
+    Erase,
+    /// The background is erased by the system as in Erase, but using the
+    /// current background color instead of the default one.
+    System,
+    /// The background is not erased automatically, and the application
+    /// is responsible for painting the entire background in its paint handler.
+    /// This is optimal for custom drawing and animation as it prevents flicker.
+    Paint,
+    /// Similar to Paint, but the background is filled with the background colour
+    /// before calling the paint event handler.
+    Colour,
+}
+
+impl BackgroundStyle {
+    /// Convert to the raw FFI value
+    pub fn to_raw(&self) -> i32 {
+        match self {
+            BackgroundStyle::Erase => wxdragon_sys::WXD_BG_STYLE_ERASE as i32,
+            BackgroundStyle::System => wxdragon_sys::WXD_BG_STYLE_SYSTEM as i32,
+            BackgroundStyle::Paint => wxdragon_sys::WXD_BG_STYLE_PAINT as i32,
+            BackgroundStyle::Colour => wxdragon_sys::WXD_BG_STYLE_COLOUR as i32,
+        }
+    }
+
+    /// Create from raw FFI value
+    pub fn from_raw(value: i32) -> Self {
+        match value as i64 {
+            v if v == wxdragon_sys::WXD_BG_STYLE_ERASE => BackgroundStyle::Erase,
+            v if v == wxdragon_sys::WXD_BG_STYLE_SYSTEM => BackgroundStyle::System,
+            v if v == wxdragon_sys::WXD_BG_STYLE_PAINT => BackgroundStyle::Paint,
+            v if v == wxdragon_sys::WXD_BG_STYLE_COLOUR => BackgroundStyle::Colour,
+            _ => BackgroundStyle::System, // Default fallback
+        }
+    }
+}
+
 /// Represents a pointer to any wxDragon window object.
 /// This is typically used as a base struct or in trait objects.
 /// Note: Deliberately NOT Copy or Clone, as it represents unique FFI resource ownership.
@@ -131,6 +172,35 @@ pub trait WxWidget {
             unsafe {
                 ffi::wxd_Window_SetBackgroundColor(window_ptr, color.into());
             }
+        }
+    }
+
+    /// Sets the background style for the window.
+    /// 
+    /// The background style determines how the window's background is painted:
+    /// - `BackgroundStyle::Erase`: Default behavior, background erased automatically
+    /// - `BackgroundStyle::System`: Background erased with current background color  
+    /// - `BackgroundStyle::Paint`: No automatic background erasing, app handles it
+    /// - `BackgroundStyle::Colour`: Background filled with background color before paint
+    /// 
+    /// For smooth custom drawing and animations, use `BackgroundStyle::Paint`.
+    fn set_background_style(&self, style: BackgroundStyle) {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetBackgroundStyle(window_ptr, style.to_raw());
+            }
+        }
+    }
+
+    /// Gets the background style for the window.
+    fn get_background_style(&self) -> BackgroundStyle {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            let raw_style = unsafe { ffi::wxd_Window_GetBackgroundStyle(window_ptr) };
+            BackgroundStyle::from_raw(raw_style)
+        } else {
+            BackgroundStyle::System // Default fallback
         }
     }
 

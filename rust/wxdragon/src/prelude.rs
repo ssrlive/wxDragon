@@ -13,7 +13,7 @@ pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES, ID_HIGHEST};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
 pub use crate::utils::WxdArrayString;
-pub use crate::window::{Window, WxWidget};
+pub use crate::window::{BackgroundStyle, Window, WxWidget};
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};
@@ -203,7 +203,7 @@ pub use crate::dnd::{
 
 // --- Painting & DeviceContexts ---
 pub use crate::dc::{
-    BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
+    AutoBufferedPaintDC, BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
     WindowDC,
 };
 
@@ -220,3 +220,6 @@ pub use crate::widgets::combobox::NOT_FOUND as COMBOBOX_NOT_FOUND;
 // Example: NotificationMessage timeouts were already there
 
 // --- XRC Support ---
+
+// --- Macros for custom widget development ---
+pub use crate::custom_widget;

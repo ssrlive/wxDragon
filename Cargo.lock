@@ -215,11 +215,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "dataview_demo"
+name = "custom_widget"
 version = "0.1.0"
 dependencies = [
+ "paste",
  "wxdragon",
- "wxdragon-sys",
 ]
 
 [[package]]

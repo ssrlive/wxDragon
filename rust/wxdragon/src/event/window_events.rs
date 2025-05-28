@@ -17,6 +17,8 @@ pub enum WindowEvent {
     MiddleUp,
     Motion,
     MouseWheel,
+    EnterWindow,
+    LeaveWindow,
 
     // Keyboard events
     KeyDown,
@@ -42,6 +44,8 @@ pub enum WindowEvent {
 pub enum WindowEventData {
     MouseButton(MouseButtonEvent),
     MouseMotion(MouseMotionEvent),
+    MouseEnter(MouseEnterEvent),
+    MouseLeave(MouseLeaveEvent),
     Keyboard(KeyboardEvent),
     Size(WindowSizeEvent),
     General(Event),
@@ -71,10 +75,14 @@ impl WindowEventData {
             return WindowEventData::Keyboard(KeyboardEvent::new(event));
         }
 
-        // Check for size events
+        // Check for size events and mouse enter/leave events
         if let Some(event_type) = event.get_event_type() {
             if event_type == EventType::SIZE {
                 return WindowEventData::Size(WindowSizeEvent::new(event));
+            } else if event_type == EventType::ENTER_WINDOW {
+                return WindowEventData::MouseEnter(MouseEnterEvent::new(event));
+            } else if event_type == EventType::LEAVE_WINDOW {
+                return WindowEventData::MouseLeave(MouseLeaveEvent::new(event));
             }
         }
 
@@ -87,6 +95,8 @@ impl WindowEventData {
         match self {
             WindowEventData::MouseButton(event) => event.event.skip(skip),
             WindowEventData::MouseMotion(event) => event.event.skip(skip),
+            WindowEventData::MouseEnter(event) => event.event.skip(skip),
+            WindowEventData::MouseLeave(event) => event.event.skip(skip),
             WindowEventData::Keyboard(event) => event.event.skip(skip),
             WindowEventData::Size(event) => event.event.skip(skip),
             WindowEventData::General(event) => event.skip(skip),
@@ -119,6 +129,42 @@ pub struct MouseMotionEvent {
 }
 
 impl MouseMotionEvent {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event: MouseEventData::new(event),
+        }
+    }
+
+    pub fn get_position(&self) -> Option<crate::geometry::Point> {
+        self.event.get_position()
+    }
+}
+
+/// Mouse enter events
+#[derive(Debug)]
+pub struct MouseEnterEvent {
+    pub event: MouseEventData,
+}
+
+impl MouseEnterEvent {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event: MouseEventData::new(event),
+        }
+    }
+
+    pub fn get_position(&self) -> Option<crate::geometry::Point> {
+        self.event.get_position()
+    }
+}
+
+/// Mouse leave events
+#[derive(Debug)]
+pub struct MouseLeaveEvent {
+    pub event: MouseEventData,
+}
+
+impl MouseLeaveEvent {
     pub fn new(event: Event) -> Self {
         Self {
             event: MouseEventData::new(event),
@@ -177,6 +223,8 @@ crate::implement_category_event_handlers!(
     MiddleUp => mouse_middle_up, EventType::MIDDLE_UP,
     Motion => mouse_motion, EventType::MOTION,
     MouseWheel => mouse_wheel, EventType::MOUSEWHEEL,
+    EnterWindow => mouse_enter, EventType::ENTER_WINDOW,
+    LeaveWindow => mouse_leave, EventType::LEAVE_WINDOW,
     KeyDown => key_down, EventType::KEY_DOWN,
     KeyUp => key_up, EventType::KEY_UP,
     Char => char, EventType::CHAR,

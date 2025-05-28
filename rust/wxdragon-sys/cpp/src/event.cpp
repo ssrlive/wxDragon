@@ -2,6 +2,7 @@
 // #include "../include/events/wxd_event_api.h" // No longer needed, wxd_Event_t defined in wxd_types.h (via wxdragon.h)
 #include <wx/wx.h>
 #include <unordered_map>
+#include <vector>  // For std::vector used in closureMap
 #include <memory> // For std::unique_ptr if we want safer memory management
 #include <tuple>  // For std::pair used in map key
 #include <wx/event.h>
@@ -59,8 +60,9 @@ struct RustClosureInfo {
     wxd_ClosureCallback rust_trampoline = nullptr; // Store the trampoline func ptr
 };
 
-// Forward declaration
+// Forward declarations
 class WxdEventHandler;
+static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val);
 
 // ClientData class to hold our handler pointer and ensure deletion
 class WxdHandlerClientData : public wxClientData {
@@ -74,8 +76,10 @@ public:
 // Custom Event Handler class to connect wx events to Rust closures
 class WxdEventHandler : public wxEvtHandler {
 public:
-    // Map (eventType, widgetId) pair to the Rust closure info
-    std::unordered_map<std::pair<wxEventType, wxd_Id>, RustClosureInfo, PairHash> closureMap; 
+    // Map (eventType, widgetId) pair to a vector of Rust closure info
+    std::unordered_map<std::pair<wxEventType, wxd_Id>, std::vector<RustClosureInfo>, PairHash> closureMap; 
+    // Track whether we've already bound DispatchEvent to wxWidgets for each event key
+    std::unordered_map<std::pair<wxEventType, wxd_Id>, bool, PairHash> wx_bindings_made;
     wxd_EvtHandler_t* c_handle = nullptr; // Changed type to wxd_EvtHandler_t*
     wxEvtHandler* ownerHandler = nullptr; // Store the actual wxEvtHandler*
 
@@ -84,8 +88,8 @@ public:
     // Destructor - Now needs to notify Rust to drop closures via drop_rust_closure_box
     ~WxdEventHandler(); // Declaration moved, definition below
 
-    // The actual event handler called by wxWidgets
-    void OnAnyEvent(wxEvent& event); 
+    // The new dispatch method that handles multiple closures per event
+    void DispatchEvent(wxEvent& event);
 };
 
 // Define WxdHandlerClientData destructor (no change needed here, it still just deletes the handler)
@@ -107,43 +111,77 @@ extern "C" {
 // WxdEventHandler Destructor Implementation
 WxdEventHandler::~WxdEventHandler() {
     // wxLogDebug("WxdEventHandler destroying for handler %p. Notifying Rust to drop closures.", ownerHandler);
-    for (auto const& [key, info] : closureMap) {
-        if (info.closure_ptr) {
-            // Tell Rust to drop the Box corresponding to this pointer
-            drop_rust_closure_box(info.closure_ptr);
+    for (auto const& [key, closure_vector] : closureMap) {
+        for (auto const& info : closure_vector) {
+            if (info.closure_ptr) {
+                // Tell Rust to drop the Box corresponding to this pointer
+                drop_rust_closure_box(info.closure_ptr);
+            }
         }
     }
-    // Clear the map (optional, as the handler is being destroyed)
+    // Clear the maps (optional, as the handler is being destroyed)
     closureMap.clear();
+    wx_bindings_made.clear();
 }
 
-// Modify OnAnyEvent to call the Rust trampoline
-void WxdEventHandler::OnAnyEvent(wxEvent& event) {
+// New DispatchEvent method that handles multiple closures per event
+void WxdEventHandler::DispatchEvent(wxEvent& event) {
     wxEventType eventType = event.GetEventType();
     wxd_Id id = event.GetId(); // Get the widget ID from the event
 
-    // Create the key pair
-    std::pair<wxEventType, wxd_Id> key = {eventType, id};
+    // Create keys for specific ID and wxID_ANY
+    std::pair<wxEventType, wxd_Id> key_specific_id = {eventType, id};
+    std::pair<wxEventType, wxd_Id> key_any_id = {eventType, wxID_ANY};
+    
+    bool event_consumed = false;
 
-    auto it = closureMap.find(key); // Look up using the combined key
-
-    if (it != closureMap.end()) {
-        RustClosureInfo& info = it->second;
-        if (info.closure_ptr && info.rust_trampoline) {
-            // wxLogDebug("[DEBUG C++] Found closure for type=%d, id=%d. Calling trampoline.", eventType, id);
-            // Call the specific Rust trampoline function stored in info
-            info.rust_trampoline(reinterpret_cast<wxd_Event_t*>(&event), info.closure_ptr);
-
-            // We assume the Rust closure handles event.Skip() if needed via wxd_Event_Skip.
-            return; // Event handled (or skipped) by Rust closure
-        } else {
-            // Should not happen if Bind succeeded, but log if it does
-            // wxLogDebug("[DEBUG C++] OnAnyEvent: Found key (%d, %d) but closure_ptr or rust_trampoline is null!", eventType, id);
+    // Process Specific ID Handlers first
+    auto it_specific = closureMap.find(key_specific_id);
+    if (it_specific != closureMap.end()) {
+        for (auto const& info : it_specific->second) {
+            if (info.closure_ptr && info.rust_trampoline) {
+                // Reset skip to true before each handler call
+                event.Skip(true);
+                
+                // Call the Rust trampoline function
+                info.rust_trampoline(info.closure_ptr, reinterpret_cast<wxd_Event_t*>(&event));
+                
+                // Check if this handler consumed the event
+                if (!event.GetSkipped()) {
+                    event_consumed = true;
+                    break; // Stop processing further handlers
+                }
+            }
         }
+    }
+
+    // Process wxID_ANY Handlers (if not already consumed)
+    if (!event_consumed) {
+        auto it_any = closureMap.find(key_any_id);
+        if (it_any != closureMap.end()) {
+            for (auto const& info : it_any->second) {
+                if (info.closure_ptr && info.rust_trampoline) {
+                    // Reset skip to true before each handler call
+                    event.Skip(true);
+                    
+                    // Call the Rust trampoline function
+                    info.rust_trampoline(info.closure_ptr, reinterpret_cast<wxd_Event_t*>(&event));
+                    
+                    // Check if this handler consumed the event
+                    if (!event.GetSkipped()) {
+                        event_consumed = true;
+                        break; // Stop processing further handlers
+                    }
+                }
+            }
+        }
+    }
+
+    // Set final event state
+    if (event_consumed) {
+        event.Skip(false);
     } else {
-    // If no Rust closure was found for this specific event type,
-    // allow default processing.
-    event.Skip();
+        event.Skip(true);
     }
 }
 
@@ -270,614 +308,40 @@ extern "C" void wxd_EvtHandler_Bind(
         return;
     }
 
-    // Create the functor that wraps the Rust data
-    CxxClosureVoid functor(rust_trampoline_fn, rust_closure_ptr);
-    bool bound = false; // Flag to track if binding succeeded
+    // Get or create the custom event handler
+    WxdEventHandler* customHandler = GetOrCreateEventHandler(wx_handler, handler);
+    if (!customHandler) {
+        wxLogWarning("wxd_EvtHandler_Bind: Failed to create custom handler.");
+        if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+        return;
+    }
 
-    // Switch on the stable C enum value and map to the wxWidgets event tag
-    switch (eventTypeC) {
-        // --- Command Events ---
-        case WXD_EVENT_TYPE_COMMAND_BUTTON_CLICKED:
-             wx_handler->Bind(wxEVT_BUTTON, functor); 
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_CHECKBOX:
-            wx_handler->Bind(wxEVT_CHECKBOX, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBUTTON_SELECTED:
-             wx_handler->Bind(wxEVT_RADIOBUTTON, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_RADIOBOX_SELECTED:
-             wx_handler->Bind(wxEVT_RADIOBOX, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_LISTBOX_SELECTED:
-             wx_handler->Bind(wxEVT_LISTBOX, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED:
-            wx_handler->Bind(wxEVT_LISTBOX_DCLICK, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_CHOICE_SELECTED:
-             wx_handler->Bind(wxEVT_CHOICE, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED:
-             wx_handler->Bind(wxEVT_COMBOBOX, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED:
-             wx_handler->Bind(wxEVT_CHECKLISTBOX, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED:
-             wx_handler->Bind(wxEVT_TOGGLEBUTTON, functor); 
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_MENU:
-             wx_handler->Bind(wxEVT_MENU, functor);
-             bound = true;
-             break;
+    // Convert C enum to wxEventType
+    wxEventType wx_event_type_to_bind = get_wx_event_type_for_c_enum(eventTypeC);
+    if (wx_event_type_to_bind == wxEVT_NULL) {
+        wxLogWarning("wxd_EvtHandler_Bind: Unsupported WXDEventTypeCEnum value %d.", (int)eventTypeC);
+        if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+        return;
+    }
 
-        // --- Text Events ---
-        case WXD_EVENT_TYPE_TEXT:
-             wx_handler->Bind(wxEVT_TEXT, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_TEXT_ENTER:
-             wx_handler->Bind(wxEVT_TEXT_ENTER, functor);
-             bound = true;
-             break;
-
-        // --- Tree Events ---
-        case WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT:
-             wx_handler->Bind(wxEVT_TREE_BEGIN_LABEL_EDIT, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_TREE_END_LABEL_EDIT:
-             wx_handler->Bind(wxEVT_TREE_END_LABEL_EDIT, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_TREE_SEL_CHANGED:
-             wx_handler->Bind(wxEVT_TREE_SEL_CHANGED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_TREE_ITEM_ACTIVATED:
-             wx_handler->Bind(wxEVT_TREE_ITEM_ACTIVATED, functor);
-             bound = true;
-             break;
-
-        // --- Slider/Spin Events ---
-        case WXD_EVENT_TYPE_SLIDER:
-             wx_handler->Bind(wxEVT_SLIDER, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPINCTRL:
-             wx_handler->Bind(wxEVT_SPINCTRL, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPIN_UP:
-             wx_handler->Bind(wxEVT_SPIN_UP, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPIN_DOWN:
-             wx_handler->Bind(wxEVT_SPIN_DOWN, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPIN:
-             wx_handler->Bind(wxEVT_SPIN, functor);
-             bound = true;
-             break;
-
-        // --- Notebook Event ---
-        case WXD_EVENT_TYPE_NOTEBOOK_PAGE_CHANGED:
-             wx_handler->Bind(wxEVT_NOTEBOOK_PAGE_CHANGED, functor);
-             bound = true;
-             break;
-
-        // --- Splitter Events ---
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGED:
-             wx_handler->Bind(wxEVT_SPLITTER_SASH_POS_CHANGED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGING:
-             wx_handler->Bind(wxEVT_SPLITTER_SASH_POS_CHANGING, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPLITTER_DOUBLECLICKED:
-             wx_handler->Bind(wxEVT_SPLITTER_DOUBLECLICKED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_SPLITTER_UNSPLIT:
-             wx_handler->Bind(wxEVT_SPLITTER_UNSPLIT, functor);
-             bound = true;
-             break;
-
-        // --- ListCtrl Events ---
-        case WXD_EVENT_TYPE_LIST_ITEM_SELECTED:
-             wx_handler->Bind(wxEVT_LIST_ITEM_SELECTED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_ITEM_ACTIVATED:
-             wx_handler->Bind(wxEVT_LIST_ITEM_ACTIVATED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_COL_CLICK:
-             wx_handler->Bind(wxEVT_LIST_COL_CLICK, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT:
-             wx_handler->Bind(wxEVT_LIST_BEGIN_LABEL_EDIT, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT:
-             wx_handler->Bind(wxEVT_LIST_END_LABEL_EDIT, functor);
-             bound = true;
-             break;
-        // ADDED: Additional ListCtrl events
-        case WXD_EVENT_TYPE_LIST_BEGIN_DRAG:
-             wx_handler->Bind(wxEVT_LIST_BEGIN_DRAG, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_BEGIN_RDRAG:
-             wx_handler->Bind(wxEVT_LIST_BEGIN_RDRAG, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_DELETE_ITEM:
-             wx_handler->Bind(wxEVT_LIST_DELETE_ITEM, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS:
-             wx_handler->Bind(wxEVT_LIST_DELETE_ALL_ITEMS, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_ITEM_DESELECTED:
-             wx_handler->Bind(wxEVT_LIST_ITEM_DESELECTED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_ITEM_FOCUSED:
-             wx_handler->Bind(wxEVT_LIST_ITEM_FOCUSED, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK:
-             wx_handler->Bind(wxEVT_LIST_ITEM_MIDDLE_CLICK, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK:
-             wx_handler->Bind(wxEVT_LIST_ITEM_RIGHT_CLICK, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_KEY_DOWN:
-             wx_handler->Bind(wxEVT_LIST_KEY_DOWN, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_INSERT_ITEM:
-             wx_handler->Bind(wxEVT_LIST_INSERT_ITEM, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK:
-             wx_handler->Bind(wxEVT_LIST_COL_RIGHT_CLICK, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG:
-             wx_handler->Bind(wxEVT_LIST_COL_BEGIN_DRAG, functor);
-             bound = true;
-             break;
-
-        // --- ColourPicker Event ---
-        case WXD_EVENT_TYPE_COLOURPICKER_CHANGED: {
-            int id = wxID_ANY;
-            wxObject* cxx_data_copy = nullptr;
-            wx_handler->Bind(wxEVT_COLOURPICKER_CHANGED, functor, id, wxID_ANY, cxx_data_copy);
-            bound = true;
-            break;
-        }
-        case WXD_EVENT_TYPE_DATE_CHANGED: {
-            int id = wxID_ANY;
-            wxObject* cxx_data_copy = nullptr;
-            wx_handler->Bind(wxEVT_DATE_CHANGED, functor, id, wxID_ANY, cxx_data_copy);
-            bound = true;
-            break;
-        }
-
-        // --- Window Events ---
-        case WXD_EVENT_TYPE_CLOSE_WINDOW:
-            wx_handler->Bind(wxEVT_CLOSE_WINDOW, functor); 
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SIZE:
-             wx_handler->Bind(wxEVT_SIZE, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_MOVE:
-            wx_handler->Bind(wxEVT_MOVE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_ERASE:
-            wx_handler->Bind(wxEVT_ERASE_BACKGROUND, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SET_FOCUS:
-            wx_handler->Bind(wxEVT_SET_FOCUS, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_KILL_FOCUS:
-            wx_handler->Bind(wxEVT_KILL_FOCUS, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_PAINT:
-            wx_handler->Bind(wxEVT_PAINT, functor);
-             bound = true;
-             break;
-
-        // --- Mouse Events ---
-        case WXD_EVENT_TYPE_LEFT_DOWN:
-             wx_handler->Bind(wxEVT_LEFT_DOWN, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_LEFT_UP:
-             wx_handler->Bind(wxEVT_LEFT_UP, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_RIGHT_DOWN:
-            wx_handler->Bind(wxEVT_RIGHT_DOWN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_RIGHT_UP:
-            wx_handler->Bind(wxEVT_RIGHT_UP, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MIDDLE_DOWN:
-            wx_handler->Bind(wxEVT_MIDDLE_DOWN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MIDDLE_UP:
-            wx_handler->Bind(wxEVT_MIDDLE_UP, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_MOTION:
-             wx_handler->Bind(wxEVT_MOTION, functor); 
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_MOUSEWHEEL:
-             wx_handler->Bind(wxEVT_MOUSEWHEEL, functor);
-             bound = true;
-             break;
-
-        // --- Keyboard Events ---
-        case WXD_EVENT_TYPE_KEY_DOWN:
-             wx_handler->Bind(wxEVT_KEY_DOWN, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_KEY_UP:
-             wx_handler->Bind(wxEVT_KEY_UP, functor);
-             bound = true;
-             break;
-        case WXD_EVENT_TYPE_CHAR:
-             wx_handler->Bind(wxEVT_CHAR, functor);
-             bound = true;
-             break;
-             
-        // ADDED: Treebook Events
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED:
-            wx_handler->Bind(wxEVT_TREEBOOK_PAGE_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGING:
-            wx_handler->Bind(wxEVT_TREEBOOK_PAGE_CHANGING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED:
-            wx_handler->Bind(wxEVT_TREEBOOK_NODE_COLLAPSED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED:
-            wx_handler->Bind(wxEVT_TREEBOOK_NODE_COLLAPSED, functor);
-            bound = true;
-            break;
-        // ADDED: SearchCtrl Events
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_SEARCH_BTN:
-            wx_handler->Bind(wxEVT_SEARCHCTRL_SEARCH_BTN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_CANCEL_BTN:
-            wx_handler->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_COMMAND_HYPERLINK:
-            wx_handler->Bind(wxEVT_HYPERLINK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SPINCTRLDOUBLE:
-            wx_handler->Bind(wxEVT_SPINCTRLDOUBLE, functor);
-            bound = true;
-            break;
-
-        // ADDED: Calendar Control Event
-        case WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED:
-            wx_handler->Bind(wxEVT_CALENDAR_SEL_CHANGED, functor);
-            bound = true;
-            break;
-
-        // ADDED: ScrollBar Events
-        case WXD_EVENT_TYPE_SCROLL_TOP:
-            wx_handler->Bind(wxEVT_SCROLL_TOP, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_BOTTOM:
-            wx_handler->Bind(wxEVT_SCROLL_BOTTOM, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_LINEUP:
-            wx_handler->Bind(wxEVT_SCROLL_LINEUP, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_LINEDOWN:
-            wx_handler->Bind(wxEVT_SCROLL_LINEDOWN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_PAGEUP:
-            wx_handler->Bind(wxEVT_SCROLL_PAGEUP, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_PAGEDOWN:
-            wx_handler->Bind(wxEVT_SCROLL_PAGEDOWN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_THUMBTRACK:
-            wx_handler->Bind(wxEVT_SCROLL_THUMBTRACK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE:
-            wx_handler->Bind(wxEVT_SCROLL_THUMBRELEASE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_SCROLL_CHANGED:
-            wx_handler->Bind(wxEVT_SCROLL_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_FILEPICKER_CHANGED:
-            wx_handler->Bind(wxEVT_FILEPICKER_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DIRPICKER_CHANGED:
-            wx_handler->Bind(wxEVT_DIRPICKER_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_FONTPICKER_CHANGED:
-            wx_handler->Bind(wxEVT_FONTPICKER_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK:
-            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED:
-            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_DISMISSED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION:
-            wx_handler->Bind(wxEVT_NOTIFICATION_MESSAGE_ACTION, functor);
-            bound = true;
-            break;
-        // MediaCtrl events
-        #if wxUSE_MEDIACTRL
-        case WXD_EVENT_TYPE_MEDIA_LOADED:
-            wx_handler->Bind(wxEVT_MEDIA_LOADED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MEDIA_STOP:
-            wx_handler->Bind(wxEVT_MEDIA_STOP, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MEDIA_FINISHED:
-            wx_handler->Bind(wxEVT_MEDIA_FINISHED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MEDIA_STATECHANGED:
-            wx_handler->Bind(wxEVT_MEDIA_STATECHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MEDIA_PLAY:
-            wx_handler->Bind(wxEVT_MEDIA_PLAY, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MEDIA_PAUSE:
-            wx_handler->Bind(wxEVT_MEDIA_PAUSE, functor);
-            bound = true;
-            break;
-        #endif // wxUSE_MEDIACTRL
-        case WXD_EVENT_TYPE_IDLE:
-            wx_handler->Bind(wxEVT_IDLE, functor);
-            bound = true;
-            break;
-        // Drag and drop events
-        case WXD_EVENT_TYPE_DROP_FILES:
-            wx_handler->Bind(wxEVT_DROP_FILES, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TIME_CHANGED:
-            wx_handler->Bind(wxEVT_TIME_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DESTROY:
-            wx_handler->Bind(wxEVT_DESTROY, functor);
-            bound = true;
-            break;
-        // DataView events
-        case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED:
-            wx_handler->Bind(wxEVT_DATAVIEW_SELECTION_CHANGED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EDITING_STARTED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EDITING_DONE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_COLLAPSING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_COLLAPSED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EXPANDING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED:
-            wx_handler->Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK:
-            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_HEADER_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK:
-            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED:
-            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_SORTED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED:
-            wx_handler->Bind(wxEVT_DATAVIEW_COLUMN_REORDERED, functor);
-            bound = true;
-            break;
-
-        // New TreeCtrl Event types
-        case WXD_EVENT_TYPE_TREE_SEL_CHANGING:
-            wx_handler->Bind(wxEVT_TREE_SEL_CHANGING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSING:
-            wx_handler->Bind(wxEVT_TREE_ITEM_COLLAPSING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSED:
-            wx_handler->Bind(wxEVT_TREE_ITEM_COLLAPSED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDING:
-            wx_handler->Bind(wxEVT_TREE_ITEM_EXPANDING, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDED:
-            wx_handler->Bind(wxEVT_TREE_ITEM_EXPANDED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_RIGHT_CLICK:
-            wx_handler->Bind(wxEVT_TREE_ITEM_RIGHT_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_MIDDLE_CLICK:
-            wx_handler->Bind(wxEVT_TREE_ITEM_MIDDLE_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_KEY_DOWN:
-            wx_handler->Bind(wxEVT_TREE_KEY_DOWN, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_DELETE_ITEM:
-            wx_handler->Bind(wxEVT_TREE_DELETE_ITEM, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_MENU:
-            wx_handler->Bind(wxEVT_TREE_ITEM_MENU, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_BEGIN_DRAG:
-            wx_handler->Bind(wxEVT_TREE_BEGIN_DRAG, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_BEGIN_RDRAG:
-            wx_handler->Bind(wxEVT_TREE_BEGIN_RDRAG, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_END_DRAG:
-            wx_handler->Bind(wxEVT_TREE_END_DRAG, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK:
-            wx_handler->Bind(wxEVT_TREE_STATE_IMAGE_CLICK, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TOOL:
-            wx_handler->Bind(wxEVT_TOOL, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TOOL_ENTER:
-            wx_handler->Bind(wxEVT_TOOL_ENTER, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP:
-            wx_handler->Bind(wxEVT_TREE_ITEM_GETTOOLTIP, functor);
-            bound = true;
-            break;
-        // AUI Manager event types
-        case WXD_EVENT_TYPE_AUI_PANE_BUTTON:
-            wx_handler->Bind(wxEVT_AUI_PANE_BUTTON, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_AUI_PANE_CLOSE:
-            wx_handler->Bind(wxEVT_AUI_PANE_CLOSE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE:
-            wx_handler->Bind(wxEVT_AUI_PANE_MAXIMIZE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_AUI_PANE_RESTORE:
-            wx_handler->Bind(wxEVT_AUI_PANE_RESTORE, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED:
-            wx_handler->Bind(wxEVT_AUI_PANE_ACTIVATED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_AUI_RENDER:
-            wx_handler->Bind(wxEVT_AUI_RENDER, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST:
-            wx_handler->Bind(wxEVT_COMMAND_LISTBOX_SELECTED, functor);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_TIMER:
-            wx_handler->Bind(wxEVT_TIMER, functor);
-            bound = true;
-            break;
-        default:
-            wxLogWarning("wxd_EvtHandler_Bind: Unsupported WXDEventTypeCEnum value %d for handler %p.", (int)eventTypeC, wx_handler);
-            bound = false;
-            break;
+    // Use wxID_ANY for wxd_EvtHandler_Bind (non-ID-specific binding)
+    wxd_Id actual_id_for_map_key = wxID_ANY;
+    
+    // Create map key
+    std::pair<wxEventType, wxd_Id> map_key = {wx_event_type_to_bind, actual_id_for_map_key};
+    
+    // Create Rust closure info
+    RustClosureInfo new_rust_info = {rust_closure_ptr, reinterpret_cast<wxd_ClosureCallback>(rust_trampoline_fn)};
+    
+    // Check if we need to bind DispatchEvent to wxWidgets
+    if (!customHandler->wx_bindings_made[map_key]) {
+        // Bind DispatchEvent method to wxWidgets for this event type
+        wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, wxID_ANY, wxID_ANY);
+        customHandler->wx_bindings_made[map_key] = true;
     }
     
-    // Handle ownership transfer based on whether binding occurred
-    if (bound) {
-        // wxWidgets has taken ownership of the functor (a copy of it).
-        // Mark the original functor on the stack so its destructor doesn't drop the Rust Box.
-        functor.owned_by_wx = true; 
-        // wxLogDebug("wxd_EvtHandler_Bind: Bound event type %d. Functor %p marked as owned by wx.", (int)eventTypeC, &functor);
-    } else {
-        // Binding failed (unknown event type?), functor going out of scope.
-        // Its destructor will drop the Rust Box unless already marked owned (which it isn't here).
-        wxLogDebug("wxd_EvtHandler_Bind: Did not bind event type %d. Functor %p destructor will drop Rust box.", (int)eventTypeC, &functor);
-        // No need to explicitly call drop_rust_closure_box here, the functor destructor handles it.
-    }
-    // Original functor goes out of scope here.
+    // Add the closure to the vector (do this after binding to ensure cleanup on failure)
+    customHandler->closureMap[map_key].push_back(new_rust_info);
 }
 
 // ID-specific event binding implementation
@@ -901,38 +365,40 @@ extern "C" void wxd_EvtHandler_BindWithId(
         return;
     }
 
-    // Create the functor that wraps the Rust data
-    CxxClosureVoid functor(rust_trampoline_fn, rust_closure_ptr);
-    bool bound = false; // Flag to track if binding succeeded
+    // Get or create the custom event handler
+    WxdEventHandler* customHandler = GetOrCreateEventHandler(wx_handler, handler);
+    if (!customHandler) {
+        wxLogWarning("wxd_EvtHandler_BindWithId: Failed to create custom handler.");
+        if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+        return;
+    }
 
-    // Switch on the stable C enum value and map to the wxWidgets event tag
-    switch (eventTypeC) {
-        case WXD_EVENT_TYPE_TOOL:
-            wx_handler->Bind(wxEVT_TOOL, functor, id);
-            bound = true;
-            break;
-        case WXD_EVENT_TYPE_MENU:
-            wx_handler->Bind(wxEVT_MENU, functor, id);
-            bound = true;
-            break;
-        // Add other event types that support ID-specific binding as needed
-        default:
-            wxLogWarning("wxd_EvtHandler_BindWithId: Unsupported WXDEventTypeCEnum value %d for ID-specific binding.", (int)eventTypeC);
-            bound = false;
-            break;
+    // Convert C enum to wxEventType
+    wxEventType wx_event_type_to_bind = get_wx_event_type_for_c_enum(eventTypeC);
+    if (wx_event_type_to_bind == wxEVT_NULL) {
+        wxLogWarning("wxd_EvtHandler_BindWithId: Unsupported WXDEventTypeCEnum value %d.", (int)eventTypeC);
+        if (rust_closure_ptr) { drop_rust_closure_box(rust_closure_ptr); }
+        return;
+    }
+
+    // Use the specific ID for ID-specific binding
+    wxd_Id actual_id_for_map_key = id;
+    
+    // Create map key
+    std::pair<wxEventType, wxd_Id> map_key = {wx_event_type_to_bind, actual_id_for_map_key};
+    
+    // Create Rust closure info
+    RustClosureInfo new_rust_info = {rust_closure_ptr, reinterpret_cast<wxd_ClosureCallback>(rust_trampoline_fn)};
+    
+    // Check if we need to bind DispatchEvent to wxWidgets
+    if (!customHandler->wx_bindings_made[map_key]) {
+        // Bind DispatchEvent method to wxWidgets for this event type and specific ID
+        wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, id, id);
+        customHandler->wx_bindings_made[map_key] = true;
     }
     
-    // Handle ownership transfer based on whether binding occurred
-    if (bound) {
-        // wxWidgets has taken ownership of the functor (a copy of it).
-        // Mark the original functor on the stack so its destructor doesn't drop the Rust Box.
-        functor.owned_by_wx = true; 
-    } else {
-        // Binding failed, functor going out of scope.
-        // Its destructor will drop the Rust Box unless already marked owned (which it isn't here).
-        wxLogDebug("wxd_EvtHandler_BindWithId: Did not bind event type %d. Functor destructor will drop Rust box.", (int)eventTypeC);
-    }
-    // Original functor goes out of scope here.
+    // Add the closure to the vector (do this after binding to ensure cleanup on failure)
+    customHandler->closureMap[map_key].push_back(new_rust_info);
 }
 
 // --- Event Accessors (Unchanged) ---
@@ -1080,6 +546,8 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_MIDDLE_UP: return wxEVT_MIDDLE_UP;
         case WXD_EVENT_TYPE_MOTION: return wxEVT_MOTION;
         case WXD_EVENT_TYPE_MOUSEWHEEL: return wxEVT_MOUSEWHEEL;
+        case WXD_EVENT_TYPE_ENTER_WINDOW: return wxEVT_ENTER_WINDOW;
+        case WXD_EVENT_TYPE_LEAVE_WINDOW: return wxEVT_LEAVE_WINDOW;
         case WXD_EVENT_TYPE_KEY_DOWN: return wxEVT_KEY_DOWN;
         case WXD_EVENT_TYPE_KEY_UP: return wxEVT_KEY_UP;
         case WXD_EVENT_TYPE_CHAR: return wxEVT_CHAR;
@@ -1090,6 +558,162 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_COMMAND_COMBOBOX_SELECTED: return wxEVT_COMBOBOX;
         case WXD_EVENT_TYPE_COMMAND_CHECKLISTBOX_SELECTED: return wxEVT_CHECKLISTBOX;
         case WXD_EVENT_TYPE_COMMAND_TOGGLEBUTTON_CLICKED: return wxEVT_TOGGLEBUTTON;
+        
+        // Tree control events
+        case WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT: return wxEVT_TREE_BEGIN_LABEL_EDIT;
+        case WXD_EVENT_TYPE_TREE_END_LABEL_EDIT: return wxEVT_TREE_END_LABEL_EDIT;
+        case WXD_EVENT_TYPE_TREE_SEL_CHANGED: return wxEVT_TREE_SEL_CHANGED;
+        case WXD_EVENT_TYPE_TREE_ITEM_ACTIVATED: return wxEVT_TREE_ITEM_ACTIVATED;
+        
+        // Slider and spin control events
+        case WXD_EVENT_TYPE_SLIDER: return wxEVT_SLIDER;
+        case WXD_EVENT_TYPE_SPINCTRL: return wxEVT_SPINCTRL;
+        case WXD_EVENT_TYPE_SPIN_UP: return wxEVT_SPIN_UP;
+        case WXD_EVENT_TYPE_SPIN_DOWN: return wxEVT_SPIN_DOWN;
+        case WXD_EVENT_TYPE_SPIN: return wxEVT_SPIN;
+        case WXD_EVENT_TYPE_SPINCTRLDOUBLE: return wxEVT_SPINCTRLDOUBLE;
+        
+        // Notebook events
+        case WXD_EVENT_TYPE_NOTEBOOK_PAGE_CHANGED: return wxEVT_NOTEBOOK_PAGE_CHANGED;
+        
+        // Splitter events
+        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGED: return wxEVT_SPLITTER_SASH_POS_CHANGED;
+        case WXD_EVENT_TYPE_SPLITTER_SASH_POS_CHANGING: return wxEVT_SPLITTER_SASH_POS_CHANGING;
+        case WXD_EVENT_TYPE_SPLITTER_DOUBLECLICKED: return wxEVT_SPLITTER_DOUBLECLICKED;
+        case WXD_EVENT_TYPE_SPLITTER_UNSPLIT: return wxEVT_SPLITTER_UNSPLIT;
+        
+        // List control events
+        case WXD_EVENT_TYPE_LIST_ITEM_SELECTED: return wxEVT_LIST_ITEM_SELECTED;
+        case WXD_EVENT_TYPE_LIST_ITEM_ACTIVATED: return wxEVT_LIST_ITEM_ACTIVATED;
+        case WXD_EVENT_TYPE_LIST_COL_CLICK: return wxEVT_LIST_COL_CLICK;
+        case WXD_EVENT_TYPE_LIST_BEGIN_LABEL_EDIT: return wxEVT_LIST_BEGIN_LABEL_EDIT;
+        case WXD_EVENT_TYPE_LIST_END_LABEL_EDIT: return wxEVT_LIST_END_LABEL_EDIT;
+        case WXD_EVENT_TYPE_COMMAND_LISTBOX_DOUBLECLICKED: return wxEVT_LISTBOX_DCLICK;
+        
+        // Picker control events
+        case WXD_EVENT_TYPE_COLOURPICKER_CHANGED: return wxEVT_COLOURPICKER_CHANGED;
+        case WXD_EVENT_TYPE_DATE_CHANGED: return wxEVT_DATE_CHANGED;
+        case WXD_EVENT_TYPE_TIME_CHANGED: return wxEVT_TIME_CHANGED;
+        case WXD_EVENT_TYPE_FILEPICKER_CHANGED: return wxEVT_FILEPICKER_CHANGED;
+        case WXD_EVENT_TYPE_DIRPICKER_CHANGED: return wxEVT_DIRPICKER_CHANGED;
+        case WXD_EVENT_TYPE_FONTPICKER_CHANGED: return wxEVT_FONTPICKER_CHANGED;
+        
+        // Treebook events
+        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGED: return wxEVT_TREEBOOK_PAGE_CHANGED;
+        case WXD_EVENT_TYPE_TREEBOOK_PAGE_CHANGING: return wxEVT_TREEBOOK_PAGE_CHANGING;
+        case WXD_EVENT_TYPE_TREEBOOK_NODE_EXPANDED: return wxEVT_TREEBOOK_NODE_EXPANDED;
+        case WXD_EVENT_TYPE_TREEBOOK_NODE_COLLAPSED: return wxEVT_TREEBOOK_NODE_COLLAPSED;
+        
+        // Search control events
+        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_SEARCH_BTN: return wxEVT_SEARCHCTRL_SEARCH_BTN;
+        case WXD_EVENT_TYPE_COMMAND_SEARCHCTRL_CANCEL_BTN: return wxEVT_SEARCHCTRL_CANCEL_BTN;
+        
+        // Hyperlink events
+        case WXD_EVENT_TYPE_COMMAND_HYPERLINK: return wxEVT_HYPERLINK;
+        
+        // Calendar events
+        case WXD_EVENT_TYPE_CALENDAR_SEL_CHANGED: return wxEVT_CALENDAR_SEL_CHANGED;
+        case WXD_EVENT_TYPE_CALENDAR_DOUBLECLICKED: return wxEVT_CALENDAR_DOUBLECLICKED;
+        case WXD_EVENT_TYPE_CALENDAR_MONTH_CHANGED: return wxEVT_CALENDAR_MONTH_CHANGED;
+        case WXD_EVENT_TYPE_CALENDAR_YEAR_CHANGED: return wxEVT_CALENDAR_YEAR_CHANGED;
+        case WXD_EVENT_TYPE_CALENDAR_WEEKDAY_CLICKED: return wxEVT_CALENDAR_WEEKDAY_CLICKED;
+        
+        // Scroll events
+        case WXD_EVENT_TYPE_SCROLL_TOP: return wxEVT_SCROLL_TOP;
+        case WXD_EVENT_TYPE_SCROLL_BOTTOM: return wxEVT_SCROLL_BOTTOM;
+        case WXD_EVENT_TYPE_SCROLL_LINEUP: return wxEVT_SCROLL_LINEUP;
+        case WXD_EVENT_TYPE_SCROLL_LINEDOWN: return wxEVT_SCROLL_LINEDOWN;
+        case WXD_EVENT_TYPE_SCROLL_PAGEUP: return wxEVT_SCROLL_PAGEUP;
+        case WXD_EVENT_TYPE_SCROLL_PAGEDOWN: return wxEVT_SCROLL_PAGEDOWN;
+        case WXD_EVENT_TYPE_SCROLL_THUMBTRACK: return wxEVT_SCROLL_THUMBTRACK;
+        case WXD_EVENT_TYPE_SCROLL_THUMBRELEASE: return wxEVT_SCROLL_THUMBRELEASE;
+        case WXD_EVENT_TYPE_SCROLL_CHANGED: return wxEVT_SCROLL_CHANGED;
+        
+        // Window events
+        case WXD_EVENT_TYPE_DESTROY: return wxEVT_DESTROY;
+        case WXD_EVENT_TYPE_MOVE: return wxEVT_MOVE;
+        case WXD_EVENT_TYPE_ERASE: return wxEVT_ERASE_BACKGROUND;
+        case WXD_EVENT_TYPE_SET_FOCUS: return wxEVT_SET_FOCUS;
+        case WXD_EVENT_TYPE_KILL_FOCUS: return wxEVT_KILL_FOCUS;
+        case WXD_EVENT_TYPE_PAINT: return wxEVT_PAINT;
+        
+        // Notification message events
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_CLICK: return wxEVT_NOTIFICATION_MESSAGE_CLICK;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_DISMISSED: return wxEVT_NOTIFICATION_MESSAGE_DISMISSED;
+        case WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION: return wxEVT_NOTIFICATION_MESSAGE_ACTION;
+        
+        // Idle event
+        case WXD_EVENT_TYPE_IDLE: return wxEVT_IDLE;
+        
+        // Drag and drop events (some may not exist in all wxWidgets versions)
+        // case WXD_EVENT_TYPE_BEGIN_DRAG: return wxEVT_BEGIN_DRAG;  // Not a standard wxWidgets event
+        case WXD_EVENT_TYPE_DROP_FILES: return wxEVT_DROP_FILES;
+        // case WXD_EVENT_TYPE_DROP_TEXT: return wxEVT_DROP_TEXT;    // Not a standard wxWidgets event
+        // case WXD_EVENT_TYPE_END_DRAG: return wxEVT_END_DRAG;      // Not a standard wxWidgets event
+        
+        // Additional ListCtrl events
+        case WXD_EVENT_TYPE_LIST_BEGIN_DRAG: return wxEVT_LIST_BEGIN_DRAG;
+        case WXD_EVENT_TYPE_LIST_BEGIN_RDRAG: return wxEVT_LIST_BEGIN_RDRAG;
+        case WXD_EVENT_TYPE_LIST_DELETE_ITEM: return wxEVT_LIST_DELETE_ITEM;
+        case WXD_EVENT_TYPE_LIST_DELETE_ALL_ITEMS: return wxEVT_LIST_DELETE_ALL_ITEMS;
+        case WXD_EVENT_TYPE_LIST_ITEM_DESELECTED: return wxEVT_LIST_ITEM_DESELECTED;
+        case WXD_EVENT_TYPE_LIST_ITEM_FOCUSED: return wxEVT_LIST_ITEM_FOCUSED;
+        case WXD_EVENT_TYPE_LIST_ITEM_MIDDLE_CLICK: return wxEVT_LIST_ITEM_MIDDLE_CLICK;
+        case WXD_EVENT_TYPE_LIST_ITEM_RIGHT_CLICK: return wxEVT_LIST_ITEM_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_LIST_KEY_DOWN: return wxEVT_LIST_KEY_DOWN;
+        case WXD_EVENT_TYPE_LIST_INSERT_ITEM: return wxEVT_LIST_INSERT_ITEM;
+        case WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK: return wxEVT_LIST_COL_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG: return wxEVT_LIST_COL_BEGIN_DRAG;
+        
+        // Media events
+        case WXD_EVENT_TYPE_MEDIA_LOADED: return wxEVT_MEDIA_LOADED;
+        case WXD_EVENT_TYPE_MEDIA_STOP: return wxEVT_MEDIA_STOP;
+        case WXD_EVENT_TYPE_MEDIA_FINISHED: return wxEVT_MEDIA_FINISHED;
+        case WXD_EVENT_TYPE_MEDIA_STATECHANGED: return wxEVT_MEDIA_STATECHANGED;
+        case WXD_EVENT_TYPE_MEDIA_PLAY: return wxEVT_MEDIA_PLAY;
+        case WXD_EVENT_TYPE_MEDIA_PAUSE: return wxEVT_MEDIA_PAUSE;
+        
+        // DataView events
+        case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED: return wxEVT_DATAVIEW_SELECTION_CHANGED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED: return wxEVT_DATAVIEW_ITEM_ACTIVATED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_STARTED: return wxEVT_DATAVIEW_ITEM_EDITING_STARTED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EDITING_DONE: return wxEVT_DATAVIEW_ITEM_EDITING_DONE;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSING: return wxEVT_DATAVIEW_ITEM_COLLAPSING;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_COLLAPSED: return wxEVT_DATAVIEW_ITEM_COLLAPSED;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDING: return wxEVT_DATAVIEW_ITEM_EXPANDING;
+        case WXD_EVENT_TYPE_DATAVIEW_ITEM_EXPANDED: return wxEVT_DATAVIEW_ITEM_EXPANDED;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_CLICK: return wxEVT_DATAVIEW_COLUMN_HEADER_CLICK;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK: return wxEVT_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_SORTED: return wxEVT_DATAVIEW_COLUMN_SORTED;
+        case WXD_EVENT_TYPE_DATAVIEW_COLUMN_REORDERED: return wxEVT_DATAVIEW_COLUMN_REORDERED;
+        
+        // Additional TreeCtrl events
+        case WXD_EVENT_TYPE_TREE_SEL_CHANGING: return wxEVT_TREE_SEL_CHANGING;
+        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSING: return wxEVT_TREE_ITEM_COLLAPSING;
+        case WXD_EVENT_TYPE_TREE_ITEM_COLLAPSED: return wxEVT_TREE_ITEM_COLLAPSED;
+        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDING: return wxEVT_TREE_ITEM_EXPANDING;
+        case WXD_EVENT_TYPE_TREE_ITEM_EXPANDED: return wxEVT_TREE_ITEM_EXPANDED;
+        case WXD_EVENT_TYPE_TREE_ITEM_RIGHT_CLICK: return wxEVT_TREE_ITEM_RIGHT_CLICK;
+        case WXD_EVENT_TYPE_TREE_ITEM_MIDDLE_CLICK: return wxEVT_TREE_ITEM_MIDDLE_CLICK;
+        case WXD_EVENT_TYPE_TREE_KEY_DOWN: return wxEVT_TREE_KEY_DOWN;
+        case WXD_EVENT_TYPE_TREE_DELETE_ITEM: return wxEVT_TREE_DELETE_ITEM;
+        case WXD_EVENT_TYPE_TREE_ITEM_MENU: return wxEVT_TREE_ITEM_MENU;
+        case WXD_EVENT_TYPE_TREE_BEGIN_DRAG: return wxEVT_TREE_BEGIN_DRAG;
+        case WXD_EVENT_TYPE_TREE_BEGIN_RDRAG: return wxEVT_TREE_BEGIN_RDRAG;
+        case WXD_EVENT_TYPE_TREE_END_DRAG: return wxEVT_TREE_END_DRAG;
+        case WXD_EVENT_TYPE_TREE_STATE_IMAGE_CLICK: return wxEVT_TREE_STATE_IMAGE_CLICK;
+        case WXD_EVENT_TYPE_TREE_ITEM_GETTOOLTIP: return wxEVT_TREE_ITEM_GETTOOLTIP;
+        
+        // Tool events
+        // case WXD_EVENT_TYPE_TOOL: return wxEVT_TOOL;  // Conflicts with WXD_EVENT_TYPE_CALENDAR_WEEKDAY_CLICKED (both = 123)
+        case WXD_EVENT_TYPE_TOOL_ENTER: return wxEVT_TOOL_ENTER;
+        
+        // Timer event
+        case WXD_EVENT_TYPE_TIMER: return wxEVT_TIMER;
+        
+        // Special events
+        case WXD_EVENT_TYPE_ANY: return wxEVT_ANY;
+        
         // AUI Manager event types
         case WXD_EVENT_TYPE_AUI_PANE_BUTTON: return wxEVT_AUI_PANE_BUTTON;
         case WXD_EVENT_TYPE_AUI_PANE_CLOSE: return wxEVT_AUI_PANE_CLOSE;
@@ -1097,8 +721,10 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_AUI_PANE_RESTORE: return wxEVT_AUI_PANE_RESTORE;
         case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED: return wxEVT_AUI_PANE_ACTIVATED;
         case WXD_EVENT_TYPE_AUI_RENDER: return wxEVT_AUI_RENDER;
+        
         // RearrangeList event
         case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST: return wxEVT_COMMAND_LISTBOX_SELECTED;
+        
         default: return wxEVT_NULL;
     }
 }

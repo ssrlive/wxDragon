@@ -7,13 +7,13 @@ members = [
     "examples/rust/simple_xrc_test",
     "examples/rust/events_test",
     "examples/rust/gallery",
-    "examples/rust/dataview_demo",
     "examples/rust/dc_example",
     "examples/rust/dnd_advanced",
     "examples/rust/clipboard_test",
     "examples/rust/wrapsizer_test",
     "examples/rust/gridsizer_test",
     "examples/rust/gridbagsizer_test",
+    "examples/rust/custom_widget",
     # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]

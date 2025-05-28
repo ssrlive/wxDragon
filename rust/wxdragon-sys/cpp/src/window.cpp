@@ -290,6 +290,23 @@ WXD_EXPORTED void wxd_Window_Center(wxd_Window_t* window) {
     }
 }
 
+// Background style functions
+WXD_EXPORTED void wxd_Window_SetBackgroundStyle(wxd_Window_t* window, int style) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxBackgroundStyle wx_style = static_cast<wxBackgroundStyle>(style);
+        wx_window->SetBackgroundStyle(wx_style);
+    }
+}
+
+WXD_EXPORTED int wxd_Window_GetBackgroundStyle(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return static_cast<int>(wx_window->GetBackgroundStyle());
+    }
+    return static_cast<int>(wxBG_STYLE_SYSTEM); // Default fallback
+}
+
 WXD_EXPORTED wxd_Point wxd_Window_ClientToScreen(wxd_Window_t* window, wxd_Point pt) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
     if (!wx_window) {

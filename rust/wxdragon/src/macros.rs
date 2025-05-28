@@ -411,3 +411,176 @@ macro_rules! impl_xrc_support {
         }
     };
 }
+
+/// Creates a custom widget with builder pattern based on Panel
+///
+/// This macro simplifies custom widget development by:
+/// - Creating a Panel-based widget struct
+/// - Generating a builder pattern with customizable fields
+/// - Automatically implementing WxWidget, Deref, DerefMut, and WxEvtHandler traits
+/// - Handling memory management properly
+///
+/// # Parameters
+///
+/// * `name` - The name of the custom widget (e.g., `AniFillButton`)
+/// * `fields` - Additional fields for configuration with default values
+/// * `setup_impl` - Implementation block for widget setup (receives config and panel)
+///
+/// # Example
+///
+/// ```ignore
+/// custom_widget!(
+///     name: AniFillButton,
+///     fields: {
+///         text: String = "Button".to_string(),
+///         border_color: Colour = Colour::new(100, 100, 100, 255),
+///         border_width: i32 = 2
+///     },
+///     setup_impl: |config, panel| {
+///         // Your setup code here
+///         // config contains all the field values
+///         // panel is the underlying Panel widget
+///     }
+/// );
+/// ```
+#[macro_export]
+macro_rules! custom_widget {
+    (
+        name: $name:ident,
+        fields: {
+            $(
+                $field_name:ident: $field_type:ty = $field_default:expr
+            ),* $(,)?
+        },
+        setup_impl: |$config_param:ident, $panel_param:ident| $setup_impl:block
+    ) => {
+        paste::paste! {
+            /// Configuration struct for the custom widget
+            #[derive(Debug, Clone)]
+            pub struct [<$name Config>] {
+                $(
+                    pub $field_name: $field_type,
+                )*
+            }
+
+            impl Default for [<$name Config>] {
+                fn default() -> Self {
+                    Self {
+                        $(
+                            $field_name: $field_default,
+                        )*
+                    }
+                }
+            }
+
+            /// Builder for the custom widget
+            #[derive(Clone)]
+            pub struct [<$name Builder>]<'a> {
+                parent: &'a dyn $crate::window::WxWidget,
+                size: $crate::geometry::Size,
+                $(
+                    $field_name: $field_type,
+                )*
+            }
+
+            impl<'a> [<$name Builder>]<'a> {
+                /// Creates a new builder
+                pub fn new(parent: &'a dyn $crate::window::WxWidget) -> Self {
+                    Self {
+                        parent,
+                        size: $crate::geometry::DEFAULT_SIZE,
+                        $(
+                            $field_name: $field_default,
+                        )*
+                    }
+                }
+
+                /// Sets the widget size
+                pub fn with_size(mut self, size: $crate::geometry::Size) -> Self {
+                    self.size = size;
+                    self
+                }
+
+                $(
+                    paste::paste! {
+                        /// Sets the field value
+                        pub fn [<with_ $field_name>](mut self, $field_name: $field_type) -> Self {
+                            self.$field_name = $field_name;
+                            self
+                        }
+                    }
+                )*
+
+                /// Builds the custom widget
+                pub fn build(self) -> $name {
+                    let panel = $crate::widgets::panel::Panel::builder(self.parent)
+                        .with_size(self.size)
+                        .build();
+
+                    let config = [<$name Config>] {
+                        $(
+                            $field_name: self.$field_name,
+                        )*
+                    };
+
+                    let mut widget = $name {
+                        panel: panel.clone(),
+                        config: config.clone(),
+                    };
+
+                    // Call the setup implementation
+                    let setup_fn = |$config_param: [<$name Config>], $panel_param: $crate::widgets::panel::Panel| $setup_impl;
+                    setup_fn(config, panel);
+
+                    widget
+                }
+            }
+
+            /// The custom widget struct
+            pub struct $name {
+                panel: $crate::widgets::panel::Panel,
+                config: [<$name Config>],
+            }
+
+            impl $name {
+                /// Returns a reference to the configuration
+                pub fn config(&self) -> &[<$name Config>] {
+                    &self.config
+                }
+
+                /// Creates a new builder for this widget type
+                pub fn builder(parent: &dyn $crate::window::WxWidget) -> [<$name Builder>] {
+                    [<$name Builder>]::new(parent)
+                }
+            }
+
+            // Implement the necessary traits
+            impl $crate::window::WxWidget for $name {
+                fn handle_ptr(&self) -> *mut $crate::ffi::wxd_Window_t {
+                    self.panel.handle_ptr()
+                }
+            }
+
+            impl std::ops::Deref for $name {
+                type Target = $crate::widgets::panel::Panel;
+                fn deref(&self) -> &Self::Target {
+                    &self.panel
+                }
+            }
+
+            impl std::ops::DerefMut for $name {
+                fn deref_mut(&mut self) -> &mut Self::Target {
+                    &mut self.panel
+                }
+            }
+
+            impl $crate::event::WxEvtHandler for $name {
+                unsafe fn get_event_handler_ptr(&self) -> *mut $crate::ffi::wxd_EvtHandler_t {
+                    self.panel.get_event_handler_ptr()
+                }
+            }
+
+            // Let the underlying Panel handle memory management
+        }
+    };
+}

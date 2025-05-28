@@ -237,6 +237,10 @@ typedef enum {
 
     WXD_EVENT_TYPE_TIMER = 200, // Added wxTimer event
 
+    // Mouse enter/leave events
+    WXD_EVENT_TYPE_ENTER_WINDOW = 201, // wxEVT_ENTER_WINDOW
+    WXD_EVENT_TYPE_LEAVE_WINDOW = 202, // wxEVT_LEAVE_WINDOW
+
     WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;
 
@@ -358,6 +362,7 @@ typedef struct wxd_ClientDC_t wxd_ClientDC_t;
 typedef struct wxd_PaintDC_t wxd_PaintDC_t;
 typedef struct wxd_MemoryDC_t wxd_MemoryDC_t;
 typedef struct wxd_ScreenDC_t wxd_ScreenDC_t;
+typedef struct wxd_AutoBufferedPaintDC_t wxd_AutoBufferedPaintDC_t;
 
 // wxBitmap (placeholder for future use)
 typedef struct wxd_Bitmap_t wxd_Bitmap_t;
@@ -374,7 +379,7 @@ typedef enum {
 
 // --- Function Pointer Typedefs --- 
 typedef bool (*wxd_OnInitCallback)(void* userData);
-typedef void (*wxd_ClosureCallback)(wxd_Event_t* event, void* closure_ptr);
+typedef void (*wxd_ClosureCallback)(void* closure_ptr, wxd_Event_t* event);
 
 // wxDragResult C Enum (for drag and drop operations)
 typedef enum {

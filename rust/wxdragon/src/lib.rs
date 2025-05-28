@@ -1,5 +1,5 @@
-// Re-export items from the sys crate for convenience?
-// pub use wxdragon_sys as ffi;
+// Re-export items from the sys crate for convenience
+pub use wxdragon_sys as ffi;
 
 #[macro_use]
 pub mod macros;

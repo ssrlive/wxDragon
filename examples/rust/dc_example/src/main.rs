@@ -7,13 +7,14 @@ struct DrawingPanel {
 impl DrawingPanel {
     fn new(parent: &Frame) -> Self {
         let panel = PanelBuilder::new(parent).build();
+        panel.set_background_style(BackgroundStyle::Paint);
 
         let panel_clone = panel.clone();
 
         // Register the paint handler with a move closure and cloned panel
         panel.on_paint(move |_event| {
             // Create a PaintDC when handling paint events
-            let dc = PaintDC::new(&panel_clone);
+            let dc = AutoBufferedPaintDC::new(&panel_clone);
 
             // Clear the DC with a white background
             dc.set_background(Colour::rgb(255, 255, 255));

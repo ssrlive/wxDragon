@@ -92,7 +92,7 @@ fn main() {
     }
 
     // --- 2. Download and Extract wxWidgets Source ---
-    let wx_version = "3.2.8";
+    let wx_version = "3.2.8.1";
     let wx_tarball_name = format!("wxWidgets-{}.tar.bz2", wx_version);
     let wx_download_url = format!(
         "https://github.com/wxWidgets/wxWidgets/releases/download/v{}/{}",
