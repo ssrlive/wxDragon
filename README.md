@@ -6,6 +6,8 @@ This project creates a manually crafted C wrapper around the wxWidgets C++ GUI l
 
 ![Screenshot](https://raw.githubusercontent.com/AllenDang/wxDragon/refs/heads/main/asset/screenshot.png)
 
+![CustomWidgets](https://raw.githubusercontent.com/AllenDang/wxDragon/refs/heads/main/asset/custom_widget.gif)
+
 ## Usage
 
 ### Programmatic Widget Creation
