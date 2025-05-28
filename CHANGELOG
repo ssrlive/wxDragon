@@ -2,69 +2,51 @@
 
 ## 0.5.0
 
-### Breaking Changes
-- **Major API Refactoring**: Implemented prelude module pattern for cleaner public API
-  - Main library now exports through `prelude::*` instead of individual re-exports
-  - This provides better organization and more predictable imports
-- **FlexGridSizer API Changes**: Replaced raw constants with type-safe `FlexGrowMode` enum
-  - `FLEX_GROWMODE_*` constants removed in favor of `FlexGrowMode::None`, `FlexGrowMode::Specified`, `FlexGrowMode::All`
-- **Media Control Feature Flag**: MediaCtrl now requires `media-ctrl` feature flag to be enabled
-
 ### New Features
 - **New Sizer Types**:
+  - **WrapSizer**: Wrapping sizer with configurable wrapping behavior
+    - `WrapSizerFlag` enum for controlling wrap behavior
+  - **GridSizer**: Basic grid layout sizer with configurable rows, columns, and gaps
   - **GridBagSizer**: Advanced grid layout with position and span control
     - `GBPosition` and `GBSpan` types for precise grid positioning
     - Support for item positioning, spanning, and cell size management
     - Empty cell size configuration
-  - **GridSizer**: Basic grid layout sizer with configurable rows, columns, and gaps
-  - **WrapSizer**: Wrapping sizer with configurable wrapping behavior
-    - `WrapSizerFlag` enum for controlling wrap behavior
-- **Enhanced DataView Support**:
-  - Added `DataViewItemAttr` for item attribute customization
-  - Added `VariantType` enum for better type safety
-  - Added `DataViewIconTextRenderer` for icon-text combinations
-  - Added `CustomDataViewVirtualListModel` for advanced virtual list scenarios
-  - Added `DataViewColumnFlags` enum for column configuration
-- **New Dialog Types**:
-  - `DirDialog` with builder pattern for directory selection
-  - `SingleChoiceDialog` and `MultiChoiceDialog` for item selection
-- **Enhanced Widget Support**:
-  - `RearrangeList` widget for reorderable list controls
-  - `BitmapBundle` support for high-DPI displays
-  - Enhanced `Window` and `WxWidget` APIs
-- **Application Enhancements**:
-  - Added `set_top_window` function for main window management
-  - Enhanced `call_after` functionality
+- **Enhanced Frame Support**:
+  - Added `set_icon` function for Frame widget to set window icons
+- **Enhanced Device Context (DC) Module**:
+  - Added `AutoBufferedPaintDC` for automatic double buffering
+  - Significantly expanded DC functionality with additional drawing methods
+  - Enhanced DC constants and type definitions
+
+### Breaking Changes
+- **Event System Refactoring**: Major refactor of the event system to allow multiple bindings to one event
+  - Improved event handling architecture for better flexibility
+  - More robust event binding mechanism
+- **API Cleanup**: Cleaned up `lib.rs` and `prelude.rs` for better organization
+  - Streamlined imports and exports
+  - Improved public API structure
 
 ### Enhancements
-- **Type Safety Improvements**:
-  - Replaced raw constants with proper enum types throughout the codebase
-  - Better compile-time checking for widget styles and flags
-- **Prelude Module**:
-  - Comprehensive re-export of commonly used types and traits
-  - Organized exports by functional categories (sizers, widgets, dialogs, etc.)
-  - Simplified import statements for users
-- **Code Organization**:
-  - Better module structure with logical grouping
-  - Consistent export patterns across modules
-  - Improved documentation organization
-
-### Refactoring
-- **Public API Restructuring**:
-  - Centralized exports through prelude module
-  - Consistent naming conventions across all modules
-  - Removed redundant re-exports from main lib.rs
-- **Feature Flag Support**:
-  - Conditional compilation for optional components
-  - Better modularity for reducing binary size
-- **Widget Implementation**:
-  - Enhanced builder patterns for new widgets
-  - Consistent error handling across widget creation
+- **MediaCtrl Feature Flag**: Enhanced conditional compilation for MediaCtrl event handling
+  - Better feature flag support for optional components
+- **Build System Improvements**:
+  - Enhanced CMake configuration
+  - Better header isolation between wxWidgets and wrapper headers
+  - Improved cross-platform build support
 
 ### Examples
 - Added `wrapsizer_test` example demonstrating WrapSizer functionality
-- Added `gridsizer_test` example showing GridSizer usage
+- Added `gridsizer_test` example showing GridSizer usage  
 - Added `gridbagsizer_test` example with advanced GridBagSizer positioning
+- Added `custom_widget` example showcasing:
+  - `AutoBufferedPaintDC` usage
+  - Custom widget implementation with `anim_fill_button.rs`
+  - Pie chart widget implementation with `pie_chart.rs`
+
+### Refactoring
+- **Event System Architecture**: Complete refactoring to support multiple event bindings
+- **DC Module Enhancement**: Expanded drawing capabilities and constants
+- **Code Organization**: Better module structure and cleaner API surface
 
 ## 0.4.0
 
