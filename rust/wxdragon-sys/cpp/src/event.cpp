@@ -666,13 +666,15 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG: return wxEVT_LIST_COL_BEGIN_DRAG;
         
         // Media events
+        #if wxUSE_MEDIACTRL
         case WXD_EVENT_TYPE_MEDIA_LOADED: return wxEVT_MEDIA_LOADED;
         case WXD_EVENT_TYPE_MEDIA_STOP: return wxEVT_MEDIA_STOP;
         case WXD_EVENT_TYPE_MEDIA_FINISHED: return wxEVT_MEDIA_FINISHED;
         case WXD_EVENT_TYPE_MEDIA_STATECHANGED: return wxEVT_MEDIA_STATECHANGED;
         case WXD_EVENT_TYPE_MEDIA_PLAY: return wxEVT_MEDIA_PLAY;
         case WXD_EVENT_TYPE_MEDIA_PAUSE: return wxEVT_MEDIA_PAUSE;
-        
+        #endif
+             
         // DataView events
         case WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED: return wxEVT_DATAVIEW_SELECTION_CHANGED;
         case WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED: return wxEVT_DATAVIEW_ITEM_ACTIVATED;
