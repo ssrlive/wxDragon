@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.6.0
+
+### New Features
+- **StyledTextCtrl Widget**: Added comprehensive StyledTextCtrl widget for advanced text editing
+  - Full-featured text editor component with syntax highlighting support
+  - Extensive API with 1600+ lines of Rust bindings
+  - Support for text styling, markers, indicators, and annotations
+  - Advanced text manipulation and editor functionality
+- **CollapsiblePane Widget**: Added CollapsiblePane widget for expandable/collapsible content areas
+  - Configurable expand/collapse behavior
+  - Integration with layout system for dynamic UI layouts
+
+### Enhancements
+- **Build System Improvements**:
+  - Enhanced static linking support from macOS to Windows via GNU toolchain
+  - Added Windows manifest embedding for gallery example
+  - Improved cross-platform build compatibility
+
+### Bug Fixes
+- **Windows Build**: Fixed Windows build by adding missing imm32 library dependency
+
+### Examples
+- Added `simple_stc_test` example demonstrating StyledTextCtrl functionality
+- Updated gallery example with CollapsiblePane demonstration
+- Enhanced custom_widget example documentation with README and GIF demonstration
+
+### Platform Support
+- Improved Windows build stability and compatibility
+- Enhanced cross-compilation support from macOS to Windows
+
 ## 0.5.0
 
 ### New Features

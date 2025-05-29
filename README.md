@@ -297,7 +297,7 @@ To build the project on macOS targeting Windows (specifically `x86_64-pc-windows
     - [x] `wxStaticBitmap`
     - [x] `wxStaticLine`
     - [x] `wxSearchCtrl`
-    - [ ] `wxStyledTextCtrl`
+    - [x] `wxStyledTextCtrl`
     - [ ] `wxRichTextCtrl`
     - [x] `wxHyperlinkCtrl`
     - [x] `wxActivityIndicator`
