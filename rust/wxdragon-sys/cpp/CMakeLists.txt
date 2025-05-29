@@ -153,6 +153,7 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/collapsiblepane.cpp
 )
 
 if (wxdUSE_MEDIACTRL)

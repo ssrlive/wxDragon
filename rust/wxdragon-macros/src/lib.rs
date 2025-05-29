@@ -148,6 +148,7 @@ fn get_class_mapping() -> HashMap<&'static str, &'static str> {
     map.insert("wxScrollBar", "wxdragon::widgets::ScrollBar");
     map.insert("wxScrolledWindow", "wxdragon::widgets::ScrolledWindow");
     map.insert("wxSplitterWindow", "wxdragon::widgets::SplitterWindow");
+    map.insert("wxCollapsiblePane", "wxdragon::widgets::CollapsiblePane");
     map.insert("wxCheckListBox", "wxdragon::widgets::CheckListBox");
     map.insert("wxRearrangeList", "wxdragon::widgets::RearrangeList");
     map.insert("wxTreebook", "wxdragon::widgets::Treebook");

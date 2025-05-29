@@ -637,6 +637,13 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxBG_STYLE_SYSTEM", wxBG_STYLE_SYSTEM});
     constants_to_extract.push_back({"wxBG_STYLE_PAINT", wxBG_STYLE_PAINT});
     constants_to_extract.push_back({"wxBG_STYLE_COLOUR", wxBG_STYLE_COLOUR});
+
+    // Stretch flags
+    constants_to_extract.push_back({"wxSTRETCH_NOT", wxSTRETCH_NOT});
+    constants_to_extract.push_back({"wxSHRINK", wxSHRINK});
+    constants_to_extract.push_back({"wxGROW", wxGROW});
+    constants_to_extract.push_back({"wxTILE", wxTILE});
+    constants_to_extract.push_back({"wxSTRETCH_MASK", wxSTRETCH_MASK});
     
     // Add other constants here, e.g.:
     // "wxBORDER_DEFAULT",

@@ -32,7 +32,10 @@ widget_style_enum!(
         AlignCentre: ffi::WXD_ALIGN_CENTRE as i64, "Center in both directions.",
         Shaped: ffi::WXD_SHAPED as i64, "Shaped sizer behavior.",
         FixedMinsize: ffi::WXD_FIXED_MINSIZE as i64, "Fixed minimum size.",
-        ReserveSpaceEvenIfHidden: ffi::WXD_RESERVE_SPACE_EVEN_IF_HIDDEN as i64, "Reserve space even if hidden."
+        ReserveSpaceEvenIfHidden: ffi::WXD_RESERVE_SPACE_EVEN_IF_HIDDEN as i64, "Reserve space even if hidden.",
+        Shrink: ffi::WXD_SHRINK as i64, "Shrink to fit contents.",
+        Tile: ffi::WXD_TILE as i64, "Tile to fill available space.",
+        StretchMask: ffi::WXD_STRETCH_MASK as i64, "Stretch mask to fill available space."
     },
     default_variant: AlignLeft
 );

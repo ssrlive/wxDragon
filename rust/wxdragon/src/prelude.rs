@@ -45,6 +45,7 @@ pub use crate::widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder, Calen
 pub use crate::widgets::checkbox::{CheckBox, CheckBoxBuilder, CheckBoxStyle};
 pub use crate::widgets::checklistbox::{CheckListBox, CheckListBoxBuilder, CheckListBoxStyle}; // Added Style
 pub use crate::widgets::choice::{Choice, ChoiceBuilder, ChoiceStyle};
+pub use crate::widgets::collapsible_pane::{CollapsiblePane, CollapsiblePaneBuilder, CollapsiblePaneStyle};
 pub use crate::widgets::colour_picker_ctrl::{
     ColourPickerCtrl, ColourPickerCtrlBuilder, ColourPickerCtrlStyle,
 };

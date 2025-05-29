@@ -33,6 +33,7 @@ pub struct BasicTabControls {
     pub scroll_bar: ScrollBar,
     pub scrollbar_status_label: StaticText,
     pub cmd_link_button: CommandLinkButton,
+    pub collapsible_pane: CollapsiblePane,
 }
 
 pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls {
@@ -259,6 +260,33 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_label(&format!("{}", scroll_bar.thumb_position()))
         .build();
 
+    // CollapsiblePane
+    let collapsible_pane_label = StaticText::builder(&basic_panel)
+        .with_label("Collapsible:")
+        .build();
+    let collapsible_pane = CollapsiblePane::builder(&basic_panel)
+        .with_label("Click to expand/collapse")
+        .with_style(CollapsiblePaneStyle::Default)
+        .build();
+    collapsible_pane.set_tooltip("Click to expand or collapse the pane content.");
+    
+    // Add content to the collapsible pane
+    if let Some(pane_window) = collapsible_pane.get_pane() {
+        let pane_content_text = StaticText::builder(&pane_window)
+            .with_label("This content is inside the collapsible pane!\nYou can add any widgets here.")
+            .build();
+        
+        let pane_button = Button::builder(&pane_window)
+            .with_label("Button in pane")
+            .build();
+            
+        // Layout the content in the pane
+        let pane_sizer = BoxSizer::builder(Orientation::Vertical).build();
+        pane_sizer.add(&pane_content_text, 0, SizerFlag::All, 5);
+        pane_sizer.add(&pane_button, 0, SizerFlag::All, 5);
+        pane_window.set_sizer(pane_sizer, true);
+    }
+
     // --- Layout using Main Vertical BoxSizer and child FlexGridSizers ---
     let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
     let label_flags = SizerFlag::AlignRight | SizerFlag::AlignCenterVertical;
@@ -445,6 +473,8 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         SizerFlag::AlignLeft | SizerFlag::AlignCenterVertical,
         0,
     );
+    grid_sizer_therest.add(&collapsible_pane_label, 0, label_flags, 0);
+    grid_sizer_therest.add(&collapsible_pane, 1, control_flags, 0);
     grid_sizer_therest.add(&cmd_link_button_label, 0, label_flags, 0);
     grid_sizer_therest.add(&cmd_link_button, 1, control_flags, 0);
 
@@ -489,6 +519,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         scroll_bar,
         scrollbar_status_label,
         cmd_link_button,
+        collapsible_pane,
     }
 }
 
@@ -755,6 +786,19 @@ impl BasicTabControls {
             .with_style(MessageDialogStyle::OK | MessageDialogStyle::IconInformation)
             .build()
             .show_modal();
+        });
+
+        // CollapsiblePane event - trigger layout update when expanded/collapsed
+        let collapsible_pane_clone = self.collapsible_pane.clone();
+        let panel_clone = self.panel.clone();
+        self.collapsible_pane.on_changed(move |_event| {
+            if collapsible_pane_clone.is_expanded() {
+                println!("CollapsiblePane expanded!");
+            } else {
+                println!("CollapsiblePane collapsed!");
+            }
+            // Update the layout to reposition other widgets
+            panel_clone.layout();
         });
     }
 }

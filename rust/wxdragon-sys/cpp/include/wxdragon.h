@@ -72,6 +72,7 @@ extern "C" {
 // Container widgets
 #include "widgets/wxd_panel.h"
 #include "widgets/wxd_staticbox.h"
+#include "widgets/wxd_collapsiblepane.h"
 #include "widgets/wxd_splitterwindow.h"
 #include "widgets/wxd_scrolledwindow.h"
 #include "widgets/wxd_treebook.h"

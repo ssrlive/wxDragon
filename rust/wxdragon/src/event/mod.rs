@@ -86,6 +86,9 @@ impl EventType {
     // ADDED: RearrangeList event type
     pub const COMMAND_REARRANGE_LIST: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST);
+    // ADDED: CollapsiblePane event type
+    pub const COLLAPSIBLEPANE_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED);
     // ADDED: TreeCtrl event types
     pub const TREE_BEGIN_LABEL_EDIT: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TREE_BEGIN_LABEL_EDIT);

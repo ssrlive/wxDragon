@@ -235,6 +235,9 @@ typedef enum {
     // ADDED: RearrangeList event
     WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST = 141, // Event for RearrangeList when items are rearranged
 
+    // ADDED: CollapsiblePane event
+    WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED = 142, // Event for CollapsiblePane when expanded/collapsed
+
     WXD_EVENT_TYPE_TIMER = 200, // Added wxTimer event
 
     // Mouse enter/leave events
@@ -279,6 +282,7 @@ typedef struct wxd_SpinCtrl_t wxd_SpinCtrl_t;
 typedef struct wxd_SpinButton_t wxd_SpinButton_t;
 typedef struct wxd_Notebook_t wxd_Notebook_t;
 typedef struct wxd_SplitterWindow_t wxd_SplitterWindow_t;
+typedef struct wxd_CollapsiblePane_t wxd_CollapsiblePane_t;
 typedef struct wxd_Bitmap_t wxd_Bitmap_t;
 typedef struct wxd_BitmapButton_t wxd_BitmapButton_t;
 typedef struct wxd_ScrolledWindow_t wxd_ScrolledWindow_t;

@@ -36,6 +36,7 @@
 #include <wx/log.h>
 #include <wx/utils.h>
 #include <wx/rearrangectrl.h> // ADDED: For wxEVT_REARRANGE_LIST
+#include <wx/collpane.h> // ADDED: For wxEVT_COLLAPSIBLEPANE_CHANGED
 
 struct wxd_Event_t { wxEvent* event; };
 
@@ -726,6 +727,9 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         
         // RearrangeList event
         case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST: return wxEVT_COMMAND_LISTBOX_SELECTED;
+        
+        // CollapsiblePane event
+        case WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED: return wxEVT_COLLAPSIBLEPANE_CHANGED;
         
         default: return wxEVT_NULL;
     }
