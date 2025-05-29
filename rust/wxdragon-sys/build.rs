@@ -426,6 +426,7 @@ fn main() {
         println!("cargo:rustc-link-lib=wininet");
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
+        println!("cargo:rustc-link-lib=imm32");  // Add IME library for Scintilla support
         
         // C++ runtime linking
         if target_env == "gnu" {
