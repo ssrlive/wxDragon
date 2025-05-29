@@ -8,3 +8,6 @@ edition = "2021"
 wxdragon = { path = "../../../rust/wxdragon" }
 wxdragon-sys = { path = "../../../rust/wxdragon-sys" } 
 image = { version = "0.25.1", default-features = false, features = ["png", "gif"] }
+
+[build-dependencies]
+embed-manifest = "1.4"

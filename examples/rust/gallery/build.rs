@@ -1,0 +1,44 @@
+use embed_manifest::{embed_manifest, new_manifest};
+use embed_manifest::manifest::{ActiveCodePage, SupportedOS::*, Setting};
+
+fn main() {
+    // Check if we're building for Windows (either natively or cross-compiling)
+    let target = std::env::var("TARGET").unwrap_or_default();
+    println!("cargo:warning=Building for target: {}", target);
+    
+    if target.contains("windows") {
+        println!("cargo:warning=Detected Windows target, embedding modern theming manifest");
+        
+        // Create a comprehensive manifest for Windows theming and modern features
+        let manifest = new_manifest("wxDragon.Gallery")
+            // Enable modern Windows Common Controls (v6) for theming
+            // Windows10 is the latest supported in the enum
+            .supported_os(Windows7..=Windows10)
+            // Set UTF-8 as active code page for better Unicode support
+            .active_code_page(ActiveCodePage::Utf8)
+            // Enable heap type optimization for better performance (if available)
+            .heap_type(embed_manifest::manifest::HeapType::SegmentHeap)
+            // Enable high-DPI awareness for crisp displays
+            .dpi_awareness(embed_manifest::manifest::DpiAwareness::PerMonitorV2)
+            // Enable long path support (if configured in Windows)
+            .long_path_aware(Setting::Enabled);
+        
+        // Embed the manifest - this works even when cross-compiling!
+        match embed_manifest(manifest) {
+            Ok(_) => {
+                println!("cargo:warning=Successfully embedded comprehensive Windows theming manifest");
+                println!("cargo:warning=Features enabled: Modern theming, UTF-8 support, high-DPI awareness, long paths");
+            }
+            Err(e) => {
+                // This should not happen with embed-manifest as it supports cross-compilation
+                println!("cargo:warning=Failed to embed manifest: {}", e);
+                println!("cargo:warning=The application will still work but may lack optimal Windows theming");
+            }
+        }
+        
+        // Tell Cargo to rerun this build script if the build script changes
+        println!("cargo:rerun-if-changed=build.rs");
+    } else {
+        println!("cargo:warning=Not building for Windows, skipping manifest embedding");
+    }
+} 
