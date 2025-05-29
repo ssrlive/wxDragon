@@ -244,6 +244,38 @@ typedef enum {
     WXD_EVENT_TYPE_ENTER_WINDOW = 201, // wxEVT_ENTER_WINDOW
     WXD_EVENT_TYPE_LEAVE_WINDOW = 202, // wxEVT_LEAVE_WINDOW
 
+    // StyledTextCtrl events (based on wxWidgets STC events)
+    WXD_EVENT_TYPE_STC_CHANGE = 300,                    // wxEVT_STC_CHANGE
+    WXD_EVENT_TYPE_STC_STYLENEEDED = 301,               // wxEVT_STC_STYLENEEDED
+    WXD_EVENT_TYPE_STC_CHARADDED = 302,                 // wxEVT_STC_CHARADDED
+    WXD_EVENT_TYPE_STC_SAVEPOINTREACHED = 303,          // wxEVT_STC_SAVEPOINTREACHED
+    WXD_EVENT_TYPE_STC_SAVEPOINTLEFT = 304,             // wxEVT_STC_SAVEPOINTLEFT
+    WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT = 305,           // wxEVT_STC_ROMODIFYATTEMPT
+    WXD_EVENT_TYPE_STC_KEY = 306,                       // wxEVT_STC_KEY
+    WXD_EVENT_TYPE_STC_DOUBLECLICK = 307,               // wxEVT_STC_DOUBLECLICK
+    WXD_EVENT_TYPE_STC_UPDATEUI = 308,                  // wxEVT_STC_UPDATEUI
+    WXD_EVENT_TYPE_STC_MODIFIED = 309,                  // wxEVT_STC_MODIFIED
+    WXD_EVENT_TYPE_STC_MACRORECORD = 310,               // wxEVT_STC_MACRORECORD
+    WXD_EVENT_TYPE_STC_MARGINCLICK = 311,               // wxEVT_STC_MARGINCLICK
+    WXD_EVENT_TYPE_STC_NEEDSHOWN = 312,                 // wxEVT_STC_NEEDSHOWN
+    WXD_EVENT_TYPE_STC_PAINTED = 313,                   // wxEVT_STC_PAINTED
+    WXD_EVENT_TYPE_STC_USERLISTSELECTION = 314,         // wxEVT_STC_USERLISTSELECTION
+    WXD_EVENT_TYPE_STC_URIDROPPED = 315,                // wxEVT_STC_URIDROPPED
+    WXD_EVENT_TYPE_STC_DWELLSTART = 316,                // wxEVT_STC_DWELLSTART
+    WXD_EVENT_TYPE_STC_DWELLEND = 317,                  // wxEVT_STC_DWELLEND
+    WXD_EVENT_TYPE_STC_START_DRAG = 318,                // wxEVT_STC_START_DRAG
+    WXD_EVENT_TYPE_STC_DRAG_OVER = 319,                 // wxEVT_STC_DRAG_OVER
+    WXD_EVENT_TYPE_STC_DO_DROP = 320,                   // wxEVT_STC_DO_DROP
+    WXD_EVENT_TYPE_STC_ZOOM = 321,                      // wxEVT_STC_ZOOM
+    WXD_EVENT_TYPE_STC_HOTSPOT_CLICK = 322,             // wxEVT_STC_HOTSPOT_CLICK
+    WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK = 323,            // wxEVT_STC_HOTSPOT_DCLICK
+    WXD_EVENT_TYPE_STC_CALLTIP_CLICK = 324,             // wxEVT_STC_CALLTIP_CLICK
+    WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION = 325,        // wxEVT_STC_AUTOCOMP_SELECTION
+    WXD_EVENT_TYPE_STC_INDICATOR_CLICK = 326,           // wxEVT_STC_INDICATOR_CLICK
+    WXD_EVENT_TYPE_STC_INDICATOR_RELEASE = 327,         // wxEVT_STC_INDICATOR_RELEASE
+    WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED = 328,        // wxEVT_STC_AUTOCOMP_CANCELLED
+    WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED = 329,     // wxEVT_STC_AUTOCOMP_CHAR_DELETED
+
     WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;
 
@@ -464,5 +496,8 @@ typedef struct wxd_Timer_t wxd_Timer_t;
 
 /// Window ID type (must match wxWidgets window ID type)
 typedef int wxd_Id;
+
+// StyledTextCtrl type
+typedef struct wxd_StyledTextCtrl_t wxd_StyledTextCtrl_t;
 
 #endif // WXD_TYPES_H 

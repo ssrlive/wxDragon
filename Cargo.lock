@@ -413,7 +413,6 @@ dependencies = [
  "embed-manifest",
  "image",
  "wxdragon",
- "wxdragon-sys",
 ]
 
 [[package]]
@@ -1273,6 +1272,13 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "simple"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
+name = "simple_stc_test"
 version = "0.1.0"
 dependencies = [
  "wxdragon",

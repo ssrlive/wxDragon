@@ -152,6 +152,10 @@ pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineS
 pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder, StaticBoxStyle}; // Added Style
 pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
+pub use crate::widgets::styledtextctrl::{
+    StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlStyle, StyledTextCtrlEvent, StyledTextCtrlEventData,
+    MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
+};
 pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
 pub use crate::widgets::time_picker_ctrl::{
     TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle,

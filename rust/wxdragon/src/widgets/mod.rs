@@ -50,6 +50,7 @@ pub mod static_line;
 pub mod static_text;
 pub mod staticbox;
 pub mod statusbar;
+pub mod styledtextctrl;
 pub mod textctrl;
 pub mod time_picker_ctrl;
 pub mod togglebutton;
@@ -126,6 +127,10 @@ pub use static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use staticbox::{StaticBox, StaticBoxBuilder};
 pub use statusbar::{StatusBar, StatusBarBuilder};
+pub use styledtextctrl::{
+    StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
+    MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
+};
 pub use textctrl::{TextCtrl, TextCtrlBuilder};
 pub use togglebutton::{ToggleButton, ToggleButtonBuilder};
 pub use toolbar::ToolBar;

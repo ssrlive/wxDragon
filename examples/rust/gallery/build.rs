@@ -4,11 +4,8 @@ use embed_manifest::manifest::{ActiveCodePage, SupportedOS::*, Setting};
 fn main() {
     // Check if we're building for Windows (either natively or cross-compiling)
     let target = std::env::var("TARGET").unwrap_or_default();
-    println!("cargo:warning=Building for target: {}", target);
     
     if target.contains("windows") {
-        println!("cargo:warning=Detected Windows target, embedding modern theming manifest");
-        
         // Create a comprehensive manifest for Windows theming and modern features
         let manifest = new_manifest("wxDragon.Gallery")
             // Enable modern Windows Common Controls (v6) for theming
@@ -24,21 +21,13 @@ fn main() {
             .long_path_aware(Setting::Enabled);
         
         // Embed the manifest - this works even when cross-compiling!
-        match embed_manifest(manifest) {
-            Ok(_) => {
-                println!("cargo:warning=Successfully embedded comprehensive Windows theming manifest");
-                println!("cargo:warning=Features enabled: Modern theming, UTF-8 support, high-DPI awareness, long paths");
-            }
-            Err(e) => {
-                // This should not happen with embed-manifest as it supports cross-compilation
-                println!("cargo:warning=Failed to embed manifest: {}", e);
-                println!("cargo:warning=The application will still work but may lack optimal Windows theming");
-            }
+        if let Err(e) = embed_manifest(manifest) {
+            // This should not happen with embed-manifest as it supports cross-compilation
+            println!("cargo:warning=Failed to embed manifest: {}", e);
+            println!("cargo:warning=The application will still work but may lack optimal Windows theming");
         }
         
         // Tell Cargo to rerun this build script if the build script changes
         println!("cargo:rerun-if-changed=build.rs");
-    } else {
-        println!("cargo:warning=Not building for Windows, skipping manifest embedding");
     }
 } 

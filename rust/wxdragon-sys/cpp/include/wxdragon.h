@@ -37,6 +37,7 @@ extern "C" {
 #include "widgets/wxd_button.h"
 #include "widgets/wxd_statictext.h"
 #include "widgets/wxd_textctrl.h"
+#include "widgets/wxd_styledtextctrl.h"
 #include "widgets/wxd_checkbox.h"
 #include "widgets/wxd_radiobutton.h"
 #include "widgets/wxd_togglebutton.h"

@@ -5,6 +5,7 @@ members = [
     "rust/wxdragon-macros",
     "examples/rust/simple",
     "examples/rust/simple_xrc_test",
+    "examples/rust/simple_stc_test",
     "examples/rust/events_test",
     "examples/rust/gallery",
     "examples/rust/dc_example",

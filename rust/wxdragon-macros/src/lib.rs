@@ -155,6 +155,7 @@ fn get_class_mapping() -> HashMap<&'static str, &'static str> {
     map.insert("wxListCtrl", "wxdragon::widgets::ListCtrl");
     map.insert("wxHyperlinkCtrl", "wxdragon::widgets::HyperlinkCtrl");
     map.insert("wxSearchCtrl", "wxdragon::widgets::SearchCtrl");
+    map.insert("wxStyledTextCtrl", "wxdragon::widgets::StyledTextCtrl");
     map.insert(
         "wxActivityIndicator",
         "wxdragon::widgets::ActivityIndicator",

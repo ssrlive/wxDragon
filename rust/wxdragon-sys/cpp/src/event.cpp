@@ -30,6 +30,7 @@
 #include <wx/mediactrl.h> // ADDED: For MediaCtrl events
 #include <wx/dataview.h> // ADDED: For DataView events
 #include <wx/grid.h>
+#include <wx/stc/stc.h> // ADDED: For StyledTextCtrl events
 #include "../src/wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK, etc.
 #include <wx/aui/framemanager.h> // ADDED: For wxEVT_AUI_* constants
 #include <wx/dynarray.h>     // For wxEVT_REARRANGE_LIST
@@ -730,6 +731,38 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         
         // CollapsiblePane event
         case WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED: return wxEVT_COLLAPSIBLEPANE_CHANGED;
+        
+        // StyledTextCtrl events
+        case WXD_EVENT_TYPE_STC_CHANGE: return wxEVT_STC_CHANGE;
+        case WXD_EVENT_TYPE_STC_STYLENEEDED: return wxEVT_STC_STYLENEEDED;
+        case WXD_EVENT_TYPE_STC_CHARADDED: return wxEVT_STC_CHARADDED;
+        case WXD_EVENT_TYPE_STC_SAVEPOINTREACHED: return wxEVT_STC_SAVEPOINTREACHED;
+        case WXD_EVENT_TYPE_STC_SAVEPOINTLEFT: return wxEVT_STC_SAVEPOINTLEFT;
+        case WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT: return wxEVT_STC_ROMODIFYATTEMPT;
+        case WXD_EVENT_TYPE_STC_KEY: return wxEVT_STC_KEY;
+        case WXD_EVENT_TYPE_STC_DOUBLECLICK: return wxEVT_STC_DOUBLECLICK;
+        case WXD_EVENT_TYPE_STC_UPDATEUI: return wxEVT_STC_UPDATEUI;
+        case WXD_EVENT_TYPE_STC_MODIFIED: return wxEVT_STC_MODIFIED;
+        case WXD_EVENT_TYPE_STC_MACRORECORD: return wxEVT_STC_MACRORECORD;
+        case WXD_EVENT_TYPE_STC_MARGINCLICK: return wxEVT_STC_MARGINCLICK;
+        case WXD_EVENT_TYPE_STC_NEEDSHOWN: return wxEVT_STC_NEEDSHOWN;
+        case WXD_EVENT_TYPE_STC_PAINTED: return wxEVT_STC_PAINTED;
+        case WXD_EVENT_TYPE_STC_USERLISTSELECTION: return wxEVT_STC_USERLISTSELECTION;
+        case WXD_EVENT_TYPE_STC_URIDROPPED: return wxEVT_STC_URIDROPPED;
+        case WXD_EVENT_TYPE_STC_DWELLSTART: return wxEVT_STC_DWELLSTART;
+        case WXD_EVENT_TYPE_STC_DWELLEND: return wxEVT_STC_DWELLEND;
+        case WXD_EVENT_TYPE_STC_START_DRAG: return wxEVT_STC_START_DRAG;
+        case WXD_EVENT_TYPE_STC_DRAG_OVER: return wxEVT_STC_DRAG_OVER;
+        case WXD_EVENT_TYPE_STC_DO_DROP: return wxEVT_STC_DO_DROP;
+        case WXD_EVENT_TYPE_STC_ZOOM: return wxEVT_STC_ZOOM;
+        case WXD_EVENT_TYPE_STC_HOTSPOT_CLICK: return wxEVT_STC_HOTSPOT_CLICK;
+        case WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK: return wxEVT_STC_HOTSPOT_DCLICK;
+        case WXD_EVENT_TYPE_STC_CALLTIP_CLICK: return wxEVT_STC_CALLTIP_CLICK;
+        case WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION: return wxEVT_STC_AUTOCOMP_SELECTION;
+        case WXD_EVENT_TYPE_STC_INDICATOR_CLICK: return wxEVT_STC_INDICATOR_CLICK;
+        case WXD_EVENT_TYPE_STC_INDICATOR_RELEASE: return wxEVT_STC_INDICATOR_RELEASE;
+        case WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED: return wxEVT_STC_AUTOCOMP_CANCELLED;
+        case WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED: return wxEVT_STC_AUTOCOMP_CHAR_DELETED;
         
         default: return wxEVT_NULL;
     }

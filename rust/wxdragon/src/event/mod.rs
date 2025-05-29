@@ -340,6 +340,38 @@ impl EventType {
     // Timer event
     pub const TIMER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TIMER);
 
+    // StyledTextCtrl events
+    pub const STC_CHANGE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHANGE);
+    pub const STC_STYLENEEDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_STYLENEEDED);
+    pub const STC_CHARADDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHARADDED);
+    pub const STC_SAVEPOINTREACHED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTREACHED);
+    pub const STC_SAVEPOINTLEFT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTLEFT);
+    pub const STC_ROMODIFYATTEMPT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT);
+    pub const STC_KEY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_KEY);
+    pub const STC_DOUBLECLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DOUBLECLICK);
+    pub const STC_UPDATEUI: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_UPDATEUI);
+    pub const STC_MODIFIED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MODIFIED);
+    pub const STC_MACRORECORD: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MACRORECORD);
+    pub const STC_MARGINCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MARGINCLICK);
+    pub const STC_NEEDSHOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_NEEDSHOWN);
+    pub const STC_PAINTED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_PAINTED);
+    pub const STC_USERLISTSELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_USERLISTSELECTION);
+    pub const STC_URIDROPPED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_URIDROPPED);
+    pub const STC_DWELLSTART: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLSTART);
+    pub const STC_DWELLEND: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLEND);
+    pub const STC_START_DRAG: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_START_DRAG);
+    pub const STC_DRAG_OVER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DRAG_OVER);
+    pub const STC_DO_DROP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DO_DROP);
+    pub const STC_ZOOM: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ZOOM);
+    pub const STC_HOTSPOT_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_CLICK);
+    pub const STC_HOTSPOT_DCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK);
+    pub const STC_CALLTIP_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CALLTIP_CLICK);
+    pub const STC_AUTOCOMP_SELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION);
+    pub const STC_INDICATOR_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_CLICK);
+    pub const STC_INDICATOR_RELEASE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_RELEASE);
+    pub const STC_AUTOCOMP_CANCELLED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED);
+    pub const STC_AUTOCOMP_CHAR_DELETED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
+
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {
         self.0
