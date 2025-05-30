@@ -98,6 +98,12 @@ WXD_EXPORTED int32_t wxd_CheckListBoxEvent_GetSelection(wxd_Event_t* self);
 // Notebook specific event functions
 WXD_EXPORTED int32_t wxd_NotebookEvent_GetSelection(wxd_Event_t* self);
 
+// --- Idle Event Specific Methods ---
+WXD_EXPORTED void wxd_IdleEvent_RequestMore(wxd_Event_t* event, bool needMore);
+WXD_EXPORTED bool wxd_IdleEvent_MoreRequested(wxd_Event_t* event);
+WXD_EXPORTED void wxd_IdleEvent_SetMode(int mode);
+WXD_EXPORTED int wxd_IdleEvent_GetMode();
+
 #ifdef __cplusplus
 }
 #endif

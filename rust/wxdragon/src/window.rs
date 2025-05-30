@@ -4,6 +4,21 @@ use crate::geometry::{Point, Size};
 use crate::sizers::WxSizer;
 use wxdragon_sys as ffi;
 
+// Use the widget_style_enum macro to define ExtraWindowStyle
+crate::widget_style_enum!(
+    name: ExtraWindowStyle,
+    doc: "Extra window style flags that control special window behaviors beyond standard styles.",
+    variants: {
+        ValidateRecursively: ffi::WXD_WS_EX_VALIDATE_RECURSIVELY, "Enable recursive validation - validation will be applied to child windows as well. This is the default behavior on most platforms.",
+        BlockEvents: ffi::WXD_WS_EX_BLOCK_EVENTS, "Block all events from being processed in this window. Events are still generated but are not delivered to the window's event handlers.",
+        Transient: ffi::WXD_WS_EX_TRANSIENT, "Mark this window as transient for its parent. This is primarily used for dialogs and popup windows.",
+        ContextHelp: ffi::WXD_WS_EX_CONTEXTHELP, "Enable context help for this window. Shows a question mark cursor when hovering over the window.",
+        ProcessIdle: ffi::WXD_WS_EX_PROCESS_IDLE, "Process idle events for this window. When IdleMode is set to ProcessSpecified, only windows with this flag receive idle events. This is essential for async integration with idle event processing.",
+        ProcessUiUpdates: ffi::WXD_WS_EX_PROCESS_UI_UPDATES, "Process UI update events for this window. Similar to ProcessIdle but for UI update events."
+    },
+    default_variant: ValidateRecursively
+);
+
 /// Background style for windows, affecting how background painting is handled.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BackgroundStyle {
@@ -485,6 +500,96 @@ pub trait WxWidget {
             s
         };
         Some(rust_string)
+    }
+
+    /// Sets the extra window style flags.
+    /// 
+    /// Extra window styles are additional style flags that control special window behaviors.
+    /// You can combine multiple styles using the bitwise OR operator (`|`).
+    /// 
+    /// # Arguments
+    /// * `extra_style` - The extra style flags to set
+    /// 
+    /// # Example
+    /// ```ignore
+    /// use wxdragon::prelude::*;
+    /// 
+    /// // Enable idle event processing for this window
+    /// window.set_extra_style(ExtraWindowStyle::ProcessIdle);
+    /// 
+    /// // Enable multiple features
+    /// window.set_extra_style(ExtraWindowStyle::ProcessIdle | ExtraWindowStyle::ValidateRecursively);
+    /// ```
+    fn set_extra_style(&self, extra_style: ExtraWindowStyle) {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetExtraStyle(window_ptr, extra_style.bits());
+            }
+        }
+    }
+
+    /// Sets extra window style flags using raw i64 value.
+    /// 
+    /// This is provided for cases where you need to set flags not covered by the enum.
+    /// For normal usage, prefer `set_extra_style()` with the enum.
+    fn set_extra_style_raw(&self, extra_style: i64) {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetExtraStyle(window_ptr, extra_style);
+            }
+        }
+    }
+
+    /// Gets the current extra window style flags as raw value.
+    /// 
+    /// # Returns
+    /// The currently set extra style flags for this window as a raw i64 value.
+    /// Use `ExtraWindowStyle` variants to check for specific flags.
+    fn get_extra_style_raw(&self) -> i64 {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe { ffi::wxd_Window_GetExtraStyle(window_ptr) }
+        } else {
+            0
+        }
+    }
+
+    /// Checks if a specific extra window style flag is set.
+    /// 
+    /// # Arguments
+    /// * `style` - The style flag to check for
+    /// 
+    /// # Returns
+    /// `true` if the style flag is set, `false` otherwise
+    /// 
+    /// # Example
+    /// ```ignore
+    /// if window.has_extra_style(ExtraWindowStyle::ProcessIdle) {
+    ///     println!("Window will receive idle events");
+    /// }
+    /// ```
+    fn has_extra_style(&self, style: ExtraWindowStyle) -> bool {
+        let current_style = self.get_extra_style_raw();
+        (current_style & style.bits()) != 0
+    }
+
+    /// Adds extra window style flags to the current set.
+    /// 
+    /// This is equivalent to `set_extra_style(get_extra_style_raw() | new_style.bits())`
+    /// but more convenient for adding flags without removing existing ones.
+    fn add_extra_style(&self, style: ExtraWindowStyle) {
+        let current_style = self.get_extra_style_raw();
+        self.set_extra_style_raw(current_style | style.bits());
+    }
+
+    /// Removes extra window style flags from the current set.
+    /// 
+    /// This removes the specified flags while preserving other flags.
+    fn remove_extra_style(&self, style: ExtraWindowStyle) {
+        let current_style = self.get_extra_style_raw();
+        self.set_extra_style_raw(current_style & !style.bits());
     }
 
     // Other common methods (SetSize, GetSize, etc.) can be added here

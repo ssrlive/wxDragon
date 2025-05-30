@@ -15,6 +15,7 @@ members = [
     "examples/rust/gridsizer_test",
     "examples/rust/gridbagsizer_test",
     "examples/rust/custom_widget",
+    "examples/rust/tokio_async_demo",
     # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]
@@ -33,4 +34,5 @@ categories = ["gui", "external-ffi-bindings"]
 readme = "README.md" # Consider adding if you have a good workspace-level README
 # Common dependencies for wxdragon and examples could go here if needed,
 # but for now, wxdragon itself will be a primary dependency for examples.
+# wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this. 
 # wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this. 

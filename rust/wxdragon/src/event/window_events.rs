@@ -48,6 +48,7 @@ pub enum WindowEventData {
     MouseLeave(MouseLeaveEvent),
     Keyboard(KeyboardEvent),
     Size(WindowSizeEvent),
+    Idle(IdleEventData),
     General(Event),
 }
 
@@ -83,6 +84,8 @@ impl WindowEventData {
                 return WindowEventData::MouseEnter(MouseEnterEvent::new(event));
             } else if event_type == EventType::LEAVE_WINDOW {
                 return WindowEventData::MouseLeave(MouseLeaveEvent::new(event));
+            } else if event_type == EventType::IDLE {
+                return WindowEventData::Idle(IdleEventData::new(event));
             }
         }
 
@@ -99,6 +102,7 @@ impl WindowEventData {
             WindowEventData::MouseLeave(event) => event.event.skip(skip),
             WindowEventData::Keyboard(event) => event.event.skip(skip),
             WindowEventData::Size(event) => event.event.skip(skip),
+            WindowEventData::Idle(event) => event.event.skip(skip),
             WindowEventData::General(event) => event.skip(skip),
         }
     }
@@ -209,6 +213,30 @@ impl WindowSizeEvent {
         // For now, we'll need to implement this in the Event struct
         // or re-implement the C API call here
         None
+    }
+}
+
+/// Idle events
+#[derive(Debug)]
+pub struct IdleEventData {
+    pub event: Event,
+}
+
+impl IdleEventData {
+    pub fn new(event: Event) -> Self {
+        Self { event }
+    }
+
+    /// Request more idle events to be sent.
+    /// When `need_more` is true, the system will continue sending idle events.
+    /// When false, idle events will stop until triggered by other activity.
+    pub fn request_more(&self, need_more: bool) {
+        self.event.request_more(need_more);
+    }
+
+    /// Returns true if more idle events have been requested.
+    pub fn more_requested(&self) -> bool {
+        self.event.more_requested()
     }
 }
 

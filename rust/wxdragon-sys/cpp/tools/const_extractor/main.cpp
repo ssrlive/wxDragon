@@ -645,8 +645,15 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxTILE", wxTILE});
     constants_to_extract.push_back({"wxSTRETCH_MASK", wxSTRETCH_MASK});
     
-    // Add other constants here, e.g.:
-    // "wxBORDER_DEFAULT",
+    // Extra window styles (wxWS_EX_*)
+    constants_to_extract.push_back({"wxWS_EX_VALIDATE_RECURSIVELY", wxWS_EX_VALIDATE_RECURSIVELY});
+    constants_to_extract.push_back({"wxWS_EX_BLOCK_EVENTS", wxWS_EX_BLOCK_EVENTS});
+    constants_to_extract.push_back({"wxWS_EX_TRANSIENT", wxWS_EX_TRANSIENT});
+    constants_to_extract.push_back({"wxWS_EX_CONTEXTHELP", wxWS_EX_CONTEXTHELP});
+    constants_to_extract.push_back({"wxWS_EX_PROCESS_IDLE", wxWS_EX_PROCESS_IDLE});
+    constants_to_extract.push_back({"wxWS_EX_PROCESS_UI_UPDATES", wxWS_EX_PROCESS_UI_UPDATES});
+
+    // wxDataViewCtrl styles
 
     // Output the constants in the Rust pub const format
     for (const auto& pair : constants_to_extract) {

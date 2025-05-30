@@ -49,4 +49,8 @@ WXD_EXPORTED wxd_Point wxd_Window_GetPosition(wxd_Window_t* self);
 WXD_EXPORTED void wxd_Window_SetBackgroundStyle(wxd_Window_t* window, int style);
 WXD_EXPORTED int wxd_Window_GetBackgroundStyle(wxd_Window_t* window);
 
+// Extra window style functions  
+WXD_EXPORTED void wxd_Window_SetExtraStyle(wxd_Window_t* window, int64_t exStyle);
+WXD_EXPORTED int64_t wxd_Window_GetExtraStyle(wxd_Window_t* window);
+
 #endif // WXD_WINDOW_BASE_H 

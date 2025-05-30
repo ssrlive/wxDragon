@@ -17,7 +17,7 @@ pub mod window_events;
 
 // Re-export window events for easier access
 pub use window_events::{
-    KeyboardEvent, MouseButtonEvent, MouseEnterEvent, MouseLeaveEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
+    IdleEventData, KeyboardEvent, MouseButtonEvent, MouseEnterEvent, MouseLeaveEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
     WindowSizeEvent,
 };
 
@@ -35,6 +35,7 @@ pub use scroll_events::{ScrollEvent, ScrollEventData, ScrollEvents};
 
 // Re-export the stable C enum for use in the safe wrapper
 pub use ffi::WXDEventTypeCEnum;
+
 
 // --- EventType Enum ---
 
@@ -378,6 +379,48 @@ impl EventType {
     }
 }
 
+/// Idle event processing modes
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IdleMode {
+    /// Send idle events to all windows
+    ProcessAll = 0,
+    /// Send idle events only to windows that explicitly request them
+    ProcessSpecified = 1,
+}
+
+/// Static methods for controlling idle event behavior
+pub struct IdleEvent;
+
+impl IdleEvent {
+    /// Sets how wxWidgets will send idle events.
+    /// 
+    /// # Arguments
+    /// * `mode` - The idle processing mode
+    /// 
+    /// # Example
+    /// ```ignore
+    /// use wxdragon::event::{IdleEvent, IdleMode};
+    /// 
+    /// // Only send idle events to windows that request them
+    /// IdleEvent::set_mode(IdleMode::ProcessSpecified);
+    /// ```
+    pub fn set_mode(mode: IdleMode) {
+        unsafe {
+            ffi::wxd_IdleEvent_SetMode(mode as i32);
+        }
+    }
+
+    /// Gets the current idle event processing mode.
+    pub fn get_mode() -> IdleMode {
+        let mode = unsafe { ffi::wxd_IdleEvent_GetMode() };
+        match mode {
+            1 => IdleMode::ProcessSpecified,
+            _ => IdleMode::ProcessAll,
+        }
+    }
+}
+
+
 // --- Simple Event Struct ---
 
 /// Represents a wxWidgets event.
@@ -541,6 +584,28 @@ impl Event {
             Some(int_val)
         }
     }
+
+    /// Requests more idle events to be sent.
+    /// This should only be called from an idle event handler.
+    /// When `need_more` is true, the system will continue sending idle events.
+    /// When false, idle events will stop until triggered by other activity.
+    pub fn request_more(&self, need_more: bool) {
+        if self.0.is_null() {
+            return;
+        }
+        unsafe {
+            ffi::wxd_IdleEvent_RequestMore(self.0, need_more);
+        }
+    }
+
+    /// Returns true if more idle events have been requested.
+    /// This can be used to check if the idle event handler requested more processing.
+    pub fn more_requested(&self) -> bool {
+        if self.0.is_null() {
+            return false;
+        }
+        unsafe { ffi::wxd_IdleEvent_MoreRequested(self.0) }
+    }
 }
 
 // --- WxEvtHandler Trait (Updated for Simple Event Handling) ---
@@ -646,6 +711,6 @@ pub unsafe extern "C" fn drop_rust_closure_box(ptr: *mut c_void) {
     if !ptr.is_null() {
         // Drop the Box<dyn FnMut(Event)>
         let _ = Box::from_raw(ptr as *mut Box<dyn FnMut(Event) + 'static>);
-    } else { /* ... */
     }
 }
+

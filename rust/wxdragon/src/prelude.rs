@@ -3,17 +3,18 @@ pub use crate::app::{main, set_top_window, call_after};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
-pub use crate::event::{Event, EventType, WxEvtHandler};
+pub use crate::event::{Event, EventType, WxEvtHandler, WindowEventData, IdleEvent, IdleMode};
 // ADDED: Event category traits
 pub use crate::event::{ButtonEvents, ScrollEvents, TextEvents, TreeEvents, WindowEvents};
 // ADDED: Event Data Structs
 pub use crate::event::event_data::{CommandEventData, KeyEventData, MouseEventData};
+pub use crate::event::{IdleEventData};
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
 pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES, ID_HIGHEST};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
 pub use crate::utils::WxdArrayString;
-pub use crate::window::{BackgroundStyle, Window, WxWidget};
+pub use crate::window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget};
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};

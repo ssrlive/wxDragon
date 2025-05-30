@@ -923,3 +923,31 @@ WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event)
     
     return dve->IsEditCancelled();
 }
+
+// --- Idle Event Implementation ---
+
+WXD_EXPORTED void wxd_IdleEvent_RequestMore(wxd_Event_t* event, bool needMore) {
+    if (!event) return;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxIdleEvent* idle_event = dynamic_cast<wxIdleEvent*>(wx_event);
+    if (!idle_event) return;
+    
+    idle_event->RequestMore(needMore);
+}
+
+WXD_EXPORTED bool wxd_IdleEvent_MoreRequested(wxd_Event_t* event) {
+    if (!event) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxIdleEvent* idle_event = dynamic_cast<wxIdleEvent*>(wx_event);
+    if (!idle_event) return false;
+    
+    return idle_event->MoreRequested();
+}
+
+WXD_EXPORTED void wxd_IdleEvent_SetMode(int mode) {
+    wxIdleEvent::SetMode(static_cast<wxIdleMode>(mode));
+}
+
+WXD_EXPORTED int wxd_IdleEvent_GetMode() {
+    return static_cast<int>(wxIdleEvent::GetMode());
+}

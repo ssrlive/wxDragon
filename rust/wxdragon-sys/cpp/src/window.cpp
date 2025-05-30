@@ -327,4 +327,20 @@ WXD_EXPORTED wxd_Point wxd_Window_ScreenToClient(wxd_Window_t* window, wxd_Point
     return { wx_result.x, wx_result.y };
 }
 
+// Extra window style functions
+WXD_EXPORTED void wxd_Window_SetExtraStyle(wxd_Window_t* window, int64_t exStyle) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetExtraStyle(static_cast<int64_t>(exStyle));
+    }
+}
+
+WXD_EXPORTED int64_t wxd_Window_GetExtraStyle(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return static_cast<int64_t>(wx_window->GetExtraStyle());
+    }
+    return 0; // Default fallback
+}
+
 } // extern "C"
