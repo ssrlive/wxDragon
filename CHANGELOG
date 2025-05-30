@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.6.1
+
+### New Features
+- **Enhanced Idle Event System**: Significantly improved idle event support for better async runtime integration
+  - Added `Event::request_more()` and `Event::more_requested()` methods for intelligent idle event control
+  - Added `IdleEvent` struct with static methods `set_mode()` and `get_mode()` for global idle mode management
+  - Added `IdleMode` enum with `ProcessAll` and `ProcessSpecified` variants for fine-grained control
+  - Added `ExtraWindowStyle::ProcessIdle` flag for per-window idle event processing control
+  - Enhanced window event handling with proper idle event data structures
+
+### Examples
+- **tokio_async_demo**: Added comprehensive example demonstrating async runtime integration
+  - Shows recommended patterns for tokio channel communication with GUI
+  - Demonstrates efficient idle event usage with `request_more()` for optimal CPU usage
+  - Includes counter updates, status messages, and background task coordination
+  - Uses `ProcessSpecified` idle mode with per-window control for maximum efficiency
+
+### Enhancements
+- **Window API**: Added extra window style management methods to `WxWidget` trait
+  - `set_extra_style()`, `get_extra_style_raw()`, `has_extra_style()`
+  - `add_extra_style()`, `remove_extra_style()` for fine-grained style control
+- **FFI Layer**: Extended C++ binding with new idle event and window style APIs
+  - Added idle event control functions in `wxd_event_api.h`
+  - Enhanced window base functionality in `wxd_window_base.h`
+  - Cross-platform constant generation for idle event modes
+
+### Platform Support
+- Enhanced cross-platform idle event constants for GTK, MSW, and OSX
+- Improved async integration compatibility across all supported platforms
+
 ## 0.6.0
 
 ### New Features
