@@ -71,6 +71,7 @@ pub use crate::widgets::dataview::{
     DataViewStyle,
     DataViewTreeCtrl,
     DataViewTreeCtrlBuilder,
+    DataViewEventHandler,
     Variant,
     VariantType, // Added VariantType
     DataViewIconTextRenderer, // Added DataViewIconTextRenderer
