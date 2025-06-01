@@ -878,13 +878,38 @@ WXD_EXPORTED bool wxd_DataViewEvent_GetRow(wxd_Event_t* event, int64_t* row) {
     wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
     if (!dve) return false;
     
-    // Get the item and try to convert to row (this is a simplification)
     wxDataViewItem item = dve->GetItem();
     if (!item.IsOk()) return false;
     
-    // For now, return 0 as we don't have a direct way to get row index
-    *row = 0;
-    return true;
+    // Get the model from the event - this is the correct API in wxWidgets 3.2.8
+    wxDataViewModel* model = dve->GetModel();
+    if (model) {
+        // Try casting to virtual list model first
+        wxDataViewVirtualListModel* vmodel = dynamic_cast<wxDataViewVirtualListModel*>(model);
+        if (vmodel) {
+            // For virtual list models, use the model's GetRow method
+            *row = static_cast<int64_t>(vmodel->GetRow(item));
+            return true;
+        }
+        
+        // Try casting to regular list model
+        wxDataViewIndexListModel* listModel = dynamic_cast<wxDataViewIndexListModel*>(model);
+        if (listModel) {
+            // For regular list models, use the model's GetRow method
+            *row = static_cast<int64_t>(listModel->GetRow(item));
+            return true;
+        }
+    }
+    
+    // Fall back to manual decoding for other model types
+    // Regular models encode row index as (row + 1) in the item ID
+    if (item.GetID()) {
+        *row = static_cast<int64_t>(reinterpret_cast<uintptr_t>(item.GetID()) - 1);
+        return true;
+    }
+    
+    // If we can't determine the row, return false instead of 0
+    return false;
 }
 
 // Header: WXD_EXPORTED bool wxd_DataViewEvent_GetValue(wxd_Event_t* event, wxd_Variant_t* value);

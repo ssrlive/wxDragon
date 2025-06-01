@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use wxdragon::prelude::*;
+use wxdragon::widgets::dataview::DataViewEventHandler;
 
 
 // Define a struct to hold our employee data
@@ -326,6 +327,28 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
     ));
 
     dvc.associate_model(model.as_ref());
+
+    // Add double-click event handler to test row index reporting
+    let employees_for_click = Rc::clone(&employees);
+    dvc.on_item_activated(move |event| {
+        match event.get_row() {
+            Some(row_index) => {
+                println!("Double-clicked on row: {}", row_index);
+                // Get employee data for the clicked row
+                let employees_borrow = employees_for_click.borrow();
+                if let Some(employee) = employees_borrow.get(row_index as usize) {
+                    println!("  Employee ID: {}", employee.id);
+                    println!("  Employee Name: {}", employee.name);
+                    println!("  Department: {}", employee.department);
+                } else {
+                    println!("  Row {} is out of bounds (total rows: {})", row_index, employees_borrow.len());
+                }
+            }
+            None => {
+                println!("Double-clicked but could not determine row index!");
+            }
+        }
+    });
 
     sizer.add(&dvc, 1, SizerFlag::All | SizerFlag::Expand, 10);
     panel.set_sizer(sizer, true);
