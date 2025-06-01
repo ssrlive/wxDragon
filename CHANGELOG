@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.6.2
+
+### Bug Fixes
+- **DataView Event System**: Fixed critical issue where `event.get_row()` always returned 0 for custom DataView virtual list models
+  - Corrected `wxd_DataViewEvent_GetRow` implementation to use proper wxWidgets 3.2.8 API (`GetModel()` instead of non-existent `GetDataViewCtrl()`)
+  - Added support for both `wxDataViewVirtualListModel` and `wxDataViewIndexListModel` row index conversion
+  - Enhanced fallback mechanism for other model types with proper manual decoding
+  - Fixed compilation errors by using correct wxWidgets API methods
+  - Added comprehensive test case in gallery example with double-click row index verification
+
+### Enhancements
+- **Prelude Module**: Added `DataViewEventHandler` trait to prelude for easier access to DataView event handling methods
+  - Enables direct usage of methods like `on_item_activated()` without explicit trait imports
+  - Improves developer experience for DataView event handling
+
+### Examples
+- **Gallery Example**: Enhanced DataView Virtual tab with double-click testing functionality
+  - Added `on_item_activated` event handler to demonstrate correct row index reporting
+  - Includes console output showing employee details for clicked rows
+  - Serves as verification for the DataView event fix
+
 ## 0.6.1
 
 ### New Features
