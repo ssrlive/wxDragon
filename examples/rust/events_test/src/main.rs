@@ -8,8 +8,9 @@ use wxdragon::widgets::static_text::StaticText;
 use wxdragon::widgets::togglebutton::ToggleButton;
 
 fn main() {
-    println!("Starting events_test application");
-    wxdragon::main(|_| {
+    println!("wxdragon events test - starting...");
+
+    let _ = wxdragon::main(|_| {
         println!("Inside wxdragon::main callback");
         // Create a frame
         let frame = Frame::builder()

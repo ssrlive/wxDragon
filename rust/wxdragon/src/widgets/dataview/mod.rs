@@ -26,7 +26,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//! DataView related widgets and types.
+//!      DataView related widgets and types.
 
 // Make submodules public so their contents can be re-exported and used.
 pub mod column;

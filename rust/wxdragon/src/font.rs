@@ -3,10 +3,11 @@ use std::default::Default;
 use std::ffi::{c_int, CStr};
 use wxdragon_sys as ffi;
 
-/// Specifies the general appearance of the font.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// Specifies the general family category of a font.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum FontFamily {
+    #[default]
     Default = 0,
     Decorative = 1,
     Roman = 2,
@@ -23,16 +24,11 @@ impl FontFamily {
     }
 }
 
-impl Default for FontFamily {
-    fn default() -> Self {
-        FontFamily::Default
-    }
-}
-
 /// Specifies the style of the font (normal, italic, or slanted).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum FontStyle {
+    #[default]
     Normal = 0,
     Italic = 1,
     Slant = 2,
@@ -44,19 +40,14 @@ impl FontStyle {
     }
 }
 
-impl Default for FontStyle {
-    fn default() -> Self {
-        FontStyle::Normal
-    }
-}
-
 /// Specifies the weight of the font (e.g., normal, light, bold).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,
     Light = 300,
+    #[default]
     Normal = 400,
     Medium = 500,
     SemiBold = 600,
@@ -68,12 +59,6 @@ pub enum FontWeight {
 impl FontWeight {
     pub fn as_i32(self) -> i32 {
         self as i32
-    }
-}
-
-impl Default for FontWeight {
-    fn default() -> Self {
-        FontWeight::Normal
     }
 }
 
@@ -245,10 +230,7 @@ impl Font {
     /// which is useful when you need to pass a font to a function that takes ownership.
     pub fn to_owned(&self) -> Self {
         if self.ptr.is_null() {
-            return Self {
-                ptr: std::ptr::null_mut(),
-                owned: true,
-            };
+            return Self::new();
         }
 
         // Create a new Font object by cloning this one
@@ -262,7 +244,7 @@ impl Font {
         );
 
         // If for some reason we couldn't clone, return a default font
-        new_font.unwrap_or_else(|| Self::new())
+        new_font.unwrap_or_default()
     }
 
     pub fn builder() -> FontBuilder {

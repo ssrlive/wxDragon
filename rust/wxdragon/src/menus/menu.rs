@@ -201,9 +201,10 @@ impl MenuBuilder {
 
 // Add XRC support
 impl crate::xrc::XrcSupport for Menu {
-    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+    unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        let menu_ptr = ptr as *mut wxdragon_sys::wxd_Menu_t;
         Self {
-            ptr: ptr as *mut ffi::wxd_Menu_t,
+            ptr: menu_ptr,
         }
     }
 }

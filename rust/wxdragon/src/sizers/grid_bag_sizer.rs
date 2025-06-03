@@ -40,7 +40,7 @@ impl GBPosition {
     }
 
     /// Convert to FFI type.
-    pub(crate) fn to_ffi(&self) -> ffi::wxd_GBPosition {
+    pub(crate) fn to_ffi(self) -> ffi::wxd_GBPosition {
         ffi::wxd_GBPosition {
             row: self.row,
             col: self.col,
@@ -91,7 +91,7 @@ impl GBSpan {
     }
 
     /// Convert to FFI type.
-    pub(crate) fn to_ffi(&self) -> ffi::wxd_GBSpan {
+    pub(crate) fn to_ffi(self) -> ffi::wxd_GBSpan {
         ffi::wxd_GBSpan {
             rowspan: self.rowspan,
             colspan: self.colspan,

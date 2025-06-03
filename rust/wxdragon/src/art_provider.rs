@@ -157,8 +157,9 @@ impl ArtProvider {
     ///
     /// # Arguments
     /// * `id` - The art ID (e.g., `ART_FILE_OPEN`, `ART_ERROR`). These are string constants.
-    /// * `client` - The art client ID (e.g., `ART_BUTTON`, `ART_MENU`). These are string constants.
-    ///              An empty string can be used for `wxART_OTHER`.
+    /// * `client_id` - The client for which the bitmap is being requested.
+    ///   This might affect the expected size or resolution.
+    ///   An empty string can be used for `wxART_OTHER`.
     /// * `size` - Optional desired size. If `None`, default size is requested (`-1, -1`).
     ///
     /// Returns `Option<Bitmap>`. The bitmap is `None` if not found or an error occurs.

@@ -16,18 +16,15 @@ use wxdragon_sys as ffi; // ADDED for enum bitwise operations
 /// Enum for specifying bitmap position on a button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)] // Matches wxd_ButtonBitmapPosition_t which is an enum
+#[derive(Default)]
 pub enum ButtonBitmapPosition {
-    Left = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_LEFT as u32,
-    Right = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_RIGHT as u32,
-    Top = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_TOP as u32,
-    Bottom = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_BOTTOM as u32,
+    #[default]
+    Left = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_LEFT,
+    Right = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_RIGHT,
+    Top = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_TOP,
+    Bottom = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_BOTTOM,
 }
 
-impl Default for ButtonBitmapPosition {
-    fn default() -> Self {
-        ButtonBitmapPosition::Left
-    }
-}
 
 /// Represents a wxButton.
 #[derive(Clone)]

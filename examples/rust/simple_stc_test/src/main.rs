@@ -107,7 +107,7 @@ impl MainFrame {
 }
 
 fn main() {
-    wxdragon::main( |_| {
+    let _ = wxdragon::main( |_| {
         let main_frame = MainFrame::new();
         main_frame.frame.show(true);
         main_frame.frame.centre();

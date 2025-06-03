@@ -32,10 +32,11 @@ fn main() {
     let target = env::var("TARGET").unwrap();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
-    
+
     // Detect cross-compilation from macOS to Windows
     let host_os = std::env::consts::OS;
-    let is_macos_to_windows_gnu = host_os == "macos" && target_os == "windows" && target_env == "gnu";
+    let is_macos_to_windows_gnu =
+        host_os == "macos" && target_os == "windows" && target_env == "gnu";
 
     // --- 1. Bindgen Include Path Setup ---
     println!("info: Setting up include paths for bindgen...");
@@ -119,7 +120,7 @@ fn main() {
             let mut resp = client
                 .get(&wx_download_url)
                 .send()
-                .expect(&format!("Failed to download {}", wx_download_url));
+                .unwrap_or_else(|_| panic!("Failed to download {}", wx_download_url));
 
             if !resp.status().is_success() {
                 panic!(
@@ -129,14 +130,15 @@ fn main() {
                 );
             }
 
-            let mut out_file = File::create(&tarball_dest_path).expect(&format!(
-                "Failed to create destination file {:?}",
-                tarball_dest_path
-            ));
-            std::io::copy(&mut resp, &mut out_file).expect(&format!(
-                "Failed to write downloaded content to {:?}",
-                tarball_dest_path
-            ));
+            let mut out_file = File::create(&tarball_dest_path).unwrap_or_else(|_| {
+                panic!("Failed to create destination file {:?}", tarball_dest_path)
+            });
+            std::io::copy(&mut resp, &mut out_file).unwrap_or_else(|_| {
+                panic!(
+                    "Failed to write downloaded content to {:?}",
+                    tarball_dest_path
+                )
+            });
         } else {
             println!(
                 "info: Using cached wxWidgets tarball: {:?}",
@@ -150,14 +152,13 @@ fn main() {
         );
 
         let tarball_file = File::open(&tarball_dest_path)
-            .expect(&format!("Failed to open tarball {:?}", tarball_dest_path));
+            .unwrap_or_else(|_| panic!("Failed to open tarball {:?}", tarball_dest_path));
         let bz_decoder = bzip2::read::BzDecoder::new(tarball_file);
         let mut archive = tar::Archive::new(bz_decoder);
 
-        archive.unpack(&out_dir).expect(&format!(
-            "Failed to extract {} to {:?}",
-            wx_tarball_name, out_dir
-        ));
+        archive
+            .unpack(&out_dir)
+            .unwrap_or_else(|_| panic!("Failed to extract {} to {:?}", wx_tarball_name, out_dir));
 
         if !wx_extracted_source_path.exists() {
             panic!(
@@ -181,7 +182,7 @@ fn main() {
 
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
-    
+
     if cfg!(feature = "media-ctrl") {
         cmake_config.define("wxdUSE_MEDIACTRL", "ON");
     }
@@ -237,16 +238,16 @@ fn main() {
                 "cargo:rustc-link-search=native={}",
                 wxwidgets_build_dir.join("lib/gcc_x64_lib").display()
             );
-    
+
             // --- Dynamically find MinGW GCC library paths ---
             let gcc_path = "x86_64-w64-mingw32-gcc"; // Assume it's in PATH
-    
+
             // Find the path containing libgcc.a
             let output_libgcc = Command::new(gcc_path)
                 .arg("-print-libgcc-file-name")
                 .output()
                 .expect("Failed to execute x86_64-w64-mingw32-gcc -print-libgcc-file-name");
-    
+
             if output_libgcc.status.success() {
                 let libgcc_path_str = String::from_utf8_lossy(&output_libgcc.stdout)
                     .trim()
@@ -259,7 +260,7 @@ fn main() {
                             "info: Added GCC library search path (from libgcc): {}",
                             libgcc_dir.display()
                         );
-    
+
                         // Attempt to find the path containing libstdc++.a (often one level up, in `../<target>/lib`)
                         if let Some(gcc_dir) = libgcc_dir.parent() {
                             // e.g., .../gcc/x86_64-w64-mingw32/15.1.0 -> .../gcc/x86_64-w64-mingw32
@@ -294,7 +295,9 @@ fn main() {
                         );
                     }
                 } else {
-                    println!("cargo:warning=Command -print-libgcc-file-name returned empty output.");
+                    println!(
+                        "cargo:warning=Command -print-libgcc-file-name returned empty output."
+                    );
                 }
             } else {
                 let stderr = String::from_utf8_lossy(&output_libgcc.stderr);
@@ -305,7 +308,7 @@ fn main() {
                 println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
             }
             // --- End dynamic path finding ---
-    
+
             // REMOVED: Old hardcoded path
             // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib");
         } else {
@@ -383,7 +386,9 @@ fn main() {
                 println!("cargo:rustc-link-lib=stdc++");
             }
         } else {
-            println!("info: Using RELEASE linking flags for Windows based on user-provided ll output.");
+            println!(
+                "info: Using RELEASE linking flags for Windows based on user-provided ll output."
+            );
             // wxWidgets release libraries from user-provided ll output
             println!("cargo:rustc-link-lib=static=wxmsw32u_aui");
             println!("cargo:rustc-link-lib=static=wxmsw32u_adv");
@@ -426,12 +431,14 @@ fn main() {
         println!("cargo:rustc-link-lib=wininet");
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
-        println!("cargo:rustc-link-lib=imm32");  // Add IME library for Scintilla support
-        
+        println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
+
         // C++ runtime linking
         if target_env == "gnu" {
             if is_macos_to_windows_gnu {
-                println!("info: Using static linking for cross-compilation from macOS to Windows GNU");
+                println!(
+                    "info: Using static linking for cross-compilation from macOS to Windows GNU"
+                );
                 // Static linking for cross-compilation to avoid runtime dependencies
                 println!("cargo:rustc-link-lib=static=stdc++");
                 println!("cargo:rustc-link-lib=static=gcc");
@@ -447,9 +454,7 @@ fn main() {
         }
     } else {
         println!("cargo:rustc-link-lib=xkbcommon");
-        let lib = pkg_config::Config::new()
-            .probe("gtk+-3.0")
-            .unwrap();
+        let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
         for l in lib.libs {
             println!("cargo:rustc-link-lib={}", l);
         }

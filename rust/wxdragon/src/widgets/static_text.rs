@@ -45,7 +45,7 @@ widget_builder!(
                 c_label.as_ptr(),
                 slf.pos.into(),
                 slf.size.into(),
-                slf.style.bits().try_into().unwrap(),
+                slf.style.bits(),
             );
             if ptr.is_null() {
                 panic!("Failed to create StaticText widget");

@@ -66,7 +66,7 @@ impl AnimationCtrl {
             ffi::wxd_AnimationCtrl_LoadFromBytes(
                 self.window.as_ptr() as *mut _,
                 data.as_ptr(),
-                data.len() as usize,
+                data.len(),
             )
         }
     }

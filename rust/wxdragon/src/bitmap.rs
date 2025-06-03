@@ -12,26 +12,17 @@ pub struct Bitmap {
 }
 
 impl Bitmap {
-    /// Creates a new empty (transparent) bitmap with the specified dimensions.
-    ///
-    /// # Arguments
-    /// * `width` - The width of the bitmap in pixels.
-    /// * `height` - The height of the bitmap in pixels.
-    ///
-    /// Returns `None` if the bitmap creation fails (e.g., invalid dimensions, memory allocation error).
-    pub fn new_empty(width: u32, height: u32) -> Option<Self> {
-        if width == 0 || height == 0 {
+    /// Creates a new empty bitmap with the specified width and height.
+    pub fn new(width: i32, height: i32) -> Option<Self> {
+        if width <= 0 || height <= 0 {
             return None;
         }
 
-        // Create a transparent RGBA buffer
-        let data_len = (width * height * 4) as usize;
-        let mut data = Vec::with_capacity(data_len);
-        for _ in 0..data_len {
-            data.push(0); // All zeros for a fully transparent bitmap
-        }
+        // Create RGBA data (4 bytes per pixel)
+        let pixel_count = (width * height * 4) as usize;
+        let data = vec![0; pixel_count]; // All zeros for a fully transparent bitmap
 
-        Self::from_rgba(&data, width, height)
+        Self::from_rgba(&data, width as u32, height as u32)
     }
 
     /// Creates a new bitmap from raw RGBA pixel data.

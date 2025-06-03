@@ -44,7 +44,15 @@ impl Dialog {
 
     /// Creates a Dialog wrapper for an XRC-managed object.
     /// This dialog will not be destroyed when dropped as it's managed by XRC.
-    pub fn from_xrc_ptr(ptr: *mut ffi::wxd_Dialog_t) -> Self {
+    ///
+    /// # Safety
+    /// 
+    /// The caller must ensure that:
+    /// - `ptr` is a valid pointer to a wxDialog object
+    /// - The dialog object pointed to by `ptr` remains valid for the lifetime of the returned Dialog
+    /// - No other code is concurrently accessing or modifying the dialog object
+    /// - The dialog was properly initialized by wxWidgets XRC loading
+    pub unsafe fn from_xrc_ptr(ptr: *mut ffi::wxd_Dialog_t) -> Self {
         Dialog {
             window: unsafe { Window::from_ptr(ptr as *mut ffi::wxd_Window_t) },
             parent_ptr: std::ptr::null_mut(),

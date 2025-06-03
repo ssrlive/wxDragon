@@ -8,9 +8,12 @@ use std::ffi::{c_char, c_void, CString};
 use std::sync::{Arc, Mutex};
 use wxdragon_sys as ffi; // Import Window and WxWidget trait
 
+// Type alias to reduce complexity
+type CallbackQueue = Arc<Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>>;
+
 // Queue for storing callbacks to be executed on the main thread
 lazy_static! {
-    static ref MAIN_THREAD_QUEUE: Arc<Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>> =
+    static ref MAIN_THREAD_QUEUE: CallbackQueue =
         Arc::new(Mutex::new(VecDeque::new()));
 }
 
@@ -110,23 +113,20 @@ where
 /// ```no_run
 /// use wxdragon::prelude::*;
 ///
-/// fn main() {
-///     wxdragon::main(|_| {
-///         let frame = Frame::builder()
-///             .with_title("My App")
-///             .build();
-///         frame.show(true);
-///         
-///         // No need to preserve the frame - wxWidgets manages it
-///     });
-/// }
+/// wxdragon::main(|_| {
+///     let frame = Frame::builder()
+///         .with_title("My App")
+///         .build();
+///     frame.show(true);
+///     
+///     // No need to preserve the frame - wxWidgets manages it
+/// });
 /// ```
-pub fn main<F>(on_init: F)
+pub fn main<F>(on_init: F) -> Result<(), Box<dyn std::error::Error>>
 where
-    F: FnOnce(()) -> () + 'static,
+    F: FnOnce(()) + 'static,
 {
-    // Box the closure
-    let on_init_boxed: Box<Box<dyn FnOnce(()) -> ()>> = Box::new(Box::new(on_init));
+    let on_init_boxed: Box<Box<dyn FnOnce(())>> = Box::new(Box::new(on_init));
     let user_data_ptr = Box::into_raw(on_init_boxed) as *mut c_void;
 
     // Prepare arguments for wxd_Main (using a default program name)
@@ -139,7 +139,7 @@ where
         let result = ffi::wxd_Main(
             argc,
             argv.as_mut_ptr(),
-            Some(trampoline_init::<F>),
+            Some(on_init_trampoline),
             user_data_ptr,
         );
 
@@ -150,15 +150,18 @@ where
     if exit_code != 0 {
         panic!("Application exited with code: {}", exit_code);
     }
+
+    Ok(())
 }
 
 // Trampoline function to call the Rust closure from C
-unsafe extern "C" fn trampoline_init<F>(user_data: *mut c_void) -> bool
-where
-    F: FnOnce(()) -> () + 'static,
-{
-    // Reconstruct the Box containing the closure
-    let closure_box: Box<Box<dyn FnOnce(()) -> ()>> = Box::from_raw(user_data as *mut _);
+unsafe extern "C" fn on_init_trampoline(user_data: *mut c_void) -> bool {
+    if user_data.is_null() {
+        return false;
+    }
+
+    // Cast back to Box<dyn FnOnce(())>
+    let closure_box: Box<Box<dyn FnOnce(())>> = Box::from_raw(user_data as *mut _);
 
     // Call the closure, catching potential panics
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {

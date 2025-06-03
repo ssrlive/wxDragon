@@ -42,6 +42,21 @@ impl ButtonEvents for BitmapButton {}
 
 impl WindowEvents for BitmapButton {}
 
+/// Configuration for creating a BitmapButton
+#[derive(Debug)]
+struct BitmapButtonConfig {
+    pub parent_ptr: *mut ffi::wxd_Window_t,
+    pub id: Id,
+    pub bitmap_ptr: *mut ffi::wxd_Bitmap_t,
+    pub pos: Point,
+    pub size: Size,
+    pub style: i64,
+    pub name: String,
+    pub bmp_disabled_ptr: *mut ffi::wxd_Bitmap_t,
+    pub bmp_focus_ptr: *mut ffi::wxd_Bitmap_t,
+    pub bmp_hover_ptr: *mut ffi::wxd_Bitmap_t,
+}
+
 impl BitmapButton {
     /// Creates a new BitmapButton builder.
     pub fn builder(parent: &dyn WxWidget) -> BitmapButtonBuilder {
@@ -58,32 +73,21 @@ impl BitmapButton {
     }
 
     /// Low-level constructor used by the builder.
-    fn new_impl(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        bitmap_ptr: *mut ffi::wxd_Bitmap_t,
-        pos: Point,
-        size: Size,
-        style: i64,
-        name: &str,
-        bmp_disabled_ptr: *mut ffi::wxd_Bitmap_t,
-        bmp_focus_ptr: *mut ffi::wxd_Bitmap_t,
-        bmp_hover_ptr: *mut ffi::wxd_Bitmap_t,
-    ) -> Self {
-        let c_name = CString::new(name).unwrap_or_default();
+    fn new_impl(config: BitmapButtonConfig) -> Self {
+        let c_name = CString::new(config.name).unwrap_or_default();
 
         unsafe {
             let ptr = ffi::wxd_BitmapButton_Create(
-                parent_ptr,
-                id as c_int,
-                bitmap_ptr,
-                pos.into(),
-                size.into(),
-                style as ffi::wxd_Style_t,
+                config.parent_ptr,
+                config.id as c_int,
+                config.bitmap_ptr,
+                config.pos.into(),
+                config.size.into(),
+                config.style as ffi::wxd_Style_t,
                 c_name.as_ptr(),
-                bmp_disabled_ptr,
-                bmp_focus_ptr,
-                bmp_hover_ptr,
+                config.bmp_disabled_ptr,
+                config.bmp_focus_ptr,
+                config.bmp_hover_ptr,
             );
 
             if ptr.is_null() {
@@ -135,18 +139,20 @@ widget_builder!(
             slf.size
         };
 
-        BitmapButton::new_impl(
+        let config = BitmapButtonConfig {
             parent_ptr,
-            slf.id,
+            id: slf.id,
             bitmap_ptr,
-            slf.pos,
-            final_size,
-            slf.style.bits(),
-            &slf.name,
+            pos: slf.pos,
+            size: final_size,
+            style: slf.style.bits(),
+            name: slf.name,
             bmp_disabled_ptr,
             bmp_focus_ptr,
             bmp_hover_ptr,
-        )
+        };
+
+        BitmapButton::new_impl(config)
     }
 );
 

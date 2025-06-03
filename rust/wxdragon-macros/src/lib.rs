@@ -216,7 +216,7 @@ fn generate_xrc_struct(input: XrcMacroInput) -> syn::Result<proc_macro2::TokenSt
 
     // Collect all named objects for field generation
     let mut all_objects = Vec::new();
-    collect_named_objects(&root_object, &mut all_objects);
+    collect_named_objects(root_object, &mut all_objects);
 
     // Filter out sizers and other non-widget objects that don't support XRC
     let widget_objects: Vec<_> = all_objects
@@ -421,7 +421,7 @@ fn read_xrc_file(path: &str) -> syn::Result<String> {
     ];
 
     for full_path in &possible_paths {
-        if let Ok(content) = std::fs::read_to_string(&full_path) {
+        if let Ok(content) = std::fs::read_to_string(full_path) {
             return Ok(content);
         }
     }

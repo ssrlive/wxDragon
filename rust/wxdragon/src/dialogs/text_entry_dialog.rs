@@ -148,7 +148,7 @@ impl<'a> TextEntryDialogBuilder<'a> {
 
     /// Convenience method to add password style flag.
     pub fn password(mut self) -> Self {
-        self.style = self.style | TextEntryDialogStyle::Password;
+        self.style |= TextEntryDialogStyle::Password;
         self
     }
 

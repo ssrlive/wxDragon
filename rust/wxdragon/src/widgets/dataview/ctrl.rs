@@ -62,6 +62,54 @@ pub struct DataViewCtrl {
     window: Window,
 }
 
+/// Configuration for appending a spin column
+#[derive(Debug, Clone)]
+pub struct SpinColumnConfig {
+    pub label: String,
+    pub model_column: usize,
+    pub width: i32,
+    pub align: DataViewAlign,
+    pub min: i32,
+    pub max: i32,
+    pub inc: i32,
+    pub flags: DataViewColumnFlags,
+}
+
+impl SpinColumnConfig {
+    pub fn new(label: &str, model_column: usize, min: i32, max: i32) -> Self {
+        Self {
+            label: label.to_string(),
+            model_column,
+            width: 80,
+            align: DataViewAlign::Left,
+            min,
+            max,
+            inc: 1,
+            flags: DataViewColumnFlags::Resizable,
+        }
+    }
+
+    pub fn with_width(mut self, width: i32) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn with_align(mut self, align: DataViewAlign) -> Self {
+        self.align = align;
+        self
+    }
+
+    pub fn with_inc(mut self, inc: i32) -> Self {
+        self.inc = inc;
+        self
+    }
+
+    pub fn with_flags(mut self, flags: DataViewColumnFlags) -> Self {
+        self.flags = flags;
+        self
+    }
+}
+
 impl DataViewCtrl {
     /// Creates a builder for configuring and constructing a DataViewCtrl.
     pub fn builder(parent: &dyn WxWidget) -> DataViewCtrlBuilder {
@@ -361,42 +409,26 @@ impl DataViewCtrl {
         self.append_column(&column)
     }
 
-    /// Creates and appends a spin control column to this control.
+    /// Creates and appends a spin column to this control.
+    /// This is a convenience method for creating a spin renderer and appending it.
     ///
     /// # Parameters
     ///
-    /// * `label` - The header label for the column
-    /// * `model_column` - The column index in the data model
-    /// * `width` - The column width (in pixels)
-    /// * `align` - The alignment
-    /// * `min` - The minimum value for the spin control
-    /// * `max` - The maximum value for the spin control
-    /// * `inc` - The increment value for the spin control
-    /// * `flags` - Column flags
+    /// * `config` - Configuration for the spin column
     ///
     /// # Returns
     ///
     /// `true` if the column was successfully appended, `false` otherwise.
-    pub fn append_spin_column(
-        &self,
-        label: &str,
-        model_column: usize,
-        width: i32,
-        align: DataViewAlign,
-        min: i32,
-        max: i32,
-        inc: i32,
-        flags: DataViewColumnFlags,
-    ) -> bool {
+    pub fn append_spin_column(&self, config: SpinColumnConfig) -> bool {
         let renderer = DataViewSpinRenderer::new(
             VariantType::Int64,
             DataViewCellMode::Editable,
-            align,
-            min,
-            max,
-            inc,
+            config.align,
+            config.min,
+            config.max,
+            config.inc,
         );
-        let column = DataViewColumn::new(label, &renderer, model_column, width, align, flags);
+        let column = DataViewColumn::new(&config.label, &renderer, config.model_column, config.width, config.align, config.flags);
         self.append_column(&column)
     }
 

@@ -97,7 +97,7 @@ async fn main() {
     // This is more efficient when we have async work to do
     IdleEvent::set_mode(IdleMode::ProcessSpecified);
 
-    wxdragon::main(|_| {
+    let _ = wxdragon::main(|_| {
         // Create the main frame
         let frame = Frame::builder()
             .with_title("Tokio Async Integration Demo")

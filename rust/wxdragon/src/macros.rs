@@ -1,6 +1,6 @@
 // use crate::event::WxEvtHandler; // This might be unused if all macros import it directly.
 
-/// Macros to simplify implementation of common patterns in the codebase.
+//! Macros to simplify implementation of common patterns in the codebase.
 
 /// Creates a builder pattern for widgets
 ///
@@ -68,9 +68,9 @@ macro_rules! widget_builder {
                 pub fn new(parent: &'a dyn WxWidget) -> Self {
                     Self {
                         parent,
-                        id: crate::id::ID_ANY as Id,
-                        pos: crate::geometry::DEFAULT_POSITION,
-                        size: crate::geometry::DEFAULT_SIZE,
+                        id: $crate::id::ID_ANY as Id,
+                        pos: $crate::geometry::DEFAULT_POSITION,
+                        size: $crate::geometry::DEFAULT_SIZE,
                         style: <$style_type>::Default,
                         $(
                             $field_name: $crate::__widget_builder_default!($($field_default)?),
@@ -313,7 +313,7 @@ macro_rules! widget_style_enum {
         impl std::ops::BitOrAssign for $name {
             fn bitor_assign(&mut self, rhs: Self) {
                 unsafe {
-                    *self = std::mem::transmute(self.bits() | rhs.bits());
+                    *self = std::mem::transmute::<i64, $name>(self.bits() | rhs.bits());
                 }
             }
         }
@@ -390,7 +390,7 @@ macro_rules! impl_xrc_support {
     // Handle the simple case where only window field is specified
     ($widget_name:ident, { window }) => {
         impl $crate::xrc::XrcSupport for $widget_name {
-            fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+            unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
                 let window = unsafe { $crate::window::Window::from_ptr(ptr) };
                 Self { window }
             }
@@ -399,7 +399,7 @@ macro_rules! impl_xrc_support {
     // Handle the more complex case with additional fields
     ($widget_name:ident, { window, $($field_name:ident: $field_value:expr),* $(,)? }) => {
         impl $crate::xrc::XrcSupport for $widget_name {
-            fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+            unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
                 let window = unsafe { $crate::window::Window::from_ptr(ptr) };
                 Self {
                     window,

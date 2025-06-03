@@ -109,7 +109,7 @@ impl Notebook {
             if let Some(id) = image_id {
                 ffi::wxd_Notebook_InsertPageWithImageId(
                     self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
-                    index as usize,
+                    index,
                     page.handle_ptr(),
                     c_text.as_ptr(),
                     select,
@@ -118,7 +118,7 @@ impl Notebook {
             } else {
                 ffi::wxd_Notebook_InsertPage(
                     self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
-                    index as usize,
+                    index,
                     page.handle_ptr(),
                     c_text.as_ptr(),
                     select,
@@ -213,12 +213,12 @@ impl Notebook {
         unsafe {
             let ptr = ffi::wxd_Notebook_GetPage(
                 self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
-                index as usize,
+                index,
             );
             if ptr.is_null() {
                 None
             } else {
-                Some(Window::from_ptr(ptr as *mut ffi::wxd_Window_t))
+                Some(Window::from_ptr(ptr))
             }
         }
     }

@@ -50,7 +50,7 @@ impl BoxSizerBuilder {
     }
 
     pub fn build(self) -> BoxSizer {
-        let ptr = unsafe { ffi::wxd_BoxSizer_Create(self.orientation.bits() as i32) };
+        let ptr = unsafe { ffi::wxd_BoxSizer_Create(self.orientation.bits().try_into().unwrap()) };
         let sizer_base =
             unsafe { Sizer::from_ptr(ptr).expect("Failed to create base Sizer for BoxSizer") };
         BoxSizer { sizer_base }

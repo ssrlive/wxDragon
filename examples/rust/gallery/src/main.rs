@@ -23,8 +23,7 @@ const ID_TOOL_SAVE: Id = ID_HIGHEST + 3;
 // --- Main Application Logic ---
 
 fn main() {
-    // Initialize the wxWidgets application
-    wxdragon::main(|_| {
+    let _ = wxdragon::main(|_| {
         // Create the main application frame
         let frame = Frame::builder()
             .with_title("wxDragon Notebook Example")

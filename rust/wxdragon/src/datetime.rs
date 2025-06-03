@@ -20,16 +20,11 @@ impl DateTime {
     pub fn new(year: i32, month: u16, day: i16, hour: i16, minute: i16, second: i16) -> Self {
         // Validate parameters before trying to create a DateTime
         if year <= 0
-            || month < 1
-            || month > 12
-            || day < 1
-            || day > 31
-            || hour < 0
-            || hour >= 24
-            || minute < 0
-            || minute >= 60
-            || second < 0
-            || second >= 60
+            || !(1..=12).contains(&month)
+            || !(1..=31).contains(&day)
+            || !(0..24).contains(&hour)
+            || !(0..60).contains(&minute)
+            || !(0..60).contains(&second)
         {
             return Self::default();
         }
@@ -53,8 +48,8 @@ impl DateTime {
 
     /// Creates a DateTime representing the current moment.
     pub fn now() -> Self {
-        let dt = unsafe { Self::from_raw(ffi::wxd_DateTime_Now()) };
-        dt
+        
+        unsafe { Self::from_raw(ffi::wxd_DateTime_Now()) }
     }
 
     /// Creates a DateTime from the raw FFI struct.
@@ -97,8 +92,8 @@ impl DateTime {
             return false;
         }
 
-        let result = unsafe { ffi::wxd_DateTime_IsValid(&self.raw) };
-        result
+        
+        unsafe { ffi::wxd_DateTime_IsValid(&self.raw) }
     }
 }
 

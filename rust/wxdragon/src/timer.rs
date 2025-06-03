@@ -80,9 +80,9 @@ impl<T: WxEvtHandler> Timer<T> {
     ///
     /// # Arguments
     ///
-    /// * `milliseconds` - The timer interval in milliseconds.
+    /// * `milliseconds` - The interval in milliseconds between timer events.
     /// * `one_shot` - If true, the timer will only fire once and then stop.
-    ///               If false, the timer will keep firing at the specified interval.
+    ///   If false, the timer will keep firing at the specified interval.
     ///
     /// # Returns
     ///

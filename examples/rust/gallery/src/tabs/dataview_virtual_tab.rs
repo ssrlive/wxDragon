@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use wxdragon::prelude::*;
 use wxdragon::widgets::dataview::DataViewEventHandler;
+use wxdragon::widgets::dataview::ctrl::SpinColumnConfig;
 
 
 // Define a struct to hold our employee data
@@ -182,16 +183,11 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
         DataViewAlign::Center,
         DataViewColumnFlags::Resizable,
     );
-    dvc.append_spin_column(
-        "Hourly Rate",
-        7,
-        100,
-        DataViewAlign::Right,
-        10,
-        100,
-        5,
-        DataViewColumnFlags::Resizable,
-    );
+    dvc.append_spin_column(SpinColumnConfig::new("Hourly Rate", 7, 10, 100)
+        .with_width(100)
+        .with_align(DataViewAlign::Right)
+        .with_inc(5)
+        .with_flags(DataViewColumnFlags::Resizable));
 
     let status_choices = vec!["Full-time", "Part-time", "Contract", "Intern"];
     dvc.append_choice_column(

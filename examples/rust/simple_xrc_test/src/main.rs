@@ -10,7 +10,7 @@ wxdragon::include_xrc!("../ui/panel.xrc", PanelUI);
 wxdragon::include_xrc!("../ui/dialog.xrc", DialogUI);
 
 fn main() {
-    wxdragon::main(|_handle| {
+    let _ = wxdragon::main(|_handle| {
         // 1. Load frame.xrc
         let frame_ui = FrameUI::new(None);
 

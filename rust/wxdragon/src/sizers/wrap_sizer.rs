@@ -9,9 +9,9 @@ widget_style_enum!(
     name: WrapSizerFlag,
     doc: "Style flags for WrapSizer.",
     variants: {
-        ExtendLastOnEachLine: ffi::WXD_EXTEND_LAST_ON_EACH_LINE as i64, "Extend the last item on each line to fill available space.",
-        RemoveLeadingSpaces: ffi::WXD_REMOVE_LEADING_SPACES as i64, "Remove leading spacers from the beginning of each line.",
-        DefaultFlags: ffi::WXD_WRAPSIZER_DEFAULT_FLAGS as i64, "Default flags (ExtendLastOnEachLine | RemoveLeadingSpaces)."
+        ExtendLastOnEachLine: ffi::WXD_EXTEND_LAST_ON_EACH_LINE, "Extend the last item on each line to fill available space.",
+        RemoveLeadingSpaces: ffi::WXD_REMOVE_LEADING_SPACES, "Remove leading spacers from the beginning of each line.",
+        DefaultFlags: ffi::WXD_WRAPSIZER_DEFAULT_FLAGS, "Default flags (ExtendLastOnEachLine | RemoveLeadingSpaces)."
     },
     default_variant: DefaultFlags
 );

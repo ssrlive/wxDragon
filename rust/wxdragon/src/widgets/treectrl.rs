@@ -81,17 +81,17 @@ widget_style_enum!(
     name: TreeCtrlStyle,
     doc: "Style flags for TreeCtrl widget.",
     variants: {
-        Default: ffi::WXD_TR_DEFAULT_STYLE as i64, "Default style. Combines `HasButtons` and `LinesAtRoot`.",
-        HasButtons: ffi::WXD_TR_HAS_BUTTONS as i64, "Use buttons to show expand/collapse state.",
-        LinesAtRoot: ffi::WXD_TR_LINES_AT_ROOT as i64, "Use lines to show hierarchy at the root level.",
-        NoLines: ffi::WXD_TR_NO_LINES as i64, "Don't show any lines.",
-        Single: ffi::WXD_TR_SINGLE as i64, "Only allow a single item to be selected.",
-        HideRoot: ffi::WXD_TR_HIDE_ROOT as i64, "Hide the root item, making its children appear as top-level items.",
-        EditLabels: ffi::WXD_TR_EDIT_LABELS as i64, "Allow editing of item labels."
+        Default: ffi::WXD_TR_DEFAULT_STYLE, "Default style. Combines `HasButtons` and `LinesAtRoot`.",
+        HasButtons: ffi::WXD_TR_HAS_BUTTONS, "Use buttons to show expand/collapse state.",
+        LinesAtRoot: ffi::WXD_TR_LINES_AT_ROOT, "Use lines to show hierarchy at the root level.",
+        NoLines: ffi::WXD_TR_NO_LINES, "Don't show any lines.",
+        Single: ffi::WXD_TR_SINGLE, "Only allow a single item to be selected.",
+        HideRoot: ffi::WXD_TR_HIDE_ROOT, "Hide the root item, making its children appear as top-level items.",
+        EditLabels: ffi::WXD_TR_EDIT_LABELS, "Allow editing of item labels."
         // Add other TR_ styles as needed, e.g., TR_FULL_ROW_HIGHLIGHT, TR_MULTIPLE, etc.
-        // TR_NO_BUTTONS = ffi::WXD_TR_NO_BUTTONS as i64, (if available)
-        // TR_ROW_LINES = ffi::WXD_TR_ROW_LINES as i64, (if available)
-        // TR_TWIST_BUTTONS = ffi::WXD_TR_TWIST_BUTTONS as i64, (if available)
+        // TR_NO_BUTTONS = ffi::WXD_TR_NO_BUTTONS, (if available)
+        // TR_ROW_LINES = ffi::WXD_TR_ROW_LINES, (if available)
+        // TR_TWIST_BUTTONS = ffi::WXD_TR_TWIST_BUTTONS, (if available)
     },
     default_variant: Default
 );
@@ -101,10 +101,10 @@ widget_style_enum!(
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)] // Matches wxd_TreeItemIconType_t which is an enum, typically int/u32
 pub enum TreeItemIcon {
-    Normal = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Normal as u32,
-    Selected = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Selected as u32,
-    Expanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Expanded as u32,
-    SelectedExpanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_SelectedExpanded as u32,
+    Normal = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Normal,
+    Selected = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Selected,
+    Expanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Expanded,
+    SelectedExpanded = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_SelectedExpanded,
 }
 
 impl From<TreeItemIcon> for ffi::wxd_TreeItemIconType_t {

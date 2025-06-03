@@ -204,7 +204,7 @@ impl Frame {
         unsafe {
             ffi::wxd_Frame_Centre(
                 self.window.as_ptr() as *mut ffi::wxd_Frame_t,
-                (ffi::WXD_ALIGN_CENTRE as i32).try_into().unwrap(),
+                ffi::WXD_ALIGN_CENTRE as i32,
             );
         }
     }
@@ -225,8 +225,8 @@ impl Frame {
     /// The frame takes ownership of the menu bar.
     pub fn set_menu_bar(&self, menu_bar: MenuBar) {
         let menu_bar_ptr = unsafe { menu_bar.as_ptr() };
-        // Forget the menu bar wrapper as the frame takes ownership
-        std::mem::forget(menu_bar);
+        // Frame takes ownership of the menu bar pointer, but MenuBar doesn't implement Drop
+        // so no need to forget it
         unsafe {
             ffi::wxd_Frame_SetMenuBar(self.window.as_ptr() as *mut _, menu_bar_ptr);
         }
@@ -344,7 +344,7 @@ impl Frame {
         unsafe {
             ffi::wxd_Frame_SetIconFromBitmap(
                 self.window.as_ptr() as *mut ffi::wxd_Frame_t,
-                bitmap.as_ptr() as *mut ffi::wxd_Bitmap_t,
+                bitmap.as_ptr(),
             );
         }
     }

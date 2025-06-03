@@ -21,20 +21,20 @@ widget_style_enum!(
     name: PenStyle,
     doc: "Style flags for DC pen.",
     variants: {
-        Solid: wxdragon_sys::WXD_PENSTYLE_SOLID as i64, "Solid line style.",
-        Dot: wxdragon_sys::WXD_PENSTYLE_DOT as i64, "Dotted line style.",
-        LongDash: wxdragon_sys::WXD_PENSTYLE_LONG_DASH as i64, "Long dashed line style.",
-        ShortDash: wxdragon_sys::WXD_PENSTYLE_SHORT_DASH as i64, "Short dashed line style.",
-        DotDash: wxdragon_sys::WXD_PENSTYLE_DOT_DASH as i64, "Dot and dash line style.",
-        Transparent: wxdragon_sys::WXD_PENSTYLE_TRANSPARENT as i64, "Transparent pen.",
-        Stipple: wxdragon_sys::WXD_PENSTYLE_STIPPLE as i64, "Stippled pen.",
-        UserDash: wxdragon_sys::WXD_PENSTYLE_USER_DASH as i64, "User-defined dash pattern.",
-        BDiagonalHatch: wxdragon_sys::WXD_PENSTYLE_BDIAGONAL_HATCH as i64, "Backward diagonal hatch pattern.",
-        CrossDiagHatch: wxdragon_sys::WXD_PENSTYLE_CROSSDIAG_HATCH as i64, "Cross-diagonal hatch pattern.",
-        FDiagonalHatch: wxdragon_sys::WXD_PENSTYLE_FDIAGONAL_HATCH as i64, "Forward diagonal hatch pattern.",
-        CrossHatch: wxdragon_sys::WXD_PENSTYLE_CROSS_HATCH as i64, "Cross hatch pattern.",
-        HorizontalHatch: wxdragon_sys::WXD_PENSTYLE_HORIZONTAL_HATCH as i64, "Horizontal hatch pattern.",
-        VerticalHatch: wxdragon_sys::WXD_PENSTYLE_VERTICAL_HATCH as i64, "Vertical hatch pattern."
+        Solid: wxdragon_sys::WXD_PENSTYLE_SOLID, "Solid line style.",
+        Dot: wxdragon_sys::WXD_PENSTYLE_DOT, "Dotted line style.",
+        LongDash: wxdragon_sys::WXD_PENSTYLE_LONG_DASH, "Long dashed line style.",
+        ShortDash: wxdragon_sys::WXD_PENSTYLE_SHORT_DASH, "Short dashed line style.",
+        DotDash: wxdragon_sys::WXD_PENSTYLE_DOT_DASH, "Dot and dash line style.",
+        Transparent: wxdragon_sys::WXD_PENSTYLE_TRANSPARENT, "Transparent pen.",
+        Stipple: wxdragon_sys::WXD_PENSTYLE_STIPPLE, "Stippled pen.",
+        UserDash: wxdragon_sys::WXD_PENSTYLE_USER_DASH, "User-defined dash pattern.",
+        BDiagonalHatch: wxdragon_sys::WXD_PENSTYLE_BDIAGONAL_HATCH, "Backward diagonal hatch pattern.",
+        CrossDiagHatch: wxdragon_sys::WXD_PENSTYLE_CROSSDIAG_HATCH, "Cross-diagonal hatch pattern.",
+        FDiagonalHatch: wxdragon_sys::WXD_PENSTYLE_FDIAGONAL_HATCH, "Forward diagonal hatch pattern.",
+        CrossHatch: wxdragon_sys::WXD_PENSTYLE_CROSS_HATCH, "Cross hatch pattern.",
+        HorizontalHatch: wxdragon_sys::WXD_PENSTYLE_HORIZONTAL_HATCH, "Horizontal hatch pattern.",
+        VerticalHatch: wxdragon_sys::WXD_PENSTYLE_VERTICAL_HATCH, "Vertical hatch pattern."
     },
     default_variant: Solid
 );
@@ -43,17 +43,17 @@ widget_style_enum!(
     name: BrushStyle,
     doc: "Style flags for DC brush.",
     variants: {
-        Solid: wxdragon_sys::WXD_BRUSHSTYLE_SOLID as i64, "Solid brush.",
-        Transparent: wxdragon_sys::WXD_BRUSHSTYLE_TRANSPARENT as i64, "Transparent brush.",
-        BDiagonalHatch: wxdragon_sys::WXD_BRUSHSTYLE_BDIAGONAL_HATCH as i64, "Backward diagonal hatch pattern.",
-        CrossDiagHatch: wxdragon_sys::WXD_BRUSHSTYLE_CROSSDIAG_HATCH as i64, "Cross-diagonal hatch pattern.",
-        FDiagonalHatch: wxdragon_sys::WXD_BRUSHSTYLE_FDIAGONAL_HATCH as i64, "Forward diagonal hatch pattern.",
-        CrossHatch: wxdragon_sys::WXD_BRUSHSTYLE_CROSS_HATCH as i64, "Cross hatch pattern.",
-        HorizontalHatch: wxdragon_sys::WXD_BRUSHSTYLE_HORIZONTAL_HATCH as i64, "Horizontal hatch pattern.",
-        VerticalHatch: wxdragon_sys::WXD_BRUSHSTYLE_VERTICAL_HATCH as i64, "Vertical hatch pattern.",
-        Stipple: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE as i64, "Stippled brush.",
-        StippleMaskOpaque: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE_MASK_OPAQUE as i64, "Stippled brush with opaque mask.",
-        StippleMask: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE_MASK as i64, "Stippled brush with mask."
+        Solid: wxdragon_sys::WXD_BRUSHSTYLE_SOLID, "Solid brush.",
+        Transparent: wxdragon_sys::WXD_BRUSHSTYLE_TRANSPARENT, "Transparent brush.",
+        BDiagonalHatch: wxdragon_sys::WXD_BRUSHSTYLE_BDIAGONAL_HATCH, "Backward diagonal hatch pattern.",
+        CrossDiagHatch: wxdragon_sys::WXD_BRUSHSTYLE_CROSSDIAG_HATCH, "Cross-diagonal hatch pattern.",
+        FDiagonalHatch: wxdragon_sys::WXD_BRUSHSTYLE_FDIAGONAL_HATCH, "Forward diagonal hatch pattern.",
+        CrossHatch: wxdragon_sys::WXD_BRUSHSTYLE_CROSS_HATCH, "Cross hatch pattern.",
+        HorizontalHatch: wxdragon_sys::WXD_BRUSHSTYLE_HORIZONTAL_HATCH, "Horizontal hatch pattern.",
+        VerticalHatch: wxdragon_sys::WXD_BRUSHSTYLE_VERTICAL_HATCH, "Vertical hatch pattern.",
+        Stipple: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE, "Stippled brush.",
+        StippleMaskOpaque: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE_MASK_OPAQUE, "Stippled brush with opaque mask.",
+        StippleMask: wxdragon_sys::WXD_BRUSHSTYLE_STIPPLE_MASK, "Stippled brush with mask."
     },
     default_variant: Solid
 );
@@ -326,6 +326,88 @@ pub use crate::bitmap::Bitmap;
 pub use crate::color::Colour;
 pub use crate::font::Font;
 
+/// Configuration for a blit operation
+#[derive(Debug, Clone, Copy)]
+pub struct BlitConfig {
+    pub dest_x: i32,
+    pub dest_y: i32,
+    pub width: i32,
+    pub height: i32,
+    pub src_x: i32,
+    pub src_y: i32,
+    pub logical_func: LogicalFunction,
+    pub use_mask: bool,
+    pub src_mask_x: i32,
+    pub src_mask_y: i32,
+}
+
+impl BlitConfig {
+    pub fn new(
+        dest_x: i32,
+        dest_y: i32,
+        width: i32,
+        height: i32,
+        src_x: i32,
+        src_y: i32,
+    ) -> Self {
+        Self {
+            dest_x,
+            dest_y,
+            width,
+            height,
+            src_x,
+            src_y,
+            logical_func: LogicalFunction::Copy,
+            use_mask: false,
+            src_mask_x: -1,
+            src_mask_y: -1,
+        }
+    }
+
+    pub fn with_logical_func(mut self, logical_func: LogicalFunction) -> Self {
+        self.logical_func = logical_func;
+        self
+    }
+
+    pub fn with_mask(mut self, src_mask_x: i32, src_mask_y: i32) -> Self {
+        self.use_mask = true;
+        self.src_mask_x = src_mask_x;
+        self.src_mask_y = src_mask_y;
+        self
+    }
+}
+
+/// Configuration for a stretch blit operation
+#[derive(Debug, Clone, Copy)]
+pub struct StretchBlitConfig {
+    pub dest_x: i32,
+    pub dest_y: i32,
+    pub dest_width: i32,
+    pub dest_height: i32,
+    pub src_x: i32,
+    pub src_y: i32,
+    pub src_width: i32,
+    pub src_height: i32,
+    pub logical_func: LogicalFunction,
+    pub use_mask: bool,
+    pub src_mask_x: i32,
+    pub src_mask_y: i32,
+}
+
+impl StretchBlitConfig {
+    pub fn with_logical_func(mut self, logical_func: LogicalFunction) -> Self {
+        self.logical_func = logical_func;
+        self
+    }
+
+    pub fn with_mask(mut self, src_mask_x: i32, src_mask_y: i32) -> Self {
+        self.use_mask = true;
+        self.src_mask_x = src_mask_x;
+        self.src_mask_y = src_mask_y;
+        self
+    }
+}
+
 /// Common trait implemented by all device context types
 pub trait DeviceContext {
     /// Get a pointer to the underlying DC
@@ -584,72 +666,44 @@ pub trait DeviceContext {
         }
     }
 
-    /// Copy a portion of one DC to another
-    fn blit(
-        &self,
-        dest_x: i32,
-        dest_y: i32,
-        width: i32,
-        height: i32,
-        source: &dyn DeviceContext,
-        src_x: i32,
-        src_y: i32,
-        logical_func: LogicalFunction,
-        use_mask: bool,
-        src_mask_x: i32,
-        src_mask_y: i32,
-    ) -> bool {
+    /// Copy a portion of one DC to another using configuration struct
+    fn blit(&self, source: &dyn DeviceContext, config: BlitConfig) -> bool {
         unsafe {
             wxdragon_sys::wxd_DC_Blit(
                 self.dc_ptr(),
-                dest_x,
-                dest_y,
-                width,
-                height,
+                config.dest_x,
+                config.dest_y,
+                config.width,
+                config.height,
                 source.dc_ptr(),
-                src_x,
-                src_y,
-                logical_func.to_raw(),
-                use_mask,
-                src_mask_x,
-                src_mask_y,
+                config.src_x,
+                config.src_y,
+                config.logical_func.to_raw(),
+                config.use_mask,
+                config.src_mask_x,
+                config.src_mask_y,
             )
         }
     }
 
-    /// Copy and stretch a portion of one DC to another
-    fn stretch_blit(
-        &self,
-        dest_x: i32,
-        dest_y: i32,
-        dest_width: i32,
-        dest_height: i32,
-        source: &dyn DeviceContext,
-        src_x: i32,
-        src_y: i32,
-        src_width: i32,
-        src_height: i32,
-        logical_func: LogicalFunction,
-        use_mask: bool,
-        src_mask_x: i32,
-        src_mask_y: i32,
-    ) -> bool {
+    /// Copy and stretch a portion of one DC to another using configuration struct
+    fn stretch_blit(&self, source: &dyn DeviceContext, config: StretchBlitConfig) -> bool {
         unsafe {
             wxdragon_sys::wxd_DC_StretchBlit(
                 self.dc_ptr(),
-                dest_x,
-                dest_y,
-                dest_width,
-                dest_height,
+                config.dest_x,
+                config.dest_y,
+                config.dest_width,
+                config.dest_height,
                 source.dc_ptr(),
-                src_x,
-                src_y,
-                src_width,
-                src_height,
-                logical_func.to_raw(),
-                use_mask,
-                src_mask_x,
-                src_mask_y,
+                config.src_x,
+                config.src_y,
+                config.src_width,
+                config.src_height,
+                config.logical_func.to_raw(),
+                config.use_mask,
+                config.src_mask_x,
+                config.src_mask_y,
             )
         }
     }

@@ -5,6 +5,12 @@ use std::any::Any;
 use std::ffi::{CStr, CString};
 use wxdragon_sys as ffi;
 
+// Type aliases to reduce complexity
+type GetValueCallback = Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Variant>;
+type SetValueCallback = Box<dyn for<'a, 'b> Fn(&'a dyn Any, usize, usize, &'b Variant) -> bool>;
+type GetAttrCallback = Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Option<DataViewItemAttr>>;
+type IsEnabledCallback = Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> bool>;
+
 /// DataViewItemAttr represents formatting attributes for a DataViewCtrl cell.
 #[derive(Debug, Clone, Default)]
 pub struct DataViewItemAttr {
@@ -320,8 +326,11 @@ impl DataViewVirtualListModel {
     }
 
     /// Get the row for a native item
-    pub fn get_row(&self, item: *mut std::ffi::c_void) -> usize {
-        unsafe { ffi::wxd_DataViewVirtualListModel_GetRow(self.ptr.ptr, item) as usize }
+    /// 
+    /// # Safety
+    /// The caller must ensure the item pointer is valid and comes from the same model.
+    pub unsafe fn get_row(&self, item: *mut std::ffi::c_void) -> usize {
+        ffi::wxd_DataViewVirtualListModel_GetRow(self.ptr.ptr, item) as usize
     }
 
     /// Get the current size of the model
@@ -368,15 +377,15 @@ struct CustomModelCallbacks {
     // The actual user data that will be passed to callbacks
     userdata: Box<dyn Any>,
     // The callbacks
-    get_value: Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Variant>,
-    set_value: Option<Box<dyn for<'a, 'b> Fn(&'a dyn Any, usize, usize, &'b Variant) -> bool>>,
-    get_attr: Option<Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Option<DataViewItemAttr>>>,
-    is_enabled: Option<Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> bool>>,
+    get_value: GetValueCallback,
+    set_value: Option<SetValueCallback>,
+    get_attr: Option<GetAttrCallback>,
+    is_enabled: Option<IsEnabledCallback>,
 }
 
 impl CustomDataViewVirtualListModel {
     /// Creates a new custom virtual list model with the specified data provider.
-    pub fn new<T: 'static, F, G, H, I>(
+    pub fn new<T, F, G, H, I>(
         initial_size: usize,
         data: T,
         get_value: F,
@@ -385,7 +394,7 @@ impl CustomDataViewVirtualListModel {
         is_enabled: Option<I>,
     ) -> Self
     where
-        T: Any,
+        T: Any + 'static,
         F: for<'a> Fn(&'a T, usize, usize) -> Variant + 'static,
         G: for<'a, 'b> Fn(&'a T, usize, usize, &'b Variant) -> bool + 'static,
         H: for<'a> Fn(&'a T, usize, usize) -> Option<DataViewItemAttr> + 'static,
@@ -395,15 +404,13 @@ impl CustomDataViewVirtualListModel {
         let any_data = Box::new(data);
 
         // Convert type-specific callbacks to callbacks that work with Any
-        let any_get_value: Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Variant> =
+        let any_get_value: GetValueCallback =
             Box::new(move |any_data, row, col| {
                 let data = any_data.downcast_ref::<T>().unwrap();
                 get_value(data, row, col)
             });
 
-        let any_set_value: Option<
-            Box<dyn for<'a, 'b> Fn(&'a dyn Any, usize, usize, &'b Variant) -> bool>,
-        > = if let Some(f) = set_value {
+        let any_set_value: Option<SetValueCallback> = if let Some(f) = set_value {
             Some(Box::new(move |any_data: &dyn Any, row, col, value| {
                 let data = any_data.downcast_ref::<T>().unwrap();
                 f(data, row, col, value)
@@ -412,9 +419,7 @@ impl CustomDataViewVirtualListModel {
             None
         };
 
-        let any_get_attr: Option<
-            Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> Option<DataViewItemAttr>>,
-        > = if let Some(f) = get_attr {
+        let any_get_attr: Option<GetAttrCallback> = if let Some(f) = get_attr {
             Some(Box::new(move |any_data: &dyn Any, row, col| {
                 let data = any_data.downcast_ref::<T>().unwrap();
                 f(data, row, col)
@@ -423,7 +428,7 @@ impl CustomDataViewVirtualListModel {
             None
         };
 
-        let any_is_enabled: Option<Box<dyn for<'a> Fn(&'a dyn Any, usize, usize) -> bool>> =
+        let any_is_enabled: Option<IsEnabledCallback> =
             if let Some(f) = is_enabled {
                 Some(Box::new(move |any_data: &dyn Any, row, col| {
                     let data = any_data.downcast_ref::<T>().unwrap();
@@ -457,7 +462,7 @@ impl CustomDataViewVirtualListModel {
                 if userdata.is_null() {
                     unsafe {
                         (*variant).type_ = ffi::WXD_VARIANT_TYPE_STRING as i32;
-                        let error_message = format!("Error: null userdata");
+                        let error_message = "Error: null userdata".to_string();
                         (*variant).data.string_val =
                             CString::new(error_message).unwrap_or_default().into_raw();
                     }
@@ -488,7 +493,7 @@ impl CustomDataViewVirtualListModel {
                 let callbacks = unsafe { &*(userdata as *const CustomModelCallbacks) };
                 if let Some(set_value) = &callbacks.set_value {
                     // Convert wxd_Variant_t to Variant
-                    let value = from_raw_variant(variant);
+                    let value = unsafe { from_raw_variant(variant) };
 
                     // Call the user's callback
                     (set_value)(&*callbacks.userdata, row as usize, col as usize, &value)
@@ -786,59 +791,60 @@ pub fn to_raw_variant(value: &Variant) -> ffi::wxd_Variant_t {
 }
 
 /// Converts a C wxd_Variant_t to a Variant
-pub fn from_raw_variant(raw: *const ffi::wxd_Variant_t) -> Variant {
-    unsafe {
-        if raw.is_null() {
-            return Variant::String(String::new());
-        }
+/// 
+/// # Safety
+/// The caller must ensure the raw pointer is valid and points to a properly initialized wxd_Variant_t.
+pub unsafe fn from_raw_variant(raw: *const ffi::wxd_Variant_t) -> Variant {
+    if raw.is_null() {
+        return Variant::String(String::new());
+    }
 
-        match (*raw).type_ {
-            t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => Variant::Bool((*raw).data.bool_val),
-            t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => Variant::Int32((*raw).data.int32_val),
-            t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => Variant::Int64((*raw).data.int64_val),
-            t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => {
-                Variant::Double((*raw).data.double_val)
-            }
-            t if t == ffi::WXD_VARIANT_TYPE_STRING as i32 => {
-                if (*raw).data.string_val.is_null() {
-                    Variant::String(String::new())
-                } else {
-                    let c_str = CStr::from_ptr((*raw).data.string_val);
-                    Variant::String(c_str.to_string_lossy().to_string())
-                }
-            }
-            t if t == ffi::WXD_VARIANT_TYPE_DATETIME as i32 => {
-                // Create a DateTime from the raw data
-                let dt = crate::DateTime::from_raw((*raw).data.datetime_val);
-                Variant::DateTime(dt)
-            }
-            t if t == ffi::WXD_VARIANT_TYPE_BITMAP as i32 => {
-                if (*raw).data.bitmap_val.is_null() {
-                    // Create a minimal 1x1 transparent bitmap as fallback
-                    match crate::Bitmap::from_rgba(&[0, 0, 0, 0], 1, 1) {
-                        Some(bitmap) => Variant::Bitmap(bitmap),
-                        None => Variant::String(String::new()), // Last resort fallback
-                    }
-                } else {
-                    // For bitmaps from C++, we need to clone them as we don't own them
-                    let ptr = (*raw).data.bitmap_val;
-                    let cloned_ptr = ffi::wxd_Bitmap_Clone(ptr);
-                    if !cloned_ptr.is_null() {
-                        let bitmap = crate::Bitmap::from_ptr_owned(cloned_ptr);
-                        Variant::Bitmap(bitmap)
-                    } else {
-                        // If clone fails, fallback to a small placeholder
-                        match crate::Bitmap::from_rgba(&[255, 0, 0, 255], 1, 1) {
-                            Some(bitmap) => Variant::Bitmap(bitmap),
-                            None => Variant::String(String::new()),
-                        }
-                    }
-                }
-            }
-            _ => {
-                // Default for unknown/unsupported types
+    match (*raw).type_ {
+        t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => Variant::Bool((*raw).data.bool_val),
+        t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => Variant::Int32((*raw).data.int32_val),
+        t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => Variant::Int64((*raw).data.int64_val),
+        t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => {
+            Variant::Double((*raw).data.double_val)
+        }
+        t if t == ffi::WXD_VARIANT_TYPE_STRING as i32 => {
+            if (*raw).data.string_val.is_null() {
                 Variant::String(String::new())
+            } else {
+                let c_str = CStr::from_ptr((*raw).data.string_val);
+                Variant::String(c_str.to_string_lossy().to_string())
             }
+        }
+        t if t == ffi::WXD_VARIANT_TYPE_DATETIME as i32 => {
+            // Create a DateTime from the raw data
+            let dt = crate::DateTime::from_raw((*raw).data.datetime_val);
+            Variant::DateTime(dt)
+        }
+        t if t == ffi::WXD_VARIANT_TYPE_BITMAP as i32 => {
+            if (*raw).data.bitmap_val.is_null() {
+                // Create a minimal 1x1 transparent bitmap as fallback
+                match crate::Bitmap::from_rgba(&[0, 0, 0, 0], 1, 1) {
+                    Some(bitmap) => Variant::Bitmap(bitmap),
+                    None => Variant::String(String::new()), // Last resort fallback
+                }
+            } else {
+                // For bitmaps from C++, we need to clone them as we don't own them
+                let ptr = (*raw).data.bitmap_val;
+                let cloned_ptr = ffi::wxd_Bitmap_Clone(ptr);
+                if !cloned_ptr.is_null() {
+                    let bitmap = crate::Bitmap::from_ptr_owned(cloned_ptr);
+                    Variant::Bitmap(bitmap)
+                } else {
+                    // If clone fails, fallback to a small placeholder
+                    match crate::Bitmap::from_rgba(&[255, 0, 0, 255], 1, 1) {
+                        Some(bitmap) => Variant::Bitmap(bitmap),
+                        None => Variant::String(String::new()),
+                    }
+                }
+            }
+        }
+        _ => {
+            // Default for unknown/unsupported types
+            Variant::String(String::new())
         }
     }
 }

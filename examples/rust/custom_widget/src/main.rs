@@ -7,7 +7,7 @@ mod pie_chart;
 use pie_chart::PieChart;
 
 fn main() {
-    wxdragon::main(|_| {
+    let _ = wxdragon::main(|_| {
         let frame = Frame::builder()
             .with_title("Custom Widgets Demo - Animated Button & Pie Chart")
             .with_size(Size::new(800, 600))

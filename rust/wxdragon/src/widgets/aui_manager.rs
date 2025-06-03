@@ -26,6 +26,12 @@ pub struct PaneInfo {
     ptr: *mut ffi::wxd_AuiPaneInfo_t,
 }
 
+impl Default for PaneInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PaneInfo {
     /// Create a new PaneInfo
     pub fn new() -> Self {
@@ -392,11 +398,11 @@ impl AuiManager {
 
     /// Add a pane with detailed pane information
     pub fn add_pane_with_info(&self, window: &impl WxWidget, pane_info: PaneInfo) -> bool {
-        let result = unsafe {
-            ffi::wxd_AuiManager_AddPaneWithInfo(self.ptr, window.handle_ptr(), pane_info.ptr)
-        };
+        
         // The pane_info is still managed by Rust and will be dropped automatically
-        result
+        unsafe {
+            ffi::wxd_AuiManager_AddPaneWithInfo(self.ptr, window.handle_ptr(), pane_info.ptr)
+        }
     }
 
     /// Update the manager's layout (must be called after adding/removing panes)

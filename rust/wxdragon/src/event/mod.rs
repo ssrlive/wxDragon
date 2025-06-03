@@ -611,6 +611,12 @@ impl Event {
 // --- WxEvtHandler Trait (Updated for Simple Event Handling) ---
 
 pub trait WxEvtHandler {
+    /// Returns the raw event handler pointer for this widget.
+    /// 
+    /// # Safety
+    /// The caller must ensure the returned pointer is valid and not null.
+    /// The pointer must point to a valid wxEvtHandler object that remains valid
+    /// for the lifetime of this widget.
     unsafe fn get_event_handler_ptr(&self) -> *mut ffi::wxd_EvtHandler_t;
 
     // Internal implementation with crate visibility
@@ -681,6 +687,13 @@ pub trait WxEvtHandler {
 
 /// Trampoline function: Called by C++.
 /// `user_data` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
+/// 
+/// # Safety
+/// This function is called from C++ code and must maintain the following invariants:
+/// - `user_data` must be a valid pointer to a `Box<Box<dyn FnMut(Event) + 'static>>`
+/// - `event_ptr_cvoid` must be a valid pointer to a `wxd_Event_t` object
+/// - The pointers must remain valid for the duration of this function call
+/// - This function must not be called from multiple threads simultaneously
 #[no_mangle]
 pub unsafe extern "C" fn rust_event_handler_trampoline(
     user_data: *mut c_void,
@@ -706,6 +719,13 @@ pub unsafe extern "C" fn rust_event_handler_trampoline(
 
 /// Function called by C++ to drop the Rust closure Box.
 /// `ptr` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
+/// 
+/// # Safety
+/// This function is called from C++ code to clean up Rust callbacks.
+/// - `ptr` must be a valid pointer to a `Box<Box<dyn FnMut(Event) + 'static>>` 
+///   that was previously allocated by Rust
+/// - The pointer must not be used after this function returns
+/// - This function must only be called once per pointer
 #[no_mangle]
 pub unsafe extern "C" fn drop_rust_closure_box(ptr: *mut c_void) {
     if !ptr.is_null() {

@@ -7,14 +7,21 @@ use std::ffi::{c_void, CStr};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
 
+// Type aliases to reduce complexity warnings
+type DragCallback = Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>;
+type LeaveCallback = Box<dyn FnMut() + 'static>;
+type DropCallback = Box<dyn FnMut(i32, i32) -> bool + 'static>;
+type DropTextCallback = Box<dyn FnMut(&str, i32, i32) -> bool + 'static>;
+type DropFilesCallback = Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>;
+
 /// Callback handlers for a text drop target.
 struct TextDropTargetCallbacks {
-    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_leave: Option<Box<dyn FnMut() + 'static>>,
-    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
-    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drop_text: Box<dyn FnMut(&str, i32, i32) -> bool + 'static>,
+    on_enter: Option<DragCallback>,
+    on_drag_over: Option<DragCallback>,
+    on_leave: Option<LeaveCallback>,
+    on_drop: Option<DropCallback>,
+    on_data: Option<DragCallback>,
+    on_drop_text: DropTextCallback,
 }
 
 /// A drop target handles text data dropped via drag and drop.
@@ -23,12 +30,12 @@ pub struct TextDropTarget {}
 /// Builder for TextDropTarget with full callback support
 pub struct TextDropTargetBuilder<'a, W: WxWidget> {
     window: &'a W,
-    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_leave: Option<Box<dyn FnMut() + 'static>>,
-    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
-    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drop_text: Option<Box<dyn FnMut(&str, i32, i32) -> bool + 'static>>,
+    on_enter: Option<DragCallback>,
+    on_drag_over: Option<DragCallback>,
+    on_leave: Option<LeaveCallback>,
+    on_drop: Option<DropCallback>,
+    on_data: Option<DragCallback>,
+    on_drop_text: Option<DropTextCallback>,
 }
 
 impl<'a, W: WxWidget> TextDropTargetBuilder<'a, W> {
@@ -150,12 +157,12 @@ impl TextDropTarget {
 
 /// Callback handlers for a file drop target.
 struct FileDropTargetCallbacks {
-    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_leave: Option<Box<dyn FnMut() + 'static>>,
-    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
-    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drop_files: Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>,
+    on_enter: Option<DragCallback>,
+    on_drag_over: Option<DragCallback>,
+    on_leave: Option<LeaveCallback>,
+    on_drop: Option<DropCallback>,
+    on_data: Option<DragCallback>,
+    on_drop_files: DropFilesCallback,
 }
 
 /// A drop target handles file data dropped via drag and drop.
@@ -164,12 +171,12 @@ pub struct FileDropTarget {}
 /// Builder for FileDropTarget to allow setting optional callbacks.
 pub struct FileDropTargetBuilder<'a, W: WxWidget> {
     window: &'a W,
-    on_enter: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drag_over: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_leave: Option<Box<dyn FnMut() + 'static>>,
-    on_drop: Option<Box<dyn FnMut(i32, i32) -> bool + 'static>>,
-    on_data: Option<Box<dyn FnMut(i32, i32, DragResult) -> DragResult + 'static>>,
-    on_drop_files: Option<Box<dyn FnMut(Vec<String>, i32, i32) -> bool + 'static>>,
+    on_enter: Option<DragCallback>,
+    on_drag_over: Option<DragCallback>,
+    on_leave: Option<LeaveCallback>,
+    on_drop: Option<DropCallback>,
+    on_data: Option<DragCallback>,
+    on_drop_files: Option<DropFilesCallback>,
 }
 
 impl<'a, W: WxWidget> FileDropTargetBuilder<'a, W> {

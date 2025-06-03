@@ -78,10 +78,9 @@ impl ProgressDialog {
         let newmsg_ptr = c_newmsg.as_ref().map_or(ptr::null(), |cs| cs.as_ptr());
 
         let mut skip = false;
-        let result =
-            unsafe { ffi::wxd_ProgressDialog_Update(self.as_ptr(), value, newmsg_ptr, &mut skip) };
+        
 
-        result
+        unsafe { ffi::wxd_ProgressDialog_Update(self.as_ptr(), value, newmsg_ptr, &mut skip) }
     }
 
     /// Updates the dialog, setting the progress bar to the given value
@@ -112,9 +111,9 @@ impl ProgressDialog {
         let newmsg_ptr = c_newmsg.as_ref().map_or(ptr::null(), |cs| cs.as_ptr());
 
         let mut skip = false;
-        let result = unsafe { ffi::wxd_ProgressDialog_Pulse(self.as_ptr(), newmsg_ptr, &mut skip) };
+        
 
-        result
+        unsafe { ffi::wxd_ProgressDialog_Pulse(self.as_ptr(), newmsg_ptr, &mut skip) }
     }
 
     /// Switches the progress dialog to indeterminate mode and makes the gauge control
@@ -171,7 +170,7 @@ impl<'a, W: WxWidget> ProgressDialogBuilder<'a, W> {
 
     /// Add a style flag to the existing style flags
     pub fn add_style(mut self, style_flag: ProgressDialogStyle) -> Self {
-        self.style = self.style | style_flag;
+        self.style |= style_flag;
         self
     }
 

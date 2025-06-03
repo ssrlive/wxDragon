@@ -45,6 +45,19 @@ impl RadioBoxEventData {
     }
 }
 
+/// Configuration for creating a RadioBox
+#[derive(Debug)]
+struct RadioBoxConfig<'a> {
+    pub parent_ptr: *mut ffi::wxd_Window_t,
+    pub id: Id,
+    pub label: &'a str,
+    pub choices: &'a [&'a str],
+    pub major_dimension: i32,
+    pub pos: Point,
+    pub size: Size,
+    pub style: i64,
+}
+
 /// Represents a wxRadioBox control.
 #[derive(Clone)]
 pub struct RadioBox {
@@ -70,20 +83,11 @@ impl RadioBox {
     }
 
     /// Low-level constructor used by the builder.
-    fn new_impl(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        label: &str,
-        choices: &[&str],
-        major_dimension: i32,
-        pos: Point,
-        size: Size,
-        style: i64,
-    ) -> Self {
-        assert!(!parent_ptr.is_null(), "RadioBox requires a parent");
-        let c_label = CString::new(label).expect("CString::new failed for label");
+    fn new_impl(config: RadioBoxConfig) -> Self {
+        assert!(!config.parent_ptr.is_null(), "RadioBox requires a parent");
+        let c_label = CString::new(config.label).expect("CString::new failed for label");
 
-        let c_choices: Vec<CString> = choices
+        let c_choices: Vec<CString> = config.choices
             .iter()
             .map(|&s| CString::new(s).expect("CString::new failed for choice"))
             .collect();
@@ -91,15 +95,15 @@ impl RadioBox {
 
         let ptr = unsafe {
             ffi::wxd_RadioBox_Create(
-                parent_ptr,
-                id,
+                config.parent_ptr,
+                config.id,
                 c_label.as_ptr(),
-                pos.into(),
-                size.into(),
-                choices.len() as i32,
+                config.pos.into(),
+                config.size.into(),
+                config.choices.len() as i32,
                 c_choices_ptrs.as_ptr(),
-                major_dimension,
-                style as ffi::wxd_Style_t,
+                config.major_dimension,
+                config.style as ffi::wxd_Style_t,
             )
         };
         if ptr.is_null() {
@@ -184,16 +188,16 @@ widget_builder!(
         // Convert Vec<String> to Vec<&str> for the new_impl function
         let choices_refs: Vec<&str> = slf.choices.iter().map(|s| s.as_str()).collect();
 
-        RadioBox::new_impl(
-            slf.parent.handle_ptr(),
-            slf.id,
-            &slf.label,
-            &choices_refs,
-            slf.major_dimension,
-            slf.pos,
-            slf.size,
-            slf.style.bits(),
-        )
+        RadioBox::new_impl(RadioBoxConfig {
+            parent_ptr: slf.parent.handle_ptr(),
+            id: slf.id,
+            label: &slf.label,
+            choices: &choices_refs,
+            major_dimension: slf.major_dimension,
+            pos: slf.pos,
+            size: slf.size,
+            style: slf.style.bits(),
+        })
     }
 );
 

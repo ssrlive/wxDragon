@@ -16,11 +16,11 @@ widget_style_enum!(
     name: TreebookStyle,
     doc: "Style flags for Treebook widget.",
     variants: {
-        Default: ffi::WXD_BK_DEFAULT as i64, "Default style.",
-        Top: ffi::WXD_BK_TOP as i64, "Place tabs at the top.",
-        Bottom: ffi::WXD_BK_BOTTOM as i64, "Place tabs at the bottom.",
-        Left: ffi::WXD_BK_LEFT as i64, "Place tabs at the left.",
-        Right: ffi::WXD_BK_RIGHT as i64, "Place tabs at the right."
+        Default: ffi::WXD_BK_DEFAULT, "Default style.",
+        Top: ffi::WXD_BK_TOP, "Place tabs at the top.",
+        Bottom: ffi::WXD_BK_BOTTOM, "Place tabs at the bottom.",
+        Left: ffi::WXD_BK_LEFT, "Place tabs at the left.",
+        Right: ffi::WXD_BK_RIGHT, "Place tabs at the right."
     },
     default_variant: Default
 );

@@ -1,7 +1,7 @@
 use wxdragon::prelude::*;
 
 fn main() {
-    wxdragon::main(|_| {
+    let _ = wxdragon::main(|_| {
         let frame = Frame::builder()
             .with_title("Hello, World!")
             .with_size(Size::new(300, 200))

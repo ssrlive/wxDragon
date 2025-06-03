@@ -9,9 +9,9 @@ widget_style_enum!(
     name: FlexGrowMode,
     doc: "Grow mode flags for FlexGridSizer.",
     variants: {
-        None: ffi::WXD_FLEX_GROWMODE_NONE as i64, "Don't resize the cells in non-flexible direction at all.",
-        Specified: ffi::WXD_FLEX_GROWMODE_SPECIFIED as i64, "Uniformly resize only the specified ones (default).",
-        All: ffi::WXD_FLEX_GROWMODE_ALL as i64, "Uniformly resize all cells."
+        None: ffi::WXD_FLEX_GROWMODE_NONE, "Don't resize the cells in non-flexible direction at all.",
+        Specified: ffi::WXD_FLEX_GROWMODE_SPECIFIED, "Uniformly resize only the specified ones (default).",
+        All: ffi::WXD_FLEX_GROWMODE_ALL, "Uniformly resize all cells."
     },
     default_variant: Specified
 );

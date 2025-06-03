@@ -23,6 +23,17 @@ widget_style_enum!(
     default_variant: Default
 );
 
+/// Configuration for setting up scrollbars
+pub struct ScrollBarConfig {
+    pub pixels_per_unit_x: i32,
+    pub pixels_per_unit_y: i32,
+    pub no_units_x: i32,
+    pub no_units_y: i32,
+    pub x_pos: i32,
+    pub y_pos: i32,
+    pub no_refresh: bool,
+}
+
 /// Represents a wxScrolledWindow widget.
 /// A window that can scroll its contents.
 pub struct ScrolledWindow {
@@ -55,26 +66,17 @@ impl ScrolledWindow {
     }
 
     /// Sets up the scrollbars.
-    pub fn set_scrollbars(
-        &self,
-        pixels_per_unit_x: i32,
-        pixels_per_unit_y: i32,
-        no_units_x: i32,
-        no_units_y: i32,
-        x_pos: i32,
-        y_pos: i32,
-        no_refresh: bool,
-    ) {
+    pub fn set_scrollbars(&self, config: ScrollBarConfig) {
         unsafe {
             ffi::wxd_ScrolledWindow_SetScrollbars(
                 self.as_ptr(),
-                pixels_per_unit_x,
-                pixels_per_unit_y,
-                no_units_x,
-                no_units_y,
-                x_pos,
-                y_pos,
-                no_refresh,
+                config.pixels_per_unit_x,
+                config.pixels_per_unit_y,
+                config.no_units_x,
+                config.no_units_y,
+                config.x_pos,
+                config.y_pos,
+                config.no_refresh,
             )
         }
     }
@@ -154,7 +156,7 @@ impl ScrollEvents for ScrolledWindow {}
 
 // Add XRC Support - enables ScrolledWindow to be created from XRC-managed pointers
 impl crate::xrc::XrcSupport for ScrolledWindow {
-    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+    unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
         let panel = unsafe { Panel::from_ptr(ptr as *mut ffi::wxd_Panel_t) };
         Self { panel }
     }

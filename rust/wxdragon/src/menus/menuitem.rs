@@ -105,7 +105,7 @@ impl MenuItem {
 
         if item_id != -1 {
             Some(MenuItem::new(
-                parent_window.clone(),
+                *parent_window,
                 item_id,
                 item_name.to_string(),
             ))

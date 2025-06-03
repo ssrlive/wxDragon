@@ -110,8 +110,8 @@ impl MenuBarBuilder {
         for (menu, title) in self.items {
             let title_c = CString::new(title).unwrap_or_default();
             let menu_ptr = unsafe { menu.as_ptr() };
-            // Forget menu wrapper as wxMenuBar takes ownership
-            std::mem::forget(menu);
+            // MenuBar takes ownership of the menu pointer, but Menu doesn't implement Drop
+            // so no need to forget it
             unsafe {
                 ffi::wxd_MenuBar_Append(menubar.ptr, menu_ptr, title_c.as_ptr());
             }
@@ -123,9 +123,10 @@ impl MenuBarBuilder {
 
 // Add XRC support
 impl crate::xrc::XrcSupport for MenuBar {
-    fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+    unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        let menubar_ptr = ptr as *mut wxdragon_sys::wxd_MenuBar_t;
         Self {
-            ptr: ptr as *mut ffi::wxd_MenuBar_t,
+            ptr: menubar_ptr,
         }
     }
 }

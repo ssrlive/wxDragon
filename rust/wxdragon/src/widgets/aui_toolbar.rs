@@ -28,18 +28,15 @@ widget_style_enum!(
 // Corresponds to WXDItemKindCEnum in C
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
+#[derive(Default)]
 pub enum ItemKind {
+    #[default]
     Normal = 0,    // WXD_ITEM_NORMAL
     Check = 1,     // WXD_ITEM_CHECK
     Radio = 2,     // WXD_ITEM_RADIO
     Separator = 3, // WXD_ITEM_SEPARATOR
 }
 
-impl Default for ItemKind {
-    fn default() -> Self {
-        ItemKind::Normal
-    }
-}
 
 /// Events for AuiToolBar
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

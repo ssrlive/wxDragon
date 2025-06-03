@@ -57,6 +57,20 @@ impl FileCtrlEventData {
     }
 }
 
+/// Configuration for creating a FileCtrl
+#[derive(Debug)]
+struct FileCtrlConfig {
+    pub parent_ptr: *mut ffi::wxd_Window_t,
+    pub id: Id,
+    pub default_directory: String,
+    pub default_filename: String,
+    pub wild_card: String,
+    pub style: i64,
+    pub pos: Point,
+    pub size: Size,
+    pub name: String,
+}
+
 #[derive(Clone)]
 pub struct FileCtrl {
     window: Window, // Composition: FileCtrl IS a Window
@@ -69,37 +83,27 @@ impl FileCtrl {
 
     // Create a new FileCtrl from a window and parent pointer
     // This is intended for internal use
-    fn new_impl(
-        parent_ptr: *mut ffi::wxd_Window_t,
-        id: Id,
-        default_directory: &str,
-        default_filename: &str,
-        wild_card: &str,
-        style: i64,
-        pos: Point,
-        size: Size,
-        name: &str,
-    ) -> Self {
-        assert!(!parent_ptr.is_null(), "FileCtrl requires a parent");
+    fn new_impl(config: FileCtrlConfig) -> Self {
+        assert!(!config.parent_ptr.is_null(), "FileCtrl requires a parent");
         let c_default_dir =
-            CString::new(default_directory).expect("CString::new failed for default_directory");
+            CString::new(config.default_directory).expect("CString::new failed for default_directory");
         let c_default_filename =
-            CString::new(default_filename).expect("CString::new failed for default_filename");
-        let c_wild_card = CString::new(wild_card).expect("CString::new failed for wild_card");
-        let c_name = CString::new(name).expect("CString::new failed for name");
+            CString::new(config.default_filename).expect("CString::new failed for default_filename");
+        let c_wild_card = CString::new(config.wild_card).expect("CString::new failed for wild_card");
+        let c_name = CString::new(config.name).expect("CString::new failed for name");
 
         let raw_ptr = unsafe {
             ffi::wxd_FileCtrl_Create(
-                parent_ptr,
-                id,
+                config.parent_ptr,
+                config.id,
                 c_default_dir.as_ptr(),
                 c_default_filename.as_ptr(),
                 c_wild_card.as_ptr(),
-                style,
-                pos.x,
-                pos.y,
-                size.width,
-                size.height,
+                config.style,
+                config.pos.x,
+                config.pos.y,
+                config.size.width,
+                config.size.height,
                 c_name.as_ptr(),
             )
         };
@@ -124,17 +128,17 @@ widget_builder!(
         name: String = "FileCtrl".to_string()
     },
     build_impl: |slf| {
-        FileCtrl::new_impl(
-            slf.parent.handle_ptr(),
-            slf.id,
-            &slf.default_directory,
-            &slf.default_filename,
-            &slf.wild_card,
-            slf.style.bits(),
-            slf.pos,
-            slf.size,
-            &slf.name,
-        )
+        FileCtrl::new_impl(FileCtrlConfig {
+            parent_ptr: slf.parent.handle_ptr(),
+            id: slf.id,
+            default_directory: slf.default_directory,
+            default_filename: slf.default_filename,
+            wild_card: slf.wild_card,
+            style: slf.style.bits(),
+            pos: slf.pos,
+            size: slf.size,
+            name: slf.name,
+        })
     }
 );
 

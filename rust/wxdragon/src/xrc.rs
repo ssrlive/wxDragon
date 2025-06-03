@@ -64,7 +64,7 @@ impl XmlResource {
         if dialog_ptr.is_null() {
             None
         } else {
-            Some(Dialog::from_xrc_ptr(dialog_ptr))
+            Some(unsafe { Dialog::from_xrc_ptr(dialog_ptr) })
         }
     }
 
@@ -79,9 +79,9 @@ impl XmlResource {
         if frame_ptr.is_null() {
             None
         } else {
-            Some(<Frame as FromXrcPtr>::from_xrc_ptr(
+            Some(unsafe { <Frame as FromXrcPtr>::from_xrc_ptr(
                 frame_ptr as *mut ffi::wxd_Window_t,
-            ))
+            ) })
         }
     }
 
@@ -96,9 +96,9 @@ impl XmlResource {
         if panel_ptr.is_null() {
             None
         } else {
-            Some(<Panel as FromXrcPtr>::from_xrc_ptr(
+            Some(unsafe { <Panel as FromXrcPtr>::from_xrc_ptr(
                 panel_ptr as *mut ffi::wxd_Window_t,
-            ))
+            ) })
         }
     }
 
@@ -122,7 +122,10 @@ pub trait FromXrcPtr {
 
     /// Create a widget wrapper from an XRC-managed pointer
     /// The widget does not own the pointer - XRC manages its lifetime
-    fn from_xrc_ptr(ptr: Self::RawFfiType) -> Self;
+    /// 
+    /// # Safety
+    /// The caller must ensure the pointer is valid and points to the correct widget type.
+    unsafe fn from_xrc_ptr(ptr: Self::RawFfiType) -> Self;
 }
 
 /// Trait for widgets that support XRC loading
@@ -131,14 +134,17 @@ pub trait XrcSupport: WxWidget + Sized {
     /// Creates a widget wrapper for an XRC-managed object.
     /// This widget will not be destroyed when dropped as it's managed by XRC.
     /// Each widget implements this with their specific field structure.
-    fn from_xrc_ptr(ptr: *mut ffi::wxd_Window_t) -> Self;
+    /// 
+    /// # Safety
+    /// The caller must ensure the pointer is valid and points to the correct widget type.
+    unsafe fn from_xrc_ptr(ptr: *mut ffi::wxd_Window_t) -> Self;
 }
 
 /// Automatically implement FromXrcPtr for any widget that implements XrcSupport
 impl<T: XrcSupport> FromXrcPtr for T {
     type RawFfiType = *mut ffi::wxd_Window_t;
 
-    fn from_xrc_ptr(ptr: Self::RawFfiType) -> Self {
+    unsafe fn from_xrc_ptr(ptr: Self::RawFfiType) -> Self {
         T::from_xrc_ptr(ptr)
     }
 }
@@ -157,7 +163,7 @@ pub trait WindowXrcMethods: WxWidget + Sized {
         if child_ptr.is_null() {
             None
         } else {
-            Some(T::from_xrc_ptr(child_ptr))
+            Some(unsafe { T::from_xrc_ptr(child_ptr) })
         }
     }
 }

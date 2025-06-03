@@ -27,6 +27,17 @@ widget_style_enum!(
     default_variant: Default
 );
 
+/// Configuration for adding a tool to the toolbar
+pub struct ToolConfig<'a> {
+    pub tool_id: Id,
+    pub label: &'a str,
+    pub bitmap: &'a Bitmap,
+    pub bitmap_disabled: Option<&'a Bitmap>,
+    pub kind: ItemKind,
+    pub short_help: &'a str,
+    pub long_help: &'a str,
+}
+
 /// Events for ToolBar
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ToolBarEvent {
@@ -84,34 +95,25 @@ impl ToolBar {
         }
     }
 
-    /// Low-level function to add a tool.
+    /// Internal helper method for adding tools with all options.
     /// Prefer using `add_tool`, `add_check_tool`, `add_radio_tool` etc.
     /// Returns true if the tool was added successfully (C++ returns non-null ptr).
     /// # Safety
     /// Requires valid toolbar pointer and CString conversions must succeed.
-    fn add_tool_raw(
-        &self,
-        tool_id: Id,
-        label: &str,
-        bitmap: &Bitmap,
-        bitmap_disabled: Option<&Bitmap>,
-        kind: ItemKind,
-        short_help: &str,
-        long_help: &str,
-    ) -> bool {
-        let c_label = CString::new(label).unwrap_or_default();
-        let c_short_help = CString::new(short_help).unwrap_or_default();
-        let c_longlong_help = CString::new(long_help).unwrap_or_default();
-        let bmp_disabled_ptr = bitmap_disabled.map_or(std::ptr::null_mut(), |bmp| bmp.as_ptr());
+    fn add_tool_raw(&self, config: ToolConfig) -> bool {
+        let c_label = CString::new(config.label).unwrap_or_default();
+        let c_short_help = CString::new(config.short_help).unwrap_or_default();
+        let c_longlong_help = CString::new(config.long_help).unwrap_or_default();
+        let bmp_disabled_ptr = config.bitmap_disabled.map_or(std::ptr::null_mut(), |bmp| bmp.as_ptr());
 
         unsafe {
             let tool_ptr = ffi::wxd_ToolBar_AddTool(
                 self.window.as_ptr() as *mut _,
-                tool_id,
+                config.tool_id,
                 c_label.as_ptr(),
-                bitmap.as_ptr(),
+                config.bitmap.as_ptr(),
                 bmp_disabled_ptr,
-                kind as c_int,
+                config.kind as c_int,
                 c_short_help.as_ptr(),
                 c_longlong_help.as_ptr(),
             );
@@ -128,13 +130,15 @@ impl ToolBar {
     /// * `short_help` - Short help string (tooltip).
     pub fn add_tool(&self, tool_id: Id, label: &str, bitmap: &Bitmap, short_help: &str) -> bool {
         self.add_tool_raw(
-            tool_id,
-            label,
-            bitmap,
-            None,
-            ItemKind::Normal,
-            short_help,
-            "",
+            ToolConfig {
+                tool_id,
+                label,
+                bitmap,
+                bitmap_disabled: None,
+                kind: ItemKind::Normal,
+                short_help,
+                long_help: "",
+            }
         )
     }
 
@@ -147,13 +151,15 @@ impl ToolBar {
         short_help: &str,
     ) -> bool {
         self.add_tool_raw(
-            tool_id,
-            label,
-            bitmap,
-            None,
-            ItemKind::Check,
-            short_help,
-            "",
+            ToolConfig {
+                tool_id,
+                label,
+                bitmap,
+                bitmap_disabled: None,
+                kind: ItemKind::Check,
+                short_help,
+                long_help: "",
+            }
         )
     }
 
@@ -167,13 +173,15 @@ impl ToolBar {
         short_help: &str,
     ) -> bool {
         self.add_tool_raw(
-            tool_id,
-            label,
-            bitmap,
-            None,
-            ItemKind::Radio,
-            short_help,
-            "",
+            ToolConfig {
+                tool_id,
+                label,
+                bitmap,
+                bitmap_disabled: None,
+                kind: ItemKind::Radio,
+                short_help,
+                long_help: "",
+            }
         )
     }
 

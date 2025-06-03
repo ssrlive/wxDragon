@@ -51,9 +51,9 @@ impl From<i32> for DragResult {
     }
 }
 
-impl Into<i32> for DragResult {
-    fn into(self) -> i32 {
-        match self {
+impl From<DragResult> for i32 {
+    fn from(val: DragResult) -> Self {
+        match val {
             DragResult::None => 0,
             DragResult::Copy => 1,
             DragResult::Move => 2,

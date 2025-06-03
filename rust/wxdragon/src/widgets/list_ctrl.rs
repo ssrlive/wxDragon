@@ -50,8 +50,10 @@ widget_style_enum!(
 // --- ListColumnFormat Enum (for LIST_FORMAT_... constants) ---
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i32)]
+#[derive(Default)]
 pub enum ListColumnFormat {
     /// Align column content to the left
+    #[default]
     Left = ffi::WXD_LIST_FORMAT_LEFT as i32,
     /// Align column content to the right
     Right = ffi::WXD_LIST_FORMAT_RIGHT as i32,
@@ -66,11 +68,6 @@ impl ListColumnFormat {
     }
 }
 
-impl Default for ListColumnFormat {
-    fn default() -> Self {
-        ListColumnFormat::Left
-    }
-}
 
 // --- ListItemState (for LIST_STATE_... constants) ---
 widget_style_enum!(
@@ -89,8 +86,10 @@ widget_style_enum!(
 // --- ListNextItemFlag Enum (for LIST_NEXT_... constants) ---
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(i32)]
+#[derive(Default)]
 pub enum ListNextItemFlag {
     /// All items, no geometric restriction
+    #[default]
     All = ffi::WXD_LIST_NEXT_ALL as i32,
     /// Item above current one
     Above = ffi::WXD_LIST_NEXT_ABOVE as i32,
@@ -109,11 +108,6 @@ impl ListNextItemFlag {
     }
 }
 
-impl Default for ListNextItemFlag {
-    fn default() -> Self {
-        ListNextItemFlag::All
-    }
-}
 
 /// Events emitted by ListCtrl
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -597,7 +591,7 @@ impl ListCtrl {
             panic!("Failed to start editing item label: FFI returned null pointer.");
         }
 
-        unsafe { crate::widgets::textctrl::TextCtrl::from_ptr(ptr as *mut ffi::wxd_TextCtrl_t) }
+        unsafe { crate::widgets::textctrl::TextCtrl::from_ptr(ptr) }
     }
 
     // --- Item Appearance Methods ---
@@ -681,7 +675,7 @@ impl ListCtrl {
             }
 
             // Free the memory allocated by the C function
-            ffi::wxd_free_int_array(ptr as *mut i32);
+            ffi::wxd_free_int_array(ptr);
 
             result
         }

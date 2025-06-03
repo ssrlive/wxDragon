@@ -7,9 +7,9 @@ widget_style_enum!(
     name: Orientation,
     doc: "Orientation flags for sizers.",
     variants: {
-        Vertical: ffi::WXD_VERTICAL as i64, "Vertical orientation.",
-        Horizontal: ffi::WXD_HORIZONTAL as i64, "Horizontal orientation.",
-        Both: ffi::WXD_BOTH as i64, "Both horizontal and vertical orientation."
+        Vertical: ffi::WXD_VERTICAL, "Vertical orientation.",
+        Horizontal: ffi::WXD_HORIZONTAL, "Horizontal orientation.",
+        Both: ffi::WXD_BOTH, "Both horizontal and vertical orientation."
     },
     default_variant: Vertical
 );
@@ -19,23 +19,23 @@ widget_style_enum!(
     name: SizerFlag,
     doc: "Style flags for sizers.",
     variants: {
-        Left: ffi::WXD_LEFT as i64, "Left alignment or border.",
-        Right: ffi::WXD_RIGHT as i64, "Right alignment or border.",
-        Top: ffi::WXD_TOP as i64, "Top alignment or border.",
-        Bottom: ffi::WXD_BOTTOM as i64, "Bottom alignment or border.",
-        All: ffi::WXD_ALL as i64, "All sides border.",
-        Expand: ffi::WXD_EXPAND as i64, "Expand to fill available space.",
-        AlignLeft: ffi::WXD_ALIGN_LEFT as i64, "Align to the left.",
-        AlignRight: ffi::WXD_ALIGN_RIGHT as i64, "Align to the right.",
-        AlignCenterVertical: ffi::WXD_ALIGN_CENTRE_VERTICAL as i64, "Center vertically.",
-        AlignCenterHorizontal: ffi::WXD_ALIGN_CENTRE_HORIZONTAL as i64, "Center horizontally.",
-        AlignCentre: ffi::WXD_ALIGN_CENTRE as i64, "Center in both directions.",
-        Shaped: ffi::WXD_SHAPED as i64, "Shaped sizer behavior.",
-        FixedMinsize: ffi::WXD_FIXED_MINSIZE as i64, "Fixed minimum size.",
-        ReserveSpaceEvenIfHidden: ffi::WXD_RESERVE_SPACE_EVEN_IF_HIDDEN as i64, "Reserve space even if hidden.",
-        Shrink: ffi::WXD_SHRINK as i64, "Shrink to fit contents.",
-        Tile: ffi::WXD_TILE as i64, "Tile to fill available space.",
-        StretchMask: ffi::WXD_STRETCH_MASK as i64, "Stretch mask to fill available space."
+        Left: ffi::WXD_LEFT, "Left alignment or border.",
+        Right: ffi::WXD_RIGHT, "Right alignment or border.",
+        Top: ffi::WXD_TOP, "Top alignment or border.",
+        Bottom: ffi::WXD_BOTTOM, "Bottom alignment or border.",
+        All: ffi::WXD_ALL, "All sides border.",
+        Expand: ffi::WXD_EXPAND, "Expand to fill available space.",
+        AlignLeft: ffi::WXD_ALIGN_LEFT, "Align to the left.",
+        AlignRight: ffi::WXD_ALIGN_RIGHT, "Align to the right.",
+        AlignCenterVertical: ffi::WXD_ALIGN_CENTRE_VERTICAL, "Center vertically.",
+        AlignCenterHorizontal: ffi::WXD_ALIGN_CENTRE_HORIZONTAL, "Center horizontally.",
+        AlignCentre: ffi::WXD_ALIGN_CENTRE, "Center in both directions.",
+        Shaped: ffi::WXD_SHAPED, "Shaped sizer behavior.",
+        FixedMinsize: ffi::WXD_FIXED_MINSIZE, "Fixed minimum size.",
+        ReserveSpaceEvenIfHidden: ffi::WXD_RESERVE_SPACE_EVEN_IF_HIDDEN, "Reserve space even if hidden.",
+        Shrink: ffi::WXD_SHRINK, "Shrink to fit contents.",
+        Tile: ffi::WXD_TILE, "Tile to fill available space.",
+        StretchMask: ffi::WXD_STRETCH_MASK, "Stretch mask to fill available space."
     },
     default_variant: AlignLeft
 );

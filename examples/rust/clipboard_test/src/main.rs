@@ -1,7 +1,7 @@
 use wxdragon::prelude::*;
 
 fn main() {
-    wxdragon::main(|_| {
+    let _ = wxdragon::main(|_| {
         // Create the main frame
         let frame = Frame::builder()
             .with_title("Clipboard Example")
@@ -63,7 +63,7 @@ fn main() {
 
         // Create a static bitmap to display pasted image
         // Creating an initial black bitmap
-        let initial_bitmap = Bitmap::new_empty(1, 1).unwrap();
+        let initial_bitmap = Bitmap::new(1, 1).unwrap();
         let static_bitmap = StaticBitmap::builder(&panel)
             .with_size(Size::new(100, 100))
             .with_bitmap(Some(initial_bitmap))
@@ -163,7 +163,7 @@ fn main() {
             }
 
             // Create a bitmap data object to receive the data
-            let bitmap_data = BitmapDataObject::new(&Bitmap::new_empty(1, 1).unwrap());
+            let bitmap_data = BitmapDataObject::new(&Bitmap::new(1, 1).unwrap());
 
             // Get the data from clipboard
             if let Some(_locker) = clipboard.locker() {
