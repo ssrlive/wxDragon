@@ -29,6 +29,16 @@ WXD_EXPORTED void wxd_Window_SetSizerAndFit(wxd_Window_t* window, wxd_Sizer_t* s
     }
 }
 
+// Implementation for wxd_Window_GetSizer
+WXD_EXPORTED wxd_Sizer_t* wxd_Window_GetSizer(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxSizer* wx_sizer = wx_window->GetSizer();
+        return reinterpret_cast<wxd_Sizer_t*>(wx_sizer);
+    }
+    return nullptr;
+}
+
 // Implementation for wxd_Window_GetId
 WXD_EXPORTED int wxd_Window_GetId(wxd_Window_t* window) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);

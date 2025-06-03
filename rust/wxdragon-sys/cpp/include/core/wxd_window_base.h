@@ -6,6 +6,7 @@
 // --- Common Window Functions ---
 WXD_EXPORTED void wxd_Window_SetSizer(wxd_Window_t* window, wxd_Sizer_t* sizer, bool deleteOldSizer);
 WXD_EXPORTED void wxd_Window_SetSizerAndFit(wxd_Window_t* window, wxd_Sizer_t* sizer, bool deleteOldSizer);
+WXD_EXPORTED wxd_Sizer_t* wxd_Window_GetSizer(wxd_Window_t* window);
 WXD_EXPORTED int wxd_Window_GetId(wxd_Window_t* window);
 WXD_EXPORTED void wxd_Window_Fit(wxd_Window_t* window);
 WXD_EXPORTED void wxd_Window_Layout(wxd_Window_t* window);

@@ -315,6 +315,26 @@ pub trait WxWidget {
         Some(unsafe { crate::font::Font::from_ptr(font_ptr, true) })
     }
 
+    /// Gets the sizer currently assigned to this widget.
+    ///
+    /// Returns `Some(Sizer)` if a sizer is assigned, or `None` if no sizer is set or the widget handle is invalid.
+    /// The returned sizer is a wrapper around the existing sizer - no ownership is transferred.
+    fn get_sizer(&self) -> Option<crate::sizers::Sizer> {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return None;
+        }
+
+        let sizer_ptr = unsafe { ffi::wxd_Window_GetSizer(handle) };
+        if sizer_ptr.is_null() {
+            return None;
+        }
+
+        // Create a Sizer wrapper around the existing sizer pointer
+        // Note: This does not take ownership - the sizer is still owned by the window
+        unsafe { crate::sizers::Sizer::from_ptr(sizer_ptr) }
+    }
+
     /// Enables or disables the widget.
     ///
     /// A disabled widget does not receive user input and is usually visually distinct.
