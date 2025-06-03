@@ -1,18 +1,32 @@
-# wxDragon - A Rust Wrapper for wxWidgets
+# wxDragon - Cross-Platform Native GUI for Rust
 
-This project creates a manually crafted C wrapper around the wxWidgets C++ GUI library. The primary goal is to expose a stable C API that can be consumed by `bindgen` to generate unsafe Rust bindings (`-sys` crate), which are then used to build safe, idiomatic Rust wrappers.
+**wxDragon** brings the power of wxWidgets to Rust, enabling you to build beautiful, native desktop applications that run seamlessly across Windows, macOS, and Linux. With wxDragon, your applications will look and feel native on every platform while maintaining a single Rust codebase.
 
-## Screenshot
+## Why Choose wxDragon?
+
+🎯 **Native Look & Feel** - Your apps integrate perfectly with each operating system's design language  
+🚀 **Single Codebase** - Write once, run everywhere with true cross-platform compatibility  
+🛡️ **Memory Safe** - All the safety guarantees of Rust with the mature wxWidgets foundation  
+⚡ **High Performance** - Direct access to native GUI components with minimal overhead  
+🎨 **Rich Widget Set** - Comprehensive collection of native controls and layouts  
+🔧 **Two Development Styles** - Choose between programmatic creation or visual XRC design
+
+## Screenshots
 
 ![Screenshot](https://raw.githubusercontent.com/AllenDang/wxDragon/refs/heads/main/asset/screenshot.png)
 
 ![CustomWidgets](https://raw.githubusercontent.com/AllenDang/wxDragon/refs/heads/main/asset/custom_widget.gif)
 
-## Usage
+## Quick Start
 
-### Programmatic Widget Creation
+Add wxDragon to your `Cargo.toml`:
 
-Add _wxdragon_ to your Cargo.toml.
+```toml
+[dependencies]
+wxdragon = "*"
+```
+
+### Simple Example
 
 ```rust
 use wxdragon::prelude::*;
@@ -28,7 +42,7 @@ fn main() {
 
         let button = Button::builder(&frame).with_label("Click me").build();
 
-        button.on_click( |_| {
+        button.on_click(|_| {
             println!("Button clicked");
         });
 
@@ -40,20 +54,17 @@ fn main() {
         );
 
         frame.set_sizer(sizer, true);
-
         frame.show(true);
         frame.centre();
     });
 }
 ```
 
-### XRC-Based UI Development
+## Visual UI Design with XRC
 
-wxDragon also supports XRC (XML Resource) files for declarative UI development with compile-time type safety.
+For complex interfaces, wxDragon supports XRC (XML Resource) files with compile-time type safety. Design your UI visually with tools like [wxFormBuilder](https://github.com/wxFormBuilder/wxFormBuilder), then load it seamlessly into Rust.
 
-You could use [wxFormBuilder](https://github.com/wxFormBuilder/wxFormBuilder) as UI designer to generate XRC.
-
-**1. Define your UI in XRC format (`ui/main.xrc`):**
+**1. Design your UI (`ui/main.xrc`):**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -80,24 +91,23 @@ You could use [wxFormBuilder](https://github.com/wxFormBuilder/wxFormBuilder) as
 </resource>
 ```
 
-**2. Use the `include_xrc!` macro to generate a typed UI struct:**
+**2. Use the `include_xrc!` macro for type-safe UI:**
 
 ```rust
 use wxdragon::prelude::*;
 
-// Generate MyUI struct with typed fields for all named widgets
+// Generate typed UI struct from XRC file
 wxdragon::include_xrc!("ui/main.xrc", MyUI);
 
 fn main() {
     wxdragon::main(|_| {
-        // Create UI instance - automatically loads XRC and finds all widgets
         let ui = MyUI::new(None);
 
         // Access widgets with full type safety
         let button = &ui.hello_button;      // Button
         let input = &ui.input_field;        // TextCtrl
         let label = &ui.status_label;       // StaticText
-        let frame = &ui.main_frame;         // Frame (root object)
+        let frame = &ui.main_frame;         // Frame
 
         // Bind events with closures
         let label_clone = label.clone();
@@ -105,299 +115,119 @@ fn main() {
         button.on_click(move |_| {
             let text = input_clone.get_value();
             label_clone.set_label(&format!("You entered: {}", text));
-            println!("Button clicked! Input: {}", text);
         });
 
-        // Show the window
         frame.show(true);
         frame.centre();
     });
 }
 ```
 
-**Key benefits of the XRC approach:**
+**Benefits of XRC approach:**
+- **Visual Design** - Use GUI designers for rapid prototyping
+- **Type Safety** - Compile-time checking of widget names and types
+- **Clean Separation** - UI layout separate from application logic
+- **Professional Workflows** - Integrate with existing design tools
 
-- **Declarative UI**: Define layouts in XML, separate from logic
-- **Compile-time safety**: Auto-generated structs with typed widget fields
-- **No verbose syntax**: Just `MyUI::new()` instead of `MyUI::new::<Frame>()`
-- **Designer support**: XRC files can be created with visual designers
-- **Automatic widget discovery**: Macro finds all named widgets and generates appropriate Rust types
+## Platform Support
 
-## Supported Platforms
+| Platform | Status | Notes |
+|----------|--------|-------|
+| **Windows** | ✅ Full Support | Native Win32 controls |
+| **macOS** | ✅ Full Support | Native Cocoa integration |
+| **Linux** | ✅ Full Support | GTK+ backend |
 
-| Platform | Support                                       |
-| -------- | --------------------------------------------- |
-| macOS    | Static Build + Cross build to Windows via gnu |
-| Windows  | Yes                                           |
-| Linux    | Yes                                           |
+Cross-compilation is supported, including building Windows executables from macOS.
 
-## Approach
+## Installation & Setup
 
-1.  **C API:** Define a C API (`rust/wxdragon-sys/cpp/include/wxdragon.h`) using opaque pointers for wxWidgets objects and C functions to interact with them. Uses stable C types for flags/constants and `const char*` for strings.
-2.  **C++ Implementation:** Implement the C API functions (`rust/wxdragon-sys/cpp/src/*.cpp`), translating C calls into wxWidgets C++ calls. Manages wxWidgets object creation (`new`) and destruction (`Destroy()`).
-3.  **Event Handling:** Implement a robust event handling system using wxWidgets' native mechanism:
-    - **C++ Side:** Uses `wxEvtHandler::Bind` with a C++ functor (`CxxClosureVoid`) that wraps the Rust trampoline function pointer and the Rust closure data pointer. The lifetime of this functor (and thus the Rust closure `Box`) is managed by wxWidgets.
-    - **C API:** Exposes `wxd_EvtHandler_Bind`, which takes a stable C enum value (`WXDEventTypeCEnum`) representing the event type, a C function pointer (to the Rust trampoline), and a `void*` (the Rust closure box pointer). The C++ implementation maps the stable C enum back to the appropriate `wxEVT_XXX` constant for the call to `Bind`.
-    - **Rust Side:** Provides a `WxEvtHandler` trait with a safe `bind` method. Uses a type-safe `EventType` enum wrapping the stable `WXDEventTypeCEnum` from the FFI layer. Closures (`FnMut(Event) + 'static`) are used for callbacks. The `Drop` implementation in the C++ functor calls a Rust function (`drop_rust_closure_box`) to correctly free the closure `Box` when the binding is destroyed.
-4.  **Build:** Use CMake to build the C wrapper library (invoked via `wxdragon-sys/build.rs` from `rust/wxdragon-sys/cpp/CMakeLists.txt`). wxWidgets source is downloaded and built automatically as part of this process.
-5.  **Rust Bindings:** Use `bindgen` on the C header (`rust/wxdragon-sys/cpp/include/wxdragon.h`) to generate a `wxdragon-sys` crate.
-6.  **Safe Rust Wrapper:** Develop a `wxdragon` Rust crate providing safe abstractions over the `wxdragon-sys` crate.
-7.  **Incremental:** Started with core widgets (`wxApp`, `wxFrame`) and expand coverage gradually.
-8.  **Constant Handling:**
-    - **Event Types:** Event types (`wxEVT_*`) are handled via a manually defined stable C enum (`WXDEventTypeCEnum` in `rust/wxdragon-sys/cpp/include/wxdragon.h`) and a corresponding Rust enum (`EventType` in `rust/wxdragon/src/event.rs`). This ensures stability across wxWidgets versions and platforms for event type identifiers.
-    - **Other Constants (Styles, IDs, Flags):** For other constants like style flags, standard IDs, etc., wxDragon now uses **pre-generated Rust files**. These files (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`, `wx_osx_constants.rs`) are located in `rust/wxdragon-sys/src/generated_constants/` and are checked into the repository. The `const_extractor` tool (in `tools/const_extractor/`) is used by maintainers to generate these files for each major platform/wxWidgets port. During a user's build (`cargo build`), the `wxdragon-sys/build.rs` script detects the target OS and copies the appropriate pre-generated file to `$OUT_DIR/wx_other_constants.rs`. This approach enhances cross-compilation capabilities and simplifies the build process for users by removing the need to run `const_extractor` at build time.
+### Prerequisites
 
-## Project Structure
+**All Platforms:**
+- Rust (latest stable)
+- CMake
+- C++ compiler
 
-```
-wxdragon/
-├── rust/
-│   ├── wxdragon-sys/    # Raw FFI bindings, C++ source, and build script
-│   │   ├── cpp/             # C++ wrapper source, headers, and CMake file
-│   │   │   ├── include/     # Public C header (wxdragon.h)
-│   │   │   ├── src/         # C++ wrapper implementation
-│   │   │   ├── tools/       # Helper tools (e.g., const_extractor for maintainers)
-│   │   │   │   └── const_extractor/
-│   │   │   └── CMakeLists.txt # CMake for libwxdragon & wxWidgets
-│   │   ├── src/
-│   │   │   ├── lib.rs
-│   │   │   └── generated_constants/ # Pre-generated OS-specific constants
-│   │   ├── build.rs         # Rust build script
-│   │   └── Cargo.toml
-│   ├── wxdragon/        # Safe Rust wrapper
-│   │   ├── src/
-│   │   └── Cargo.toml
-│   └── Cargo.toml         # Workspace Cargo.toml (might be at root)
-├── examples/
-│   └── rust/
-│       └── gallery/
-├── Cargo.toml           # Top-level Workspace Cargo.toml (if not in rust/)
-└── README.md            # This file
+**Linux Additional Requirements:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install libclang-dev pkg-config libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev
+
+# Fedora/RHEL
+sudo dnf install clang-devel pkg-config gtk3-devel libpng-devel libjpeg-devel mesa-libGL-devel mesa-libGLU-devel libxkbcommon-devel expat-devel libtiff-devel
 ```
 
-_(Note: The `const_extractor` path and the exact location of the workspace `Cargo.toml` in the diagram might need slight adjustment based on your final layout.)_
+**Windows Additional Requirements:**
+- Visual Studio Build Tools or Visual Studio with C++ support
+- Windows SDK
+- Ninja build system: `winget install --id=Ninja-build.Ninja -e`
 
-## Build Instructions
+### Building Your Project
 
-1.  Install a C++ compiler suitable for your platform (CMake is used by the build script but doesn't need separate installation if you have `cmake` in your PATH or use the `cmake` crate feature that bundles it).
-2.  **wxWidgets is downloaded and built automatically as part of the project.**
-3.  Navigate to the root of the repository (or the directory containing the main workspace `Cargo.toml`).
-4.  Run `cargo build` or `cargo run -p gallery`.
-    - The `wxdragon-sys` build script (`build.rs`) will automatically:
-      - Download the wxWidgets source tarball (version 3.2.8 currently) if not already present.
-      - Extract wxWidgets.
-      - Invoke CMake to configure and build:
-        - The wxWidgets static libraries.
-        - The C++ wrapper static library (`libwxdragon.a`).
-      - Copy the appropriate pre-generated platform-specific constants file (e.g., `wx_msw_constants.rs`) from `rust/wxdragon-sys/src/generated_constants/` to `$OUT_DIR/wx_other_constants.rs`.
-      - Generate Rust FFI bindings (`bindings.rs`) using `bindgen` against `rust/wxdragon-sys/cpp/include/wxdragon.h` and the built wxWidgets headers.
-      - Configure Cargo to link `libwxdragon.a` and the necessary wxWidgets libraries.
+```bash
+# Clone and build
+cargo new my-gui-app
+cd my-gui-app
 
-    #### MacOS
-      Apart from the necessary build tools (CMake, Rust and the C++ compiler), the build requires no additional dependencies. wxDragon uses a hardcoded set of linker flags and bindgen include paths derived from `wx-config` for stability.
-    
-    #### Linux
-      wxDragon requires gtk+-3.0 which the build script finds via pkg-config. It also requires libclang to generate the bindings. This requires the user to install the development packages necessary to build wxWidgets. Which for debian-based distros:
-      ```bash
-      sudo apt-get install libclang-dev pkg-config libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev
-      ```
-    
-    #### Windows
-    ##### GNU
-      If you're targeting the gnu toolchain, you will still need to install libclang which can be done using `pacman -S $MINGW_PACKAGE_PREFIX-clang`. This is necessary for generating the rust-bindgen bindings.
-    
-    ##### MSVC
-      An additional build tool is required: Ninja!
-      This can be installed using winget (or any of the current windows package managers):
-      ```
-      winget install --id=Ninja-build.Ninja  -e
-      ```
-      libclang is also needed to generate the rust-bindgen bindings. This can be installed as instructed in the [rust-bindgen documentation](https://rust-lang.github.io/rust-bindgen/requirements.html), LLVM and libclang can also be installed through the Visual Studio Installer.
-      Also verify that you have a windows sdk installed through your Visual Studio Installer. 
+# Add wxdragon to Cargo.toml
+cargo add wxdragon
 
-## Cross-Compilation (macOS to Windows)
+# Build (wxWidgets will be downloaded and built automatically)
+cargo build
 
-To build the project on macOS targeting Windows (specifically `x86_64-pc-windows-gnu`):
+# Run
+cargo run
+```
 
-1.  **Install Dependencies via Homebrew:**
+wxDragon automatically downloads and builds wxWidgets during the first compilation. No manual wxWidgets installation required!
 
-    ```bash
-    brew install mingw-w64
-    ```
+### Cross-Compilation (macOS → Windows)
 
-    This installs the MinGW-w64 toolchain, including the necessary C/C++ cross-compilers (e.g., `x86_64-w64-mingw32-gcc`, `x86_64-w64-mingw32-g++`) and linker.
+```bash
+# Install MinGW-w64 toolchain
+brew install mingw-w64
 
-2.  **Add Rust Target:**
+# Add Windows target
+rustup target add x86_64-pc-windows-gnu
 
-    ```bash
-    rustup target add x86_64-pc-windows-gnu
-    ```
+# Build for Windows
+cargo build --target=x86_64-pc-windows-gnu --release
+```
 
-    This downloads the Rust standard library pre-compiled for the target.
+## Rich Widget Ecosystem
 
-3.  **Build:**
-    ```bash
-    cargo build --target=x86_64-pc-windows-gnu
-    ```
-    Or for a release build:
-    ```bash
-    cargo build --target=x86_64-pc-windows-gnu --release
-    ```
-    The `wxdragon-sys/build.rs` script contains specific logic to detect this target, configure CMake appropriately, and set the correct linker flags (including static linking for `libstdc++` and `libgcc`) to produce a standalone `.exe` file.
+wxDragon provides comprehensive widget support including:
 
-## Current Status (Reflecting Recent Build System Changes)
+- **Basic Controls** - Buttons, text fields, checkboxes, sliders, progress bars
+- **Advanced Input** - Date pickers, color pickers, rich text editors, search controls
+- **Data Display** - Lists, trees, tables, data views with sorting and filtering
+- **Layout Management** - Flexible sizers, notebooks, splitters, scrollable containers
+- **Menus & Toolbars** - Full menu system with accelerators and toolbar support
+- **Dialogs** - File choosers, message boxes, custom dialogs
+- **Media & Graphics** - Image display, animations, media playback, drawing contexts
 
-- Basic project structure set up with CMake and Cargo workspace.
-- Core C wrapper implementation for various widgets is ongoing.
-- **Build System:**
-  - [x] wxWidgets source (currently 3.2.8) is automatically **downloaded, extracted, configured, and built statically** by `wxdragon-sys/build.rs` using the `cmake` crate.
-  - [x] C++ wrapper library (`libwxdragon.a`) built by CMake invoked from `build.rs` (using `rust/wxdragon-sys/cpp/CMakeLists.txt`).
-  - [x] **Hybrid Constant Handling:**
-    - Event Types: Stable C enum (`WXDEventTypeCEnum`) and Rust enum (`EventType`).
-    - Other Constants: Pre-generated platform-specific Rust files (e.g., `wx_msw_constants.rs`, `wx_gtk_constants.rs`) located in `rust/wxdragon-sys/src/generated_constants/`, copied to `$OUT_DIR/wx_other_constants.rs` by `build.rs`.
-  - [x] `build.rs` supports incremental C++ builds.
-  - [x] **macOS Build:** Uses hardcoded linker and bindgen flags for stability.
-  - [x] **Linux Build:** Uses gtk+-3.0 which it finds via pkg-config. This requires additional installs of development packages and pkg-config on the system. Check the `Build Instructions` section.
-  - [x] **Windows Build:** Uses the current msw win32 backend. CMake currently builds wxWidgets for Release.
-- **`wxdragon-sys` Rust crate:**
-  - [x] `bindgen` generates raw FFI bindings from `rust/wxdragon-sys/cpp/include/wxdragon.h`.
-  - [x] `build.rs` correctly invokes CMake, downloads wxWidgets, copies pre-generated constants, and links libraries using a manual configuration for macOS.
-- **`wxdragon` Safe Rust Wrapper:**
-  - [x] Safe wrappers for core widgets, sizers, and menu components implemented with builder pattern.
-  - [x] **Stable Event Handling:**
-    - `WxEvtHandler` trait provides generic `bind(EventType, FnMut(Event))` using the stable `EventType` enum.
-    - Relies on C++ `wxEvtHandler::Bind` with functor for lifetime management.
-  - [x] Safe application entry point (`wxdragon::main`).
-  - [x] Basic lifetime management (`Drop`, `preserve()`).
-  - [x] Basic layout management (`set_sizer`, `set_sizer_and_fit`).
-  - [x] Gallery Rust example (`gallery`) demonstrates core features and event handling.
+## Examples
 
-## TODO List - Implementation Tasks
+Explore the `examples/` directory for comprehensive demonstrations:
 
-- **Core:**
-  - [x] `wxApp`
-  - [x] `wxFrame`
-- **Widgets/Controls:**
-  - **Basic:**
-    - [x] `wxButton`
-    - [x] `wxStaticText`
-    - [x] `wxTextCtrl`
-    - [x] `wxCheckBox`
-    - [x] `wxRadioButton`
-    - [x] `wxToggleButton`
-    - [x] `wxGauge`
-    - [x] `wxSlider`
-    - [x] `wxSpinCtrl`
-    - [x] `wxSpinButton`
-    - [x] `wxDatePickerCtrl`
-    - [x] `wxBitmapButton`
-    - [x] `wxRadioBox`
-    - [x] `wxScrollBar`
-    - [x] `wxSpinCtrlDouble`
-    - [x] `wxStaticBitmap`
-    - [x] `wxStaticLine`
-    - [x] `wxSearchCtrl`
-    - [x] `wxStyledTextCtrl`
-    - [ ] `wxRichTextCtrl`
-    - [x] `wxHyperlinkCtrl`
-    - [x] `wxActivityIndicator`
-    - [x] `wxAnimationCtrl`
-    - [x] `wxCommandLinkButton`
-  - **Choices/Lists:**
-    - [x] `wxChoice`
-    - [x] `wxComboBox`
-    - [x] `wxListBox`
-    - [x] `wxCheckListBox`
-    - [x] `wxTreeCtrl`
-    - [x] `wxListCtrl`
-    - [x] `wxBitmapComboBox`
-    - [ ] `wxComboCtrl`
-    - [x] `wxDataViewCtrl`
-    - [x] `wxDataViewListCtrl`
-    - [x] `wxDataViewTreeCtrl`
-    - [x] `wxEditableListBox`
-    - [x] `wxFileCtrl`
-    - [ ] `wxGenericDirCtrl`
-    - [ ] `wxHtmlListBox`
-    - [ ] `wxOwnerDrawnComboBox`
-    - [ ] `wxPropertyGrid`
-    - [ ] `wxPropertyGridManager`
-    - [x] `wxRearrangeCtrl`
-    - [ ] `wxSimpleHtmlListBox`
-    - [ ] `wxTreeListCtrl`
-  - **Picker Controls:**
-    - [x] `wxColourPickerCtrl`
-    - [x] `wxDatePickerCtrl`
-    - [x] `wxFilePickerCtrl`
-    - [x] `wxDirPickerCtrl`
-    - [x] `wxFontPickerCtrl`
-    - [x] `wxTimePicker`
-  - **Containers:**
-    - [x] `wxPanel`
-    - [x] `wxScrolledWindow`
-    - [x] `wxSplitterWindow`
-    - [x] `wxNotebook` (Tabs)
-    - [x] `wxStaticBox`
-    - [x] `wxAuiMDIChildFrame`
-    - [x] `wxAuiMDIParentFrame`
-    - [x] `wxAuiMDIClientWindow`
-    - [x] `wxAuiNotebook`
-    - [x] `wxAuiToolBar`
-    - [ ] `wxBannerWindow`
-    - [ ] `wxChoicebook`
-    - [ ] `wxCollapsiblePane`
-    - [ ] `wxListbook`
-    - [ ] `wxSimplebook`
-    - [x] `wxTreebook`
-  - **Other:**
-    - [x] `wxArtProvider` (_Basic support for `GetBitmap`_)
-    - [x] `wxCalendarCtrl`
-    - [ ] `wxGLCanvas`
-    - [ ] `wxHtmlWindow`
-    - [x] `wxMediaCtrl`
-    - [x] `wxNotificationMessage`
-    - [ ] `wxRichToolTip`
-    - [ ] `wxSplashScreen`
-    - [x] `wxStatusBar`
-    - [ ] `wxTaskBarIcon`
-    - [x] `wxTimer`
-    - [ ] `wxWebView`
-    - [ ] `wxWizard`
-- **Sizers:**
-  - [x] `wxBoxSizer`
-  - [x] Expand `BoxSizer` methods (`AddSizer`, `AddSpacer`, `AddStretchSpacer`)
-  - [x] `wxGridSizer`
-  - [x] `wxFlexGridSizer`
-  - [x] `wxStaticBoxSizer`
-- **Menus & Toolbars:**
-  - [x] `wxMenuBar`
-  - [x] `wxMenu`
-  - [x] `wxMenuItem`
-  - [x] `wxToolBar` (_Use `Frame::create_tool_bar` and call `realize()` after adding tools_)
-- **Dialogs:**
-  - [x] `wxDialog` (base class)
-  - [x] `wxMessageDialog`
-  - [x] `wxFileDialog`
-  - [x] `wxDirDialog`
-  - [x] `wxColourDialog`
-  - [x] `wxFontDialog`
-  - [x] `wxTextEntryDialog`
-  - [x] `wxProgressDialog`
-  - [x] `wxSingleChoiceDialog`
-  - [x] `wxMultiChoiceDialog`
-  - [ ] `wxSplashScreen` (_Moved here, also related to Other_)
-  - [ ] `wxWizard` (_Moved here, also related to Other_)
-- **Event Handling Expansion:**
-  - [x] Add specific event data access (e.g., `event.get_string()`, `event.get_position()`, `event.get_checked()`, `event.get_key_code()`).
-- **XRC Support:**
-  - [x] Implement C++ bindings for `wxXmlResource` in `wxdragon-sys`.
-  - [x] Create safe Rust wrappers for `wxXmlResource` in `wxdragon`.
-  - [x] Develop `include_xrc!("file.xrc", UStructName)` procedural macro to generate Rust UI structs from XRC files.
-    - [x] Compile-time XRC parsing.
-    - [x] Mapping XRC widget classes to `wxDragon` types.
-    - [x] Generation of struct with typed fields for named XRC widgets.
-    - [x] Automatic loading of XRC and widget retrieval in the generated struct's constructor.
-- **Documentation:**
-  - [ ] Improve C API docs (doxygen?).
-  - [ ] Rust API docs (rustdoc).
+- **Simple** - Basic window and controls
+- **Gallery** - Showcase of all available widgets
+- **Custom Widgets** - Creating your own controls
+- **Media Player** - Audio/video playback application
+- **Data Views** - Complex data display and editing
+
+```bash
+# Run the gallery to see all widgets in action
+cargo run -p gallery
+```
+
+## Getting Help
+
+- **Documentation** - [API Documentation](https://docs.rs/wxdragon)
+- **Examples** - Browse the `examples/` directory
+- **Issues** - [GitHub Issues](https://github.com/AllenDang/wxDragon/issues)
+
+## License
+
+wxDragon is dual-licensed under Apache 2.0 and MIT licenses, giving you flexibility in how you use it in your projects.
 
