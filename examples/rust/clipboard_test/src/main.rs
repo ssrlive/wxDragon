@@ -180,7 +180,7 @@ fn main() {
         });
 
         // Copy file to clipboard
-        let clipboard_file = clipboard.clone();
+        let clipboard_file = clipboard;
         copy_file_button.on_click(move |_| {
             // Create a file data object and add a file
             let mut file_data = FileDataObject::new();
@@ -209,7 +209,7 @@ fn main() {
         });
 
         // Paste files from clipboard
-        let clipboard_paste = clipboard.clone();
+        let clipboard_paste = clipboard;
         let file_text_ctrl_paste = file_text_ctrl.clone();
         paste_file_button.on_click(move |_| {
             if let Some(_locker) = clipboard_paste.locker() {

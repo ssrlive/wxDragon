@@ -129,10 +129,11 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     for y in 0..BMP_HEIGHT {
         for x in 0..BMP_WIDTH {
             let idx = ((y * BMP_WIDTH + x) * 4) as usize;
-            if x < 2 || x >= BMP_WIDTH - 2 || y < 2 || y >= BMP_HEIGHT - 2 {
+            if !(2..BMP_WIDTH - 2).contains(&x) || !(2..BMP_HEIGHT - 2).contains(&y) {
+                // Set border pixels to transparent
                 bmp_data[idx + 3] = 0;
             } else {
-                bmp_data[idx + 0] = 255;
+                bmp_data[idx] = 255;
                 bmp_data[idx + 3] = 255;
             }
         }
@@ -201,7 +202,7 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
     let today = DateTime::now();
     calendar_ctrl.set_date(&today);
 
-    let initial_calendar_date = calendar_ctrl.get_date().unwrap_or_else(|| DateTime::now());
+    let initial_calendar_date = calendar_ctrl.get_date().unwrap_or_else(DateTime::now);
     let calendar_status_label = StaticText::builder(&basic_panel)
         .with_label(&format!(
             "{:04}-{:02}-{:02}",

@@ -7,7 +7,7 @@ pub struct AuiTabControls {
 }
 
 impl AuiTabControls {
-    pub fn bind_events(&self) -> () {
+    pub fn bind_events(&self) {
         // Use a simple approach for the demo that doesn't try to access self inside the closure
         let toolbar_ref = self.toolbar.clone();
 

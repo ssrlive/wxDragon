@@ -496,7 +496,7 @@ impl DialogTabControls {
                     "Rust files (*.rs)|*.rs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
                 )
                 .build();
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 let path_option = dialog.get_path();
                 let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
                 status_label_clone_open.set_label(&format!("Opened: {}", path_str));
@@ -517,7 +517,7 @@ impl DialogTabControls {
                 .with_default_file("my_document.txt")
                 .with_wildcard("Text files (*.txt)|*.txt|All files (*.*)|*.*")
                 .build();
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 let path_option = dialog.get_path();
                 let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
                 status_label_clone_save.set_label(&format!("Saved to: {}", path_str));
@@ -539,7 +539,7 @@ impl DialogTabControls {
             )
             .with_default_value("wxDragon User")
             .build();
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(text) = dialog.get_value() {
                     status_label_clone_text.set_label(&format!("Entered: {}", text));
                     println!("Text Entry Dialog: Entered text: {}", text);
@@ -568,7 +568,7 @@ impl DialogTabControls {
                     | TextEntryDialogStyle::Cancel,
             )
             .build();
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(text) = dialog.get_value() {
                     status_label_clone_pass
                         .set_label(&format!("Password entered (length: {})", text.len()));
@@ -595,7 +595,7 @@ impl DialogTabControls {
                 .with_title("Select a Colour")
                 .with_initial_colour(colours::BLUE)
                 .build();
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(colour) = dialog.get_colour() {
                     status_label_clone_colour.set_label(&format!("Chosen: {:?}", colour));
                     colour_sample_panel_clone.set_background_color(colour);
@@ -613,7 +613,7 @@ impl DialogTabControls {
         let font_sample_text_clone = self.font_sample_text.clone();
         self.font_button.on_click(move |_event| {
             let font_dialog = FontDialog::builder(&frame_clone_font).build();
-            if font_dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if font_dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(font) = font_dialog.get_font() {
                     // Create a copy of the font before setting it on the text control
                     let font_copy = font.to_owned();
@@ -743,7 +743,7 @@ impl DialogTabControls {
             )
             .build();
 
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(selection) = dialog.get_string_selection() {
                     status_label_clone_choice.set_label(&format!("Choice: {}", selection));
                     println!("SingleChoiceDialog: Selected '{}'", selection);
@@ -780,7 +780,7 @@ impl DialogTabControls {
             // Set some initial selections if desired
             dialog.set_selections(&[0, 2]); // Select Red and Blue initially
 
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 let selections = dialog.get_selections();
                 let string_selections = dialog.get_string_selections();
 
@@ -812,7 +812,7 @@ impl DialogTabControls {
                 .with_style(DirDialogStyle::Default as i64 | DirDialogStyle::MustExist as i64)
                 .build();
 
-            if dialog.show_modal() == wxdragon::id::ID_OK as i32 {
+            if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(path) = dialog.get_path() {
                     println!("Directory: {}", path);
                 } else {

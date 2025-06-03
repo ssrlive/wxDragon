@@ -62,58 +62,49 @@ fn main() {
         // Add window events using the WindowEvents trait
         let status_clone = event_status.clone();
         button.on_mouse_left_down(move |mouse_event| {
-            match mouse_event {
-                WindowEventData::MouseButton(ref mouse_data) => {
-                    if let Some(pos) = mouse_data.get_position() {
-                        status_clone.set_label(&format!(
-                            "Event Status: Left mouse down at ({}, {})",
-                            pos.x, pos.y
-                        ));
-                        println!("Left mouse down on button at ({}, {})", pos.x, pos.y);
-                    }
-
-                    // Skip this event to allow button click processing
-                    mouse_event.skip(true);
+            if let WindowEventData::MouseButton(ref mouse_data) = mouse_event {
+                if let Some(pos) = mouse_data.get_position() {
+                    status_clone.set_label(&format!(
+                        "Event Status: Left mouse down at ({}, {})",
+                        pos.x, pos.y
+                    ));
+                    println!("Left mouse down on button at ({}, {})", pos.x, pos.y);
                 }
-                _ => {} // Shouldn't happen but handle to be safe
+
+                // Skip this event to allow button click processing
+                mouse_event.skip(true);
             }
         });
 
         let status_clone = event_status.clone();
         button.on_mouse_right_down(move |mouse_event| {
-            match mouse_event {
-                WindowEventData::MouseButton(ref mouse_data) => {
-                    if let Some(pos) = mouse_data.get_position() {
-                        status_clone.set_label(&format!(
-                            "Event Status: Right mouse down at ({}, {})",
-                            pos.x, pos.y
-                        ));
-                        println!("Right mouse down on button at ({}, {})", pos.x, pos.y);
-                    }
-
-                    // Skip this event to allow other handlers to process it
-                    mouse_event.skip(true);
+            if let WindowEventData::MouseButton(ref mouse_data) = mouse_event {
+                if let Some(pos) = mouse_data.get_position() {
+                    status_clone.set_label(&format!(
+                        "Event Status: Right mouse down at ({}, {})",
+                        pos.x, pos.y
+                    ));
+                    println!("Right mouse down on button at ({}, {})", pos.x, pos.y);
                 }
-                _ => {} // Shouldn't happen but handle to be safe
+
+                // Skip this event to allow other handlers to process it
+                mouse_event.skip(true);
             }
         });
 
         let status_clone = event_status.clone();
         toggle_button.on_mouse_motion(move |motion_event| {
-            match motion_event {
-                WindowEventData::MouseMotion(ref motion_data) => {
-                    if let Some(pos) = motion_data.get_position() {
-                        status_clone.set_label(&format!(
-                            "Event Status: Mouse motion at ({}, {})",
-                            pos.x, pos.y
-                        ));
-                        println!("Mouse motion at ({}, {})", pos.x, pos.y);
-                    }
-
-                    // Skip this event to allow other handlers to process it
-                    motion_event.skip(true);
+            if let WindowEventData::MouseMotion(ref motion_data) = motion_event {
+                if let Some(pos) = motion_data.get_position() {
+                    status_clone.set_label(&format!(
+                        "Event Status: Mouse motion at ({}, {})",
+                        pos.x, pos.y
+                    ));
+                    println!("Mouse motion at ({}, {})", pos.x, pos.y);
                 }
-                _ => {} // Shouldn't happen but handle to be safe
+
+                // Skip this event to allow other handlers to process it
+                motion_event.skip(true);
             }
         });
 

@@ -141,19 +141,16 @@ async fn main() {
         frame.on_idle(move |event_data| {
             let has_more_messages = message_handler.process_messages();
             
-            match event_data {
-                WindowEventData::Idle(event) => {
-                    // Only request more idle events if we have messages to process
-                    // This reduces CPU usage when there's no async work to do
-                    if has_more_messages {
-                        println!("Requesting more idle events (has messages)");
-                        event.request_more(true);
-                    } else {
-                        // No more messages, stop requesting idle events to save CPU
-                        event.request_more(false);
-                    }
+            if let WindowEventData::Idle(event) = event_data {
+                // Only request more idle events if we have messages to process
+                // This reduces CPU usage when there's no async work to do
+                if has_more_messages {
+                    println!("Requesting more idle events (has messages)");
+                    event.request_more(true);
+                } else {
+                    // No more messages, stop requesting idle events to save CPU
+                    event.request_more(false);
                 }
-                _ => {}
             }
         });
 

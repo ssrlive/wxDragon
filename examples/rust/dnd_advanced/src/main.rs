@@ -3,7 +3,7 @@ use wxdragon::prelude::*;
 struct DropTargetPanel;
 
 impl DropTargetPanel {
-    fn new(parent: &Frame) {
+    fn setup(parent: &Frame) {
         let panel = Panel::builder(parent)
             .with_size(Size::new(500, 400))
             .build();
@@ -238,7 +238,7 @@ fn main() {
 
         // Create our panel and store it in the static variable
         // to keep it alive until the application exits
-        DropTargetPanel::new(&frame);
+        DropTargetPanel::setup(&frame);
 
         // Show the frame
         frame.show(true);

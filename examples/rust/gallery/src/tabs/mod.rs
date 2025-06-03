@@ -1,6 +1,6 @@
 /// This module contains the different tabs of the wxDragon demo application.
 /// Each tab demonstrates a different set of widgets and functionality.
-
+///
 /// Basic tab demonstrates fundamental widgets like buttons, text controls, checkboxes, etc.
 pub mod basic_tab;
 
