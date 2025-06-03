@@ -1,10 +1,11 @@
 #ifndef WXD_BUTTON_H
 #define WXD_BUTTON_H
 
+#include <stdint.h>
 #include "../wxd_types.h"
 
 // Enum for bitmap position on a button
-typedef enum {
+typedef enum : int32_t {
     WXD_BUTTON_BITMAP_LEFT = 0,   // wxLEFT
     WXD_BUTTON_BITMAP_RIGHT = 1,  // wxRIGHT
     WXD_BUTTON_BITMAP_TOP = 2,    // wxTOP

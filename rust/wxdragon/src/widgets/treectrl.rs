@@ -99,7 +99,7 @@ widget_style_enum!(
 // --- TreeItemIcon Enum ---
 /// Specifies which icon of a tree item is being referred to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)] // Matches wxd_TreeItemIconType_t which is an enum, typically int/u32
+#[repr(i32)] // Matches wxd_TreeItemIconType_t which is an enum, typically int/u32
 pub enum TreeItemIcon {
     Normal = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Normal,
     Selected = ffi::wxd_TreeItemIconType_t_WXD_TreeItemIcon_Selected,

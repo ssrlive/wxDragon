@@ -15,7 +15,7 @@ use wxdragon_sys as ffi; // ADDED for enum bitwise operations
 
 /// Enum for specifying bitmap position on a button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)] // Matches wxd_ButtonBitmapPosition_t which is an enum
+#[repr(i32)] // Matches wxd_ButtonBitmapPosition_t which is an enum
 #[derive(Default)]
 pub enum ButtonBitmapPosition {
     #[default]

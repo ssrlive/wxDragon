@@ -1,6 +1,7 @@
 #ifndef WXD_TREECTRL_H
 #define WXD_TREECTRL_H
 
+#include <stdint.h>
 #include "../wxd_types.h"
 
 // --- TreeItemData functions ---
@@ -33,7 +34,7 @@ WXD_EXPORTED size_t wxd_TreeCtrl_GetChildrenCount(wxd_TreeCtrl_t* self, wxd_Tree
 // --- TreeCtrl ImageList and Item Image functions ---
 
 // Enum for specifying which icon to set/get for a tree item
-typedef enum {
+typedef enum : int32_t {
     WXD_TreeItemIcon_Normal = 0,         // wxTreeItemIcon_Normal
     WXD_TreeItemIcon_Selected,       // wxTreeItemIcon_Selected
     WXD_TreeItemIcon_Expanded,       // wxTreeItemIcon_Expanded
