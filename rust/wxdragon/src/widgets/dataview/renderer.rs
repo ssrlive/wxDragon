@@ -757,28 +757,87 @@ extern "C" fn activate_cell_trampoline(
 extern "C" fn create_editor_trampoline(
     user_data: *mut std::ffi::c_void,
     parent: *mut std::ffi::c_void,
-    _label_rect: ffi::wxd_Rect_t,
-    _value: *const ffi::wxd_Variant_t,
+    label_rect: ffi::wxd_Rect_t,
+    value: *const ffi::wxd_Variant_t,
 ) -> *mut std::ffi::c_void {
-    if user_data.is_null() || parent.is_null() {
+    if user_data.is_null() || parent.is_null() || value.is_null() {
         return std::ptr::null_mut();
     }
 
-    // For now, return null - full editor support would require more complex widget management
-    std::ptr::null_mut()
+    let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
+    if let Some(ref callback) = callbacks.create_editor {
+        let rect = crate::geometry::Rect::new(label_rect.x, label_rect.y, label_rect.width, label_rect.height);
+        let variant = unsafe { super::model::from_raw_variant(value) };
+        
+        // Create a wrapper for the parent widget
+        // Note: This is a simplified implementation. In a full implementation,
+        // we would need proper widget type detection and conversion.
+        struct ParentWrapper {
+            ptr: *mut std::ffi::c_void,
+        }
+        
+        impl crate::WxWidget for ParentWrapper {
+            fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+                self.ptr as *mut wxdragon_sys::wxd_Window_t
+            }
+        }
+        
+        let parent_wrapper = ParentWrapper { ptr: parent };
+        
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            callback(&parent_wrapper, rect, &variant)
+        }));
+        
+        match result {
+            Ok(Some(editor)) => editor.handle_ptr() as *mut std::ffi::c_void,
+            _ => std::ptr::null_mut(),
+        }
+    } else {
+        std::ptr::null_mut()
+    }
 }
 
 extern "C" fn get_value_from_editor_trampoline(
     user_data: *mut std::ffi::c_void,
-    _editor: *mut std::ffi::c_void,
+    editor: *mut std::ffi::c_void,
     value: *mut ffi::wxd_Variant_t,
 ) -> bool {
-    if user_data.is_null() || value.is_null() {
+    if user_data.is_null() || editor.is_null() || value.is_null() {
         return false;
     }
 
-    // For now, return false - full editor support would require more implementation
-    false
+    let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
+    if let Some(ref callback) = callbacks.get_value_from_editor {
+        // Create a wrapper for the editor widget
+        struct EditorWrapper {
+            ptr: *mut std::ffi::c_void,
+        }
+        
+        impl crate::WxWidget for EditorWrapper {
+            fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
+                self.ptr as *mut wxdragon_sys::wxd_Window_t
+            }
+        }
+        
+        let editor_wrapper = EditorWrapper { ptr: editor };
+        
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            callback(&editor_wrapper)
+        }));
+        
+        match result {
+            Ok(Some(variant)) => {
+                let raw = super::model::to_raw_variant(&variant);
+                unsafe {
+                    *value = raw;
+                }
+                true
+            }
+            _ => false,
+        }
+    } else {
+        false
+    }
 }
 
 /// Function called by C++ to drop the Rust callback data.
