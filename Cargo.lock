@@ -215,6 +215,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "custom_dataview_renderer"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
 name = "custom_widget"
 version = "0.1.0"
 dependencies = [

@@ -216,6 +216,57 @@ WXD_EXPORTED void wxd_DataViewColumn_SetSortable(wxd_DataViewColumn_t* self, boo
 WXD_EXPORTED bool wxd_DataViewColumn_IsSortable(wxd_DataViewColumn_t* self);
 // TODO: Add other properties like Reorderable, Hidden, Alignment, Width etc. as needed
 
+// Custom Renderer Callbacks
+typedef struct {
+    int width;
+    int height;
+} wxd_Size_t;
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} wxd_Rect_t;
+
+// Custom renderer callback function types
+typedef wxd_Size_t (*wxd_CustomRenderer_GetSizeCallback)(void* user_data);
+typedef bool (*wxd_CustomRenderer_RenderCallback)(void* user_data, wxd_Rect_t cell, void* dc, int state);
+typedef bool (*wxd_CustomRenderer_SetValueCallback)(void* user_data, const wxd_Variant_t* value);
+typedef void (*wxd_CustomRenderer_GetValueCallback)(void* user_data, wxd_Variant_t* value);
+typedef bool (*wxd_CustomRenderer_HasEditorCtrlCallback)(void* user_data);
+typedef void* (*wxd_CustomRenderer_CreateEditorCtrlCallback)(void* user_data, void* parent, wxd_Rect_t label_rect, const wxd_Variant_t* value);
+typedef bool (*wxd_CustomRenderer_GetValueFromEditorCtrlCallback)(void* user_data, void* editor, wxd_Variant_t* value);
+typedef bool (*wxd_CustomRenderer_ActivateCellCallback)(void* user_data, wxd_Rect_t cell, void* model, void* item, unsigned int col, void* mouse_event);
+
+// Custom renderer creation
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCustomRenderer_Create(
+    const char* varianttype,
+    int64_t mode,
+    int64_t align,
+    void* user_data,
+    wxd_CustomRenderer_GetSizeCallback get_size_callback,
+    wxd_CustomRenderer_RenderCallback render_callback,
+    wxd_CustomRenderer_SetValueCallback set_value_callback,
+    wxd_CustomRenderer_GetValueCallback get_value_callback,
+    wxd_CustomRenderer_HasEditorCtrlCallback has_editor_callback,
+    wxd_CustomRenderer_CreateEditorCtrlCallback create_editor_callback,
+    wxd_CustomRenderer_GetValueFromEditorCtrlCallback get_value_from_editor_callback,
+    wxd_CustomRenderer_ActivateCellCallback activate_cell_callback
+);
+
+// Function to release callbacks by renderer ID
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseCallbacksByKey(int32_t renderer_id);
+
+// Function to release all callbacks for a specific dataview ID (deprecated - kept for compatibility)
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseAllCallbacksForDataView(int32_t dataview_id);
+
+// Cleanup function for custom renderer callbacks (legacy)
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseCallbacks(wxd_DataViewRenderer_t* renderer);
+
+// Helper function to free Rust custom renderer callbacks
+WXD_EXPORTED void drop_rust_custom_renderer_callbacks(void* ptr);
+
 #ifdef __cplusplus
 }
 #endif

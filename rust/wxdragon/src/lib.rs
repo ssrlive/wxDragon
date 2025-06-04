@@ -37,3 +37,17 @@ pub use wxdragon_macros::include_xrc;
 
 // Re-export XRC macros (these are macro_rules! macros, not procedural macros)
 // include_xrc_dialog!, include_xrc_panel! are available via #[macro_use]
+
+pub use widgets::dataview::{
+    DataViewAlign, DataViewBitmapRenderer, DataViewCellMode, DataViewCheckIconTextRenderer,
+    DataViewChoiceRenderer, DataViewColumn, DataViewColumnFlag, DataViewCtrl,
+    DataViewCtrlBuilder, DataViewStyle, DataViewDateRenderer, DataViewIconTextRenderer,
+    DataViewItem, DataViewListCtrl, DataViewListCtrlBuilder, DataViewListModel,
+    DataViewProgressRenderer, DataViewRenderer, DataViewSpinRenderer, DataViewTextRenderer,
+    DataViewToggleRenderer, DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewTreeCtrlStyle,
+    DataViewVirtualListModel, DataViewModel, Variant, CustomDataViewVirtualListModel,
+    DataViewCustomRenderer, DataViewCustomRendererBuilder, RenderContext,
+};
+
+// Re-export DC functionality for custom renderers
+pub use dc::{DeviceContext, BrushStyle, PenStyle};

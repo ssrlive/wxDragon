@@ -10,7 +10,56 @@
 #include <wx/wx.h>
 #include <wx/log.h>  // For wxLogDebug and wxLogError
 
+// Forward declarations
+void drop_rust_custom_renderer_callbacks(void* ptr);
+
+// Global storage for custom renderer callbacks keyed by unique renderer ID
+struct CustomRendererCallbacks {
+    void* closure_ptr = nullptr;
+    void* get_size_trampoline = nullptr;
+    void* render_trampoline = nullptr;
+    void* set_value_trampoline = nullptr;
+    void* get_value_trampoline = nullptr;
+    void* has_editor_trampoline = nullptr;
+    void* create_editor_trampoline = nullptr;
+    void* get_value_from_editor_trampoline = nullptr;
+    void* activate_cell_trampoline = nullptr;
+};
+
+// Use renderer_id as the primary key instead of (dataview_id, column_index)
+typedef int RendererKey;
+
+// Hash function for RendererKey (now just int)
+struct RendererKeyHash {
+    std::size_t operator()(const RendererKey& key) const {
+        return std::hash<int>{}(key);
+    }
+};
+
+// Global map to store custom renderer callbacks by renderer ID
+static std::unordered_map<RendererKey, CustomRendererCallbacks, RendererKeyHash> g_custom_renderer_callbacks;
+
 extern "C" {
+
+// Function to clean up all callbacks for a specific dataview ID
+// This should be called when the DataView control is destroyed
+void cleanup_all_custom_renderer_callbacks_for_dataview(int dataview_id) {
+    // With the new renderer_id approach, we don't automatically clean up by dataview_id
+    // Individual renderers are now cleaned up when they're dropped in Rust
+    // This function is kept for compatibility but does nothing
+}
+
+// Enhanced DataView control that automatically cleans up custom renderer callbacks
+class WxdDataViewCtrlWithCleanup : public wxDataViewCtrl {
+public:
+    WxdDataViewCtrlWithCleanup(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
+        : wxDataViewCtrl(parent, id, pos, size, style) {
+    }
+    
+    virtual ~WxdDataViewCtrlWithCleanup() {
+        // No special cleanup needed - each renderer manages its own callbacks
+    }
+};
 
 // Base DataViewCtrl functions
 WXD_EXPORTED wxd_Window_t* wxd_DataViewCtrl_Create(wxd_Window_t* parent, int64_t id, 
@@ -22,7 +71,8 @@ WXD_EXPORTED wxd_Window_t* wxd_DataViewCtrl_Create(wxd_Window_t* parent, int64_t
     wxPoint wxPos = pos ? wxPoint(pos->x, pos->y) : wxDefaultPosition;
     wxSize wxSizeObj = size ? wxSize(size->width, size->height) : wxDefaultSize;
     
-    wxDataViewCtrl* ctrl = new wxDataViewCtrl(p, id, wxPos, wxSizeObj, style);
+    // Use the enhanced DataView control that automatically cleans up custom renderer callbacks
+    WxdDataViewCtrlWithCleanup* ctrl = new WxdDataViewCtrlWithCleanup(p, id, wxPos, wxSizeObj, style);
     return reinterpret_cast<wxd_Window_t*>(ctrl);
 }
 
@@ -214,6 +264,307 @@ WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCheckIconTextRenderer_Create(co
         static_cast<int>(align));
         
     return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+}
+
+// Custom Renderer Implementation - stores callbacks directly in the instance
+class WxdDataViewCustomRenderer : public wxDataViewCustomRenderer {
+public:
+    typedef wxd_Size_t (*GetSizeCallback)(void* user_data);
+    typedef bool (*RenderCallback)(void* user_data, wxd_Rect_t cell, void* dc, int state);
+    typedef bool (*SetValueCallback)(void* user_data, const wxd_Variant_t* value);
+    typedef void (*GetValueCallback)(void* user_data, wxd_Variant_t* value);
+    typedef bool (*HasEditorCtrlCallback)(void* user_data);
+    typedef void* (*CreateEditorCtrlCallback)(void* user_data, void* parent, wxd_Rect_t label_rect, const wxd_Variant_t* value);
+    typedef bool (*GetValueFromEditorCtrlCallback)(void* user_data, void* editor, wxd_Variant_t* value);
+    typedef bool (*ActivateCellCallback)(void* user_data, wxd_Rect_t cell, void* model, void* item, unsigned int col, void* mouse_event);
+
+    WxdDataViewCustomRenderer(
+        const wxString& varianttype,
+        wxDataViewCellMode mode,
+        int align,
+        void* user_data,
+        GetSizeCallback get_size_callback,
+        RenderCallback render_callback,
+        SetValueCallback set_value_callback,
+        GetValueCallback get_value_callback,
+        HasEditorCtrlCallback has_editor_callback,
+        CreateEditorCtrlCallback create_editor_callback,
+        GetValueFromEditorCtrlCallback get_value_from_editor_callback,
+        ActivateCellCallback activate_cell_callback
+    ) : wxDataViewCustomRenderer(varianttype, mode, align),
+        m_user_data(user_data),
+        m_get_size_callback(get_size_callback),
+        m_render_callback(render_callback),
+        m_set_value_callback(set_value_callback),
+        m_get_value_callback(get_value_callback),
+        m_has_editor_callback(has_editor_callback),
+        m_create_editor_callback(create_editor_callback),
+        m_get_value_from_editor_callback(get_value_from_editor_callback),
+        m_activate_cell_callback(activate_cell_callback)
+    {
+        printf("[DEBUG C++] WxdDataViewCustomRenderer constructor - user_data: %p\n", user_data);
+        printf("[DEBUG C++] Stored callbacks directly in renderer - get_size: %p, render: %p, user_data: %p\n",
+               get_size_callback, render_callback, user_data);
+    }
+
+    virtual ~WxdDataViewCustomRenderer() {
+        printf("[DEBUG C++] WxdDataViewCustomRenderer destructor - user_data: %p\n", m_user_data);
+        // Clean up the Rust callback data when this renderer is destroyed
+        if (m_user_data) {
+            drop_rust_custom_renderer_callbacks(m_user_data);
+            m_user_data = nullptr;
+        }
+    }
+
+    // Required pure virtual methods
+    virtual wxSize GetSize() const override {
+        printf("[DEBUG C++] WxdDataViewCustomRenderer::GetSize() called\n");
+        
+        if (m_get_size_callback && m_user_data) {
+            printf("[DEBUG C++] Found callbacks, calling get_size_callback\n");
+            wxd_Size_t size = m_get_size_callback(m_user_data);
+            printf("[DEBUG C++] get_size_callback returned: %dx%d\n", size.width, size.height);
+            return wxSize(size.width, size.height);
+        }
+        printf("[DEBUG C++] No callbacks found, returning default size\n");
+        return wxSize(50, 20);
+    }
+
+    virtual bool Render(wxRect cell, wxDC *dc, int state) override {
+        printf("[DEBUG C++] WxdDataViewCustomRenderer::Render() called, cell: %dx%d+%d+%d, state: %d\n", 
+               cell.width, cell.height, cell.x, cell.y, state);
+        
+        if (m_render_callback && m_user_data && dc) {
+            printf("[DEBUG C++] Found callbacks, calling render_callback\n");
+            wxd_Rect_t cell_rect = {cell.x, cell.y, cell.width, cell.height};
+            bool result = m_render_callback(m_user_data, cell_rect, dc, state);
+            printf("[DEBUG C++] render_callback returned: %s\n", result ? "true" : "false");
+            return result;
+        }
+        printf("[DEBUG C++] No render callbacks found\n");
+        return false;
+    }
+
+    virtual bool SetValue(const wxVariant &value) override {
+        printf("[DEBUG C++] WxdDataViewCustomRenderer::SetValue() called\n");
+        
+        if (m_set_value_callback && m_user_data) {
+            printf("[DEBUG C++] Found callbacks, converting wxVariant to wxd_Variant_t\n");
+            // Convert wxVariant to wxd_Variant_t
+            wxd_Variant_t var_data;
+            if (value.GetType() == wxT("string")) {
+                wxString str = value.GetString();
+                var_data.type = WXD_VARIANT_TYPE_STRING;
+                var_data.data.string_val = strdup(str.ToUTF8().data());
+                printf("[DEBUG C++] Converting string value: '%s'\n", str.ToUTF8().data());
+            } else if (value.GetType() == wxT("bool")) {
+                var_data.type = WXD_VARIANT_TYPE_BOOL;
+                var_data.data.bool_val = value.GetBool();
+                printf("[DEBUG C++] Converting bool value: %s\n", value.GetBool() ? "true" : "false");
+            } else if (value.GetType() == wxT("long")) {
+                var_data.type = WXD_VARIANT_TYPE_INT32;
+                var_data.data.int32_val = static_cast<int32_t>(value.GetLong());
+                printf("[DEBUG C++] Converting long value: %ld\n", value.GetLong());
+            } else {
+                // Default to string
+                wxString str = value.GetString();
+                var_data.type = WXD_VARIANT_TYPE_STRING;
+                var_data.data.string_val = strdup(str.ToUTF8().data());
+                printf("[DEBUG C++] Converting unknown type to string: '%s'\n", str.ToUTF8().data());
+            }
+
+            printf("[DEBUG C++] Calling set_value_callback\n");
+            bool result = m_set_value_callback(m_user_data, &var_data);
+
+            // Clean up any allocated string
+            if (var_data.type == WXD_VARIANT_TYPE_STRING && var_data.data.string_val) {
+                free(var_data.data.string_val);
+            }
+
+            printf("[DEBUG C++] set_value_callback returned: %s\n", result ? "true" : "false");
+            return result;
+        }
+        printf("[DEBUG C++] No set_value callbacks found, calling parent\n");
+        return wxDataViewCustomRenderer::SetValue(value);
+    }
+
+    virtual bool GetValue(wxVariant &value) const override {
+        if (m_get_value_callback && m_user_data) {
+            wxd_Variant_t var_data = {0};
+            m_get_value_callback(m_user_data, &var_data);
+
+            switch (var_data.type) {
+                case WXD_VARIANT_TYPE_STRING:
+                    if (var_data.data.string_val) {
+                        value = wxString::FromUTF8(var_data.data.string_val);
+                        free(var_data.data.string_val);
+                    } else {
+                        value = wxString();
+                    }
+                    break;
+                case WXD_VARIANT_TYPE_BOOL:
+                    value = var_data.data.bool_val;
+                    break;
+                case WXD_VARIANT_TYPE_INT32:
+                    value = static_cast<long>(var_data.data.int32_val);
+                    break;
+                default:
+                    value = wxString();
+                    break;
+            }
+            return true;
+        }
+        return wxDataViewCustomRenderer::GetValue(value);
+    }
+
+    // Optional editing support
+    virtual bool HasEditorCtrl() const override {
+        if (m_has_editor_callback && m_user_data) {
+            return m_has_editor_callback(m_user_data);
+        }
+        return false;
+    }
+
+    virtual wxWindow* CreateEditorCtrl(wxWindow *parent, wxRect labelRect, const wxVariant &value) override {
+        if (m_create_editor_callback && m_user_data) {
+            // Convert value to wxd_Variant_t
+            wxd_Variant_t var_data;
+            if (value.GetType() == wxT("string")) {
+                wxString str = value.GetString();
+                var_data.type = WXD_VARIANT_TYPE_STRING;
+                var_data.data.string_val = strdup(str.ToUTF8().data());
+            } else {
+                var_data.type = WXD_VARIANT_TYPE_STRING;
+                var_data.data.string_val = strdup("");
+            }
+
+            wxd_Rect_t rect = {labelRect.x, labelRect.y, labelRect.width, labelRect.height};
+            void* editor = m_create_editor_callback(m_user_data, parent, rect, &var_data);
+
+            // Clean up
+            if (var_data.data.string_val) {
+                free(var_data.data.string_val);
+            }
+
+            return reinterpret_cast<wxWindow*>(editor);
+        }
+        return nullptr;
+    }
+
+    virtual bool GetValueFromEditorCtrl(wxWindow *editor, wxVariant &value) override {
+        if (m_get_value_from_editor_callback && m_user_data && editor) {
+            wxd_Variant_t var_data = {0};
+            bool result = m_get_value_from_editor_callback(m_user_data, editor, &var_data);
+
+            if (result) {
+                switch (var_data.type) {
+                    case WXD_VARIANT_TYPE_STRING:
+                        if (var_data.data.string_val) {
+                            value = wxString::FromUTF8(var_data.data.string_val);
+                            free(var_data.data.string_val);
+                        } else {
+                            value = wxString();
+                        }
+                        break;
+                    case WXD_VARIANT_TYPE_BOOL:
+                        value = var_data.data.bool_val;
+                        break;
+                    case WXD_VARIANT_TYPE_INT32:
+                        value = static_cast<long>(var_data.data.int32_val);
+                        break;
+                    default:
+                        value = wxString();
+                        break;
+                }
+            }
+
+            return result;
+        }
+        return false;
+    }
+
+    // Optional cell activation support
+    virtual bool ActivateCell(const wxRect &cell, wxDataViewModel *model, const wxDataViewItem &item, unsigned int col, const wxMouseEvent *mouseEvent) override {
+        if (m_activate_cell_callback && m_user_data) {
+            wxd_Rect_t cell_rect = {cell.x, cell.y, cell.width, cell.height};
+            return m_activate_cell_callback(m_user_data, cell_rect, model, (void*)item.GetID(), col, (void*)mouseEvent);
+        }
+        return false;
+    }
+
+private:
+    void* m_user_data;
+    GetSizeCallback m_get_size_callback;
+    RenderCallback m_render_callback;
+    SetValueCallback m_set_value_callback;
+    GetValueCallback m_get_value_callback;
+    HasEditorCtrlCallback m_has_editor_callback;
+    CreateEditorCtrlCallback m_create_editor_callback;
+    GetValueFromEditorCtrlCallback m_get_value_from_editor_callback;
+    ActivateCellCallback m_activate_cell_callback;
+};
+
+// Custom renderer creation
+WXD_EXPORTED wxd_DataViewRenderer_t* wxd_DataViewCustomRenderer_Create(
+    const char* varianttype,
+    int64_t mode,
+    int64_t align,
+    void* user_data,
+    wxd_CustomRenderer_GetSizeCallback get_size_callback,
+    wxd_CustomRenderer_RenderCallback render_callback,
+    wxd_CustomRenderer_SetValueCallback set_value_callback,
+    wxd_CustomRenderer_GetValueCallback get_value_callback,
+    wxd_CustomRenderer_HasEditorCtrlCallback has_editor_callback,
+    wxd_CustomRenderer_CreateEditorCtrlCallback create_editor_callback,
+    wxd_CustomRenderer_GetValueFromEditorCtrlCallback get_value_from_editor_callback,
+    wxd_CustomRenderer_ActivateCellCallback activate_cell_callback
+) {
+    printf("[DEBUG C++] wxd_DataViewCustomRenderer_Create called with varianttype: %s\n", varianttype);
+    
+    try {
+        wxString variant_type(varianttype, wxConvUTF8);
+        WxdDataViewCustomRenderer* renderer = new WxdDataViewCustomRenderer(
+            variant_type,
+            static_cast<wxDataViewCellMode>(mode),
+            static_cast<int>(align),
+            user_data,
+            get_size_callback,
+            render_callback,
+            set_value_callback,
+            get_value_callback,
+            has_editor_callback,
+            create_editor_callback,
+            get_value_from_editor_callback,
+            activate_cell_callback
+        );
+        
+        printf("[DEBUG C++] Successfully created custom renderer: %p\n", renderer);
+        return reinterpret_cast<wxd_DataViewRenderer_t*>(renderer);
+    } catch (const std::exception& e) {
+        printf("[ERROR C++] Exception creating custom renderer: %s\n", e.what());
+        return nullptr;
+    } catch (...) {
+        printf("[ERROR C++] Unknown exception creating custom renderer\n");
+        return nullptr;
+    }
+}
+
+// Function to release callbacks by renderer ID (no longer needed with direct storage)
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseCallbacksByKey(int32_t renderer_id) {
+    // No-op: callbacks are now cleaned up automatically when renderer is destroyed
+    printf("[DEBUG C++] wxd_DataViewCustomRenderer_ReleaseCallbacksByKey called for renderer_id: %d (no-op)\n", renderer_id);
+}
+
+// Function to release all callbacks for a specific dataview ID (no longer needed)
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseAllCallbacksForDataView(int32_t dataview_id) {
+    // No-op: callbacks are now cleaned up automatically when renderers are destroyed
+    printf("[DEBUG C++] wxd_DataViewCustomRenderer_ReleaseAllCallbacksForDataView called for dataview_id: %d (no-op)\n", dataview_id);
+}
+
+// Cleanup function for custom renderer callbacks (legacy - no longer needed)
+WXD_EXPORTED void wxd_DataViewCustomRenderer_ReleaseCallbacks(wxd_DataViewRenderer_t* renderer) {
+    // No-op: callbacks are now cleaned up automatically in destructor
+    printf("[DEBUG C++] wxd_DataViewCustomRenderer_ReleaseCallbacks called (no-op)\n");
 }
 
 // DataViewModel implementation

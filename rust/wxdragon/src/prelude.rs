@@ -75,6 +75,8 @@ pub use crate::widgets::dataview::{
     Variant,
     VariantType, // Added VariantType
     DataViewIconTextRenderer, // Added DataViewIconTextRenderer
+    DataViewTextRenderer, // Added DataViewTextRenderer
+    DataViewCustomRenderer, // Added DataViewCustomRenderer
     CustomDataViewVirtualListModel, // Added CustomDataViewVirtualListModel
 };
 // Added DataView enums
