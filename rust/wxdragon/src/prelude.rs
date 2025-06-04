@@ -14,7 +14,7 @@ pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES, ID_HIGHEST};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
 pub use crate::utils::WxdArrayString;
-pub use crate::window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget};
+pub use crate::window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget, WxWidgetDowncast};
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};

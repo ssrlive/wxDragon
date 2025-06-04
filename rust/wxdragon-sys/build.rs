@@ -474,6 +474,11 @@ fn main() {
         println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
         println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
         println!("cargo:rustc-link-lib=static=wxscintilla-3.2");
+        println!("cargo:rustc-link-lib=static=wxregexu-3.2");
+        println!("cargo:rustc-link-lib=static=wxpng-3.2");
+        println!("cargo:rustc-link-lib=static=wxtiff-3.2");
+        println!("cargo:rustc-link-lib=static=wxjpeg-3.2");
+        println!("cargo:rustc-link-lib=static=wxzlib-3.2");
         println!("cargo:rustc-link-lib=stdc++");
 
         if cfg!(feature = "webview") {

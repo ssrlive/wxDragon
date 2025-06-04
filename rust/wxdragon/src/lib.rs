@@ -51,3 +51,6 @@ pub use widgets::dataview::{
 
 // Re-export DC functionality for custom renderers
 pub use dc::{DeviceContext, BrushStyle, PenStyle};
+
+// Re-export window functionality including downcasting
+pub use window::{WxWidget, WxWidgetDowncast, Window, BackgroundStyle, ExtraWindowStyle};

@@ -616,6 +616,55 @@ pub trait WxWidget {
     // if corresponding wxd_Window_* functions are added to the C API.
 }
 
+/// Trait for downcasting wxWidgets to specific types.
+/// 
+/// This trait is automatically implemented for any type that implements both
+/// `WxWidget` and `Any`, providing safe downcasting functionality.
+/// 
+/// # Example
+/// ```ignore
+/// use wxdragon::window::WxWidgetDowncast;
+/// use wxdragon::widgets::TextCtrl;
+/// 
+/// fn handle_widget(widget: &dyn WxWidget) {
+///     if let Some(text_ctrl) = widget.downcast_ref::<TextCtrl>() {
+///         let value = text_ctrl.get_value();
+///         println!("Text control value: {}", value);
+///     }
+/// }
+/// ```
+pub trait WxWidgetDowncast {
+    /// Attempts to downcast this widget to a specific type.
+    /// Returns `Some(&T)` if the widget is of type `T`, `None` otherwise.
+    fn downcast_ref<T: WxWidget + 'static>(&self) -> Option<&T>;
+
+    /// Attempts to downcast this widget to a specific type (mutable).
+    /// Returns `Some(&mut T)` if the widget is of type `T`, `None` otherwise.
+    fn downcast_mut<T: WxWidget + 'static>(&mut self) -> Option<&mut T>;
+
+    /// Returns the type name of this widget for debugging purposes.
+    fn widget_type_name(&self) -> &'static str;
+}
+
+/// Blanket implementation: any type that implements both WxWidget and Any 
+/// automatically gets downcasting functionality.
+impl<W> WxWidgetDowncast for W 
+where 
+    W: WxWidget + std::any::Any 
+{
+    fn downcast_ref<T: WxWidget + 'static>(&self) -> Option<&T> {
+        (self as &dyn std::any::Any).downcast_ref::<T>()
+    }
+
+    fn downcast_mut<T: WxWidget + 'static>(&mut self) -> Option<&mut T> {
+        (self as &mut dyn std::any::Any).downcast_mut::<T>()
+    }
+
+    fn widget_type_name(&self) -> &'static str {
+        std::any::type_name::<Self>()
+    }
+}
+
 // Implement the trait for the base Window struct itself.
 impl WxWidget for Window {
     fn handle_ptr(&self) -> *mut ffi::wxd_Window_t {

@@ -390,6 +390,58 @@ impl DataViewRenderer for DataViewCheckIconTextRenderer {
 /// - **Thread-safe**: Safe to create from any thread
 /// - **Memory safe**: Automatic cleanup when renderer is destroyed
 /// - **Flexible**: Support for custom sizing, rendering, editing, and activation
+/// - **Type-safe downcasting**: Use `WxWidgetDowncast` trait to safely cast editor widgets
+/// 
+/// # Complete Example: Editable Text Renderer
+/// 
+/// ```ignore
+/// use wxdragon::window::WxWidgetDowncast;
+/// use wxdragon::widgets::TextCtrl;
+/// use wxdragon::widgets::dataview::{DataViewCustomRenderer, VariantType, DataViewCellMode, DataViewAlign, Variant};
+/// 
+/// // Create a custom text renderer with editing support
+/// let text_renderer = DataViewCustomRenderer::builder()
+///     .variant_type(VariantType::String)
+///     .mode(DataViewCellMode::Editable)
+///     .align(DataViewAlign::Left)
+///     .with_render(|rect, ctx, _state, variant| {
+///         if let Variant::String(text) = variant {
+///             ctx.draw_text(text, rect.x + 2, rect.y + 2);
+///             true
+///         } else {
+///             false
+///         }
+///     })
+///     .with_has_editor(|| true)
+///     .with_create_editor(|parent, rect, variant| {
+///         let initial_value = match variant {
+///             Variant::String(s) => s.clone(),
+///             _ => String::new(),
+///         };
+///         
+///         let text_ctrl = TextCtrl::builder(parent)
+///             .with_pos(rect.position())
+///             .with_size(rect.size())
+///             .with_value(&initial_value)
+///             .build();
+///         
+///         Some(Box::new(text_ctrl))
+///     })
+///     .with_get_value_from_editor(|editor| {
+///         // Use downcasting to get the specific widget type
+///         if let Some(text_ctrl) = editor.downcast_ref::<TextCtrl>() {
+///             let value = text_ctrl.get_value();
+///             Some(Variant::String(value))
+///         } else {
+///             None
+///         }
+///     })
+///     .build();
+/// 
+/// // Use in multiple columns
+/// let col1 = DataViewColumn::new("Name", &text_renderer, 0, 120, ...);
+/// let col2 = DataViewColumn::new("Description", &text_renderer, 1, 200, ...);
+/// ```
 /// 
 /// # Examples
 /// 
@@ -529,6 +581,29 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the callback for creating an editor control.
+    /// 
+    /// The callback receives the parent widget, the cell rectangle, and the current value.
+    /// It should return a boxed widget that will be used for editing the cell value.
+    /// 
+    /// # Example
+    /// ```ignore
+    /// use wxdragon::widgets::TextCtrl;
+    /// 
+    /// .with_create_editor(|parent, rect, variant| {
+    ///     let initial_value = match variant {
+    ///         Variant::String(s) => s.clone(),
+    ///         _ => String::new(),
+    ///     };
+    ///     
+    ///     let text_ctrl = TextCtrl::builder(parent)
+    ///         .with_pos(rect.position())
+    ///         .with_size(rect.size())
+    ///         .with_value(&initial_value)
+    ///         .build();
+    ///     
+    ///     Some(Box::new(text_ctrl))
+    /// })
+    /// ```
     pub fn with_create_editor<F>(mut self, callback: F) -> Self
     where
         F: Fn(&dyn crate::WxWidget, crate::geometry::Rect, &super::Variant) -> Option<Box<dyn crate::WxWidget>> + 'static,
@@ -538,6 +613,25 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the callback for getting the value from an editor control.
+    /// 
+    /// The callback receives the editor widget that was created by `with_create_editor`.
+    /// You can downcast it to the specific widget type to extract the value.
+    /// 
+    /// # Example
+    /// ```ignore
+    /// use wxdragon::window::WxWidgetDowncast;
+    /// use wxdragon::widgets::TextCtrl;
+    /// 
+    /// .with_get_value_from_editor(|editor| {
+    ///     // Downcast to the specific widget type you created
+    ///     if let Some(text_ctrl) = editor.downcast_ref::<TextCtrl>() {
+    ///         let value = text_ctrl.get_value();
+    ///         Some(Variant::String(value))
+    ///     } else {
+    ///         None
+    ///     }
+    /// })
+    /// ```
     pub fn with_get_value_from_editor<F>(mut self, callback: F) -> Self
     where
         F: Fn(&dyn crate::WxWidget) -> Option<super::Variant> + 'static,
