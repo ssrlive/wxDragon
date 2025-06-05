@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.6.4
+
+### New Features
+- **DataView Custom Renderers**: Added comprehensive custom renderer support for DataView controls
+  - Implemented `DataViewCustomRenderer` with full editor functionality
+  - Added editor-related APIs for custom DataView rendering with edit capabilities
+  - Enhanced DataView widget with custom renderer integration
+  - Added `custom_dataview_renderer` example demonstrating custom rendering functionality
+
+### Enhancements
+- **Feature Gates**: Added granular feature flags for better build customization
+  - Added `webview` feature flag for WebView widget support
+  - Added `media-ctrl` feature flag for MediaCtrl widget support  
+  - Added `stc` feature flag for StyledTextCtrl widget support
+  - Added `xrc` feature flag for XML Resource support
+  - Added `aui` feature flag for Advanced User Interface components
+  - Updated examples to use appropriate feature flags
+- **Build System Improvements**: Enhanced cross-platform build compatibility
+  - Fixed build failures across all platforms when enabling HTML with both XRC and WebView features
+  - Improved Linux build stability with build script optimizations
+  - Enhanced MSVC and MinGW64 build support
+  - Better CMake configuration for conditional feature compilation
+- **Widget API Enhancements**: Extended widget functionality and API surface
+  - Enhanced menu system with additional functionality
+  - Improved toolbar and scrolled window implementations
+  - Added window-related utility functions
+
+### Bug Fixes
+- **Cross-Platform Build**: Fixed critical build issues affecting all platforms
+  - Resolved HTML feature conflicts when both XRC and WebView features are enabled
+  - Fixed Linux-specific build errors in the build script
+  - Improved build stability for MSVC and MinGW64 toolchains
+- **DataView Renderer**: Fixed implementation issues in custom DataView rendering
+  - Optimized C++ implementation for better performance
+  - Improved memory management in custom renderer implementations
+
+### Examples
+- **custom_dataview_renderer**: New comprehensive example showcasing custom DataView renderer functionality
+  - Demonstrates custom cell rendering and editing capabilities
+  - Shows integration with custom data models
+  - Includes practical use cases for advanced DataView customization
+
+### Platform Support
+- Enhanced cross-platform compatibility for Linux, Windows (MSVC/MinGW64), and macOS
+- Improved feature gate system for platform-specific functionality
+- Better conditional compilation support across different build environments
+
 ## 0.6.2
 
 ### Bug Fixes
