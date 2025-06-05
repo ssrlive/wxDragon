@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::widgets::AuiMdiParentFrame;
+use crate::widgets::aui_mdi_parent_frame::AuiMdiParentFrame;
 use crate::window::Window;
 use std::ffi::CString;
 use std::marker::PhantomData;

@@ -25,7 +25,6 @@ set(wxBUILD_DEMOS OFF)
 set(wxBUILD_BENCHMARKS OFF)
 set(wxUSE_EXCEPTIONS ON)
 set(wxUSE_GUI ON)
-set(wxUSE_STC ON)
 set(wxUSE_OPENGL ON)
 set(wxUSE_HTML ON)
 option(wxdUSE_WEBVIEW "Use the Webview widget" OFF)
@@ -35,6 +34,20 @@ endif()
 option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" OFF)
 if (wxdUSE_MEDIACTRL)
     set(wxUSE_MEDIACTRL ON) 
+endif()
+option(wxdUSE_STC "Use Styled Text Control widget" OFF)
+if (wxdUSE_STC)
+    set(wxUSE_STC ON)
+else()
+    set(wxUSE_STC OFF)
+endif()
+option(wxdUSE_XRC "Use XML Resource (XRC) support" OFF)
+if (wxdUSE_XRC)
+    set(wxUSE_XRC ON)
+    set(wxUSE_XML ON)
+else()
+    set(wxUSE_XRC OFF)
+    set(wxUSE_XML OFF)
 endif()
 
 # Platform-specific options
@@ -70,11 +83,6 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/app.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/array_string.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/art_provider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_manager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_child_frame.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_parent_frame.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_notebook.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_toolbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap_button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bitmapbundle.cpp
@@ -152,13 +160,26 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/collapsiblepane.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/styledtextctrl.cpp
 )
 
+if (wxdUSE_AUI)
+    list(APPEND WXDRAGON_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_manager.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_child_frame.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_parent_frame.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_notebook.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_toolbar.cpp
+    )
+endif()
 if (wxdUSE_MEDIACTRL)
-    list(APPEND ${WXDRAGON_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/media_ctrl.cpp)
+    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/media_ctrl.cpp)
+endif()
+if (wxdUSE_STC)
+    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/styledtextctrl.cpp)
+endif()
+if (wxdUSE_XRC)
+    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp)
 endif()
 if (wxdUSE_WEBVIEW)
     # similarly append webview wrapper
@@ -179,6 +200,38 @@ target_include_directories(wxdragon PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include # For wxdragon.h
 )
 
+# Set preprocessor definitions based on feature flags
+# Always define the flags, setting them to 1 when enabled and 0 when disabled
+if (wxdUSE_AUI)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=0)
+endif()
+
+if (wxdUSE_MEDIACTRL)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=0)
+endif()
+
+if (wxdUSE_WEBVIEW)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=0)
+endif()
+
+if (wxdUSE_STC)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=0)
+endif()
+
+if (wxdUSE_XRC)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=0)
+endif()
+
 # Link wxdragon against the wxWidgets targets built by add_subdirectory above.
 # These targets (e.g., wx::core, wx::base) should provide necessary include paths and link libraries.
 # The exact target names might vary slightly based on wxWidgets version/config,
@@ -188,8 +241,6 @@ target_link_libraries(wxdragon PRIVATE
     wxcore 
     wxbase
     wxadv     # For controls like wxDatePickerCtrl, wxCalendarCtrl
-    wxaui     # If you use wxAuiNotebook, wxAuiManager
-    wxmedia   # If you use wxMediaCtrl
     wxpropgrid # If you use wxPropertyGrid
     wxgl
     wxstc
@@ -199,6 +250,15 @@ target_link_libraries(wxdragon PRIVATE
     wxxrc
     wxexpat   # For XML parsing functionality
 )
+
+# Conditional library linking based on features
+if (wxdUSE_AUI)
+    target_link_libraries(wxdragon PRIVATE wxaui)
+endif()
+
+if (wxdUSE_MEDIACTRL)
+    target_link_libraries(wxdragon PRIVATE wxmedia)
+endif()
 
 # If on MSVC, and wxWidgets was built with a different CRT, you might need to adjust
 # For example, if wxWidgets is /MD and you want wxdragon to be /MT, that can cause issues.

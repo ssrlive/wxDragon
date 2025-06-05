@@ -1,7 +1,11 @@
 //! wxMenuBar wrapper
 
-use crate::menus::{Menu, MenuItem};
+use crate::menus::Menu;
+#[cfg(feature = "xrc")]
+use crate::menus::MenuItem;
+#[cfg(feature = "xrc")]
 use crate::window::Window;
+#[cfg(feature = "xrc")]
 use crate::xrc::XmlResource;
 use std::ffi::CString;
 use std::marker::PhantomData;
@@ -28,12 +32,14 @@ impl MenuBar {
 
     /// Gets a menu item by its XRC name from any menu in this menubar.
     /// Returns a MenuItem wrapper that can be used for event binding.
+    #[cfg(feature = "xrc")]
     pub fn get_item_by_name(&self, parent_window: &Window, item_name: &str) -> Option<MenuItem> {
         MenuItem::from_xrc_name(parent_window, item_name)
     }
 
     /// Special XRC loading method for menubars.
     /// This looks up the menubar by name and creates a MenuBar wrapper.
+    #[cfg(feature = "xrc")]
     pub fn from_xrc_name(menubar_name: &str) -> Option<Self> {
         // Get the XRC resource and try to load the menubar
         let xml_resource = XmlResource::get();
@@ -122,6 +128,7 @@ impl MenuBarBuilder {
 }
 
 // Add XRC support
+#[cfg(feature = "xrc")]
 impl crate::xrc::XrcSupport for MenuBar {
     unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
         let menubar_ptr = ptr as *mut wxdragon_sys::wxd_MenuBar_t;

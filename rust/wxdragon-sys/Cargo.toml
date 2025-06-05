@@ -27,5 +27,8 @@ bzip2 = "0.4"         # For decompressing .bz2 archives (used by wxWidgets tarba
 
 [features]
 default = []
+aui = []
 media-ctrl = []
 webview = []
+stc = []
+xrc = []

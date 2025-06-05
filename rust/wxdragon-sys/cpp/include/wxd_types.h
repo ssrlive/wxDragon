@@ -175,12 +175,17 @@ typedef enum {
     WXD_EVENT_TYPE_LIST_INSERT_ITEM = 84,
     WXD_EVENT_TYPE_LIST_COL_RIGHT_CLICK = 85,
     WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG = 86,
+    
+    // Media events - only available when media-ctrl feature is enabled
+    #if WXD_USE_MEDIACTRL
     WXD_EVENT_TYPE_MEDIA_LOADED = 87,
     WXD_EVENT_TYPE_MEDIA_STOP = 88,
     WXD_EVENT_TYPE_MEDIA_FINISHED = 89,
     WXD_EVENT_TYPE_MEDIA_STATECHANGED = 90,
     WXD_EVENT_TYPE_MEDIA_PLAY = 91,
     WXD_EVENT_TYPE_MEDIA_PAUSE = 92,
+    #endif
+    
     // DataView Events
     WXD_EVENT_TYPE_DATAVIEW_SELECTION_CHANGED = 93,
     WXD_EVENT_TYPE_DATAVIEW_ITEM_ACTIVATED = 94,
@@ -225,12 +230,14 @@ typedef enum {
     WXD_EVENT_TYPE_KILL_FOCUS = 130, // Window kill focus event
 
     // AUI Manager event types
+    #if WXD_USE_AUI
     WXD_EVENT_TYPE_AUI_PANE_BUTTON = 135, // wxEVT_AUI_PANE_BUTTON
     WXD_EVENT_TYPE_AUI_PANE_CLOSE = 136, // wxEVT_AUI_PANE_CLOSE
     WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE = 137, // wxEVT_AUI_PANE_MAXIMIZE
     WXD_EVENT_TYPE_AUI_PANE_RESTORE = 138, // wxEVT_AUI_PANE_RESTORE
     WXD_EVENT_TYPE_AUI_PANE_ACTIVATED = 139, // wxEVT_AUI_PANE_ACTIVATED
     WXD_EVENT_TYPE_AUI_RENDER = 140, // wxEVT_AUI_RENDER
+    #endif
 
     // ADDED: RearrangeList event
     WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST = 141, // Event for RearrangeList when items are rearranged
@@ -244,7 +251,8 @@ typedef enum {
     WXD_EVENT_TYPE_ENTER_WINDOW = 201, // wxEVT_ENTER_WINDOW
     WXD_EVENT_TYPE_LEAVE_WINDOW = 202, // wxEVT_LEAVE_WINDOW
 
-    // StyledTextCtrl events (based on wxWidgets STC events)
+    // StyledTextCtrl events - only available when stc feature is enabled
+    #if WXD_USE_STC
     WXD_EVENT_TYPE_STC_CHANGE = 300,                    // wxEVT_STC_CHANGE
     WXD_EVENT_TYPE_STC_STYLENEEDED = 301,               // wxEVT_STC_STYLENEEDED
     WXD_EVENT_TYPE_STC_CHARADDED = 302,                 // wxEVT_STC_CHARADDED
@@ -275,6 +283,7 @@ typedef enum {
     WXD_EVENT_TYPE_STC_INDICATOR_RELEASE = 327,         // wxEVT_STC_INDICATOR_RELEASE
     WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED = 328,        // wxEVT_STC_AUTOCOMP_CANCELLED
     WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED = 329,     // wxEVT_STC_AUTOCOMP_CHAR_DELETED
+    #endif
 
     WXD_EVENT_TYPE_MAX // Keep this last for count if needed, or remove if not used for iteration
 } WXDEventTypeCEnum;

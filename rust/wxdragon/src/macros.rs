@@ -386,9 +386,11 @@ macro_rules! __widget_builder_default {
 /// });
 /// ```
 #[macro_export]
+#[cfg(feature = "xrc")]
 macro_rules! impl_xrc_support {
     // Handle the simple case where only window field is specified
     ($widget_name:ident, { window }) => {
+        #[cfg(feature = "xrc")]
         impl $crate::xrc::XrcSupport for $widget_name {
             unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
                 let window = unsafe { $crate::window::Window::from_ptr(ptr) };
@@ -398,6 +400,7 @@ macro_rules! impl_xrc_support {
     };
     // Handle the more complex case with additional fields
     ($widget_name:ident, { window, $($field_name:ident: $field_value:expr),* $(,)? }) => {
+        #[cfg(feature = "xrc")]
         impl $crate::xrc::XrcSupport for $widget_name {
             unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
                 let window = unsafe { $crate::window::Window::from_ptr(ptr) };
@@ -410,6 +413,15 @@ macro_rules! impl_xrc_support {
             }
         }
     };
+}
+
+// Empty version when xrc feature is disabled
+#[macro_export]
+#[cfg(not(feature = "xrc"))]
+macro_rules! impl_xrc_support {
+    // Accept the same patterns but generate no code
+    ($widget_name:ident, { window }) => {};
+    ($widget_name:ident, { window, $($field_name:ident: $field_value:expr),* $(,)? }) => {};
 }
 
 /// Creates a custom widget with builder pattern based on Panel

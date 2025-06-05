@@ -34,10 +34,15 @@ pub use crate::widgets::activity_indicator::{
 }; // Added Style
 pub use crate::widgets::animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder, AnimationCtrlStyle}; // Added Style
                                                                                                    // ADDED: AUI
+#[cfg(feature = "aui")]
 pub use crate::widgets::aui_manager::{AuiManager, AuiPaneInfo, DockDirection};
+#[cfg(feature = "aui")]
 pub use crate::widgets::aui_mdi_child_frame::{AuiMdiChildFrame, AuiMdiChildFrameBuilder};
+#[cfg(feature = "aui")]
 pub use crate::widgets::aui_mdi_parent_frame::{AuiMdiParentFrame, AuiMdiParentFrameBuilder};
+#[cfg(feature = "aui")]
 pub use crate::widgets::aui_notebook::{AuiNotebook, AuiNotebookBuilder, AuiNotebookStyle}; // Added Style
+#[cfg(feature = "aui")]
 pub use crate::widgets::aui_toolbar::{AuiToolBar, AuiToolBarBuilder, AuiToolBarStyle}; // Added Style
 pub use crate::widgets::bitmap_button::{BitmapButton, BitmapButtonBuilder, BitmapButtonStyle}; // Added Style
 pub use crate::widgets::bitmap_combobox::{BitmapComboBox, BitmapComboBoxBuilder}; // Style is ComboBoxStyle
@@ -156,6 +161,7 @@ pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineS
 pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder, StaticBoxStyle}; // Added Style
 pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
+#[cfg(feature = "stc")]
 pub use crate::widgets::styledtextctrl::{
     StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlStyle, StyledTextCtrlEvent, StyledTextCtrlEventData,
     MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
@@ -176,6 +182,7 @@ pub use crate::menus::menuitem::{ID_ABOUT, ID_EXIT, ID_SEPARATOR};
 pub use crate::menus::{ItemKind, Menu, MenuBar, MenuItem};
 
 // --- Widgets ItemKind (for toolbar) ---
+#[cfg(feature = "aui")]
 pub use crate::widgets::ItemKind as WidgetItemKind;
 
 // --- Bitmaps & Art ---
@@ -219,7 +226,6 @@ pub use crate::dc::{
 // --- Application & Misc ---
 // pub use crate::app::App; // Commented out as per previous error, App is in main or app module
 pub use crate::timer::Timer; // Added Timer
-pub use crate::xrc::{FromXrcPtr, WindowXrcMethods, XmlResource}; // Added XRC functionality
 
 // --- Constants for specific widgets that might be commonly used ---
 // Example: ListBox specific constants
@@ -229,6 +235,8 @@ pub use crate::widgets::combobox::NOT_FOUND as COMBOBOX_NOT_FOUND;
 // Example: NotificationMessage timeouts were already there
 
 // --- XRC Support ---
+#[cfg(feature = "xrc")]
+pub use crate::xrc::{FromXrcPtr, WindowXrcMethods, XmlResource}; // Added XRC functionality
 
 // --- Macros for custom widget development ---
 pub use crate::custom_widget;

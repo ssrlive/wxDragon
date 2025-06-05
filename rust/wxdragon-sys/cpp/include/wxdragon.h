@@ -29,7 +29,9 @@ extern "C" {
 // Include API categories
 #include "core/wxd_app.h"
 #include "core/wxd_window_base.h"
+#if WXD_USE_XRC
 #include "core/wxd_xrc.h"
+#endif
 #include "events/wxd_event_api.h"
 #include "events/wxd_droptarget_api.h" // Extended drop target callbacks
 

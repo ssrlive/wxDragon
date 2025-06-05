@@ -668,7 +668,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG: return wxEVT_LIST_COL_BEGIN_DRAG;
         
         // Media events
-        #if wxUSE_MEDIACTRL
+        #if WXD_USE_MEDIACTRL
         case WXD_EVENT_TYPE_MEDIA_LOADED: return wxEVT_MEDIA_LOADED;
         case WXD_EVENT_TYPE_MEDIA_STOP: return wxEVT_MEDIA_STOP;
         case WXD_EVENT_TYPE_MEDIA_FINISHED: return wxEVT_MEDIA_FINISHED;
@@ -719,12 +719,14 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_ANY: return wxEVT_ANY;
         
         // AUI Manager event types
+        #if WXD_USE_AUI
         case WXD_EVENT_TYPE_AUI_PANE_BUTTON: return wxEVT_AUI_PANE_BUTTON;
         case WXD_EVENT_TYPE_AUI_PANE_CLOSE: return wxEVT_AUI_PANE_CLOSE;
         case WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE: return wxEVT_AUI_PANE_MAXIMIZE;
         case WXD_EVENT_TYPE_AUI_PANE_RESTORE: return wxEVT_AUI_PANE_RESTORE;
         case WXD_EVENT_TYPE_AUI_PANE_ACTIVATED: return wxEVT_AUI_PANE_ACTIVATED;
         case WXD_EVENT_TYPE_AUI_RENDER: return wxEVT_AUI_RENDER;
+        #endif
         
         // RearrangeList event
         case WXD_EVENT_TYPE_COMMAND_REARRANGE_LIST: return wxEVT_COMMAND_LISTBOX_SELECTED;
@@ -732,7 +734,8 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         // CollapsiblePane event
         case WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED: return wxEVT_COLLAPSIBLEPANE_CHANGED;
         
-        // StyledTextCtrl events
+        // StyledTextCtrl events - only available when stc feature is enabled
+        #if WXD_USE_STC
         case WXD_EVENT_TYPE_STC_CHANGE: return wxEVT_STC_CHANGE;
         case WXD_EVENT_TYPE_STC_STYLENEEDED: return wxEVT_STC_STYLENEEDED;
         case WXD_EVENT_TYPE_STC_CHARADDED: return wxEVT_STC_CHARADDED;
@@ -763,6 +766,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_STC_INDICATOR_RELEASE: return wxEVT_STC_INDICATOR_RELEASE;
         case WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED: return wxEVT_STC_AUTOCOMP_CANCELLED;
         case WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED: return wxEVT_STC_AUTOCOMP_CHAR_DELETED;
+        #endif
         
         default: return wxEVT_NULL;
     }

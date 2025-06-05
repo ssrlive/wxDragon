@@ -22,6 +22,7 @@ pub struct Tool {
 impl Tool {
     /// Creates a Tool wrapper from a toolbar and tool information.
     /// This is typically called by the XRC loading system.
+    #[cfg(feature = "xrc")]
     pub(crate) fn new(toolbar_window: Window, tool_id: Id, tool_name: String) -> Self {
         Self {
             toolbar_window,
@@ -108,6 +109,7 @@ impl Tool {
 
     /// Special XRC loading method for tools.
     /// This looks up the tool by name in the parent toolbar and creates a Tool wrapper.
+    #[cfg(feature = "xrc")]
     pub fn from_xrc_name(toolbar: &crate::widgets::ToolBar, tool_name: &str) -> Option<Self> {
         use crate::xrc::XmlResource;
 

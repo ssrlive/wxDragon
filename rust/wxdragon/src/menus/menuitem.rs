@@ -65,6 +65,7 @@ impl MenuItem {
 
     /// Creates a MenuItem wrapper from XRC information.
     /// This is typically called by the XRC loading system.
+    #[cfg(feature = "xrc")]
     pub(crate) fn new(parent_window: Window, item_id: i32, item_name: String) -> Self {
         Self {
             ptr: std::ptr::null_mut(), // Not used for XRC items
@@ -97,6 +98,7 @@ impl MenuItem {
 
     /// Special XRC loading method for menu items.
     /// This looks up the menu item by name and creates a MenuItem wrapper.
+    #[cfg(feature = "xrc")]
     pub fn from_xrc_name(parent_window: &Window, item_name: &str) -> Option<Self> {
         use crate::xrc::XmlResource;
 

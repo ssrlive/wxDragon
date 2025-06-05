@@ -226,15 +226,21 @@ impl EventType {
     pub const NOTIFICATION_MESSAGE_ACTION: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NOTIFICATION_MESSAGE_ACTION);
 
-    // Media events
+    // Media events - only available when media-ctrl feature is enabled
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_LOADED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_LOADED);
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_STOP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STOP);
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_FINISHED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_FINISHED);
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_STATECHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_STATECHANGED);
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_PLAY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PLAY);
+    #[cfg(feature = "media-ctrl")]
     pub const MEDIA_PAUSE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MEDIA_PAUSE);
 
     pub const EVT_DATE_CHANGED: EventType =
@@ -326,51 +332,87 @@ impl EventType {
     pub const NONE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NULL); // Assuming NULL is 0
 
     // AuiManager events
+    #[cfg(feature = "aui")]
     pub const AUI_PANE_BUTTON: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_BUTTON);
+    #[cfg(feature = "aui")]
     pub const AUI_PANE_CLOSE: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_CLOSE);
+    #[cfg(feature = "aui")]
     pub const AUI_PANE_MAXIMIZE: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE);
+    #[cfg(feature = "aui")]
     pub const AUI_PANE_RESTORE: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_RESTORE);
+    #[cfg(feature = "aui")]
     pub const AUI_PANE_ACTIVATED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_PANE_ACTIVATED);
+    #[cfg(feature = "aui")]
     pub const AUI_RENDER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_AUI_RENDER);
 
     // Timer event
     pub const TIMER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TIMER);
 
-    // StyledTextCtrl events
+    // StyledTextCtrl events - only available when stc feature is enabled
+    #[cfg(feature = "stc")]
     pub const STC_CHANGE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHANGE);
+    #[cfg(feature = "stc")]
     pub const STC_STYLENEEDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_STYLENEEDED);
+    #[cfg(feature = "stc")]
     pub const STC_CHARADDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHARADDED);
+    #[cfg(feature = "stc")]
     pub const STC_SAVEPOINTREACHED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTREACHED);
+    #[cfg(feature = "stc")]
     pub const STC_SAVEPOINTLEFT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTLEFT);
+    #[cfg(feature = "stc")]
     pub const STC_ROMODIFYATTEMPT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT);
+    #[cfg(feature = "stc")]
     pub const STC_KEY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_KEY);
+    #[cfg(feature = "stc")]
     pub const STC_DOUBLECLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DOUBLECLICK);
+    #[cfg(feature = "stc")]
     pub const STC_UPDATEUI: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_UPDATEUI);
+    #[cfg(feature = "stc")]
     pub const STC_MODIFIED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MODIFIED);
+    #[cfg(feature = "stc")]
     pub const STC_MACRORECORD: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MACRORECORD);
+    #[cfg(feature = "stc")]
     pub const STC_MARGINCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MARGINCLICK);
+    #[cfg(feature = "stc")]
     pub const STC_NEEDSHOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_NEEDSHOWN);
+    #[cfg(feature = "stc")]
     pub const STC_PAINTED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_PAINTED);
+    #[cfg(feature = "stc")]
     pub const STC_USERLISTSELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_USERLISTSELECTION);
+    #[cfg(feature = "stc")]
     pub const STC_URIDROPPED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_URIDROPPED);
+    #[cfg(feature = "stc")]
     pub const STC_DWELLSTART: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLSTART);
+    #[cfg(feature = "stc")]
     pub const STC_DWELLEND: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLEND);
+    #[cfg(feature = "stc")]
     pub const STC_START_DRAG: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_START_DRAG);
+    #[cfg(feature = "stc")]
     pub const STC_DRAG_OVER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DRAG_OVER);
+    #[cfg(feature = "stc")]
     pub const STC_DO_DROP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DO_DROP);
+    #[cfg(feature = "stc")]
     pub const STC_ZOOM: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ZOOM);
+    #[cfg(feature = "stc")]
     pub const STC_HOTSPOT_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_CLICK);
+    #[cfg(feature = "stc")]
     pub const STC_HOTSPOT_DCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK);
+    #[cfg(feature = "stc")]
     pub const STC_CALLTIP_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CALLTIP_CLICK);
+    #[cfg(feature = "stc")]
     pub const STC_AUTOCOMP_SELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION);
+    #[cfg(feature = "stc")]
     pub const STC_INDICATOR_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_CLICK);
+    #[cfg(feature = "stc")]
     pub const STC_INDICATOR_RELEASE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_RELEASE);
+    #[cfg(feature = "stc")]
     pub const STC_AUTOCOMP_CANCELLED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED);
+    #[cfg(feature = "stc")]
     pub const STC_AUTOCOMP_CHAR_DELETED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
 
     /// Get the underlying stable C enum value.

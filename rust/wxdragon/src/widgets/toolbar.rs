@@ -312,6 +312,7 @@ impl ToolBar {
 
     /// Gets a tool by its XRC name.
     /// Returns a Tool wrapper that can be used for event binding and operations.
+    #[cfg(feature = "xrc")]
     pub fn get_tool_by_name(&self, tool_name: &str) -> Option<crate::widgets::Tool> {
         use crate::xrc::XmlResource;
 

@@ -27,12 +27,14 @@ pub mod types;
 pub mod utils;
 pub mod widgets;
 pub mod window;
+#[cfg(feature = "xrc")]
 pub mod xrc;
 
 // Re-export the prelude for convenience - users should use this
 pub use prelude::*;
 
 // Re-export procedural macros from wxdragon-macros
+#[cfg(feature = "xrc")]
 pub use wxdragon_macros::include_xrc;
 
 // Re-export XRC macros (these are macro_rules! macros, not procedural macros)

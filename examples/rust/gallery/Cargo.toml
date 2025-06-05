@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # Depend on the safe wrapper crate now
-wxdragon = { path = "../../../rust/wxdragon" }
+wxdragon = { path = "../../../rust/wxdragon", features = ["aui"] }
 image = { version = "0.25.1", default-features = false, features = ["png", "gif"] }
 
 [build-dependencies]

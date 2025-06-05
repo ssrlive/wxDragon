@@ -155,9 +155,11 @@ impl WindowEvents for ScrolledWindow {}
 impl ScrollEvents for ScrolledWindow {}
 
 // Add XRC Support - enables ScrolledWindow to be created from XRC-managed pointers
+#[cfg(feature = "xrc")]
 impl crate::xrc::XrcSupport for ScrolledWindow {
     unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
-        let panel = unsafe { Panel::from_ptr(ptr as *mut ffi::wxd_Panel_t) };
-        Self { panel }
+        ScrolledWindow {
+            panel: unsafe { Panel::from_ptr(ptr as *mut ffi::wxd_Panel_t) },
+        }
     }
 }

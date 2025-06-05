@@ -2,7 +2,9 @@
 
 use crate::id::Id;
 use crate::menus::menuitem::{ItemKind, MenuItem};
+#[cfg(feature = "xrc")]
 use crate::window::Window;
+#[cfg(feature = "xrc")]
 use crate::xrc::XmlResource;
 use std::ffi::CString;
 use std::marker::PhantomData;
@@ -39,12 +41,14 @@ impl Menu {
 
     /// Gets a menu item by its XRC name.
     /// Returns a MenuItem wrapper that can be used for event binding.
+    #[cfg(feature = "xrc")]
     pub fn get_item_by_name(&self, parent_window: &Window, item_name: &str) -> Option<MenuItem> {
         MenuItem::from_xrc_name(parent_window, item_name)
     }
 
     /// Special XRC loading method for menus.
     /// This looks up the menu by name and creates a Menu wrapper.
+    #[cfg(feature = "xrc")]
     pub fn from_xrc_name(menu_name: &str) -> Option<Self> {
         // For now, we'll assume menus are loaded as part of menubar
         // This might need to be extended if we support standalone menu loading
@@ -200,6 +204,7 @@ impl MenuBuilder {
 }
 
 // Add XRC support
+#[cfg(feature = "xrc")]
 impl crate::xrc::XrcSupport for Menu {
     unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
         let menu_ptr = ptr as *mut wxdragon_sys::wxd_Menu_t;

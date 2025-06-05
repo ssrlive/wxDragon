@@ -1,9 +1,14 @@
 pub mod activity_indicator;
 pub mod animation_ctrl;
+#[cfg(feature = "aui")]
 pub mod aui_manager;
+#[cfg(feature = "aui")]
 pub mod aui_mdi_child_frame;
+#[cfg(feature = "aui")]
 pub mod aui_mdi_parent_frame;
+#[cfg(feature = "aui")]
 pub mod aui_notebook;
+#[cfg(feature = "aui")]
 pub mod aui_toolbar;
 pub mod bitmap_button;
 pub mod bitmap_combobox;
@@ -50,6 +55,7 @@ pub mod static_line;
 pub mod static_text;
 pub mod staticbox;
 pub mod statusbar;
+#[cfg(feature = "stc")]
 pub mod styledtextctrl;
 pub mod textctrl;
 pub mod time_picker_ctrl;
@@ -78,10 +84,15 @@ pub use time_picker_ctrl::{TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrl
 // Re-export the main widget types and builders for convenience
 pub use activity_indicator::{ActivityIndicator, ActivityIndicatorBuilder};
 pub use animation_ctrl::{AnimationCtrl, AnimationCtrlBuilder};
+#[cfg(feature = "aui")]
 pub use aui_manager::{AuiManager, AuiPaneInfo, DockDirection};
+#[cfg(feature = "aui")]
 pub use aui_mdi_child_frame::*;
+#[cfg(feature = "aui")]
 pub use aui_mdi_parent_frame::*;
+#[cfg(feature = "aui")]
 pub use aui_notebook::*;
+#[cfg(feature = "aui")]
 pub use aui_toolbar::{AuiToolBar, AuiToolBarBuilder, ItemKind};
 pub use bitmap_button::{BitmapButton, BitmapButtonBuilder};
 pub use bitmap_combobox::{BitmapComboBox, BitmapComboBoxBuilder};
@@ -127,6 +138,7 @@ pub use static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use staticbox::{StaticBox, StaticBoxBuilder};
 pub use statusbar::{StatusBar, StatusBarBuilder};
+#[cfg(feature = "stc")]
 pub use styledtextctrl::{
     StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
     MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
