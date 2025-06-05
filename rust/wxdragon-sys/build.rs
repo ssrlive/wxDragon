@@ -383,6 +383,8 @@ fn main() {
         }
         if cfg!(feature = "webview") {
             println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.2");
+        }
+        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
             println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.2");
         }
         if cfg!(feature = "stc") {
@@ -443,6 +445,8 @@ fn main() {
             }
             if cfg!(feature = "webview") {
                 println!("cargo:rustc-link-lib=static=wxmsw32ud_webview");
+            }
+            if cfg!(feature = "xrc") || cfg!(feature = "webview") {
                 println!("cargo:rustc-link-lib=static=wxmsw32ud_html");
             }
             if cfg!(feature = "stc") {
@@ -488,6 +492,8 @@ fn main() {
             }
             if cfg!(feature = "webview") {
                 println!("cargo:rustc-link-lib=static=wxmsw32u_webview");
+            }
+            if cfg!(feature = "xrc") || cfg!(feature = "webview") {
                 println!("cargo:rustc-link-lib=static=wxmsw32u_html");
             }
             if cfg!(feature = "stc") {
@@ -576,6 +582,8 @@ fn main() {
         }
         if cfg!(feature = "webview") {
             println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.2");
+        }
+        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
             println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.2");
         }
         if cfg!(feature = "media-ctrl") {
