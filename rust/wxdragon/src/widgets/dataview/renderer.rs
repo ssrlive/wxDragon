@@ -5,7 +5,7 @@ use std::ffi::CString;
 use wxdragon_sys as ffi;
 
 // Type aliases for custom renderer callbacks to reduce complexity
-type GetSizeCallback = Box<dyn Fn() -> crate::geometry::Size + 'static>;
+type GetSizeCallback = Box<dyn Fn(&super::Variant, crate::geometry::Size) -> crate::geometry::Size + 'static>;
 // Simple render callback that receives the variant directly
 type RenderCallback = Box<dyn Fn(crate::geometry::Rect, &RenderContext, i32, &super::Variant) -> bool + 'static>;
 type SetValueCallback = Box<dyn Fn(&super::Variant) -> bool + 'static>;
@@ -528,9 +528,32 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the callback for determining the size needed for rendering.
+    /// 
+    /// The callback receives the variant value and the default cell size,
+    /// allowing for more intelligent sizing based on content.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// .with_get_size(|variant, default_size| {
+    ///     match variant {
+    ///         Variant::String(s) => {
+    ///             // Size based on text length
+    ///             let char_width = 8; // approximate character width
+    ///             Size::new(s.len() as i32 * char_width, default_size.height)
+    ///         }
+    ///         Variant::Int32(i) => {
+    ///             // Size for progress bar based on value
+    ///             let progress_width = 100;
+    ///             Size::new(progress_width, default_size.height)
+    ///         }
+    ///         _ => default_size // Use default size for other types
+    ///     }
+    /// })
+    /// ```
     pub fn with_get_size<F>(mut self, callback: F) -> Self
     where
-        F: Fn() -> crate::geometry::Size + 'static,
+        F: Fn(&super::Variant, crate::geometry::Size) -> crate::geometry::Size + 'static,
     {
         self.get_size = Some(Box::new(callback));
         self
@@ -723,10 +746,23 @@ extern "C" fn get_size_trampoline(user_data: *mut std::ffi::c_void) -> ffi::wxd_
 
     let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
     if let Some(ref callback) = callbacks.get_size {
-        let size = callback();
-        ffi::wxd_Size_t {
-            width: size.width,
-            height: size.height,
+        // Get the current variant value
+        let current_value = callbacks.current_value.borrow();
+        
+        // Provide a default cell size - this could be made configurable or
+        // derived from the widget's font metrics in a future enhancement
+        let default_size = crate::geometry::Size::new(80, 20);
+        
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            callback(&current_value, default_size)
+        }));
+        
+        match result {
+            Ok(size) => ffi::wxd_Size_t {
+                width: size.width,
+                height: size.height,
+            },
+            Err(_) => ffi::wxd_Size_t { width: 50, height: 20 }
         }
     } else {
         ffi::wxd_Size_t { width: 50, height: 20 }

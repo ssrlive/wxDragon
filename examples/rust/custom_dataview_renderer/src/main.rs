@@ -43,7 +43,7 @@ fn main() {
             .variant_type(VariantType::Int32)
             .mode(DataViewCellMode::Inert)
             .align(DataViewAlign::Center)
-            .with_get_size(|| Size::new(100, 20))
+            .with_get_size(|_variant, _default_size| Size::new(100, 20))
             .with_render(|rect, ctx, _state, variant| {
                 // Pattern match on the variant to get the progress value
                 if let Variant::Int32(progress) = variant {
@@ -82,7 +82,16 @@ fn main() {
             .variant_type(VariantType::String)
             .mode(DataViewCellMode::Inert)
             .align(DataViewAlign::Center)
-            .with_get_size(|| Size::new(120, 20))
+            .with_get_size(|variant, default_size| {
+                // Size based on content - longer status strings get more width
+                if let Variant::String(status) = variant {
+                    let base_width = 120;
+                    let extra_width = status.len().saturating_sub(8) as i32 * 8; // 8 pixels per extra char
+                    Size::new(base_width + extra_width, default_size.height)
+                } else {
+                    default_size
+                }
+            })
             .with_render(|rect, ctx, _state, variant| {
                 // Pattern match on the variant to get the status string
                 if let Variant::String(status) = variant {

@@ -296,3 +296,8 @@
 ## 0.1.0
 
 - Initial release of wxdragon and wxdragon-sys
+
+## [Unreleased]
+
+### Enhanced
+- **DataViewCustomRenderer GetSizeCallback**: Enhanced the `GetSizeCallback` signature to receive both the variant value and default cell size as parameters, making it more practical for content-aware sizing. The callback now has the signature `Fn(&Variant, Size) -> Size` instead of `Fn() -> Size`, allowing renderers to adjust their size based on the actual data content.
