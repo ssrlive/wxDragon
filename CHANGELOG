@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.5
+
+### Bug Fixes
+- **XRC Loading from String**: Fixed critical UTF-8 encoding bug in `wxd_XmlResource_LoadFromString` function
+  - Corrected memory stream size calculation to use actual UTF-8 byte length instead of Unicode character count
+  - Fixed truncated XRC data when loading XML with non-ASCII characters (e.g., Chinese characters)
+  - Resolved "Failed to parse XML document" errors when using wxFormBuilder-generated XRC files
+  - **wxDragon is now fully compatible with wxFormBuilder-generated XRC files without requiring manual cleanup**
+
+### Enhancements
+- **DataViewCustomRenderer GetSizeCallback**: Enhanced the `GetSizeCallback` signature to receive both the variant value and default cell size as parameters, making it more practical for content-aware sizing
+  - The callback now has the signature `Fn(&Variant, Size) -> Size` instead of `Fn() -> Size`
+  - Allows renderers to adjust their size based on the actual data content
+
 ## 0.6.4
 
 ### New Features
@@ -297,7 +311,3 @@
 
 - Initial release of wxdragon and wxdragon-sys
 
-## [Unreleased]
-
-### Enhanced
-- **DataViewCustomRenderer GetSizeCallback**: Enhanced the `GetSizeCallback` signature to receive both the variant value and default cell size as parameters, making it more practical for content-aware sizing. The callback now has the signature `Fn(&Variant, Size) -> Size` instead of `Fn() -> Size`, allowing renderers to adjust their size based on the actual data content.
