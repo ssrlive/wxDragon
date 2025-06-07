@@ -39,7 +39,8 @@ extern "C" WXD_EXPORTED bool wxd_XmlResource_LoadFromString(wxd_XmlResource_t* s
     
     // Create a memory input stream from the string data
     wxString xmlString = wxString::FromUTF8(xrc_data);
-    wxMemoryInputStream stream(xmlString.mb_str(wxConvUTF8), xmlString.length());
+    wxCharBuffer utf8Buffer = xmlString.mb_str(wxConvUTF8);
+    wxMemoryInputStream stream(utf8Buffer.data(), utf8Buffer.length());
     
     // Create an XML document and load from the stream
     wxXmlDocument* doc = new wxXmlDocument();
