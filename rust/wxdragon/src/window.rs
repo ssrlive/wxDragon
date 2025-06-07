@@ -612,6 +612,24 @@ pub trait WxWidget {
         self.set_extra_style_raw(current_style & !style.bits());
     }
 
+    /// Gets the parent window of this widget.
+    /// 
+    /// # Returns
+    /// `Some(Window)` if the widget has a parent, `None` if it's a top-level window or an error occurs.
+    fn get_parent(&self) -> Option<Window> {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return None;
+        }
+        
+        let parent_ptr = unsafe { ffi::wxd_Window_GetParent(handle) };
+        if parent_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Window::from_ptr(parent_ptr) })
+        }
+    }
+
     // Other common methods (SetSize, GetSize, etc.) can be added here
     // if corresponding wxd_Window_* functions are added to the C API.
 }

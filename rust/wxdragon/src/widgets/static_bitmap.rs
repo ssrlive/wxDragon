@@ -123,6 +123,12 @@ impl StaticBitmap {
                 bitmap.as_ptr(),
             );
         }
+        
+        // Trigger refresh on parent to update the display
+        if let Some(parent) = self.window.get_parent() {
+            parent.refresh(true, None);
+            parent.layout();
+        }
     }
 
     /// Sets or replaces the bitmap bundle shown in the control.
@@ -134,6 +140,12 @@ impl StaticBitmap {
                 self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t,
                 bundle.as_ptr(),
             );
+        }
+        
+        // Trigger refresh on parent to update the display
+        if let Some(parent) = self.window.get_parent() {
+            parent.refresh(true, None);
+            parent.layout();
         }
     }
 
@@ -166,6 +178,12 @@ impl StaticBitmap {
                 self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t,
                 mode.to_raw(),
             );
+        }
+        
+        // Trigger refresh on parent to apply the new scale mode
+        if let Some(parent) = self.window.get_parent() {
+            parent.refresh(true, None);
+            parent.layout();
         }
     }
 
