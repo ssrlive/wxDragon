@@ -133,7 +133,7 @@ pub use spinbutton::{SpinButton, SpinButtonBuilder};
 pub use spinctrl::{SpinCtrl, SpinCtrlBuilder};
 pub use spinctrl_double::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
 pub use splitter_window::{SplitterWindow, SplitterWindowBuilder};
-pub use static_bitmap::{StaticBitmap, StaticBitmapBuilder};
+pub use static_bitmap::{StaticBitmap, StaticBitmapBuilder, ScaleMode};
 pub use static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use staticbox::{StaticBox, StaticBoxBuilder};

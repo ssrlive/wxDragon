@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.6
+
+### New Features
+- **StaticBitmap Scale Mode Support**: Added comprehensive scale mode functionality for StaticBitmap widget
+  - Added `ScaleMode` enum with variants: `None`, `Fill`, `AspectFit`, and `AspectFill`
+  - Added `set_scale_mode()` and `get_scale_mode()` methods to StaticBitmap
+  - Added `with_scale_mode()` builder method for convenient scale mode configuration
+  - Enhanced StaticBitmap builder to support scale mode initialization
+  - Scale modes control how bitmaps are displayed within the control boundaries:
+    - `None`: Display bitmap at original size (no scaling)
+    - `Fill`: Scale to fill entire control (may change aspect ratio)
+    - `AspectFit`: Scale to fit within control while maintaining aspect ratio
+    - `AspectFill`: Scale to fill control while maintaining aspect ratio (may crop)
+
+### Enhancements
+- **API Exports**: Added `ScaleMode` enum to public API exports in prelude and widgets module
+- **FFI Layer**: Extended C++ bindings with `wxd_StaticBitmap_SetScaleMode` and `wxd_StaticBitmap_GetScaleMode` functions
+- **Type Safety**: Implemented safe conversion between Rust enum and C++ scale mode constants
+
 ## 0.6.5
 
 ### Bug Fixes

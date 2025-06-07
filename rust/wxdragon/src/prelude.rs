@@ -156,7 +156,7 @@ pub use crate::widgets::splitter_window::{
     SplitterWindowStyle,
     // Events for SplitterWindow are now in splitterwindow/event.rs, re-exported from splitterwindow/mod.rs
 }; // Added Style & Events
-pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder, StaticBitmapStyle}; // Added Style
+pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder, StaticBitmapStyle, ScaleMode}; // Added Style & ScaleMode
 pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder, StaticBoxStyle}; // Added Style

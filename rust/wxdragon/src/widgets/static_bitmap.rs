@@ -21,6 +21,38 @@ widget_style_enum!(
     default_variant: Default
 );
 
+/// Scale modes for how the bitmap is scaled within the StaticBitmap control.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
+pub enum ScaleMode {
+    /// No scaling - display the bitmap at its original size.
+    None = ffi::WXD_StaticBitmap_Scale_None as i32,
+    /// Scale the bitmap to fill the entire control, potentially changing aspect ratio.
+    Fill = ffi::WXD_StaticBitmap_Scale_Fill as i32,
+    /// Scale the bitmap to fit within the control while maintaining aspect ratio.
+    AspectFit = ffi::WXD_StaticBitmap_Scale_AspectFit as i32,
+    /// Scale the bitmap to fill the control while maintaining aspect ratio (may crop).
+    AspectFill = ffi::WXD_StaticBitmap_Scale_AspectFill as i32,
+}
+
+impl ScaleMode {
+    /// Convert from raw integer value to ScaleMode enum.
+    pub fn from_raw(value: i32) -> Self {
+        match value {
+            x if x == ffi::WXD_StaticBitmap_Scale_None as i32 => ScaleMode::None,
+            x if x == ffi::WXD_StaticBitmap_Scale_Fill as i32 => ScaleMode::Fill,
+            x if x == ffi::WXD_StaticBitmap_Scale_AspectFit as i32 => ScaleMode::AspectFit,
+            x if x == ffi::WXD_StaticBitmap_Scale_AspectFill as i32 => ScaleMode::AspectFill,
+            _ => ScaleMode::None, // Default to None for unknown values
+        }
+    }
+
+    /// Convert ScaleMode enum to raw integer value.
+    pub fn to_raw(self) -> i32 {
+        self as i32
+    }
+}
+
 /// Represents a wxStaticBitmap widget, used to display a bitmap.
 #[derive(Clone)]
 pub struct StaticBitmap {
@@ -121,6 +153,33 @@ impl StaticBitmap {
             }
         }
     }
+
+    /// Sets the scale mode for how the bitmap is displayed within the control.
+    ///
+    /// This determines how the bitmap is scaled to fit the control's size.
+    /// 
+    /// # Arguments
+    /// * `mode` - The scale mode to use
+    pub fn set_scale_mode(&self, mode: ScaleMode) {
+        unsafe {
+            ffi::wxd_StaticBitmap_SetScaleMode(
+                self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t,
+                mode.to_raw(),
+            );
+        }
+    }
+
+    /// Gets the current scale mode of the control.
+    ///
+    /// Returns the scale mode that determines how the bitmap is scaled within the control.
+    pub fn get_scale_mode(&self) -> ScaleMode {
+        unsafe {
+            let raw_mode = ffi::wxd_StaticBitmap_GetScaleMode(
+                self.window.handle_ptr() as *mut ffi::wxd_StaticBitmap_t
+            );
+            ScaleMode::from_raw(raw_mode)
+        }
+    }
 }
 
 widget_builder!(
@@ -130,13 +189,14 @@ widget_builder!(
     fields: {
         bitmap: Option<Bitmap> = None,
         bitmap_bundle: Option<BitmapBundle> = None,
+        scale_mode: Option<ScaleMode> = None,
         name: String = "StaticBitmap".to_string()
     },
     build_impl: |slf| {
         let name_cstr = CString::new(&slf.name[..]).unwrap_or_default();
 
         // Prioritize BitmapBundle if both are set
-        if let Some(bundle) = &slf.bitmap_bundle {
+        let static_bitmap = if let Some(bundle) = &slf.bitmap_bundle {
             unsafe {
                 let ptr = ffi::wxd_StaticBitmap_CreateWithBitmapBundle(
                     slf.parent.handle_ptr(),
@@ -147,7 +207,7 @@ widget_builder!(
                 if ptr.is_null() {
                     panic!("Failed to create StaticBitmap widget with BitmapBundle");
                 }
-                return StaticBitmap::from_ptr(ptr);
+                StaticBitmap::from_ptr(ptr)
             }
         } else if let Some(bmp) = &slf.bitmap {
             unsafe {
@@ -164,11 +224,18 @@ widget_builder!(
                 if ptr.is_null() {
                     panic!("Failed to create StaticBitmap widget");
                 }
-                return StaticBitmap::from_ptr(ptr);
+                StaticBitmap::from_ptr(ptr)
             }
+        } else {
+            panic!("Either bitmap or bitmap_bundle must be set for StaticBitmap");
+        };
+
+        // Set scale mode if specified
+        if let Some(mode) = slf.scale_mode {
+            static_bitmap.set_scale_mode(mode);
         }
 
-        panic!("Either bitmap or bitmap_bundle must be set for StaticBitmap");
+        static_bitmap
     }
 );
 

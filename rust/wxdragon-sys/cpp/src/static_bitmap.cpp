@@ -133,4 +133,31 @@ WXD_EXPORTED void wxd_StaticBitmap_SetBitmapBundle(wxd_StaticBitmap_t* self, wxd
     if (!statBmp) return;
 
     statBmp->SetBitmap(bundle ? *bundlePtr : wxBitmapBundle());
+}
+
+/**
+ * @brief Sets the scale mode for the static bitmap control.
+ *
+ * The scale mode determines how the bitmap is scaled within the control.
+ * Available modes are defined in the WXD_StaticBitmap_Scale_* constants.
+ */
+WXD_EXPORTED void wxd_StaticBitmap_SetScaleMode(wxd_StaticBitmap_t* self, int scaleMode) {
+    wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+    if (!statBmp) return;
+
+    wxStaticBitmap::ScaleMode mode = static_cast<wxStaticBitmap::ScaleMode>(scaleMode);
+    statBmp->SetScaleMode(mode);
+}
+
+/**
+ * @brief Gets the current scale mode of the static bitmap control.
+ *
+ * Returns the current scale mode as an integer value corresponding to
+ * the WXD_StaticBitmap_Scale_* constants.
+ */
+WXD_EXPORTED int wxd_StaticBitmap_GetScaleMode(wxd_StaticBitmap_t* self) {
+    wxStaticBitmap* statBmp = reinterpret_cast<wxStaticBitmap*>(self);
+    if (!statBmp) return 0; // Default to Scale_None
+
+    return static_cast<int>(statBmp->GetScaleMode());
 } 
