@@ -83,21 +83,16 @@ impl MediaCtrlEventData {
 }
 
 /// Represents a seek mode for media controls and similar use cases
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum SeekMode {
     /// Seek from start of media (offset is positive from the beginning)
+    #[default]
     FromStart = 0, // wxFromStart
     /// Seek from current position (offset can be negative or positive)
     FromCurrent = 1, // wxFromCurrent
     /// Seek from end of media (offset is usually negative from the end)
     FromEnd = 2, // wxFromEnd
-}
-
-impl Default for SeekMode {
-    fn default() -> Self {
-        SeekMode::FromStart
-    }
 }
 
 /// A wxWidgets media player control

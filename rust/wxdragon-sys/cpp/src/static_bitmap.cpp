@@ -133,7 +133,7 @@ WXD_EXPORTED void wxd_StaticBitmap_SetBitmapBundle(wxd_StaticBitmap_t* self, wxd
     if (!statBmp) return;
 
     statBmp->SetBitmap(bundle ? *bundlePtr : wxBitmapBundle());
-}
+} 
 
 /**
  * @brief Sets the scale mode for the static bitmap control.

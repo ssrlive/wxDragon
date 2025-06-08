@@ -114,4 +114,60 @@ WXD_EXPORTED wxd_Bitmap_t* wxd_Bitmap_Clone(wxd_Bitmap_t* bitmap) {
         return nullptr;
     }
     return reinterpret_cast<wxd_Bitmap_t*>(cloned_bmp);
+}
+
+// Extract RGBA data from bitmap
+WXD_EXPORTED unsigned char* wxd_Bitmap_GetRGBAData(wxd_Bitmap_t* bitmap) {
+    if (!bitmap) {
+        return nullptr;
+    }
+    
+    wxBitmap* bmp = reinterpret_cast<wxBitmap*>(bitmap);
+    if (!bmp || !bmp->IsOk()) {
+        return nullptr;
+    }
+    
+    // Convert bitmap to image to access pixel data
+    wxImage image = bmp->ConvertToImage();
+    if (!image.IsOk()) {
+        return nullptr;
+    }
+    
+    int width = image.GetWidth();
+    int height = image.GetHeight();
+    size_t num_pixels = static_cast<size_t>(width) * static_cast<size_t>(height);
+    size_t rgba_data_size = num_pixels * 4; // 4 bytes per pixel (RGBA)
+    
+    // Allocate memory for RGBA data
+    unsigned char* rgba_data = static_cast<unsigned char*>(malloc(rgba_data_size));
+    if (!rgba_data) {
+        return nullptr;
+    }
+    
+    // Get RGB and alpha data from image
+    unsigned char* rgb_data = image.GetData();
+    unsigned char* alpha_data = image.GetAlpha();
+    
+    // Combine RGB and alpha into RGBA format
+    for (size_t i = 0; i < num_pixels; ++i) {
+        rgba_data[i * 4 + 0] = rgb_data[i * 3 + 0]; // R
+        rgba_data[i * 4 + 1] = rgb_data[i * 3 + 1]; // G
+        rgba_data[i * 4 + 2] = rgb_data[i * 3 + 2]; // B
+        
+        // Set alpha channel (255 if no alpha data available)
+        if (alpha_data) {
+            rgba_data[i * 4 + 3] = alpha_data[i]; // A
+        } else {
+            rgba_data[i * 4 + 3] = 255; // Fully opaque
+        }
+    }
+    
+    return rgba_data;
+}
+
+// Free RGBA data allocated by wxd_Bitmap_GetRGBAData
+WXD_EXPORTED void wxd_Bitmap_FreeRGBAData(unsigned char* data) {
+    if (data) {
+        free(data);
+    }
 } 

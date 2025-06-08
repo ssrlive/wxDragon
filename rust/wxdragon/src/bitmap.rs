@@ -128,6 +128,56 @@ impl Bitmap {
         }
         unsafe { ffi::wxd_Bitmap_IsOk(self.ptr) }
     }
+
+    /// Extracts the raw RGBA pixel data from the bitmap.
+    ///
+    /// Returns a vector containing RGBA pixel data where each pixel is represented
+    /// by 4 consecutive bytes: R, G, B, A. The data is ordered row by row from
+    /// top to bottom, left to right within each row.
+    ///
+    /// # Returns
+    /// - `Some(Vec<u8>)` containing RGBA data if extraction succeeds
+    /// - `None` if the bitmap is invalid or extraction fails
+    ///
+    /// # Example
+    /// ```rust
+    /// # use wxdragon::prelude::*;
+    /// # fn example() -> Option<()> {
+    /// let bitmap = Bitmap::new(100, 100)?;
+    /// let rgba_data = bitmap.get_rgba_data()?;
+    /// 
+    /// // Each pixel takes 4 bytes (RGBA)
+    /// assert_eq!(rgba_data.len(), 100 * 100 * 4);
+    /// 
+    /// // Use with image crate:
+    /// // let img = image::RgbaImage::from_raw(100, 100, rgba_data)?;
+    /// # Some(())
+    /// # }
+    /// ```
+    pub fn get_rgba_data(&self) -> Option<Vec<u8>> {
+        if self.ptr.is_null() || !self.is_ok() {
+            return None;
+        }
+
+        unsafe {
+            let data_ptr = ffi::wxd_Bitmap_GetRGBAData(self.ptr);
+            if data_ptr.is_null() {
+                return None;
+            }
+
+            let width = self.get_width() as usize;
+            let height = self.get_height() as usize;
+            let data_len = width * height * 4; // 4 bytes per pixel (RGBA)
+
+            // Copy the data from C++ allocated memory to Rust Vec
+            let rgba_data = std::slice::from_raw_parts(data_ptr, data_len).to_vec();
+
+            // Free the C++ allocated memory
+            ffi::wxd_Bitmap_FreeRGBAData(data_ptr);
+
+            Some(rgba_data)
+        }
+    }
 }
 
 impl Clone for Bitmap {

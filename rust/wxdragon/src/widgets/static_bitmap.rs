@@ -245,7 +245,7 @@ widget_builder!(
                 StaticBitmap::from_ptr(ptr)
             }
         } else {
-            panic!("Either bitmap or bitmap_bundle must be set for StaticBitmap");
+        panic!("Either bitmap or bitmap_bundle must be set for StaticBitmap");
         };
 
         // Set scale mode if specified

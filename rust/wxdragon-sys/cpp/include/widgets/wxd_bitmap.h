@@ -11,4 +11,8 @@ WXD_EXPORTED int wxd_Bitmap_GetHeight(wxd_Bitmap_t* bitmap);
 WXD_EXPORTED bool wxd_Bitmap_IsOk(wxd_Bitmap_t* bitmap);
 WXD_EXPORTED wxd_Bitmap_t* wxd_Bitmap_Clone(wxd_Bitmap_t* bitmap);
 
+// Extract RGBA data from bitmap
+WXD_EXPORTED unsigned char* wxd_Bitmap_GetRGBAData(wxd_Bitmap_t* bitmap);
+WXD_EXPORTED void wxd_Bitmap_FreeRGBAData(unsigned char* data);
+
 #endif // WXD_BITMAP_H 

@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.6.8
+
+### New Features
+- **Bitmap RGBA Data Extraction**: Added `get_rgba_data()` method to `Bitmap` for seamless integration with Rust image processing libraries
+  - Extracts raw RGBA pixel data as `Vec<u8>` with 4 bytes per pixel (R, G, B, A)
+  - Data is ordered row by row from top to bottom, left to right within each row
+  - Handles both alpha and non-alpha bitmaps (non-alpha defaults to fully opaque)
+  - Perfect for integration with the `image` crate: `image::RgbaImage::from_raw(width, height, rgba_data)`
+  - Added comprehensive documentation with usage examples
+  - Includes proper memory management with C++ allocated data cleanup
+
+### Enhancements
+- **FFI Layer**: Added `wxd_Bitmap_GetRGBAData()` and `wxd_Bitmap_FreeRGBAData()` C++ functions
+  - Utilizes wxWidgets' `ConvertToImage()` and pixel data extraction APIs
+  - Safe memory allocation and deallocation patterns
+  - Proper alpha channel handling for all bitmap types
+
+### Bug Fixes
+- **MediaCtrl SeekMode**: Fixed clippy warning by using `#[derive(Default)]` instead of manual implementation
+
+## 0.6.7
+
+### Enhancements
+- **WxWidget Trait**: Added `get_parent()` method to `WxWidget` trait for accessing parent windows
+  - Returns `Option<Window>` - `Some(Window)` if widget has a parent, `None` for top-level windows
+  - Enables child widgets to trigger refresh and layout updates on their parent containers
+  - Improves widget update behavior by allowing proper parent notification
+- **StaticBitmap Refresh Enhancement**: Enhanced StaticBitmap methods to refresh parent containers
+  - Updated `set_scale_mode()`, `set_bitmap()`, and `set_bitmap_bundle()` to refresh parent instead of self
+  - Ensures immediate visual updates when bitmap content or scaling changes
+  - Eliminates the need to manually resize windows to see changes
+
 ## 0.6.6
 
 ### New Features
@@ -14,17 +46,7 @@
     - `AspectFit`: Scale to fit within control while maintaining aspect ratio
     - `AspectFill`: Scale to fill control while maintaining aspect ratio (may crop)
 
-### Bug Fixes
-- **StaticBitmap Display Refresh**: Fixed issue where setting scale mode or bitmap didn't immediately update the display
-  - Added automatic parent refresh and layout calls to `set_scale_mode()`, `set_bitmap()`, and `set_bitmap_bundle()` methods
-  - Eliminates the need to manually resize the window to see scale mode changes applied
-  - Ensures bitmap scaling is immediately visible when scale mode or bitmap content changes
-
 ### Enhancements
-- **WxWidget Trait**: Added `get_parent()` method to `WxWidget` trait for accessing parent windows
-  - Returns `Option<Window>` - `Some(Window)` if widget has a parent, `None` for top-level windows
-  - Enables child widgets to trigger refresh and layout updates on their parent containers
-  - Improves widget update behavior by allowing proper parent notification
 - **API Exports**: Added `ScaleMode` enum to public API exports in prelude and widgets module
 - **FFI Layer**: Extended C++ bindings with `wxd_StaticBitmap_SetScaleMode` and `wxd_StaticBitmap_GetScaleMode` functions
 - **Type Safety**: Implemented safe conversion between Rust enum and C++ scale mode constants
