@@ -591,8 +591,10 @@ fn main() {
                 println!("cargo:rustc-link-lib=static=wxzlib");
                 println!("cargo:rustc-link-lib=static=wxexpat");
             }
-
-            println!("cargo:rustc-link-lib=stdc++");
+            
+            if target_env == "gnu" {
+                println!("cargo:rustc-link-lib=stdc++");
+            }
         }
 
         // System libraries (same for debug and release)
