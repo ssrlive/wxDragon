@@ -431,7 +431,7 @@ fn main() {
             println!("cargo:rustc-link-lib=framework=AVKit");
             println!("cargo:rustc-link-lib=framework=CoreMedia");
         }
-    } else if target_os == "windows" {
+    } else if target_os == "windows" && target_env == "msvc" {
         if is_debug {
             println!("info: Using DEBUG linking flags for Windows");
             // wxWidgets debug libraries from user's ll output
@@ -455,6 +455,8 @@ fn main() {
             }
             if cfg!(feature = "stc") {
                 println!("cargo:rustc-link-lib=static=wxmsw33ud_stc");
+                println!("cargo:rustc-link-lib=static=wxscintillad");
+                println!("cargo:rustc-link-lib=static=wxlexillad");
             }
             if cfg!(feature = "xrc") {
                 println!("cargo:rustc-link-lib=static=wxmsw33ud_xrc");
@@ -468,12 +470,6 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxregexud");
             println!("cargo:rustc-link-lib=static=wxzlibd");
             println!("cargo:rustc-link-lib=static=wxexpatd");
-
-            // Conditional STC support libraries for Windows debug
-            if cfg!(feature = "stc") {
-                println!("cargo:rustc-link-lib=static=wxscintillad");
-                println!("cargo:rustc-link-lib=static=wxlexillad");
-            }
 
             if target_env == "msvc" {
                 println!("cargo:rustc-link-lib=stdc++");
@@ -503,6 +499,8 @@ fn main() {
             }
             if cfg!(feature = "stc") {
                 println!("cargo:rustc-link-lib=static=wxmsw33u_stc");
+                println!("cargo:rustc-link-lib=static=wxscintilla");
+                println!("cargo:rustc-link-lib=static=wxlexilla");
             }
             if cfg!(feature = "xrc") {
                 println!("cargo:rustc-link-lib=static=wxmsw33u_xrc");
@@ -516,18 +514,14 @@ fn main() {
             println!("cargo:rustc-link-lib=static=wxregexu");
             println!("cargo:rustc-link-lib=static=wxzlib");
             println!("cargo:rustc-link-lib=static=wxexpat");
-
-            // Conditional STC support libraries for Windows release
-            if cfg!(feature = "stc") {
-                println!("cargo:rustc-link-lib=static=wxscintilla");
-                println!("cargo:rustc-link-lib=static=wxlexilla");
-            }
         }
 
         // System libraries (same for debug and release)
         println!("cargo:rustc-link-lib=kernel32");
         println!("cargo:rustc-link-lib=user32");
         println!("cargo:rustc-link-lib=gdi32");
+        println!("cargo:rustc-link-lib=gdiplus"); // Add GDI+ library for graphics support
+        println!("cargo:rustc-link-lib=msimg32"); // Add for AlphaBlend and GradientFill functions
         println!("cargo:rustc-link-lib=comdlg32");
         println!("cargo:rustc-link-lib=winspool");
         println!("cargo:rustc-link-lib=winmm");
@@ -545,26 +539,83 @@ fn main() {
         println!("cargo:rustc-link-lib=oleacc");
         println!("cargo:rustc-link-lib=uxtheme");
         println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
+    } else if target_os == "windows" && target_env == "gnu" {
+        println!("info: Using linking flags for Windows via gnu");
+        // wxWidgets debug libraries from user's ll output
+        println!("cargo:rustc-link-lib=static=wx_mswu_core-3.3-Windows");
+        println!("cargo:rustc-link-lib=static=wx_mswu_adv-3.3-Windows");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.3-Windows");
+        println!("cargo:rustc-link-lib=static=wx_mswu_gl-3.3-Windows");
+        println!("cargo:rustc-link-lib=static=wx_mswu_propgrid-3.3-Windows");
 
-        // C++ runtime linking
-        if target_env == "gnu" {
-            if is_macos_to_windows_gnu {
-                println!(
-                    "info: Using static linking for cross-compilation from macOS to Windows GNU"
-                );
-                // Static linking for cross-compilation to avoid runtime dependencies
-                println!("cargo:rustc-link-lib=static=stdc++");
-                println!("cargo:rustc-link-lib=static=gcc");
-                println!("cargo:rustc-link-lib=static=gcc_eh");
-                println!("cargo:rustc-link-lib=static=pthread");
-                // Add linker arguments for fully static C++ runtime
-                println!("cargo:rustc-link-arg=-static-libgcc");
-                println!("cargo:rustc-link-arg=-static-libstdc++");
-            } else {
-                // Default dynamic linking for native Windows builds
-                println!("cargo:rustc-link-lib=stdc++");
-            }
+        // Conditional features for Windows debug
+        if cfg!(feature = "aui") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_aui-3.3-Windows");
         }
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_media-3.3-Windows");
+        }
+        if cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_webview-3.3-Windows");
+        }
+        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_html-3.3-Windows");
+        }
+        if cfg!(feature = "stc") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_stc-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+            println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
+        }
+        if cfg!(feature = "xrc") {
+            println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3-Windows");
+        }
+
+        println!("cargo:rustc-link-lib=static=wxpng-3.3");
+        println!("cargo:rustc-link-lib=static=wxtiff-3.3");
+        println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
+        println!("cargo:rustc-link-lib=static=wxregexu-3.3");
+        println!("cargo:rustc-link-lib=static=wxzlib-3.3");
+        println!("cargo:rustc-link-lib=static=wxexpat-3.3");
+
+        if is_macos_to_windows_gnu {
+            println!("info: Using static linking for cross-compilation from macOS to Windows GNU");
+            // Static linking for cross-compilation to avoid runtime dependencies
+            println!("cargo:rustc-link-lib=static=stdc++");
+            println!("cargo:rustc-link-lib=static=gcc");
+            println!("cargo:rustc-link-lib=static=gcc_eh");
+            println!("cargo:rustc-link-lib=static=pthread");
+            // Add linker arguments for fully static C++ runtime
+            println!("cargo:rustc-link-arg=-static-libgcc");
+            println!("cargo:rustc-link-arg=-static-libstdc++");
+        } else {
+            // Default dynamic linking for native Windows builds
+            println!("cargo:rustc-link-lib=stdc++");
+        }
+
+        // System libraries (same for debug and release)
+        println!("cargo:rustc-link-lib=kernel32");
+        println!("cargo:rustc-link-lib=user32");
+        println!("cargo:rustc-link-lib=gdi32");
+        println!("cargo:rustc-link-lib=gdiplus"); // Add GDI+ library for graphics support
+        println!("cargo:rustc-link-lib=msimg32"); // Add for AlphaBlend and GradientFill functions
+        println!("cargo:rustc-link-lib=comdlg32");
+        println!("cargo:rustc-link-lib=winspool");
+        println!("cargo:rustc-link-lib=winmm");
+        println!("cargo:rustc-link-lib=shell32");
+        println!("cargo:rustc-link-lib=shlwapi");
+        println!("cargo:rustc-link-lib=comctl32");
+        println!("cargo:rustc-link-lib=ole32");
+        println!("cargo:rustc-link-lib=oleaut32");
+        println!("cargo:rustc-link-lib=uuid");
+        println!("cargo:rustc-link-lib=rpcrt4");
+        println!("cargo:rustc-link-lib=advapi32");
+        println!("cargo:rustc-link-lib=version");
+        println!("cargo:rustc-link-lib=ws2_32");
+        println!("cargo:rustc-link-lib=wininet");
+        println!("cargo:rustc-link-lib=oleacc");
+        println!("cargo:rustc-link-lib=uxtheme");
+        println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
     } else {
         println!("cargo:rustc-link-lib=xkbcommon");
         let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
