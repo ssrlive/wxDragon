@@ -269,6 +269,42 @@ fn main() {
         wxwidgets_build_dir
     );
 
+    // Debug: List actual library files for troubleshooting
+    if target_os == "windows" && target_env == "gnu" {
+        let lib_dir = wxwidgets_build_dir.join("lib");
+        println!("info: === DEBUG: Listing contents of {:?} ===", lib_dir);
+        if lib_dir.exists() {
+            match std::fs::read_dir(&lib_dir) {
+                Ok(entries) => {
+                    for entry in entries {
+                        if let Ok(entry) = entry {
+                            println!("info: Found library file: {:?}", entry.file_name());
+                        }
+                    }
+                }
+                Err(e) => println!("info: Error reading lib directory: {}", e),
+            }
+        } else {
+            println!("info: Library directory does not exist: {:?}", lib_dir);
+        }
+
+        // Also check the gcc_x64_lib subdirectory
+        let gcc_lib_dir = lib_dir.join("gcc_x64_lib");
+        if gcc_lib_dir.exists() {
+            println!("info: === DEBUG: Listing contents of {:?} ===", gcc_lib_dir);
+            match std::fs::read_dir(&gcc_lib_dir) {
+                Ok(entries) => {
+                    for entry in entries {
+                        if let Ok(entry) = entry {
+                            println!("info: Found GCC library file: {:?}", entry.file_name());
+                        }
+                    }
+                }
+                Err(e) => println!("info: Error reading gcc lib directory: {}", e),
+            }
+        }
+    }
+
     // --- 4. Linker Instructions ---
     println!(
         "cargo:rustc-link-search=native={}",
@@ -541,34 +577,70 @@ fn main() {
         println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
     } else if target_os == "windows" && target_env == "gnu" {
         println!("info: Using linking flags for Windows via gnu");
-        // wxWidgets debug libraries from user's ll output
-        println!("cargo:rustc-link-lib=static=wx_mswu_core-3.3-Windows");
-        println!("cargo:rustc-link-lib=static=wx_mswu_adv-3.3-Windows");
-        println!("cargo:rustc-link-lib=static=wx_baseu-3.3-Windows");
-        println!("cargo:rustc-link-lib=static=wx_mswu_gl-3.3-Windows");
-        println!("cargo:rustc-link-lib=static=wx_mswu_propgrid-3.3-Windows");
 
-        // Conditional features for Windows debug
-        if cfg!(feature = "aui") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_aui-3.3-Windows");
+        // Different library names for cross-compilation vs native Windows builds
+        if is_macos_to_windows_gnu {
+            // Cross-compilation from macOS: libraries have -Windows suffix
+            println!("cargo:rustc-link-lib=static=wx_mswu_core-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_adv-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_baseu-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_gl-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_propgrid-3.3-Windows");
+
+            // Conditional features for cross-compilation
+            if cfg!(feature = "aui") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_aui-3.3-Windows");
+            }
+            if cfg!(feature = "media-ctrl") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_media-3.3-Windows");
+            }
+            if cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_webview-3.3-Windows");
+            }
+            if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_html-3.3-Windows");
+            }
+            if cfg!(feature = "stc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_stc-3.3-Windows");
+            }
+            if cfg!(feature = "xrc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3-Windows");
+                println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3-Windows");
+            }
+        } else {
+            // Native Windows GNU: libraries likely have standard names without -Windows suffix
+            println!("cargo:rustc-link-lib=static=wx_mswu_core-3.3");
+            println!("cargo:rustc-link-lib=static=wx_mswu_adv-3.3");
+            println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
+            println!("cargo:rustc-link-lib=static=wx_mswu_gl-3.3");
+            println!("cargo:rustc-link-lib=static=wx_mswu_propgrid-3.3");
+
+            // Conditional features for native Windows GNU
+            if cfg!(feature = "aui") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_aui-3.3");
+            }
+            if cfg!(feature = "media-ctrl") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_media-3.3");
+            }
+            if cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_webview-3.3");
+            }
+            if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_html-3.3");
+            }
+            if cfg!(feature = "stc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_stc-3.3");
+            }
+            if cfg!(feature = "xrc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3");
+                println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+            }
         }
-        if cfg!(feature = "media-ctrl") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_media-3.3-Windows");
-        }
-        if cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_webview-3.3-Windows");
-        }
-        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_html-3.3-Windows");
-        }
+
+        // Common STC libraries (same for both)
         if cfg!(feature = "stc") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_stc-3.3-Windows");
             println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
             println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
-        }
-        if cfg!(feature = "xrc") {
-            println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3-Windows");
-            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3-Windows");
         }
 
         println!("cargo:rustc-link-lib=static=wxpng-3.3");
