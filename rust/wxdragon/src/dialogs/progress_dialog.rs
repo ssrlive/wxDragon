@@ -78,7 +78,6 @@ impl ProgressDialog {
         let newmsg_ptr = c_newmsg.as_ref().map_or(ptr::null(), |cs| cs.as_ptr());
 
         let mut skip = false;
-        
 
         unsafe { ffi::wxd_ProgressDialog_Update(self.as_ptr(), value, newmsg_ptr, &mut skip) }
     }
@@ -111,7 +110,6 @@ impl ProgressDialog {
         let newmsg_ptr = c_newmsg.as_ref().map_or(ptr::null(), |cs| cs.as_ptr());
 
         let mut skip = false;
-        
 
         unsafe { ffi::wxd_ProgressDialog_Pulse(self.as_ptr(), newmsg_ptr, &mut skip) }
     }

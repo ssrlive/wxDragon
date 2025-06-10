@@ -31,12 +31,11 @@ widget_style_enum!(
 #[derive(Default)]
 pub enum ItemKind {
     #[default]
-    Normal = 0,    // WXD_ITEM_NORMAL
+    Normal = 0, // WXD_ITEM_NORMAL
     Check = 1,     // WXD_ITEM_CHECK
     Radio = 2,     // WXD_ITEM_RADIO
     Separator = 3, // WXD_ITEM_SEPARATOR
 }
-
 
 /// Events for AuiToolBar
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

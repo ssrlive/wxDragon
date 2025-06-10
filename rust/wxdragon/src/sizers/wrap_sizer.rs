@@ -20,7 +20,7 @@ widget_style_enum!(
 #[derive(Clone)]
 pub struct WrapSizer {
     raw_specific_ptr: *mut ffi::wxd_WrapSizer_t, // Specific pointer for WrapSizer FFI calls
-    sizer_base: Sizer, // Base Sizer for common functionality and Deref
+    sizer_base: Sizer,                           // Base Sizer for common functionality and Deref
 }
 
 impl WrapSizer {
@@ -90,14 +90,9 @@ impl WrapSizerBuilder {
 
     /// Build the WrapSizer.
     pub fn build(self) -> WrapSizer {
-        let ptr = unsafe { 
-            ffi::wxd_WrapSizer_Create(
-                self.orientation.bits() as i32, 
-                self.flags.bits() as i32
-            ) 
+        let ptr = unsafe {
+            ffi::wxd_WrapSizer_Create(self.orientation.bits() as i32, self.flags.bits() as i32)
         };
-        unsafe { 
-            WrapSizer::from_ptr(ptr).expect("Failed to create wxWrapSizer") 
-        }
+        unsafe { WrapSizer::from_ptr(ptr).expect("Failed to create wxWrapSizer") }
     }
-} 
+}

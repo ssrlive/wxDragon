@@ -742,7 +742,6 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_STC_SAVEPOINTREACHED: return wxEVT_STC_SAVEPOINTREACHED;
         case WXD_EVENT_TYPE_STC_SAVEPOINTLEFT: return wxEVT_STC_SAVEPOINTLEFT;
         case WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT: return wxEVT_STC_ROMODIFYATTEMPT;
-        case WXD_EVENT_TYPE_STC_KEY: return wxEVT_STC_KEY;
         case WXD_EVENT_TYPE_STC_DOUBLECLICK: return wxEVT_STC_DOUBLECLICK;
         case WXD_EVENT_TYPE_STC_UPDATEUI: return wxEVT_STC_UPDATEUI;
         case WXD_EVENT_TYPE_STC_MODIFIED: return wxEVT_STC_MODIFIED;
@@ -751,7 +750,6 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_STC_NEEDSHOWN: return wxEVT_STC_NEEDSHOWN;
         case WXD_EVENT_TYPE_STC_PAINTED: return wxEVT_STC_PAINTED;
         case WXD_EVENT_TYPE_STC_USERLISTSELECTION: return wxEVT_STC_USERLISTSELECTION;
-        case WXD_EVENT_TYPE_STC_URIDROPPED: return wxEVT_STC_URIDROPPED;
         case WXD_EVENT_TYPE_STC_DWELLSTART: return wxEVT_STC_DWELLSTART;
         case WXD_EVENT_TYPE_STC_DWELLEND: return wxEVT_STC_DWELLEND;
         case WXD_EVENT_TYPE_STC_START_DRAG: return wxEVT_STC_START_DRAG;

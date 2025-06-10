@@ -46,7 +46,7 @@ impl Dialog {
     /// This dialog will not be destroyed when dropped as it's managed by XRC.
     ///
     /// # Safety
-    /// 
+    ///
     /// The caller must ensure that:
     /// - `ptr` is a valid pointer to a wxDialog object
     /// - The dialog object pointed to by `ptr` remains valid for the lifetime of the returned Dialog

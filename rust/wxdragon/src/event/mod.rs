@@ -17,8 +17,8 @@ pub mod window_events;
 
 // Re-export window events for easier access
 pub use window_events::{
-    IdleEventData, KeyboardEvent, MouseButtonEvent, MouseEnterEvent, MouseLeaveEvent, MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents,
-    WindowSizeEvent,
+    IdleEventData, KeyboardEvent, MouseButtonEvent, MouseEnterEvent, MouseLeaveEvent,
+    MouseMotionEvent, WindowEvent, WindowEventData, WindowEvents, WindowSizeEvent,
 };
 
 // Re-export button events for easier access
@@ -35,7 +35,6 @@ pub use scroll_events::{ScrollEvent, ScrollEventData, ScrollEvents};
 
 // Re-export the stable C enum for use in the safe wrapper
 pub use ffi::WXDEventTypeCEnum;
-
 
 // --- EventType Enum ---
 
@@ -63,8 +62,10 @@ impl EventType {
     pub const MIDDLE_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MIDDLE_UP);
     pub const MOTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOTION);
     pub const MOUSEWHEEL: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_MOUSEWHEEL);
-    pub const ENTER_WINDOW: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_ENTER_WINDOW);
-    pub const LEAVE_WINDOW: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LEAVE_WINDOW);
+    pub const ENTER_WINDOW: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_ENTER_WINDOW);
+    pub const LEAVE_WINDOW: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_LEAVE_WINDOW);
     pub const KEY_DOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KEY_DOWN);
     pub const KEY_UP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_KEY_UP);
     pub const CHAR: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_CHAR);
@@ -357,63 +358,83 @@ impl EventType {
     #[cfg(feature = "stc")]
     pub const STC_CHANGE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHANGE);
     #[cfg(feature = "stc")]
-    pub const STC_STYLENEEDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_STYLENEEDED);
+    pub const STC_STYLENEEDED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_STYLENEEDED);
     #[cfg(feature = "stc")]
-    pub const STC_CHARADDED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHARADDED);
+    pub const STC_CHARADDED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CHARADDED);
     #[cfg(feature = "stc")]
-    pub const STC_SAVEPOINTREACHED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTREACHED);
+    pub const STC_SAVEPOINTREACHED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTREACHED);
     #[cfg(feature = "stc")]
-    pub const STC_SAVEPOINTLEFT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTLEFT);
+    pub const STC_SAVEPOINTLEFT: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_SAVEPOINTLEFT);
     #[cfg(feature = "stc")]
-    pub const STC_ROMODIFYATTEMPT: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT);
+    pub const STC_ROMODIFYATTEMPT: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ROMODIFYATTEMPT);
     #[cfg(feature = "stc")]
-    pub const STC_KEY: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_KEY);
+    pub const STC_DOUBLECLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DOUBLECLICK);
     #[cfg(feature = "stc")]
-    pub const STC_DOUBLECLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DOUBLECLICK);
+    pub const STC_UPDATEUI: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_UPDATEUI);
     #[cfg(feature = "stc")]
-    pub const STC_UPDATEUI: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_UPDATEUI);
+    pub const STC_MODIFIED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MODIFIED);
     #[cfg(feature = "stc")]
-    pub const STC_MODIFIED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MODIFIED);
+    pub const STC_MACRORECORD: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MACRORECORD);
     #[cfg(feature = "stc")]
-    pub const STC_MACRORECORD: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MACRORECORD);
+    pub const STC_MARGINCLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MARGINCLICK);
     #[cfg(feature = "stc")]
-    pub const STC_MARGINCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_MARGINCLICK);
-    #[cfg(feature = "stc")]
-    pub const STC_NEEDSHOWN: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_NEEDSHOWN);
+    pub const STC_NEEDSHOWN: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_NEEDSHOWN);
     #[cfg(feature = "stc")]
     pub const STC_PAINTED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_PAINTED);
     #[cfg(feature = "stc")]
-    pub const STC_USERLISTSELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_USERLISTSELECTION);
+    pub const STC_USERLISTSELECTION: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_USERLISTSELECTION);
     #[cfg(feature = "stc")]
-    pub const STC_URIDROPPED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_URIDROPPED);
+    pub const STC_DWELLSTART: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLSTART);
     #[cfg(feature = "stc")]
-    pub const STC_DWELLSTART: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLSTART);
+    pub const STC_DWELLEND: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLEND);
     #[cfg(feature = "stc")]
-    pub const STC_DWELLEND: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DWELLEND);
+    pub const STC_START_DRAG: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_START_DRAG);
     #[cfg(feature = "stc")]
-    pub const STC_START_DRAG: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_START_DRAG);
-    #[cfg(feature = "stc")]
-    pub const STC_DRAG_OVER: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DRAG_OVER);
+    pub const STC_DRAG_OVER: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DRAG_OVER);
     #[cfg(feature = "stc")]
     pub const STC_DO_DROP: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_DO_DROP);
     #[cfg(feature = "stc")]
     pub const STC_ZOOM: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_ZOOM);
     #[cfg(feature = "stc")]
-    pub const STC_HOTSPOT_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_CLICK);
+    pub const STC_HOTSPOT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_CLICK);
     #[cfg(feature = "stc")]
-    pub const STC_HOTSPOT_DCLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK);
+    pub const STC_HOTSPOT_DCLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_HOTSPOT_DCLICK);
     #[cfg(feature = "stc")]
-    pub const STC_CALLTIP_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CALLTIP_CLICK);
+    pub const STC_CALLTIP_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_CALLTIP_CLICK);
     #[cfg(feature = "stc")]
-    pub const STC_AUTOCOMP_SELECTION: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION);
+    pub const STC_AUTOCOMP_SELECTION: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_SELECTION);
     #[cfg(feature = "stc")]
-    pub const STC_INDICATOR_CLICK: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_CLICK);
+    pub const STC_INDICATOR_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_CLICK);
     #[cfg(feature = "stc")]
-    pub const STC_INDICATOR_RELEASE: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_RELEASE);
+    pub const STC_INDICATOR_RELEASE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_INDICATOR_RELEASE);
     #[cfg(feature = "stc")]
-    pub const STC_AUTOCOMP_CANCELLED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED);
+    pub const STC_AUTOCOMP_CANCELLED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED);
     #[cfg(feature = "stc")]
-    pub const STC_AUTOCOMP_CHAR_DELETED: EventType = EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
+    pub const STC_AUTOCOMP_CHAR_DELETED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
 
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {
@@ -435,14 +456,14 @@ pub struct IdleEvent;
 
 impl IdleEvent {
     /// Sets how wxWidgets will send idle events.
-    /// 
+    ///
     /// # Arguments
     /// * `mode` - The idle processing mode
-    /// 
+    ///
     /// # Example
     /// ```ignore
     /// use wxdragon::event::{IdleEvent, IdleMode};
-    /// 
+    ///
     /// // Only send idle events to windows that request them
     /// IdleEvent::set_mode(IdleMode::ProcessSpecified);
     /// ```
@@ -461,7 +482,6 @@ impl IdleEvent {
         }
     }
 }
-
 
 // --- Simple Event Struct ---
 
@@ -654,7 +674,7 @@ impl Event {
 
 pub trait WxEvtHandler {
     /// Returns the raw event handler pointer for this widget.
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the returned pointer is valid and not null.
     /// The pointer must point to a valid wxEvtHandler object that remains valid
@@ -729,7 +749,7 @@ pub trait WxEvtHandler {
 
 /// Trampoline function: Called by C++.
 /// `user_data` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
-/// 
+///
 /// # Safety
 /// This function is called from C++ code and must maintain the following invariants:
 /// - `user_data` must be a valid pointer to a `Box<Box<dyn FnMut(Event) + 'static>>`
@@ -761,10 +781,10 @@ pub unsafe extern "C" fn rust_event_handler_trampoline(
 
 /// Function called by C++ to drop the Rust closure Box.
 /// `ptr` is a raw pointer to `Box<dyn FnMut(Event) + 'static>`.
-/// 
+///
 /// # Safety
 /// This function is called from C++ code to clean up Rust callbacks.
-/// - `ptr` must be a valid pointer to a `Box<Box<dyn FnMut(Event) + 'static>>` 
+/// - `ptr` must be a valid pointer to a `Box<Box<dyn FnMut(Event) + 'static>>`
 ///   that was previously allocated by Rust
 /// - The pointer must not be used after this function returns
 /// - This function must only be called once per pointer
@@ -775,4 +795,3 @@ pub unsafe extern "C" fn drop_rust_closure_box(ptr: *mut c_void) {
         let _ = Box::from_raw(ptr as *mut Box<dyn FnMut(Event) + 'static>);
     }
 }
-

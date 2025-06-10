@@ -37,7 +37,7 @@ impl MainFrame {
         stc.marker_add(0, 0);
 
         // Add another marker at line 10
-        stc.marker_define(1, 2, Colour::rgb(0, 0, 255), Colour::rgb(192, 192, 192)); // Square marker  
+        stc.marker_define(1, 2, Colour::rgb(0, 0, 255), Colour::rgb(192, 192, 192)); // Square marker
         stc.marker_add(10, 1);
 
         // Set up some basic styling
@@ -71,7 +71,7 @@ impl MainFrame {
             let pos = event.get_position().unwrap_or(0);
             let line = stc_copy3.line_from_position(pos);
             println!("Margin clicked at line: {}", line);
-            
+
             // Toggle marker on clicked line
             let markers = stc_copy3.marker_get(line);
             if markers & 1 != 0 {
@@ -92,11 +92,11 @@ impl MainFrame {
         println!("Character at position 0: {}", stc.get_char_at(0));
         println!("Current position: {}", stc.get_current_pos());
         println!("Selection mode: {}", stc.get_selection_mode());
-        
+
         // Test line operations
         println!("Line 0 text: '{}'", stc.get_line_text(0).trim());
         println!("Line 0 length: {}", stc.get_line_length(0));
-        
+
         // Position the cursor at the end
         let end_pos = stc.get_length();
         stc.set_current_pos(end_pos);
@@ -107,9 +107,9 @@ impl MainFrame {
 }
 
 fn main() {
-    let _ = wxdragon::main( |_| {
+    let _ = wxdragon::main(|_| {
         let main_frame = MainFrame::new();
         main_frame.frame.show(true);
         main_frame.frame.centre();
     });
-} 
+}

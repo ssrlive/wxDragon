@@ -1,9 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use wxdragon::prelude::*;
-use wxdragon::widgets::dataview::DataViewEventHandler;
 use wxdragon::widgets::dataview::ctrl::SpinColumnConfig;
-
+use wxdragon::widgets::dataview::DataViewEventHandler;
 
 // Define a struct to hold our employee data
 #[derive(Clone)] // Added Clone for potential future use if Employee instances need to be copied
@@ -183,11 +182,13 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
         DataViewAlign::Center,
         DataViewColumnFlags::Resizable,
     );
-    dvc.append_spin_column(SpinColumnConfig::new("Hourly Rate", 7, 10, 100)
-        .with_width(100)
-        .with_align(DataViewAlign::Right)
-        .with_inc(5)
-        .with_flags(DataViewColumnFlags::Resizable));
+    dvc.append_spin_column(
+        SpinColumnConfig::new("Hourly Rate", 7, 10, 100)
+            .with_width(100)
+            .with_align(DataViewAlign::Right)
+            .with_inc(5)
+            .with_flags(DataViewColumnFlags::Resizable),
+    );
 
     let status_choices = vec!["Full-time", "Part-time", "Contract", "Intern"];
     dvc.append_choice_column(
@@ -337,7 +338,11 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
                     println!("  Employee Name: {}", employee.name);
                     println!("  Department: {}", employee.department);
                 } else {
-                    println!("  Row {} is out of bounds (total rows: {})", row_index, employees_borrow.len());
+                    println!(
+                        "  Row {} is out of bounds (total rows: {})",
+                        row_index,
+                        employees_borrow.len()
+                    );
                 }
             }
             None => {

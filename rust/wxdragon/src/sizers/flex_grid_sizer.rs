@@ -63,7 +63,10 @@ impl FlexGridSizer {
 
     pub fn set_non_flexible_grow_mode(&self, mode: FlexGrowMode) {
         unsafe {
-            ffi::wxd_FlexGridSizer_SetNonFlexibleGrowMode(self.raw_specific_ptr, mode.bits() as i32);
+            ffi::wxd_FlexGridSizer_SetNonFlexibleGrowMode(
+                self.raw_specific_ptr,
+                mode.bits() as i32,
+            );
         }
     }
 

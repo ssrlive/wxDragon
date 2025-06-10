@@ -84,19 +84,19 @@ fn main() {
     } else {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=0");
     }
-    
+
     if cfg!(feature = "media-ctrl") {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=1");
     } else {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=0");
     }
-    
+
     if cfg!(feature = "webview") {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=1");
     } else {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=0");
     }
-    
+
     if cfg!(feature = "stc") {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=1");
     } else {
@@ -129,7 +129,7 @@ fn main() {
     }
 
     // --- 2. Download and Extract wxWidgets Source ---
-    let wx_version = "3.2.8.1";
+    let wx_version = "3.3.0";
     let wx_tarball_name = format!("wxWidgets-{}.tar.bz2", wx_version);
     let wx_download_url = format!(
         "https://github.com/wxWidgets/wxWidgets/releases/download/v{}/{}",
@@ -214,6 +214,9 @@ fn main() {
 
     let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
     cmake_config.define("WXWIDGETS_SOURCE_DIR", &wx_extracted_source_path);
+
+    // Disable WebP support since we'll use the image crate for image decoding
+    cmake_config.define("wxUSE_LIBWEBP", "OFF");
 
     if cfg!(feature = "aui") {
         cmake_config.define("wxdUSE_AUI", "ON");
@@ -368,47 +371,48 @@ fn main() {
     if target_os == "macos" {
         // macOS linking flags (assuming release build for wxWidgets library names here)
         // If macOS also has d suffix for debug, this section would need similar conditional logic
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.2");
-        println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_adv-3.2");
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_gl-3.2");
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_propgrid-3.2");
-        
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_adv-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_gl-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_propgrid-3.3");
+
         // Conditional features for macOS
         if cfg!(feature = "aui") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_aui-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_aui-3.3");
         }
         if cfg!(feature = "media-ctrl") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_media-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_media-3.3");
         }
         if cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.3");
         }
         if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
         }
         if cfg!(feature = "stc") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.3");
         }
         if cfg!(feature = "xrc") {
-            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.2");
-            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.3");
+            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
         }
-        
-        println!("cargo:rustc-link-lib=static=wxjpeg-3.2");
-        println!("cargo:rustc-link-lib=static=wxpng-3.2");
-        println!("cargo:rustc-link-lib=static=wxtiff-3.2");
-        println!("cargo:rustc-link-lib=static=wxregexu-3.2");
+
+        println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
+        println!("cargo:rustc-link-lib=static=wxpng-3.3");
+        println!("cargo:rustc-link-lib=static=wxtiff-3.3");
+        println!("cargo:rustc-link-lib=static=wxregexu-3.3");
         println!("cargo:rustc-link-lib=expat");
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=iconv");
         println!("cargo:rustc-link-lib=c++");
-        
+
         // Conditional STC support libraries for macOS
         if cfg!(feature = "stc") {
-            println!("cargo:rustc-link-lib=static=wxscintilla-3.2");
+            println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+            println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
         }
-        
+
         println!("cargo:rustc-link-lib=framework=AudioToolbox");
         println!("cargo:rustc-link-lib=framework=CoreFoundation");
         println!("cargo:rustc-link-lib=framework=Security");
@@ -420,7 +424,7 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=CoreGraphics");
         println!("cargo:rustc-link-lib=framework=Foundation");
         println!("cargo:rustc-link-lib=framework=SystemConfiguration");
-        
+
         // Conditional frameworks for macOS
         if cfg!(feature = "media-ctrl") {
             println!("cargo:rustc-link-lib=framework=AVFoundation");
@@ -431,45 +435,46 @@ fn main() {
         if is_debug {
             println!("info: Using DEBUG linking flags for Windows");
             // wxWidgets debug libraries from user's ll output
-            println!("cargo:rustc-link-lib=static=wxmsw32ud_adv");
-            println!("cargo:rustc-link-lib=static=wxmsw32ud_core");
-            println!("cargo:rustc-link-lib=static=wxmsw32ud_gl");
-            println!("cargo:rustc-link-lib=static=wxmsw32ud_propgrid");
-            
+            println!("cargo:rustc-link-lib=static=wxmsw33ud_adv");
+            println!("cargo:rustc-link-lib=static=wxmsw33ud_core");
+            println!("cargo:rustc-link-lib=static=wxmsw33ud_gl");
+            println!("cargo:rustc-link-lib=static=wxmsw33ud_propgrid");
+
             // Conditional features for Windows debug
             if cfg!(feature = "aui") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_aui");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_aui");
             }
             if cfg!(feature = "media-ctrl") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_media");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_media");
             }
             if cfg!(feature = "webview") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_webview");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_webview");
             }
             if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_html");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_html");
             }
             if cfg!(feature = "stc") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_stc");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_stc");
             }
             if cfg!(feature = "xrc") {
-                println!("cargo:rustc-link-lib=static=wxmsw32ud_xrc");
-                println!("cargo:rustc-link-lib=static=wxbase32ud_xml");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_xrc");
+                println!("cargo:rustc-link-lib=static=wxbase33ud_xml");
             }
-            
-            println!("cargo:rustc-link-lib=static=wxbase32ud");
+
+            println!("cargo:rustc-link-lib=static=wxbase33ud");
             println!("cargo:rustc-link-lib=static=wxpngd");
             println!("cargo:rustc-link-lib=static=wxtiffd");
             println!("cargo:rustc-link-lib=static=wxjpegd");
             println!("cargo:rustc-link-lib=static=wxregexud");
             println!("cargo:rustc-link-lib=static=wxzlibd");
             println!("cargo:rustc-link-lib=static=wxexpatd");
-            
+
             // Conditional STC support libraries for Windows debug
             if cfg!(feature = "stc") {
                 println!("cargo:rustc-link-lib=static=wxscintillad");
+                println!("cargo:rustc-link-lib=static=wxlexillad");
             }
-            
+
             if target_env == "msvc" {
                 println!("cargo:rustc-link-lib=stdc++");
             }
@@ -478,43 +483,44 @@ fn main() {
                 "info: Using RELEASE linking flags for Windows based on user-provided ll output."
             );
             // wxWidgets release libraries from user-provided ll output
-            println!("cargo:rustc-link-lib=static=wxmsw32u_adv");
-            println!("cargo:rustc-link-lib=static=wxmsw32u_core");
-            println!("cargo:rustc-link-lib=static=wxmsw32u_gl");
-            println!("cargo:rustc-link-lib=static=wxmsw32u_propgrid");
-            
+            println!("cargo:rustc-link-lib=static=wxmsw33u_adv");
+            println!("cargo:rustc-link-lib=static=wxmsw33u_core");
+            println!("cargo:rustc-link-lib=static=wxmsw33u_gl");
+            println!("cargo:rustc-link-lib=static=wxmsw33u_propgrid");
+
             // Conditional features for Windows release
             if cfg!(feature = "aui") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_aui");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_aui");
             }
             if cfg!(feature = "media-ctrl") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_media");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_media");
             }
             if cfg!(feature = "webview") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_webview");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_webview");
             }
             if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_html");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_html");
             }
             if cfg!(feature = "stc") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_stc");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_stc");
             }
             if cfg!(feature = "xrc") {
-                println!("cargo:rustc-link-lib=static=wxmsw32u_xrc");
-                println!("cargo:rustc-link-lib=static=wxbase32u_xml");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_xrc");
+                println!("cargo:rustc-link-lib=static=wxbase33u_xml");
             }
-            
-            println!("cargo:rustc-link-lib=static=wxbase32u");
+
+            println!("cargo:rustc-link-lib=static=wxbase33u");
             println!("cargo:rustc-link-lib=static=wxtiff");
             println!("cargo:rustc-link-lib=static=wxjpeg");
             println!("cargo:rustc-link-lib=static=wxpng");
             println!("cargo:rustc-link-lib=static=wxregexu");
             println!("cargo:rustc-link-lib=static=wxzlib");
             println!("cargo:rustc-link-lib=static=wxexpat");
-            
+
             // Conditional STC support libraries for Windows release
             if cfg!(feature = "stc") {
                 println!("cargo:rustc-link-lib=static=wxscintilla");
+                println!("cargo:rustc-link-lib=static=wxlexilla");
             }
         }
 
@@ -570,32 +576,33 @@ fn main() {
         println!("cargo:rustc-link-lib=jpeg");
         println!("cargo:rustc-link-lib=expat");
         println!("cargo:rustc-link-lib=tiff");
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.2");
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.2");
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.2");
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.2");
-        println!("cargo:rustc-link-lib=static=wx_baseu-3.2");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
         println!("cargo:rustc-link-lib=stdc++");
 
         if cfg!(feature = "aui") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.3");
         }
         if cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.3");
         }
         if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
         }
         if cfg!(feature = "media-ctrl") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
         }
         if cfg!(feature = "stc") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.2");
-            println!("cargo:rustc-link-lib=static=wxscintilla-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
+            println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+            println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
         }
         if cfg!(feature = "xrc") {
-            println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.2");
-            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.2");
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.3");
+            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
         }
     }
 }

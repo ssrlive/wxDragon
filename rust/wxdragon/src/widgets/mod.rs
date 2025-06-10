@@ -133,15 +133,16 @@ pub use spinbutton::{SpinButton, SpinButtonBuilder};
 pub use spinctrl::{SpinCtrl, SpinCtrlBuilder};
 pub use spinctrl_double::{SpinCtrlDouble, SpinCtrlDoubleBuilder};
 pub use splitter_window::{SplitterWindow, SplitterWindowBuilder};
-pub use static_bitmap::{StaticBitmap, StaticBitmapBuilder, ScaleMode};
+pub use static_bitmap::{ScaleMode, StaticBitmap, StaticBitmapBuilder};
 pub use static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use staticbox::{StaticBox, StaticBoxBuilder};
 pub use statusbar::{StatusBar, StatusBarBuilder};
 #[cfg(feature = "stc")]
 pub use styledtextctrl::{
-    StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
-    MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
+    EolMode, FindFlags, Lexer, MarginType, MarkerSymbol, SelectionMode, StyledTextCtrl,
+    StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
+    WhiteSpaceView, WrapMode,
 };
 pub use textctrl::{TextCtrl, TextCtrlBuilder};
 pub use togglebutton::{ToggleButton, ToggleButtonBuilder};

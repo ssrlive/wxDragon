@@ -16,18 +16,18 @@ fn main() {
         let title = StaticText::builder(&panel)
             .with_label("GridBagSizer Demo - Layout with Positions and Spans")
             .build();
-        main_sizer.add(&title, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &title,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         // Create the GridBagSizer with gaps
-        let gb_sizer = GridBagSizer::builder()
-            .with_vgap(8)
-            .with_hgap(8)
-            .build();
+        let gb_sizer = GridBagSizer::builder().with_vgap(8).with_hgap(8).build();
 
         // Row 0: Form-like layout with labels and inputs
-        let name_label = StaticText::builder(&panel)
-            .with_label("Name:")
-            .build();
+        let name_label = StaticText::builder(&panel).with_label("Name:").build();
         gb_sizer.add_at(
             &name_label,
             GBPosition::new(0, 0),
@@ -48,9 +48,7 @@ fn main() {
         );
 
         // Row 1: Email input spanning 3 columns
-        let email_label = StaticText::builder(&panel)
-            .with_label("Email:")
-            .build();
+        let email_label = StaticText::builder(&panel).with_label("Email:").build();
         gb_sizer.add_at(
             &email_label,
             GBPosition::new(1, 0),
@@ -71,9 +69,7 @@ fn main() {
         );
 
         // Row 2: Address spanning multiple columns
-        let address_label = StaticText::builder(&panel)
-            .with_label("Address:")
-            .build();
+        let address_label = StaticText::builder(&panel).with_label("Address:").build();
         gb_sizer.add_at(
             &address_label,
             GBPosition::new(2, 0),
@@ -130,9 +126,7 @@ fn main() {
             5,
         );
 
-        let checkbox3 = CheckBox::builder(&panel)
-            .with_label("Auto-save")
-            .build();
+        let checkbox3 = CheckBox::builder(&panel).with_label("Auto-save").build();
         gb_sizer.add_at(
             &checkbox3,
             GBPosition::new(4, 3),
@@ -142,9 +136,7 @@ fn main() {
         );
 
         // Row 5: Buttons spanning across columns
-        let button_cancel = Button::builder(&panel)
-            .with_label("Cancel")
-            .build();
+        let button_cancel = Button::builder(&panel).with_label("Cancel").build();
         gb_sizer.add_at(
             &button_cancel,
             GBPosition::new(5, 1),
@@ -153,9 +145,7 @@ fn main() {
             5,
         );
 
-        let button_save = Button::builder(&panel)
-            .with_label("Save")
-            .build();
+        let button_save = Button::builder(&panel).with_label("Save").build();
         gb_sizer.add_at(
             &button_save,
             GBPosition::new(5, 2),
@@ -164,9 +154,7 @@ fn main() {
             5,
         );
 
-        let button_submit = Button::builder(&panel)
-            .with_label("Submit")
-            .build();
+        let button_submit = Button::builder(&panel).with_label("Submit").build();
         gb_sizer.add_at(
             &button_submit,
             GBPosition::new(5, 3),
@@ -180,16 +168,21 @@ fn main() {
 
         // Add some information about the grid
         let info_sizer = BoxSizer::builder(Orientation::Horizontal).build();
-        
+
         let info_text = StaticText::builder(&panel)
-            .with_label("GridBagSizer allows precise positioning and spanning of widgets in a grid.")
+            .with_label(
+                "GridBagSizer allows precise positioning and spanning of widgets in a grid.",
+            )
             .build();
         info_sizer.add(&info_text, 1, SizerFlag::AlignCenterVertical, 0);
 
-        let demo_button = Button::builder(&panel)
-            .with_label("Move Items")
-            .build();
-        info_sizer.add(&demo_button, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 10);
+        let demo_button = Button::builder(&panel).with_label("Move Items").build();
+        info_sizer.add(
+            &demo_button,
+            0,
+            SizerFlag::AlignCenterVertical | SizerFlag::Left,
+            10,
+        );
 
         main_sizer.add_sizer(&info_sizer, 0, SizerFlag::Expand | SizerFlag::All, 10);
 
@@ -204,4 +197,4 @@ fn main() {
         frame.show(true);
         frame.centre();
     });
-} 
+}

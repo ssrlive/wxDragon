@@ -13,8 +13,7 @@ type CallbackQueue = Arc<Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>>;
 
 // Queue for storing callbacks to be executed on the main thread
 lazy_static! {
-    static ref MAIN_THREAD_QUEUE: CallbackQueue =
-        Arc::new(Mutex::new(VecDeque::new()));
+    static ref MAIN_THREAD_QUEUE: CallbackQueue = Arc::new(Mutex::new(VecDeque::new()));
 }
 
 /// Schedules a callback to be executed on the main thread.

@@ -79,9 +79,9 @@ impl XmlResource {
         if frame_ptr.is_null() {
             None
         } else {
-            Some(unsafe { <Frame as FromXrcPtr>::from_xrc_ptr(
-                frame_ptr as *mut ffi::wxd_Window_t,
-            ) })
+            Some(unsafe {
+                <Frame as FromXrcPtr>::from_xrc_ptr(frame_ptr as *mut ffi::wxd_Window_t)
+            })
         }
     }
 
@@ -96,9 +96,9 @@ impl XmlResource {
         if panel_ptr.is_null() {
             None
         } else {
-            Some(unsafe { <Panel as FromXrcPtr>::from_xrc_ptr(
-                panel_ptr as *mut ffi::wxd_Window_t,
-            ) })
+            Some(unsafe {
+                <Panel as FromXrcPtr>::from_xrc_ptr(panel_ptr as *mut ffi::wxd_Window_t)
+            })
         }
     }
 
@@ -122,7 +122,7 @@ pub trait FromXrcPtr {
 
     /// Create a widget wrapper from an XRC-managed pointer
     /// The widget does not own the pointer - XRC manages its lifetime
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the pointer is valid and points to the correct widget type.
     unsafe fn from_xrc_ptr(ptr: Self::RawFfiType) -> Self;
@@ -134,7 +134,7 @@ pub trait XrcSupport: WxWidget + Sized {
     /// Creates a widget wrapper for an XRC-managed object.
     /// This widget will not be destroyed when dropped as it's managed by XRC.
     /// Each widget implements this with their specific field structure.
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the pointer is valid and points to the correct widget type.
     unsafe fn from_xrc_ptr(ptr: *mut ffi::wxd_Window_t) -> Self;

@@ -398,11 +398,8 @@ impl AuiManager {
 
     /// Add a pane with detailed pane information
     pub fn add_pane_with_info(&self, window: &impl WxWidget, pane_info: PaneInfo) -> bool {
-        
         // The pane_info is still managed by Rust and will be dropped automatically
-        unsafe {
-            ffi::wxd_AuiManager_AddPaneWithInfo(self.ptr, window.handle_ptr(), pane_info.ptr)
-        }
+        unsafe { ffi::wxd_AuiManager_AddPaneWithInfo(self.ptr, window.handle_ptr(), pane_info.ptr) }
     }
 
     /// Update the manager's layout (must be called after adding/removing panes)

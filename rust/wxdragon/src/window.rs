@@ -191,13 +191,13 @@ pub trait WxWidget {
     }
 
     /// Sets the background style for the window.
-    /// 
+    ///
     /// The background style determines how the window's background is painted:
     /// - `BackgroundStyle::Erase`: Default behavior, background erased automatically
     /// - `BackgroundStyle::System`: Background erased with current background color  
     /// - `BackgroundStyle::Paint`: No automatic background erasing, app handles it
     /// - `BackgroundStyle::Colour`: Background filled with background color before paint
-    /// 
+    ///
     /// For smooth custom drawing and animations, use `BackgroundStyle::Paint`.
     fn set_background_style(&self, style: BackgroundStyle) {
         let window_ptr = self.handle_ptr();
@@ -523,20 +523,20 @@ pub trait WxWidget {
     }
 
     /// Sets the extra window style flags.
-    /// 
+    ///
     /// Extra window styles are additional style flags that control special window behaviors.
     /// You can combine multiple styles using the bitwise OR operator (`|`).
-    /// 
+    ///
     /// # Arguments
     /// * `extra_style` - The extra style flags to set
-    /// 
+    ///
     /// # Example
     /// ```ignore
     /// use wxdragon::prelude::*;
-    /// 
+    ///
     /// // Enable idle event processing for this window
     /// window.set_extra_style(ExtraWindowStyle::ProcessIdle);
-    /// 
+    ///
     /// // Enable multiple features
     /// window.set_extra_style(ExtraWindowStyle::ProcessIdle | ExtraWindowStyle::ValidateRecursively);
     /// ```
@@ -550,7 +550,7 @@ pub trait WxWidget {
     }
 
     /// Sets extra window style flags using raw i64 value.
-    /// 
+    ///
     /// This is provided for cases where you need to set flags not covered by the enum.
     /// For normal usage, prefer `set_extra_style()` with the enum.
     fn set_extra_style_raw(&self, extra_style: i64) {
@@ -563,7 +563,7 @@ pub trait WxWidget {
     }
 
     /// Gets the current extra window style flags as raw value.
-    /// 
+    ///
     /// # Returns
     /// The currently set extra style flags for this window as a raw i64 value.
     /// Use `ExtraWindowStyle` variants to check for specific flags.
@@ -577,13 +577,13 @@ pub trait WxWidget {
     }
 
     /// Checks if a specific extra window style flag is set.
-    /// 
+    ///
     /// # Arguments
     /// * `style` - The style flag to check for
-    /// 
+    ///
     /// # Returns
     /// `true` if the style flag is set, `false` otherwise
-    /// 
+    ///
     /// # Example
     /// ```ignore
     /// if window.has_extra_style(ExtraWindowStyle::ProcessIdle) {
@@ -596,7 +596,7 @@ pub trait WxWidget {
     }
 
     /// Adds extra window style flags to the current set.
-    /// 
+    ///
     /// This is equivalent to `set_extra_style(get_extra_style_raw() | new_style.bits())`
     /// but more convenient for adding flags without removing existing ones.
     fn add_extra_style(&self, style: ExtraWindowStyle) {
@@ -605,7 +605,7 @@ pub trait WxWidget {
     }
 
     /// Removes extra window style flags from the current set.
-    /// 
+    ///
     /// This removes the specified flags while preserving other flags.
     fn remove_extra_style(&self, style: ExtraWindowStyle) {
         let current_style = self.get_extra_style_raw();
@@ -613,7 +613,7 @@ pub trait WxWidget {
     }
 
     /// Gets the parent window of this widget.
-    /// 
+    ///
     /// # Returns
     /// `Some(Window)` if the widget has a parent, `None` if it's a top-level window or an error occurs.
     fn get_parent(&self) -> Option<Window> {
@@ -621,7 +621,7 @@ pub trait WxWidget {
         if handle.is_null() {
             return None;
         }
-        
+
         let parent_ptr = unsafe { ffi::wxd_Window_GetParent(handle) };
         if parent_ptr.is_null() {
             None
@@ -635,15 +635,15 @@ pub trait WxWidget {
 }
 
 /// Trait for downcasting wxWidgets to specific types.
-/// 
+///
 /// This trait is automatically implemented for any type that implements both
 /// `WxWidget` and `Any`, providing safe downcasting functionality.
-/// 
+///
 /// # Example
 /// ```ignore
 /// use wxdragon::window::WxWidgetDowncast;
 /// use wxdragon::widgets::TextCtrl;
-/// 
+///
 /// fn handle_widget(widget: &dyn WxWidget) {
 ///     if let Some(text_ctrl) = widget.downcast_ref::<TextCtrl>() {
 ///         let value = text_ctrl.get_value();
@@ -664,11 +664,11 @@ pub trait WxWidgetDowncast {
     fn widget_type_name(&self) -> &'static str;
 }
 
-/// Blanket implementation: any type that implements both WxWidget and Any 
+/// Blanket implementation: any type that implements both WxWidget and Any
 /// automatically gets downcasting functionality.
-impl<W> WxWidgetDowncast for W 
-where 
-    W: WxWidget + std::any::Any 
+impl<W> WxWidgetDowncast for W
+where
+    W: WxWidget + std::any::Any,
 {
     fn downcast_ref<T: WxWidget + 'static>(&self) -> Option<&T> {
         (self as &dyn std::any::Any).downcast_ref::<T>()

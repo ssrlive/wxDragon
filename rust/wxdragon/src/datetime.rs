@@ -48,7 +48,6 @@ impl DateTime {
 
     /// Creates a DateTime representing the current moment.
     pub fn now() -> Self {
-        
         unsafe { Self::from_raw(ffi::wxd_DateTime_Now()) }
     }
 
@@ -92,7 +91,6 @@ impl DateTime {
             return false;
         }
 
-        
         unsafe { ffi::wxd_DateTime_IsValid(&self.raw) }
     }
 }

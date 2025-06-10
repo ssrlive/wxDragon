@@ -211,10 +211,8 @@ impl Notebook {
     /// Returns `None` if the page index is out of bounds.
     pub fn get_page(&self, index: usize) -> Option<Window> {
         unsafe {
-            let ptr = ffi::wxd_Notebook_GetPage(
-                self.window.as_ptr() as *mut ffi::wxd_Notebook_t,
-                index,
-            );
+            let ptr =
+                ffi::wxd_Notebook_GetPage(self.window.as_ptr() as *mut ffi::wxd_Notebook_t, index);
             if ptr.is_null() {
                 None
             } else {

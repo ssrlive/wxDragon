@@ -50,22 +50,22 @@ fn main() {
                     // Draw progress bar background
                     ctx.set_brush(Colour::rgb(240, 240, 240), BrushStyle::Solid);
                     ctx.draw_rectangle(rect.x, rect.y, rect.width, rect.height);
-                    
+
                     // Draw progress bar fill
                     let fill_width = (rect.width as f32 * (*progress as f32 / 100.0)) as i32;
-                    
+
                     // Color based on progress
                     let color = if *progress >= 100 {
-                        Colour::rgb(76, 175, 80)  // Green for complete
+                        Colour::rgb(76, 175, 80) // Green for complete
                     } else if *progress >= 50 {
-                        Colour::rgb(255, 193, 7)  // Yellow for in progress
+                        Colour::rgb(255, 193, 7) // Yellow for in progress
                     } else {
-                        Colour::rgb(244, 67, 54)  // Red for low progress
+                        Colour::rgb(244, 67, 54) // Red for low progress
                     };
-                    
+
                     ctx.set_brush(color, BrushStyle::Solid);
                     ctx.draw_rectangle(rect.x, rect.y, fill_width, rect.height);
-                    
+
                     // Draw progress text
                     ctx.set_text_foreground(Colour::rgb(0, 0, 0));
                     let text = format!("{}%", progress);
@@ -101,11 +101,11 @@ fn main() {
                         "Almost Done" => (Colour::rgb(255, 236, 179), Colour::rgb(230, 81, 0)),
                         _ => (Colour::rgb(255, 205, 210), Colour::rgb(183, 28, 28)),
                     };
-                    
+
                     // Draw background
                     ctx.set_brush(bg_color, BrushStyle::Solid);
                     ctx.draw_rectangle(rect.x, rect.y, rect.width, rect.height);
-                    
+
                     // Draw text
                     ctx.set_text_foreground(text_color);
                     let (text_width, text_height) = ctx.get_text_extent(status);
@@ -163,8 +163,8 @@ fn main() {
         panel.set_sizer(sizer, true);
 
         frame.show(true);
-        
+
         // No need to keep renderers alive manually - they're now managed properly!
         // The custom renderers will live as long as the columns that reference them.
     });
-} 
+}

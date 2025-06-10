@@ -1,5 +1,5 @@
 //! Tokio Async Integration Demo
-//! 
+//!
 //! This example demonstrates how to integrate tokio async runtime with wxDragon
 //! using the idle event mechanism. It shows the recommended pattern for handling
 //! async messages in a GUI application.
@@ -67,9 +67,12 @@ impl AsyncMessageHandler {
 
         let has_more = processed_count == 10;
         if processed_count > 0 {
-            println!("Processed {} messages, has_more: {}", processed_count, has_more);
+            println!(
+                "Processed {} messages, has_more: {}",
+                processed_count, has_more
+            );
         }
-        
+
         // If we processed the maximum number of messages, there might be more
         // If we processed fewer, we've emptied the queue
         has_more
@@ -134,13 +137,14 @@ async fn main() {
         let (sender, receiver) = tokio_mpsc::unbounded_channel::<AsyncMessage>();
 
         // Create our async message handler
-        let mut message_handler = AsyncMessageHandler::new(receiver, counter_text, status_text.clone());
+        let mut message_handler =
+            AsyncMessageHandler::new(receiver, counter_text, status_text.clone());
 
         // Use idle events for efficient async message processing
         // This is the recommended approach for wxDragon async integration
         frame.on_idle(move |event_data| {
             let has_more_messages = message_handler.process_messages();
-            
+
             if let WindowEventData::Idle(event) = event_data {
                 // Only request more idle events if we have messages to process
                 // This reduces CPU usage when there's no async work to do
@@ -159,11 +163,11 @@ async fn main() {
         start_button.on_click(move |_| {
             println!("Start button clicked!");
             let sender = sender_clone.clone();
-            
+
             // Spawn async tasks
             tokio::spawn(async move {
                 println!("Spawning async tasks...");
-                
+
                 // Counter task - updates every 500ms
                 let sender_counter = sender.clone();
                 tokio::spawn(async move {
@@ -190,16 +194,20 @@ async fn main() {
                         "Almost done...",
                         "Finalizing...",
                     ];
-                    
+
                     for status in statuses.iter() {
                         tokio::time::sleep(Duration::from_secs(1)).await;
                         println!("Sending status update: {}", status);
-                        if sender_status.send(AsyncMessage::UpdateStatus(status.to_string())).is_err() {
+                        if sender_status
+                            .send(AsyncMessage::UpdateStatus(status.to_string()))
+                            .is_err()
+                        {
                             println!("Failed to send status message");
                             break;
                         }
                     }
-                    let _ = sender_status.send(AsyncMessage::TaskCompleted("Status Updates".to_string()));
+                    let _ = sender_status
+                        .send(AsyncMessage::TaskCompleted("Status Updates".to_string()));
                 });
 
                 // Simulate some async work
@@ -207,8 +215,11 @@ async fn main() {
                 tokio::spawn(async move {
                     println!("Background work task started");
                     tokio::time::sleep(Duration::from_secs(3)).await;
-                    let _ = sender_work.send(AsyncMessage::UpdateStatus("Background work completed!".to_string()));
-                    let _ = sender_work.send(AsyncMessage::TaskCompleted("Background Work".to_string()));
+                    let _ = sender_work.send(AsyncMessage::UpdateStatus(
+                        "Background work completed!".to_string(),
+                    ));
+                    let _ = sender_work
+                        .send(AsyncMessage::TaskCompleted("Background Work".to_string()));
                 });
             });
         });
@@ -219,11 +230,11 @@ async fn main() {
             // For this demo, we just update the status
             status_text.set_label("Tasks stopped (demo - tasks will continue)");
         });
-        
+
         // In ProcessSpecified mode, we need to manually request the first idle event
         // to start the cycle. We'll do this by using the low-level event binding
         // to trigger an initial idle event after the frame is shown.
-        
+
         // First, show the frame so it's ready to receive events
         frame.show(true);
         frame.centre();
@@ -231,4 +242,4 @@ async fn main() {
         // Enable idle event processing for this frame
         frame.set_extra_style(ExtraWindowStyle::ProcessIdle);
     });
-} 
+}

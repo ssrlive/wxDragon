@@ -41,18 +41,18 @@ pub use wxdragon_macros::include_xrc;
 // include_xrc_dialog!, include_xrc_panel! are available via #[macro_use]
 
 pub use widgets::dataview::{
-    DataViewAlign, DataViewBitmapRenderer, DataViewCellMode, DataViewCheckIconTextRenderer,
-    DataViewChoiceRenderer, DataViewColumn, DataViewColumnFlag, DataViewCtrl,
-    DataViewCtrlBuilder, DataViewStyle, DataViewDateRenderer, DataViewIconTextRenderer,
-    DataViewItem, DataViewListCtrl, DataViewListCtrlBuilder, DataViewListModel,
-    DataViewProgressRenderer, DataViewRenderer, DataViewSpinRenderer, DataViewTextRenderer,
+    CustomDataViewVirtualListModel, DataViewAlign, DataViewBitmapRenderer, DataViewCellMode,
+    DataViewCheckIconTextRenderer, DataViewChoiceRenderer, DataViewColumn, DataViewColumnFlag,
+    DataViewCtrl, DataViewCtrlBuilder, DataViewCustomRenderer, DataViewCustomRendererBuilder,
+    DataViewDateRenderer, DataViewIconTextRenderer, DataViewItem, DataViewListCtrl,
+    DataViewListCtrlBuilder, DataViewListModel, DataViewModel, DataViewProgressRenderer,
+    DataViewRenderer, DataViewSpinRenderer, DataViewStyle, DataViewTextRenderer,
     DataViewToggleRenderer, DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewTreeCtrlStyle,
-    DataViewVirtualListModel, DataViewModel, Variant, CustomDataViewVirtualListModel,
-    DataViewCustomRenderer, DataViewCustomRendererBuilder, RenderContext,
+    DataViewVirtualListModel, RenderContext, Variant,
 };
 
 // Re-export DC functionality for custom renderers
-pub use dc::{DeviceContext, BrushStyle, PenStyle};
+pub use dc::{BrushStyle, DeviceContext, PenStyle};
 
 // Re-export window functionality including downcasting
-pub use window::{WxWidget, WxWidgetDowncast, Window, BackgroundStyle, ExtraWindowStyle};
+pub use window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget, WxWidgetDowncast};

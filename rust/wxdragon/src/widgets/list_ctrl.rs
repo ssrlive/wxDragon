@@ -68,7 +68,6 @@ impl ListColumnFormat {
     }
 }
 
-
 // --- ListItemState (for LIST_STATE_... constants) ---
 widget_style_enum!(
     name: ListItemState,
@@ -107,7 +106,6 @@ impl ListNextItemFlag {
         self as i32
     }
 }
-
 
 /// Events emitted by ListCtrl
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -428,7 +428,14 @@ impl DataViewCtrl {
             config.max,
             config.inc,
         );
-        let column = DataViewColumn::new(&config.label, &renderer, config.model_column, config.width, config.align, config.flags);
+        let column = DataViewColumn::new(
+            &config.label,
+            &renderer,
+            config.model_column,
+            config.width,
+            config.align,
+            config.flags,
+        );
         self.append_column(&column)
     }
 

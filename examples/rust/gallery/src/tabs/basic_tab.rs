@@ -270,17 +270,19 @@ pub fn create_basic_tab(notebook: &Notebook, _frame: &Frame) -> BasicTabControls
         .with_style(CollapsiblePaneStyle::Default)
         .build();
     collapsible_pane.set_tooltip("Click to expand or collapse the pane content.");
-    
+
     // Add content to the collapsible pane
     if let Some(pane_window) = collapsible_pane.get_pane() {
         let pane_content_text = StaticText::builder(&pane_window)
-            .with_label("This content is inside the collapsible pane!\nYou can add any widgets here.")
+            .with_label(
+                "This content is inside the collapsible pane!\nYou can add any widgets here.",
+            )
             .build();
-        
+
         let pane_button = Button::builder(&pane_window)
             .with_label("Button in pane")
             .build();
-            
+
         // Layout the content in the pane
         let pane_sizer = BoxSizer::builder(Orientation::Vertical).build();
         pane_sizer.add(&pane_content_text, 0, SizerFlag::All, 5);

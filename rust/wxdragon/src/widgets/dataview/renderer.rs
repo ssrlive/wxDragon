@@ -5,15 +5,25 @@ use std::ffi::CString;
 use wxdragon_sys as ffi;
 
 // Type aliases for custom renderer callbacks to reduce complexity
-type GetSizeCallback = Box<dyn Fn(&super::Variant, crate::geometry::Size) -> crate::geometry::Size + 'static>;
+type GetSizeCallback =
+    Box<dyn Fn(&super::Variant, crate::geometry::Size) -> crate::geometry::Size + 'static>;
 // Simple render callback that receives the variant directly
-type RenderCallback = Box<dyn Fn(crate::geometry::Rect, &RenderContext, i32, &super::Variant) -> bool + 'static>;
+type RenderCallback =
+    Box<dyn Fn(crate::geometry::Rect, &RenderContext, i32, &super::Variant) -> bool + 'static>;
 type SetValueCallback = Box<dyn Fn(&super::Variant) -> bool + 'static>;
 type GetValueCallback = Box<dyn Fn() -> Option<super::Variant> + 'static>;
 type HasEditorCallback = Box<dyn Fn() -> bool + 'static>;
 type ActivateCellCallback = Box<dyn Fn(crate::geometry::Rect, i32) -> bool + 'static>;
-type CreateEditorCallback = Box<dyn Fn(&dyn crate::WxWidget, crate::geometry::Rect, &super::Variant) -> Option<Box<dyn crate::WxWidget>> + 'static>;
-type GetValueFromEditorCallback = Box<dyn Fn(&dyn crate::WxWidget) -> Option<super::Variant> + 'static>;
+type CreateEditorCallback = Box<
+    dyn Fn(
+            &dyn crate::WxWidget,
+            crate::geometry::Rect,
+            &super::Variant,
+        ) -> Option<Box<dyn crate::WxWidget>>
+        + 'static,
+>;
+type GetValueFromEditorCallback =
+    Box<dyn Fn(&dyn crate::WxWidget) -> Option<super::Variant> + 'static>;
 
 /// Holds the callbacks for a custom DataView renderer
 #[repr(C)]
@@ -379,26 +389,26 @@ impl DataViewRenderer for DataViewCheckIconTextRenderer {
 }
 
 /// A custom renderer for DataView controls that allows completely custom drawing and behavior.
-/// 
+///
 /// This renderer provides a flexible way to display data in DataView columns with custom
 /// appearance and interaction. You can override various aspects like sizing, rendering,
 /// editing, and cell activation.
-/// 
+///
 /// # Features
-/// 
+///
 /// - **Reusable**: Same renderer instance can be used across multiple columns and DataViews
 /// - **Thread-safe**: Safe to create from any thread
 /// - **Memory safe**: Automatic cleanup when renderer is destroyed
 /// - **Flexible**: Support for custom sizing, rendering, editing, and activation
 /// - **Type-safe downcasting**: Use `WxWidgetDowncast` trait to safely cast editor widgets
-/// 
+///
 /// # Complete Example: Editable Text Renderer
-/// 
+///
 /// ```ignore
 /// use wxdragon::window::WxWidgetDowncast;
 /// use wxdragon::widgets::TextCtrl;
 /// use wxdragon::widgets::dataview::{DataViewCustomRenderer, VariantType, DataViewCellMode, DataViewAlign, Variant};
-/// 
+///
 /// // Create a custom text renderer with editing support
 /// let text_renderer = DataViewCustomRenderer::builder()
 ///     .variant_type(VariantType::String)
@@ -437,14 +447,14 @@ impl DataViewRenderer for DataViewCheckIconTextRenderer {
 ///         }
 ///     })
 ///     .build();
-/// 
+///
 /// // Use in multiple columns
 /// let col1 = DataViewColumn::new("Name", &text_renderer, 0, 120, ...);
 /// let col2 = DataViewColumn::new("Description", &text_renderer, 1, 200, ...);
 /// ```
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// // Create a progress bar renderer
 /// let progress_renderer = DataViewCustomRenderer::builder()
@@ -459,7 +469,7 @@ impl DataViewRenderer for DataViewCheckIconTextRenderer {
 ///         }
 ///     })
 ///     .build();
-/// 
+///
 /// // Use in multiple columns
 /// let col1 = DataViewColumn::new("Progress 1", &progress_renderer, 1, 120, ...);
 /// let col2 = DataViewColumn::new("Progress 2", &progress_renderer, 3, 120, ...);
@@ -528,12 +538,12 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the callback for determining the size needed for rendering.
-    /// 
+    ///
     /// The callback receives the variant value and the default cell size,
     /// allowing for more intelligent sizing based on content.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// .with_get_size(|variant, default_size| {
     ///     match variant {
@@ -560,9 +570,9 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the render callback. The callback receives the current variant value.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust
     /// .with_render(|rect, ctx, state, variant| {
     ///     match variant {
@@ -604,14 +614,14 @@ impl DataViewCustomRendererBuilder {
     }
 
     /// Sets the callback for creating an editor control.
-    /// 
+    ///
     /// The callback receives the parent widget, the cell rectangle, and the current value.
     /// It should return a boxed widget that will be used for editing the cell value.
-    /// 
+    ///
     /// # Example
     /// ```ignore
     /// use wxdragon::widgets::TextCtrl;
-    /// 
+    ///
     /// .with_create_editor(|parent, rect, variant| {
     ///     let initial_value = match variant {
     ///         Variant::String(s) => s.clone(),
@@ -629,22 +639,27 @@ impl DataViewCustomRendererBuilder {
     /// ```
     pub fn with_create_editor<F>(mut self, callback: F) -> Self
     where
-        F: Fn(&dyn crate::WxWidget, crate::geometry::Rect, &super::Variant) -> Option<Box<dyn crate::WxWidget>> + 'static,
+        F: Fn(
+                &dyn crate::WxWidget,
+                crate::geometry::Rect,
+                &super::Variant,
+            ) -> Option<Box<dyn crate::WxWidget>>
+            + 'static,
     {
         self.create_editor = Some(Box::new(callback));
         self
     }
 
     /// Sets the callback for getting the value from an editor control.
-    /// 
+    ///
     /// The callback receives the editor widget that was created by `with_create_editor`.
     /// You can downcast it to the specific widget type to extract the value.
-    /// 
+    ///
     /// # Example
     /// ```ignore
     /// use wxdragon::window::WxWidgetDowncast;
     /// use wxdragon::widgets::TextCtrl;
-    /// 
+    ///
     /// .with_get_value_from_editor(|editor| {
     ///     // Downcast to the specific widget type you created
     ///     if let Some(text_ctrl) = editor.downcast_ref::<TextCtrl>() {
@@ -722,7 +737,7 @@ pub struct RenderContext {
 
 impl RenderContext {
     /// Create a new render context from a raw DC pointer.
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the DC pointer is valid for the duration of rendering.
     pub unsafe fn from_raw(dc: *mut std::ffi::c_void) -> Self {
@@ -741,31 +756,40 @@ impl crate::dc::DeviceContext for RenderContext {
 // Trampoline functions that bridge from C++ to Rust
 extern "C" fn get_size_trampoline(user_data: *mut std::ffi::c_void) -> ffi::wxd_Size_t {
     if user_data.is_null() {
-        return ffi::wxd_Size_t { width: 50, height: 20 };
+        return ffi::wxd_Size_t {
+            width: 50,
+            height: 20,
+        };
     }
 
     let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
     if let Some(ref callback) = callbacks.get_size {
         // Get the current variant value
         let current_value = callbacks.current_value.borrow();
-        
+
         // Provide a default cell size - this could be made configurable or
         // derived from the widget's font metrics in a future enhancement
         let default_size = crate::geometry::Size::new(80, 20);
-        
+
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             callback(&current_value, default_size)
         }));
-        
+
         match result {
             Ok(size) => ffi::wxd_Size_t {
                 width: size.width,
                 height: size.height,
             },
-            Err(_) => ffi::wxd_Size_t { width: 50, height: 20 }
+            Err(_) => ffi::wxd_Size_t {
+                width: 50,
+                height: 20,
+            },
         }
     } else {
-        ffi::wxd_Size_t { width: 50, height: 20 }
+        ffi::wxd_Size_t {
+            width: 50,
+            height: 20,
+        }
     }
 }
 
@@ -786,7 +810,7 @@ extern "C" fn render_trampoline(
 
         // Get the current value and pass it directly to the callback
         let current_value = callbacks.current_value.borrow();
-        
+
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             callback(rect, &context, state, &current_value)
         }));
@@ -807,13 +831,13 @@ extern "C" fn set_value_trampoline(
 
     let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
     let variant = unsafe { super::model::from_raw_variant(value) };
-    
+
     // Store the value internally in the renderer
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         *callbacks.current_value.borrow_mut() = variant;
         true
     }));
-    
+
     result.unwrap_or(false)
 }
 
@@ -833,7 +857,7 @@ extern "C" fn get_value_trampoline(
             *value = raw;
         }
     }));
-    
+
     if result.is_err() {
         // Return empty string on panic
         unsafe {
@@ -850,9 +874,7 @@ extern "C" fn has_editor_trampoline(user_data: *mut std::ffi::c_void) -> bool {
 
     let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
     if let Some(ref callback) = callbacks.has_editor {
-        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            callback()
-        }));
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(callback));
         result.unwrap_or(false)
     } else {
         false
@@ -875,9 +897,8 @@ extern "C" fn activate_cell_trampoline(
     if let Some(ref callback) = callbacks.activate_cell {
         // Convert parameters properly
         let rect = crate::geometry::Rect::new(cell.x, cell.y, cell.width, cell.height);
-        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            callback(rect, col as i32)
-        }));
+        let result =
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| callback(rect, col as i32)));
         result.unwrap_or(false)
     } else {
         false
@@ -896,28 +917,33 @@ extern "C" fn create_editor_trampoline(
 
     let callbacks = unsafe { &*(user_data as *const CustomRendererCallbacks) };
     if let Some(ref callback) = callbacks.create_editor {
-        let rect = crate::geometry::Rect::new(label_rect.x, label_rect.y, label_rect.width, label_rect.height);
+        let rect = crate::geometry::Rect::new(
+            label_rect.x,
+            label_rect.y,
+            label_rect.width,
+            label_rect.height,
+        );
         let variant = unsafe { super::model::from_raw_variant(value) };
-        
+
         // Create a wrapper for the parent widget
         // Note: This is a simplified implementation. In a full implementation,
         // we would need proper widget type detection and conversion.
         struct ParentWrapper {
             ptr: *mut std::ffi::c_void,
         }
-        
+
         impl crate::WxWidget for ParentWrapper {
             fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
                 self.ptr as *mut wxdragon_sys::wxd_Window_t
             }
         }
-        
+
         let parent_wrapper = ParentWrapper { ptr: parent };
-        
+
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             callback(&parent_wrapper, rect, &variant)
         }));
-        
+
         match result {
             Ok(Some(editor)) => editor.handle_ptr() as *mut std::ffi::c_void,
             _ => std::ptr::null_mut(),
@@ -942,19 +968,18 @@ extern "C" fn get_value_from_editor_trampoline(
         struct EditorWrapper {
             ptr: *mut std::ffi::c_void,
         }
-        
+
         impl crate::WxWidget for EditorWrapper {
             fn handle_ptr(&self) -> *mut wxdragon_sys::wxd_Window_t {
                 self.ptr as *mut wxdragon_sys::wxd_Window_t
             }
         }
-        
+
         let editor_wrapper = EditorWrapper { ptr: editor };
-        
-        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            callback(&editor_wrapper)
-        }));
-        
+
+        let result =
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| callback(&editor_wrapper)));
+
         match result {
             Ok(Some(variant)) => {
                 let raw = super::model::to_raw_variant(&variant);
@@ -971,9 +996,9 @@ extern "C" fn get_value_from_editor_trampoline(
 }
 
 /// Function called by C++ to drop the Rust callback data.
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is called from C++ code and must only be called with a valid pointer
 /// that was previously created by `Box::into_raw()` for a `CustomRendererCallbacks` struct.
 /// The pointer must not be null and must not have been freed previously. After this
@@ -983,4 +1008,4 @@ pub unsafe extern "C" fn drop_rust_custom_renderer_callbacks(ptr: *mut std::ffi:
     if !ptr.is_null() {
         let _ = Box::from_raw(ptr as *mut CustomRendererCallbacks);
     }
-} 
+}

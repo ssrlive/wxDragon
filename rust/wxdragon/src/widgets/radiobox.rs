@@ -87,7 +87,8 @@ impl RadioBox {
         assert!(!config.parent_ptr.is_null(), "RadioBox requires a parent");
         let c_label = CString::new(config.label).expect("CString::new failed for label");
 
-        let c_choices: Vec<CString> = config.choices
+        let c_choices: Vec<CString> = config
+            .choices
             .iter()
             .map(|&s| CString::new(s).expect("CString::new failed for choice"))
             .collect();

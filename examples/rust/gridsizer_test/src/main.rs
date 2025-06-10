@@ -16,13 +16,15 @@ fn main() {
         let title = StaticText::builder(&panel)
             .with_label("GridSizer Demo")
             .build();
-        main_sizer.add(&title, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &title,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         // Create a 3x3 grid sizer with gaps
-        let grid_sizer = GridSizer::builder(3, 3)
-            .with_vgap(10)
-            .with_hgap(10)
-            .build();
+        let grid_sizer = GridSizer::builder(3, 3).with_vgap(10).with_hgap(10).build();
 
         // Add buttons to fill the grid
         for i in 1..=9 {
@@ -44,12 +46,15 @@ fn main() {
                 grid_sizer.get_hgap()
             ))
             .build();
-        main_sizer.add(&info, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &info,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         // Create another grid with different dimensions
-        let grid_sizer2 = GridSizer::builder(2, 4)
-            .with_gap(Size::new(5, 8))
-            .build();
+        let grid_sizer2 = GridSizer::builder(2, 4).with_gap(Size::new(5, 8)).build();
 
         // Add some checkboxes to the second grid
         for i in 1..=8 {
@@ -65,7 +70,12 @@ fn main() {
         let flex_title = StaticText::builder(&panel)
             .with_label("FlexGridSizer with FlexGrowMode enum:")
             .build();
-        main_sizer.add(&flex_title, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &flex_title,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         let flex_sizer = FlexGridSizer::builder(2, 2)
             .with_vgap(5)
@@ -90,4 +100,4 @@ fn main() {
         frame.show(true);
         frame.centre();
     });
-} 
+}

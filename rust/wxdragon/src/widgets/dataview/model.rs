@@ -326,7 +326,7 @@ impl DataViewVirtualListModel {
     }
 
     /// Get the row for a native item
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the item pointer is valid and comes from the same model.
     pub unsafe fn get_row(&self, item: *mut std::ffi::c_void) -> usize {
@@ -404,11 +404,10 @@ impl CustomDataViewVirtualListModel {
         let any_data = Box::new(data);
 
         // Convert type-specific callbacks to callbacks that work with Any
-        let any_get_value: GetValueCallback =
-            Box::new(move |any_data, row, col| {
-                let data = any_data.downcast_ref::<T>().unwrap();
-                get_value(data, row, col)
-            });
+        let any_get_value: GetValueCallback = Box::new(move |any_data, row, col| {
+            let data = any_data.downcast_ref::<T>().unwrap();
+            get_value(data, row, col)
+        });
 
         let any_set_value: Option<SetValueCallback> = if let Some(f) = set_value {
             Some(Box::new(move |any_data: &dyn Any, row, col, value| {
@@ -428,15 +427,14 @@ impl CustomDataViewVirtualListModel {
             None
         };
 
-        let any_is_enabled: Option<IsEnabledCallback> =
-            if let Some(f) = is_enabled {
-                Some(Box::new(move |any_data: &dyn Any, row, col| {
-                    let data = any_data.downcast_ref::<T>().unwrap();
-                    f(data, row, col)
-                }))
-            } else {
-                None
-            };
+        let any_is_enabled: Option<IsEnabledCallback> = if let Some(f) = is_enabled {
+            Some(Box::new(move |any_data: &dyn Any, row, col| {
+                let data = any_data.downcast_ref::<T>().unwrap();
+                f(data, row, col)
+            }))
+        } else {
+            None
+        };
 
         // Create callback data struct
         let callback_data = Box::new(CustomModelCallbacks {
@@ -791,7 +789,7 @@ pub fn to_raw_variant(value: &Variant) -> ffi::wxd_Variant_t {
 }
 
 /// Converts a C wxd_Variant_t to a Variant
-/// 
+///
 /// # Safety
 /// The caller must ensure the raw pointer is valid and points to a properly initialized wxd_Variant_t.
 pub unsafe fn from_raw_variant(raw: *const ffi::wxd_Variant_t) -> Variant {
@@ -803,9 +801,7 @@ pub unsafe fn from_raw_variant(raw: *const ffi::wxd_Variant_t) -> Variant {
         t if t == ffi::WXD_VARIANT_TYPE_BOOL as i32 => Variant::Bool((*raw).data.bool_val),
         t if t == ffi::WXD_VARIANT_TYPE_INT32 as i32 => Variant::Int32((*raw).data.int32_val),
         t if t == ffi::WXD_VARIANT_TYPE_INT64 as i32 => Variant::Int64((*raw).data.int64_val),
-        t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => {
-            Variant::Double((*raw).data.double_val)
-        }
+        t if t == ffi::WXD_VARIANT_TYPE_DOUBLE as i32 => Variant::Double((*raw).data.double_val),
         t if t == ffi::WXD_VARIANT_TYPE_STRING as i32 => {
             if (*raw).data.string_val.is_null() {
                 Variant::String(String::new())

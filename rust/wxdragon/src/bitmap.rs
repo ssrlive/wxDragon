@@ -145,10 +145,10 @@ impl Bitmap {
     /// # fn example() -> Option<()> {
     /// let bitmap = Bitmap::new(100, 100)?;
     /// let rgba_data = bitmap.get_rgba_data()?;
-    /// 
+    ///
     /// // Each pixel takes 4 bytes (RGBA)
     /// assert_eq!(rgba_data.len(), 100 * 100 * 4);
-    /// 
+    ///
     /// // Use with image crate:
     /// // let img = image::RgbaImage::from_raw(100, 100, rgba_data)?;
     /// # Some(())

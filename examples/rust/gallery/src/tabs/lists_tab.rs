@@ -410,13 +410,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     scrolled_list_window.set_scroll_rate(10, 10);
     // Set scrollbars based on inner panel size (make virtual size a bit larger to ensure scrolling)
     scrolled_list_window.set_scrollbars(ScrollBarConfig {
-        pixels_per_unit_x: 10,                            // pixels per unit X
-        pixels_per_unit_y: 10,                            // pixels per unit Y
-        no_units_x: (inner_size.width + 50) / 10,         // number of units X (ensure > visible width)
-        no_units_y: (inner_size.height + 50) / 10,        // number of units Y (ensure > visible height)
-        x_pos: 0,                                          // initial X position
-        y_pos: 0,                                          // initial Y position
-        no_refresh: true,                                  // no refresh immediately
+        pixels_per_unit_x: 10,                     // pixels per unit X
+        pixels_per_unit_y: 10,                     // pixels per unit Y
+        no_units_x: (inner_size.width + 50) / 10,  // number of units X (ensure > visible width)
+        no_units_y: (inner_size.height + 50) / 10, // number of units Y (ensure > visible height)
+        x_pos: 0,                                  // initial X position
+        y_pos: 0,                                  // initial Y position
+        no_refresh: true,                          // no refresh immediately
     });
 
     // --- Event Binding ---

@@ -12,11 +12,16 @@ fn main() {
         // Create a main vertical sizer
         let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
 
-            // Add a title
-    let title = StaticText::builder(&panel)
-        .with_label("Sizer Demo - WrapSizer and GridSizer")
-        .build();
-    main_sizer.add(&title, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        // Add a title
+        let title = StaticText::builder(&panel)
+            .with_label("Sizer Demo - WrapSizer and GridSizer")
+            .build();
+        main_sizer.add(
+            &title,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         // Create a WrapSizer with default flags
         let wrap_sizer = WrapSizer::builder(Orientation::Horizontal)
@@ -38,7 +43,12 @@ fn main() {
         let section_title = StaticText::builder(&panel)
             .with_label("WrapSizer with ExtendLastOnEachLine disabled:")
             .build();
-        main_sizer.add(&section_title, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &section_title,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         let wrap_sizer2 = WrapSizer::builder(Orientation::Horizontal)
             .with_flags(WrapSizerFlag::RemoveLeadingSpaces)
@@ -58,13 +68,15 @@ fn main() {
         let separator = StaticText::builder(&panel)
             .with_label("GridSizer Demo (2x3 grid):")
             .build();
-        main_sizer.add(&separator, 0, SizerFlag::All | SizerFlag::AlignCenterHorizontal, 10);
+        main_sizer.add(
+            &separator,
+            0,
+            SizerFlag::All | SizerFlag::AlignCenterHorizontal,
+            10,
+        );
 
         // Create a GridSizer with 2 rows, 3 columns, and gaps
-        let grid_sizer = GridSizer::builder(2, 3)
-            .with_vgap(5)
-            .with_hgap(5)
-            .build();
+        let grid_sizer = GridSizer::builder(2, 3).with_vgap(5).with_hgap(5).build();
 
         // Add some buttons to the grid
         for i in 1..=6 {
@@ -81,4 +93,4 @@ fn main() {
         frame.show(true);
         frame.centre();
     });
-} 
+}

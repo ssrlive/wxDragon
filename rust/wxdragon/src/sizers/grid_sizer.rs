@@ -9,7 +9,7 @@ use wxdragon_sys as ffi;
 #[derive(Clone)]
 pub struct GridSizer {
     raw_specific_ptr: *mut ffi::wxd_GridSizer_t, // Specific pointer for GridSizer FFI calls
-    sizer_base: Sizer, // Base Sizer for common functionality and Deref
+    sizer_base: Sizer,                           // Base Sizer for common functionality and Deref
 }
 
 impl GridSizer {
@@ -64,27 +64,19 @@ impl GridSizer {
     }
 
     pub fn get_cols(&self) -> i32 {
-        unsafe {
-            ffi::wxd_GridSizer_GetCols(self.raw_specific_ptr)
-        }
+        unsafe { ffi::wxd_GridSizer_GetCols(self.raw_specific_ptr) }
     }
 
     pub fn get_rows(&self) -> i32 {
-        unsafe {
-            ffi::wxd_GridSizer_GetRows(self.raw_specific_ptr)
-        }
+        unsafe { ffi::wxd_GridSizer_GetRows(self.raw_specific_ptr) }
     }
 
     pub fn get_vgap(&self) -> i32 {
-        unsafe {
-            ffi::wxd_GridSizer_GetVGap(self.raw_specific_ptr)
-        }
+        unsafe { ffi::wxd_GridSizer_GetVGap(self.raw_specific_ptr) }
     }
 
     pub fn get_hgap(&self) -> i32 {
-        unsafe {
-            ffi::wxd_GridSizer_GetHGap(self.raw_specific_ptr)
-        }
+        unsafe { ffi::wxd_GridSizer_GetHGap(self.raw_specific_ptr) }
     }
 }
 
@@ -154,8 +146,6 @@ impl GridSizerBuilder {
                 ffi::wxd_GridSizer_Create(self.rows, self.cols, self.vgap, self.hgap)
             }
         };
-        unsafe { 
-            GridSizer::from_ptr(ptr).expect("Failed to create wxGridSizer") 
-        }
+        unsafe { GridSizer::from_ptr(ptr).expect("Failed to create wxGridSizer") }
     }
-} 
+}

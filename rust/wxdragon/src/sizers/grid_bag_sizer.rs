@@ -112,7 +112,10 @@ impl GBSpan {
 pub const DEFAULT_GB_POSITION: GBPosition = GBPosition { row: 0, col: 0 };
 
 /// Default span (1, 1).
-pub const DEFAULT_GB_SPAN: GBSpan = GBSpan { rowspan: 1, colspan: 1 };
+pub const DEFAULT_GB_SPAN: GBSpan = GBSpan {
+    rowspan: 1,
+    colspan: 1,
+};
 
 // --- GridBagSizer ---
 /// A sizer that can lay out items in a grid with items at specified cells,
@@ -120,7 +123,7 @@ pub const DEFAULT_GB_SPAN: GBSpan = GBSpan { rowspan: 1, colspan: 1 };
 #[derive(Clone)]
 pub struct GridBagSizer {
     raw_specific_ptr: *mut ffi::wxd_GridBagSizer_t, // Specific pointer for GridBagSizer FFI calls
-    sizer_base: Sizer, // Base Sizer for common functionality and Deref
+    sizer_base: Sizer,                              // Base Sizer for common functionality and Deref
 }
 
 impl GridBagSizer {
@@ -421,4 +424,4 @@ impl GridBagSizerBuilder {
         let ptr = unsafe { ffi::wxd_GridBagSizer_Create(self.vgap, self.hgap) };
         unsafe { GridBagSizer::from_ptr(ptr).expect("Failed to create wxGridBagSizer") }
     }
-} 
+}

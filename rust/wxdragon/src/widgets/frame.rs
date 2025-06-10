@@ -1,9 +1,9 @@
+use crate::bitmap::Bitmap; // ADDED: Import Bitmap
 use crate::event::WindowEvents;
 use crate::geometry::{Point, Size, DEFAULT_POSITION};
 use crate::id::Id;
 use crate::id::ID_ANY;
 use crate::menus::MenuBar; // ADDED: Import MenuBar
-use crate::bitmap::Bitmap; // ADDED: Import Bitmap
 use crate::widget_style_enum;
 use crate::widgets::statusbar::StatusBar; // ADDED Import
 use crate::widgets::toolbar::{ToolBar, ToolBarStyle}; // Added ToolBarStyle

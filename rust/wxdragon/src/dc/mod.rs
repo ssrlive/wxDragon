@@ -203,14 +203,30 @@ pub struct TextAlignment {
 }
 
 impl TextAlignment {
-    pub const INVALID: Self = Self { bits: wxdragon_sys::WXD_ALIGN_INVALID as i32 };
-    pub const LEFT: Self = Self { bits: wxdragon_sys::WXD_ALIGN_LEFT as i32 };
-    pub const TOP: Self = Self { bits: wxdragon_sys::WXD_ALIGN_TOP as i32 };
-    pub const RIGHT: Self = Self { bits: wxdragon_sys::WXD_ALIGN_RIGHT as i32 };
-    pub const BOTTOM: Self = Self { bits: wxdragon_sys::WXD_ALIGN_BOTTOM as i32 };
-    pub const CENTER_HORIZONTAL: Self = Self { bits: wxdragon_sys::WXD_ALIGN_CENTRE_HORIZONTAL as i32 };
-    pub const CENTER_VERTICAL: Self = Self { bits: wxdragon_sys::WXD_ALIGN_CENTRE_VERTICAL as i32 };
-    pub const CENTER: Self = Self { bits: wxdragon_sys::WXD_ALIGN_CENTRE as i32 };
+    pub const INVALID: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_INVALID as i32,
+    };
+    pub const LEFT: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_LEFT as i32,
+    };
+    pub const TOP: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_TOP as i32,
+    };
+    pub const RIGHT: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_RIGHT as i32,
+    };
+    pub const BOTTOM: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_BOTTOM as i32,
+    };
+    pub const CENTER_HORIZONTAL: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_CENTRE_HORIZONTAL as i32,
+    };
+    pub const CENTER_VERTICAL: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_CENTRE_VERTICAL as i32,
+    };
+    pub const CENTER: Self = Self {
+        bits: wxdragon_sys::WXD_ALIGN_CENTRE as i32,
+    };
 
     pub const fn bits(&self) -> i32 {
         self.bits
@@ -224,7 +240,9 @@ impl TextAlignment {
 impl std::ops::BitOr for TextAlignment {
     type Output = Self;
     fn bitor(self, rhs: Self) -> Self::Output {
-        Self { bits: self.bits | rhs.bits }
+        Self {
+            bits: self.bits | rhs.bits,
+        }
     }
 }
 
@@ -270,13 +288,19 @@ impl Point {
 
 impl From<Point> for wxdragon_sys::wxd_Point {
     fn from(point: Point) -> Self {
-        wxdragon_sys::wxd_Point { x: point.x, y: point.y }
+        wxdragon_sys::wxd_Point {
+            x: point.x,
+            y: point.y,
+        }
     }
 }
 
 impl From<wxdragon_sys::wxd_Point> for Point {
     fn from(point: wxdragon_sys::wxd_Point) -> Self {
-        Point { x: point.x, y: point.y }
+        Point {
+            x: point.x,
+            y: point.y,
+        }
     }
 }
 
@@ -291,19 +315,34 @@ pub struct Rect {
 
 impl Rect {
     pub fn new(x: i32, y: i32, width: i32, height: i32) -> Self {
-        Self { x, y, width, height }
+        Self {
+            x,
+            y,
+            width,
+            height,
+        }
     }
 }
 
 impl From<Rect> for wxdragon_sys::wxd_Rect {
     fn from(rect: Rect) -> Self {
-        wxdragon_sys::wxd_Rect { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+        wxdragon_sys::wxd_Rect {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+        }
     }
 }
 
 impl From<wxdragon_sys::wxd_Rect> for Rect {
     fn from(rect: wxdragon_sys::wxd_Rect) -> Self {
-        Rect { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+        Rect {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+        }
     }
 }
 
@@ -342,14 +381,7 @@ pub struct BlitConfig {
 }
 
 impl BlitConfig {
-    pub fn new(
-        dest_x: i32,
-        dest_y: i32,
-        width: i32,
-        height: i32,
-        src_x: i32,
-        src_y: i32,
-    ) -> Self {
+    pub fn new(dest_x: i32, dest_y: i32, width: i32, height: i32, src_x: i32, src_y: i32) -> Self {
         Self {
             dest_x,
             dest_y,
@@ -571,13 +603,20 @@ pub trait DeviceContext {
     }
 
     /// Draw a polygon using the specified points
-    fn draw_polygon(&self, points: &[Point], x_offset: i32, y_offset: i32, fill_mode: PolygonFillMode) {
+    fn draw_polygon(
+        &self,
+        points: &[Point],
+        x_offset: i32,
+        y_offset: i32,
+        fill_mode: PolygonFillMode,
+    ) {
         if points.is_empty() {
             return;
         }
-        
-        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> = points.iter().map(|p| (*p).into()).collect();
-        
+
+        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> =
+            points.iter().map(|p| (*p).into()).collect();
+
         unsafe {
             wxdragon_sys::wxd_DC_DrawPolygon(
                 self.dc_ptr(),
@@ -591,9 +630,25 @@ pub trait DeviceContext {
     }
 
     /// Draw an elliptic arc
-    fn draw_elliptic_arc(&self, x: i32, y: i32, width: i32, height: i32, start_angle: f64, end_angle: f64) {
+    fn draw_elliptic_arc(
+        &self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        start_angle: f64,
+        end_angle: f64,
+    ) {
         unsafe {
-            wxdragon_sys::wxd_DC_DrawEllipticArc(self.dc_ptr(), x, y, width, height, start_angle, end_angle);
+            wxdragon_sys::wxd_DC_DrawEllipticArc(
+                self.dc_ptr(),
+                x,
+                y,
+                width,
+                height,
+                start_angle,
+                end_angle,
+            );
         }
     }
 
@@ -602,9 +657,10 @@ pub trait DeviceContext {
         if points.is_empty() {
             return;
         }
-        
-        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> = points.iter().map(|p| (*p).into()).collect();
-        
+
+        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> =
+            points.iter().map(|p| (*p).into()).collect();
+
         unsafe {
             wxdragon_sys::wxd_DC_DrawLines(
                 self.dc_ptr(),
@@ -628,9 +684,10 @@ pub trait DeviceContext {
         if points.is_empty() {
             return;
         }
-        
-        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> = points.iter().map(|p| (*p).into()).collect();
-        
+
+        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> =
+            points.iter().map(|p| (*p).into()).collect();
+
         unsafe {
             wxdragon_sys::wxd_DC_DrawSpline(
                 self.dc_ptr(),
@@ -713,9 +770,10 @@ pub trait DeviceContext {
         if points.is_empty() {
             return;
         }
-        
-        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> = points.iter().map(|p| (*p).into()).collect();
-        
+
+        let mut ffi_points: Vec<wxdragon_sys::wxd_Point> =
+            points.iter().map(|p| (*p).into()).collect();
+
         unsafe {
             wxdragon_sys::wxd_DC_SetClippingRegionFromPoints(
                 self.dc_ptr(),
@@ -731,11 +789,17 @@ pub trait DeviceContext {
         let mut y = 0;
         let mut width = 0;
         let mut height = 0;
-        
+
         unsafe {
-            wxdragon_sys::wxd_DC_GetClippingBox(self.dc_ptr(), &mut x, &mut y, &mut width, &mut height);
+            wxdragon_sys::wxd_DC_GetClippingBox(
+                self.dc_ptr(),
+                &mut x,
+                &mut y,
+                &mut width,
+                &mut height,
+            );
         }
-        
+
         Rect::new(x, y, width, height)
     }
 
@@ -794,11 +858,11 @@ pub trait DeviceContext {
     fn get_user_scale(&self) -> (f64, f64) {
         let mut x_scale = 0.0;
         let mut y_scale = 0.0;
-        
+
         unsafe {
             wxdragon_sys::wxd_DC_GetUserScale(self.dc_ptr(), &mut x_scale, &mut y_scale);
         }
-        
+
         (x_scale, y_scale)
     }
 
@@ -806,11 +870,11 @@ pub trait DeviceContext {
     fn get_logical_scale(&self) -> (f64, f64) {
         let mut x_scale = 0.0;
         let mut y_scale = 0.0;
-        
+
         unsafe {
             wxdragon_sys::wxd_DC_GetLogicalScale(self.dc_ptr(), &mut x_scale, &mut y_scale);
         }
-        
+
         (x_scale, y_scale)
     }
 
@@ -824,30 +888,22 @@ pub trait DeviceContext {
 
     /// Convert device coordinates to logical coordinates (X)
     fn device_to_logical_x(&self, x: i32) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_DeviceToLogicalX(self.dc_ptr(), x)
-        }
+        unsafe { wxdragon_sys::wxd_DC_DeviceToLogicalX(self.dc_ptr(), x) }
     }
 
     /// Convert device coordinates to logical coordinates (Y)
     fn device_to_logical_y(&self, y: i32) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_DeviceToLogicalY(self.dc_ptr(), y)
-        }
+        unsafe { wxdragon_sys::wxd_DC_DeviceToLogicalY(self.dc_ptr(), y) }
     }
 
     /// Convert logical coordinates to device coordinates (X)
     fn logical_to_device_x(&self, x: i32) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_LogicalToDeviceX(self.dc_ptr(), x)
-        }
+        unsafe { wxdragon_sys::wxd_DC_LogicalToDeviceX(self.dc_ptr(), x) }
     }
 
     /// Convert logical coordinates to device coordinates (Y)
     fn logical_to_device_y(&self, y: i32) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_LogicalToDeviceY(self.dc_ptr(), y)
-        }
+        unsafe { wxdragon_sys::wxd_DC_LogicalToDeviceY(self.dc_ptr(), y) }
     }
 
     /// Get the size in millimeters
@@ -866,7 +922,7 @@ pub trait DeviceContext {
             let mut height = 0;
             let mut descent = 0;
             let mut external_leading = 0;
-            
+
             unsafe {
                 wxdragon_sys::wxd_DC_GetFullTextExtent(
                     self.dc_ptr(),
@@ -891,7 +947,7 @@ pub trait DeviceContext {
             let mut width = 0;
             let mut height = 0;
             let mut height_line = 0;
-            
+
             unsafe {
                 wxdragon_sys::wxd_DC_GetMultiLineTextExtent(
                     self.dc_ptr(),
@@ -910,16 +966,12 @@ pub trait DeviceContext {
 
     /// Get the character height for the current font
     fn get_char_height(&self) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_GetCharHeight(self.dc_ptr())
-        }
+        unsafe { wxdragon_sys::wxd_DC_GetCharHeight(self.dc_ptr()) }
     }
 
     /// Get the character width for the current font
     fn get_char_width(&self) -> i32 {
-        unsafe {
-            wxdragon_sys::wxd_DC_GetCharWidth(self.dc_ptr())
-        }
+        unsafe { wxdragon_sys::wxd_DC_GetCharWidth(self.dc_ptr()) }
     }
 
     /// Get the current background color
@@ -968,9 +1020,7 @@ pub trait DeviceContext {
 
     /// Get the content scale factor (for high-DPI displays)
     fn get_content_scale_factor(&self) -> f64 {
-        unsafe {
-            wxdragon_sys::wxd_DC_GetContentScaleFactor(self.dc_ptr())
-        }
+        unsafe { wxdragon_sys::wxd_DC_GetContentScaleFactor(self.dc_ptr()) }
     }
 
     /// Fill a rectangle with a linear gradient

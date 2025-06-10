@@ -104,7 +104,9 @@ impl ToolBar {
         let c_label = CString::new(config.label).unwrap_or_default();
         let c_short_help = CString::new(config.short_help).unwrap_or_default();
         let c_longlong_help = CString::new(config.long_help).unwrap_or_default();
-        let bmp_disabled_ptr = config.bitmap_disabled.map_or(std::ptr::null_mut(), |bmp| bmp.as_ptr());
+        let bmp_disabled_ptr = config
+            .bitmap_disabled
+            .map_or(std::ptr::null_mut(), |bmp| bmp.as_ptr());
 
         unsafe {
             let tool_ptr = ffi::wxd_ToolBar_AddTool(
@@ -129,17 +131,15 @@ impl ToolBar {
     /// * `bitmap` - The bitmap for the tool's normal state.
     /// * `short_help` - Short help string (tooltip).
     pub fn add_tool(&self, tool_id: Id, label: &str, bitmap: &Bitmap, short_help: &str) -> bool {
-        self.add_tool_raw(
-            ToolConfig {
-                tool_id,
-                label,
-                bitmap,
-                bitmap_disabled: None,
-                kind: ItemKind::Normal,
-                short_help,
-                long_help: "",
-            }
-        )
+        self.add_tool_raw(ToolConfig {
+            tool_id,
+            label,
+            bitmap,
+            bitmap_disabled: None,
+            kind: ItemKind::Normal,
+            short_help,
+            long_help: "",
+        })
     }
 
     /// Adds a check tool (toggle tool) to the toolbar.
@@ -150,17 +150,15 @@ impl ToolBar {
         bitmap: &Bitmap,
         short_help: &str,
     ) -> bool {
-        self.add_tool_raw(
-            ToolConfig {
-                tool_id,
-                label,
-                bitmap,
-                bitmap_disabled: None,
-                kind: ItemKind::Check,
-                short_help,
-                long_help: "",
-            }
-        )
+        self.add_tool_raw(ToolConfig {
+            tool_id,
+            label,
+            bitmap,
+            bitmap_disabled: None,
+            kind: ItemKind::Check,
+            short_help,
+            long_help: "",
+        })
     }
 
     /// Adds a radio tool to the toolbar.
@@ -172,17 +170,15 @@ impl ToolBar {
         bitmap: &Bitmap,
         short_help: &str,
     ) -> bool {
-        self.add_tool_raw(
-            ToolConfig {
-                tool_id,
-                label,
-                bitmap,
-                bitmap_disabled: None,
-                kind: ItemKind::Radio,
-                short_help,
-                long_help: "",
-            }
-        )
+        self.add_tool_raw(ToolConfig {
+            tool_id,
+            label,
+            bitmap,
+            bitmap_disabled: None,
+            kind: ItemKind::Radio,
+            short_help,
+            long_help: "",
+        })
     }
 
     /// Adds a separator.

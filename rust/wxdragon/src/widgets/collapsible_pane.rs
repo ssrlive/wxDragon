@@ -22,7 +22,7 @@ widget_style_enum!(
 );
 
 /// Represents a wxCollapsiblePane widget.
-/// A collapsible pane is a container with an embedded button-like control which can be 
+/// A collapsible pane is a container with an embedded button-like control which can be
 /// used by the user to collapse or expand the pane's content.
 #[derive(Clone)]
 pub struct CollapsiblePane {
@@ -64,7 +64,7 @@ impl CollapsiblePane {
     }
 
     /// Expands or collapses the pane.
-    /// 
+    ///
     /// # Arguments
     /// * `expand` - If true, expands the pane; if false, collapses it.
     pub fn expand(&self, expand: bool) {
@@ -72,7 +72,7 @@ impl CollapsiblePane {
     }
 
     /// Collapses the pane.
-    /// 
+    ///
     /// # Arguments
     /// * `collapse` - If true, collapses the pane; if false, expands it.
     pub fn collapse(&self, collapse: bool) {
@@ -91,7 +91,7 @@ impl CollapsiblePane {
     }
 
     /// Sets the text label for the collapsible pane button.
-    /// 
+    ///
     /// # Arguments
     /// * `label` - The new label text.
     pub fn set_label(&self, label: &str) {
@@ -105,7 +105,7 @@ impl CollapsiblePane {
         if c_str.is_null() {
             return String::new();
         }
-        
+
         let result = unsafe {
             let cstr = std::ffi::CStr::from_ptr(c_str);
             let string = cstr.to_string_lossy().into_owned();
@@ -113,7 +113,7 @@ impl CollapsiblePane {
             ffi::wxd_free_string(c_str);
             string
         };
-        
+
         result
     }
 }
@@ -133,7 +133,7 @@ widget_builder!(
     build_impl: |slf| {
         let c_label = CString::new(&slf.label[..]).expect("CString::new failed for label");
         let c_name = CString::new(&slf.name[..]).expect("CString::new failed for name");
-        
+
         let pane_ptr = unsafe {
             ffi::wxd_CollapsiblePane_Create(
                 slf.parent.handle_ptr(),
@@ -204,4 +204,4 @@ crate::implement_widget_local_event_handlers!(
 impl WindowEvents for CollapsiblePane {}
 
 // Add XRC Support - enables CollapsiblePane to be created from XRC-managed pointers
-impl_xrc_support!(CollapsiblePane, { window }); 
+impl_xrc_support!(CollapsiblePane, { window });

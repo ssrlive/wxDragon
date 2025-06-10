@@ -1,5 +1,5 @@
-use wxdragon::prelude::*;
 use image::GenericImageView;
+use wxdragon::prelude::*;
 
 pub struct MediaControls {
     pub panel: Panel,

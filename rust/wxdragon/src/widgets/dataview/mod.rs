@@ -43,7 +43,9 @@ pub mod variant;
 // Re-export key types for easier access, e.g., wxdragon::widgets::dataview::DataViewCtrl
 pub use column::DataViewColumn;
 pub use ctrl::{DataViewCtrl, DataViewCtrlBuilder, DataViewStyle};
-pub use enums::{DataViewAlign, DataViewCellMode, DataViewColumnFlags, DataViewColumnFlags as DataViewColumnFlag};
+pub use enums::{
+    DataViewAlign, DataViewCellMode, DataViewColumnFlags, DataViewColumnFlags as DataViewColumnFlag,
+};
 pub use events::{DataViewEvent, DataViewEventData, DataViewEventHandler, TreeViewEventHandler};
 pub use item::DataViewItem;
 pub use list_ctrl::{DataViewListCtrl, DataViewListCtrlBuilder};
@@ -52,11 +54,10 @@ pub use model::{
     DataViewVirtualListModel,
 };
 pub use renderer::{
-    DataViewRenderer, DataViewTextRenderer, DataViewIconTextRenderer, 
-    DataViewToggleRenderer, DataViewProgressRenderer, DataViewBitmapRenderer,
-    DataViewDateRenderer, DataViewSpinRenderer, DataViewChoiceRenderer,
-    DataViewCheckIconTextRenderer, DataViewCustomRenderer, DataViewCustomRendererBuilder,
-    RenderContext
+    DataViewBitmapRenderer, DataViewCheckIconTextRenderer, DataViewChoiceRenderer,
+    DataViewCustomRenderer, DataViewCustomRendererBuilder, DataViewDateRenderer,
+    DataViewIconTextRenderer, DataViewProgressRenderer, DataViewRenderer, DataViewSpinRenderer,
+    DataViewTextRenderer, DataViewToggleRenderer, RenderContext,
 };
 pub use tree_ctrl::{DataViewTreeCtrl, DataViewTreeCtrlBuilder, DataViewTreeCtrlStyle};
 pub use variant::{Variant, VariantType};

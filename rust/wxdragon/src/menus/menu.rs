@@ -208,9 +208,7 @@ impl MenuBuilder {
 impl crate::xrc::XrcSupport for Menu {
     unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
         let menu_ptr = ptr as *mut wxdragon_sys::wxd_Menu_t;
-        Self {
-            ptr: menu_ptr,
-        }
+        Self { ptr: menu_ptr }
     }
 }
 

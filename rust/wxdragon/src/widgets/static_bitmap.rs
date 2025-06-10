@@ -123,7 +123,7 @@ impl StaticBitmap {
                 bitmap.as_ptr(),
             );
         }
-        
+
         // Trigger refresh on parent to update the display
         if let Some(parent) = self.window.get_parent() {
             parent.refresh(true, None);
@@ -141,7 +141,7 @@ impl StaticBitmap {
                 bundle.as_ptr(),
             );
         }
-        
+
         // Trigger refresh on parent to update the display
         if let Some(parent) = self.window.get_parent() {
             parent.refresh(true, None);
@@ -169,7 +169,7 @@ impl StaticBitmap {
     /// Sets the scale mode for how the bitmap is displayed within the control.
     ///
     /// This determines how the bitmap is scaled to fit the control's size.
-    /// 
+    ///
     /// # Arguments
     /// * `mode` - The scale mode to use
     pub fn set_scale_mode(&self, mode: ScaleMode) {
@@ -179,7 +179,7 @@ impl StaticBitmap {
                 mode.to_raw(),
             );
         }
-        
+
         // Trigger refresh on parent to apply the new scale mode
         if let Some(parent) = self.window.get_parent() {
             parent.refresh(true, None);

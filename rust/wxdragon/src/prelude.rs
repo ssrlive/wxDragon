@@ -1,16 +1,16 @@
 // --- Core Types & Traits ---
-pub use crate::app::{main, set_top_window, call_after};
+pub use crate::app::{call_after, main, set_top_window};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
 pub use crate::datetime::DateTime;
-pub use crate::event::{Event, EventType, WxEvtHandler, WindowEventData, IdleEvent, IdleMode};
+pub use crate::event::{Event, EventType, IdleEvent, IdleMode, WindowEventData, WxEvtHandler};
 // ADDED: Event category traits
 pub use crate::event::{ButtonEvents, ScrollEvents, TextEvents, TreeEvents, WindowEvents};
 // ADDED: Event Data Structs
 pub use crate::event::event_data::{CommandEventData, KeyEventData, MouseEventData};
-pub use crate::event::{IdleEventData};
+pub use crate::event::IdleEventData;
 pub use crate::geometry::{Point, Rect, Size, DEFAULT_POSITION, DEFAULT_SIZE};
-pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_NO, ID_OK, ID_YES, ID_HIGHEST};
+pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_HIGHEST, ID_NO, ID_OK, ID_YES};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
 pub use crate::utils::WxdArrayString;
@@ -20,11 +20,11 @@ pub use crate::window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget, WxW
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};
 pub use crate::sizers::flex_grid_sizer::{FlexGridSizer, FlexGridSizerBuilder, FlexGrowMode};
 pub use crate::sizers::grid_bag_sizer::{
-    GridBagSizer, GridBagSizerBuilder, GBPosition, GBSpan, DEFAULT_GB_POSITION, DEFAULT_GB_SPAN,
+    GBPosition, GBSpan, GridBagSizer, GridBagSizerBuilder, DEFAULT_GB_POSITION, DEFAULT_GB_SPAN,
 };
 pub use crate::sizers::grid_sizer::{GridSizer, GridSizerBuilder};
-pub use crate::sizers::wrap_sizer::{WrapSizer, WrapSizerBuilder, WrapSizerFlag};
 pub use crate::sizers::staticbox_sizer::{StaticBoxSizer, StaticBoxSizerBuilder};
+pub use crate::sizers::wrap_sizer::{WrapSizer, WrapSizerBuilder, WrapSizerFlag};
 // Sizer Flags/Constants
 pub use crate::sizers::base::{Orientation, SizerFlag};
 
@@ -51,7 +51,9 @@ pub use crate::widgets::calendar_ctrl::{CalendarCtrl, CalendarCtrlBuilder, Calen
 pub use crate::widgets::checkbox::{CheckBox, CheckBoxBuilder, CheckBoxStyle};
 pub use crate::widgets::checklistbox::{CheckListBox, CheckListBoxBuilder, CheckListBoxStyle}; // Added Style
 pub use crate::widgets::choice::{Choice, ChoiceBuilder, ChoiceStyle};
-pub use crate::widgets::collapsible_pane::{CollapsiblePane, CollapsiblePaneBuilder, CollapsiblePaneStyle};
+pub use crate::widgets::collapsible_pane::{
+    CollapsiblePane, CollapsiblePaneBuilder, CollapsiblePaneStyle,
+};
 pub use crate::widgets::colour_picker_ctrl::{
     ColourPickerCtrl, ColourPickerCtrlBuilder, ColourPickerCtrlStyle,
 };
@@ -61,11 +63,15 @@ pub use crate::widgets::command_link_button::{
 }; // Added Style
    // ADDED: DataView
 pub use crate::widgets::dataview::{
+    CustomDataViewVirtualListModel, // Added CustomDataViewVirtualListModel
     DataViewAlign,
     DataViewCellMode,
     DataViewColumn,
     DataViewCtrl,
     DataViewCtrlBuilder,
+    DataViewCustomRenderer, // Added DataViewCustomRenderer
+    DataViewEventHandler,
+    DataViewIconTextRenderer, // Added DataViewIconTextRenderer
     DataViewItem,
     DataViewItemAttr, // Added DataViewItemAttr
     // Events for DataView are now in dataview/event.rs, re-exported from dataview/mod.rs
@@ -74,15 +80,11 @@ pub use crate::widgets::dataview::{
     DataViewListModel,
     DataViewModel,
     DataViewStyle,
+    DataViewTextRenderer, // Added DataViewTextRenderer
     DataViewTreeCtrl,
     DataViewTreeCtrlBuilder,
-    DataViewEventHandler,
     Variant,
     VariantType, // Added VariantType
-    DataViewIconTextRenderer, // Added DataViewIconTextRenderer
-    DataViewTextRenderer, // Added DataViewTextRenderer
-    DataViewCustomRenderer, // Added DataViewCustomRenderer
-    CustomDataViewVirtualListModel, // Added CustomDataViewVirtualListModel
 };
 // Added DataView enums
 pub use crate::widgets::dataview::enums::DataViewColumnFlags;
@@ -118,7 +120,7 @@ pub use crate::widgets::list_ctrl::{
     ListNextItemFlag,
     // Events for ListCtrl are now in list_ctrl/event.rs, re-exported from list_ctrl/mod.rs
 }; // Added Events
-// Added image_list_type for ListCtrl
+   // Added image_list_type for ListCtrl
 pub use crate::widgets::list_ctrl::image_list_type;
 pub use crate::widgets::listbox::{ListBox, ListBoxBuilder, ListBoxStyle};
 #[cfg(feature = "media-ctrl")]
@@ -156,15 +158,18 @@ pub use crate::widgets::splitter_window::{
     SplitterWindowStyle,
     // Events for SplitterWindow are now in splitterwindow/event.rs, re-exported from splitterwindow/mod.rs
 }; // Added Style & Events
-pub use crate::widgets::static_bitmap::{StaticBitmap, StaticBitmapBuilder, StaticBitmapStyle, ScaleMode}; // Added Style & ScaleMode
+pub use crate::widgets::static_bitmap::{
+    ScaleMode, StaticBitmap, StaticBitmapBuilder, StaticBitmapStyle,
+}; // Added Style & ScaleMode
 pub use crate::widgets::static_line::{StaticLine, StaticLineBuilder, StaticLineStyle};
 pub use crate::widgets::static_text::{StaticText, StaticTextBuilder, StaticTextStyle};
 pub use crate::widgets::staticbox::{StaticBox, StaticBoxBuilder, StaticBoxStyle}; // Added Style
 pub use crate::widgets::statusbar::{StatusBar, StatusBarBuilder};
 #[cfg(feature = "stc")]
 pub use crate::widgets::styledtextctrl::{
-    StyledTextCtrl, StyledTextCtrlBuilder, StyledTextCtrlStyle, StyledTextCtrlEvent, StyledTextCtrlEventData,
-    MarkerSymbol, SelectionMode, MarginType, FindFlags, WhiteSpaceView, Lexer, EolMode, WrapMode
+    EolMode, FindFlags, Lexer, MarginType, MarkerSymbol, SelectionMode, StyledTextCtrl,
+    StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
+    WhiteSpaceView, WrapMode,
 };
 pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
 pub use crate::widgets::time_picker_ctrl::{
@@ -219,8 +224,8 @@ pub use crate::dnd::{
 
 // --- Painting & DeviceContexts ---
 pub use crate::dc::{
-    AutoBufferedPaintDC, BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC, PenStyle, ScreenDC,
-    WindowDC,
+    AutoBufferedPaintDC, BackgroundMode, BrushStyle, ClientDC, DeviceContext, MemoryDC, PaintDC,
+    PenStyle, ScreenDC, WindowDC,
 };
 
 // --- Application & Misc ---

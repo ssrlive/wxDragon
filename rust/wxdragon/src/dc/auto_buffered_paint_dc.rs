@@ -3,8 +3,8 @@ use crate::window::WxWidget;
 
 /// An automatically buffered paint DC that provides flicker-free drawing.
 ///
-/// This DC automatically chooses between wxPaintDC (on platforms with native 
-/// double-buffering) and wxBufferedPaintDC (on platforms without) to provide 
+/// This DC automatically chooses between wxPaintDC (on platforms with native
+/// double-buffering) and wxBufferedPaintDC (on platforms without) to provide
 /// optimal performance while eliminating flicker.
 ///
 /// Use this instead of PaintDC for smooth animations and frequent redraws.
@@ -29,8 +29,8 @@ use crate::window::WxWidget;
 ///
 /// # Important Notes
 ///
-/// For best results, make sure to call `set_background_style(BackgroundStyle::Paint)` 
-/// on your widget during initialization. This tells wxWidgets to not erase the 
+/// For best results, make sure to call `set_background_style(BackgroundStyle::Paint)`
+/// on your widget during initialization. This tells wxWidgets to not erase the
 /// background automatically, which is essential for flicker-free drawing.
 ///
 /// Also consider handling the erase background event with an empty handler to
@@ -71,4 +71,4 @@ impl Drop for AutoBufferedPaintDC {
             wxdragon_sys::wxd_AutoBufferedPaintDC_Destroy(self.dc_ptr);
         }
     }
-} 
+}

@@ -132,9 +132,7 @@ impl MenuBarBuilder {
 impl crate::xrc::XrcSupport for MenuBar {
     unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
         let menubar_ptr = ptr as *mut wxdragon_sys::wxd_MenuBar_t;
-        Self {
-            ptr: menubar_ptr,
-        }
+        Self { ptr: menubar_ptr }
     }
 }
 

@@ -25,7 +25,6 @@ pub enum ButtonBitmapPosition {
     Bottom = ffi::wxd_ButtonBitmapPosition_t_WXD_BUTTON_BITMAP_BOTTOM,
 }
 
-
 /// Represents a wxButton.
 #[derive(Clone)]
 pub struct Button {
