@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload build artifacts for debugging
         if: failure()  # Run this even if the build fails
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-gnu-build-debug
           path: |
