@@ -114,6 +114,7 @@ pub use dataview::{
 pub use font_picker_ctrl::{FontPickerCtrl, FontPickerCtrlBuilder, FontPickerCtrlStyle};
 pub use frame::{Frame, FrameBuilder};
 pub use gauge::{Gauge, GaugeBuilder};
+// GenericStaticBitmap is mainly for internal use by the platform-aware XRC handler
 pub use generic_static_bitmap::{GenericStaticBitmap, GenericStaticBitmapBuilder};
 pub use hyperlink_ctrl::{HyperlinkCtrl, HyperlinkCtrlBuilder};
 pub use list_ctrl::{ListCtrl, ListCtrlBuilder};

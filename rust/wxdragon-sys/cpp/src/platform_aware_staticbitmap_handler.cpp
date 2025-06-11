@@ -1,6 +1,11 @@
 #include "../include/wxdragon.h"
 #include <wx/wx.h>
+
+// Only compile when XRC is enabled
+#if WXD_USE_XRC
+
 #include <wx/xrc/xmlres.h>
+#include <wx/xrc/xh_stbmp.h>  // Include for XRC_MAKE_INSTANCE macro
 #include <wx/statbmp.h>
 #ifdef __WXMSW__
 #include <wx/generic/statbmpg.h>
@@ -14,19 +19,19 @@
 class WxdPlatformAwareStaticBitmapHandler : public wxXmlResourceHandler
 {
 public:
-    WxdPlatformAwareStaticBitmapHandler() : wxXmlResourceHandler() {}
+    WxdPlatformAwareStaticBitmapHandler() {}
 
-    wxObject *DoCreateResource() override
+    virtual wxObject *DoCreateResource()
     {
-        XRC_MAKE_INSTANCE(control, wxStaticBitmap)
-
         // Get the bitmap - can be from 'bitmap' attribute or child <bitmap> node
         wxBitmap bitmap = GetBitmap(wxT("bitmap"), wxART_OTHER);
 
         // Create the appropriate control based on platform
+        wxStaticBitmap* control = nullptr;
+
 #ifdef __WXMSW__
         // On Windows, use wxGenericStaticBitmap for proper scaling
-        wxGenericStaticBitmap* genericControl = new wxGenericStaticBitmap(
+        control = new wxGenericStaticBitmap(
             m_parentAsWindow,
             GetID(),
             bitmap,
@@ -35,10 +40,9 @@ public:
             GetStyle(),
             GetName()
         );
-        control = genericControl;
 #else
         // On other platforms, use native wxStaticBitmap
-        control->Create(
+        control = new wxStaticBitmap(
             m_parentAsWindow,
             GetID(),
             bitmap,
@@ -68,7 +72,7 @@ public:
         return control;
     }
 
-    bool CanHandle(wxXmlNode *node) override
+    virtual bool CanHandle(wxXmlNode *node)
     {
         return IsOfClass(node, wxT("wxStaticBitmap"));
     }
@@ -86,4 +90,14 @@ WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlRe
 
     // Add our custom handler - it will take precedence over the default one
     res->AddHandler(new WxdPlatformAwareStaticBitmapHandler());
-} 
+}
+
+#else // WXD_USE_XRC
+
+// Stub implementation when XRC is not enabled
+WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlResource_t* resource) {
+    // Do nothing when XRC is not enabled
+    (void)resource; // Suppress unused parameter warning
+}
+
+#endif // WXD_USE_XRC 

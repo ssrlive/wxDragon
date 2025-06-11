@@ -148,6 +148,8 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/spinctrldouble.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/splitterwindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/static_bitmap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/generic_static_bitmap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/platform_aware_staticbitmap_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/static_line.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/static_text.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/staticbox.cpp

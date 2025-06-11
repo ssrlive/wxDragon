@@ -31,12 +31,22 @@ impl XmlResource {
         }
     }
 
-    /// Initialize platform-aware StaticBitmap handler
-    ///
+        /// Initialize platform-aware StaticBitmap handler for XRC files
+    /// 
     /// This should be called after `init_all_handlers()` and before loading XRC files.
-    /// It registers a custom handler that creates:
-    /// - wxGenericStaticBitmap on Windows (for proper scaling support)
-    /// - native wxStaticBitmap on other platforms
+    /// It registers a custom handler that automatically creates the appropriate StaticBitmap
+    /// implementation based on the platform:
+    /// 
+    /// - **Windows**: Creates `wxGenericStaticBitmap` for proper scaling support (fixes scaling issues)
+    /// - **macOS/Linux**: Creates native `wxStaticBitmap` for optimal performance
+    /// 
+    /// This is automatically called by the `include_xrc!` macro, so users typically don't
+    /// need to call this directly. XRC files can continue to use `<object class="wxStaticBitmap">`
+    /// and the correct implementation will be created transparently.
+    /// 
+    /// # Note
+    /// Only available when the `xrc` feature is enabled. When XRC is disabled, this function
+    /// does nothing.
     pub fn init_platform_aware_staticbitmap_handler(&self) {
         unsafe {
             ffi::wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(self.ptr);
