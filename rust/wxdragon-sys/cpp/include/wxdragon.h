@@ -54,6 +54,8 @@ extern "C" {
 #include "widgets/wxd_mediactrl.h"
 #include "widgets/wxd_commandlinkbutton.h"
 #include "widgets/wxd_staticbitmap.h"
+#include "widgets/wxd_genericstaticbitmap.h"
+#include "widgets/wxd_platform_aware_staticbitmap_handler.h"
 #include "widgets/wxd_staticline.h"
 #include "widgets/wxd_scrollbar.h"
 #include "widgets/wxd_bitmapbutton.h"

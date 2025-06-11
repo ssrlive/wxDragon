@@ -269,42 +269,6 @@ fn main() {
         wxwidgets_build_dir
     );
 
-    // Debug: List actual library files for troubleshooting
-    if target_os == "windows" && target_env == "gnu" {
-        let lib_dir = wxwidgets_build_dir.join("lib");
-        println!("info: === DEBUG: Listing contents of {:?} ===", lib_dir);
-        if lib_dir.exists() {
-            match std::fs::read_dir(&lib_dir) {
-                Ok(entries) => {
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            println!("info: Found library file: {:?}", entry.file_name());
-                        }
-                    }
-                }
-                Err(e) => println!("info: Error reading lib directory: {}", e),
-            }
-        } else {
-            println!("info: Library directory does not exist: {:?}", lib_dir);
-        }
-
-        // Also check the gcc_x64_lib subdirectory
-        let gcc_lib_dir = lib_dir.join("gcc_x64_lib");
-        if gcc_lib_dir.exists() {
-            println!("info: === DEBUG: Listing contents of {:?} ===", gcc_lib_dir);
-            match std::fs::read_dir(&gcc_lib_dir) {
-                Ok(entries) => {
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            println!("info: Found GCC library file: {:?}", entry.file_name());
-                        }
-                    }
-                }
-                Err(e) => println!("info: Error reading gcc lib directory: {}", e),
-            }
-        }
-    }
-
     // --- 4. Linker Instructions ---
     println!(
         "cargo:rustc-link-search=native={}",
@@ -391,9 +355,6 @@ fn main() {
                 println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
             }
             // --- End dynamic path finding ---
-
-            // REMOVED: Old hardcoded path
-            // println!("cargo:rustc-link-search=native=/opt/homebrew/Cellar/mingw-w64/12.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/lib");
         } else {
             println!(
                 "cargo:rustc-link-search=native={}",
@@ -591,7 +552,7 @@ fn main() {
                 println!("cargo:rustc-link-lib=static=wxzlib");
                 println!("cargo:rustc-link-lib=static=wxexpat");
             }
-            
+
             if target_env == "gnu" {
                 println!("cargo:rustc-link-lib=stdc++");
             }

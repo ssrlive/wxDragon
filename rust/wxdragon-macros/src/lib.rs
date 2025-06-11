@@ -142,7 +142,13 @@ fn get_class_mapping() -> HashMap<&'static str, &'static str> {
     map.insert("wxRadioBox", "wxdragon::widgets::RadioBox");
     map.insert("wxToggleButton", "wxdragon::widgets::ToggleButton");
     map.insert("wxBitmapButton", "wxdragon::widgets::BitmapButton");
+
+    // StaticBitmap uses platform-aware XRC handler at C++ level
+    // On Windows: creates wxGenericStaticBitmap, but we still treat it as StaticBitmap in Rust
+    // On other platforms: creates native wxStaticBitmap
+    // Both have the same interface, so we always use StaticBitmap wrapper
     map.insert("wxStaticBitmap", "wxdragon::widgets::StaticBitmap");
+
     map.insert("wxStaticLine", "wxdragon::widgets::StaticLine");
     map.insert("wxStaticBox", "wxdragon::widgets::StaticBox");
     map.insert("wxScrollBar", "wxdragon::widgets::ScrollBar");
@@ -348,6 +354,9 @@ fn generate_xrc_struct(input: XrcMacroInput) -> syn::Result<proc_macro2::TokenSt
             pub fn new(parent: Option<&dyn wxdragon::window::WxWidget>) -> Self {
                 let resource = wxdragon::xrc::XmlResource::get();
                 resource.init_all_handlers();
+
+                // Initialize platform-aware StaticBitmap handler for proper scaling on Windows
+                resource.init_platform_aware_staticbitmap_handler();
 
                 resource.load_from_string(Self::XRC_DATA)
                     .unwrap_or_else(|err| panic!("Failed to load XRC data: {}", err));

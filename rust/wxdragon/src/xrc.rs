@@ -31,6 +31,18 @@ impl XmlResource {
         }
     }
 
+    /// Initialize platform-aware StaticBitmap handler
+    ///
+    /// This should be called after `init_all_handlers()` and before loading XRC files.
+    /// It registers a custom handler that creates:
+    /// - wxGenericStaticBitmap on Windows (for proper scaling support)
+    /// - native wxStaticBitmap on other platforms
+    pub fn init_platform_aware_staticbitmap_handler(&self) {
+        unsafe {
+            ffi::wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(self.ptr);
+        }
+    }
+
     /// Load XRC from file
     pub fn load_from_file(&self, filename: &str) -> Result<(), String> {
         let c_filename = CString::new(filename).map_err(|_| "Invalid filename")?;
