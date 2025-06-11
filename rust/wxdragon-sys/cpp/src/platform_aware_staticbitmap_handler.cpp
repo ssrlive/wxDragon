@@ -26,12 +26,9 @@ public:
         // Get the bitmap - can be from 'bitmap' attribute or child <bitmap> node
         wxBitmap bitmap = GetBitmap(wxT("bitmap"), wxART_OTHER);
 
-        // Create the appropriate control based on platform
-        wxStaticBitmap* control = nullptr;
-
 #ifdef __WXMSW__
         // On Windows, use wxGenericStaticBitmap for proper scaling
-        control = new wxGenericStaticBitmap(
+        wxGenericStaticBitmap* control = new wxGenericStaticBitmap(
             m_parentAsWindow,
             GetID(),
             bitmap,
@@ -40,20 +37,8 @@ public:
             GetStyle(),
             GetName()
         );
-#else
-        // On other platforms, use native wxStaticBitmap
-        control = new wxStaticBitmap(
-            m_parentAsWindow,
-            GetID(),
-            bitmap,
-            GetPosition(),
-            GetSize(),
-            GetStyle(),
-            GetName()
-        );
-#endif
 
-        // Handle scale mode if specified (works on both implementations)
+        // Handle scale mode if specified
         wxString scaleMode = GetParamValue(wxT("scalemode"));
         if (!scaleMode.IsEmpty()) {
             if (scaleMode == wxT("None") || scaleMode == wxT("0")) {
@@ -68,8 +53,36 @@ public:
         }
 
         SetupWindow(control);
-
         return control;
+#else
+        // On other platforms, use native wxStaticBitmap
+        wxStaticBitmap* control = new wxStaticBitmap(
+            m_parentAsWindow,
+            GetID(),
+            bitmap,
+            GetPosition(),
+            GetSize(),
+            GetStyle(),
+            GetName()
+        );
+
+        // Handle scale mode if specified
+        wxString scaleMode = GetParamValue(wxT("scalemode"));
+        if (!scaleMode.IsEmpty()) {
+            if (scaleMode == wxT("None") || scaleMode == wxT("0")) {
+                control->SetScaleMode(wxStaticBitmap::Scale_None);
+            } else if (scaleMode == wxT("Fill") || scaleMode == wxT("1")) {
+                control->SetScaleMode(wxStaticBitmap::Scale_Fill);
+            } else if (scaleMode == wxT("AspectFit") || scaleMode == wxT("2")) {
+                control->SetScaleMode(wxStaticBitmap::Scale_AspectFit);
+            } else if (scaleMode == wxT("AspectFill") || scaleMode == wxT("3")) {
+                control->SetScaleMode(wxStaticBitmap::Scale_AspectFill);
+            }
+        }
+
+        SetupWindow(control);
+        return control;
+#endif
     }
 
     virtual bool CanHandle(wxXmlNode *node)
