@@ -304,6 +304,19 @@ jobs:
               ;;
           esac
           
+          # Copy wxWidgets headers (source headers + generated headers)
+          echo "Packaging wxWidgets headers..."
+          if [ -d "${WX_SOURCE_DIR}/include" ]; then
+            mkdir -p "dist/${{ matrix.artifact }}/include"
+            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.artifact }}/include/"
+          fi
+          
+          # Copy generated headers from build directory
+          if [ -d "build/lib/wx" ]; then
+            mkdir -p "dist/${{ matrix.artifact }}/wx"
+            cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
+          fi
+          
           # Create version info file
           echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
           echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
@@ -313,6 +326,8 @@ jobs:
           # List contents for debugging
           echo "Packaged libraries:"
           find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" | head -20
+          echo "Packaged headers:"
+          find "dist/${{ matrix.artifact }}" -name "*.h" | head -10
           
           # Create tarball
           cd dist
@@ -338,6 +353,19 @@ jobs:
             cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.artifact }}/"
           fi
           
+          # Copy wxWidgets headers (source headers + generated headers)
+          echo "Packaging wxWidgets headers..."
+          if [ -d "${WX_SOURCE_DIR}/include" ]; then
+            mkdir -p "dist/${{ matrix.artifact }}/include"
+            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.artifact }}/include/"
+          fi
+          
+          # Copy generated headers from build directory
+          if [ -d "build/lib/wx" ]; then
+            mkdir -p "dist/${{ matrix.artifact }}/wx"
+            cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
+          fi
+          
           # Create version info file
           echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
           echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
@@ -347,6 +375,8 @@ jobs:
           # List contents for debugging
           echo "Packaged libraries:"
           find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" | head -20
+          echo "Packaged headers:"
+          find "dist/${{ matrix.artifact }}" -name "*.h" | head -10
           
           # Create tarball
           cd dist
