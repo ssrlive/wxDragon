@@ -102,6 +102,16 @@ jobs:
           # Verify installation
           "$MINGW_DIR/bin/gcc.exe" --version
 
+      - name: Setup MSVC (Windows MSVC only)
+        if: matrix.target == 'windows-msvc-x64'
+        uses: microsoft/setup-msbuild@v2
+        
+      - name: Configure MSVC Environment (Windows MSVC only)
+        if: matrix.target == 'windows-msvc-x64'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Install platform dependencies (Non-Windows)
         if: matrix.setup_script != '' && matrix.target != 'windows-gnu-x64'
         run: ${{ matrix.setup_script }}
@@ -207,7 +217,8 @@ jobs:
               ;;
             "windows-msvc-x64")
               CMAKE_ARGS+=(
-                -G "Ninja"
+                -G "Visual Studio 17 2022"
+                -A x64
                 -DwxBUILD_TOOLKIT=msw
                 -DCMAKE_CXX_FLAGS="/DHAVE_INTPTR_T=1 /DWXINTPTR_DEFINED=1 /D_WINDOWS /DWIN32 /D_WIN32 /D__WXMSW__"
                 -DCMAKE_C_FLAGS="/DHAVE_INTPTR_T=1 /DWXINTPTR_DEFINED=1 /D_WINDOWS /DWIN32 /D_WIN32 /D__WXMSW__"
@@ -290,8 +301,6 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           cmake --build . --config Release --parallel ${NPROC}
-
-
 
       - name: Package libraries (Non-Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
