@@ -209,6 +209,8 @@ jobs:
               CMAKE_ARGS+=(
                 -G "Ninja"
                 -DwxBUILD_TOOLKIT=msw
+                -DCMAKE_CXX_FLAGS="/DHAVE_INTPTR_T=1 /DWXINTPTR_DEFINED=1 /D_WINDOWS /DWIN32 /D_WIN32 /D__WXMSW__"
+                -DCMAKE_C_FLAGS="/DHAVE_INTPTR_T=1 /DWXINTPTR_DEFINED=1 /D_WINDOWS /DWIN32 /D_WIN32 /D__WXMSW__"
               )
               ;;
             "linux-x64")
@@ -326,6 +328,43 @@ jobs:
           if [ -d "build/lib/wx" ]; then
             mkdir -p "dist/${{ matrix.artifact }}/wx"
             cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
+          fi
+          
+          # Special handling for Windows MSVC setup.h
+          if [ "${{ matrix.target }}" = "windows-msvc-x64" ]; then
+            echo "Creating MSVC-specific setup.h patch..."
+            # Find the setup.h file
+            SETUP_H_PATH=$(find "dist/${{ matrix.artifact }}" -name "setup.h" | head -1)
+            if [ -n "$SETUP_H_PATH" ]; then
+              echo "Found setup.h at: $SETUP_H_PATH"
+              # Prepend our MSVC fixes to setup.h
+              cat > temp_setup_prefix.h << 'EOF'
+/* MSVC compatibility fixes - Added by wxDragon build */
+#ifdef _MSC_VER
+    #include <stdint.h>
+    #include <stddef.h>
+    #ifndef wxIntPtr
+        #ifdef _WIN64
+            typedef intptr_t wxIntPtr;
+            typedef uintptr_t wxUIntPtr;
+        #else
+            typedef int wxIntPtr;
+            typedef unsigned int wxUIntPtr;
+        #endif
+        #define WXINTPTR_DEFINED 1
+        #define WXUINTPTR_DEFINED 1
+    #endif
+#endif
+
+EOF
+              # Combine our fixes with the original setup.h
+              cat temp_setup_prefix.h "$SETUP_H_PATH" > temp_setup.h
+              mv temp_setup.h "$SETUP_H_PATH"
+              rm temp_setup_prefix.h
+              echo "Applied MSVC fixes to setup.h"
+            else
+              echo "Warning: setup.h not found in package"
+            fi
           fi
           
           # Create version info file
