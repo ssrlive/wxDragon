@@ -337,26 +337,24 @@ jobs:
             SETUP_H_PATH=$(find "dist/${{ matrix.artifact }}" -name "setup.h" | head -1)
             if [ -n "$SETUP_H_PATH" ]; then
               echo "Found setup.h at: $SETUP_H_PATH"
-              # Prepend our MSVC fixes to setup.h
-              cat > temp_setup_prefix.h << 'EOF'
-/* MSVC compatibility fixes - Added by wxDragon build */
-#ifdef _MSC_VER
-    #include <stdint.h>
-    #include <stddef.h>
-    #ifndef wxIntPtr
-        #ifdef _WIN64
-            typedef intptr_t wxIntPtr;
-            typedef uintptr_t wxUIntPtr;
-        #else
-            typedef int wxIntPtr;
-            typedef unsigned int wxUIntPtr;
-        #endif
-        #define WXINTPTR_DEFINED 1
-        #define WXUINTPTR_DEFINED 1
-    #endif
-#endif
-
-EOF
+              # Create our MSVC fixes as a separate file
+              echo "/* MSVC compatibility fixes - Added by wxDragon build */" > temp_setup_prefix.h
+              echo "#ifdef _MSC_VER" >> temp_setup_prefix.h
+              echo "    #include <stdint.h>" >> temp_setup_prefix.h
+              echo "    #include <stddef.h>" >> temp_setup_prefix.h
+              echo "    #ifndef wxIntPtr" >> temp_setup_prefix.h
+              echo "        #ifdef _WIN64" >> temp_setup_prefix.h
+              echo "            typedef intptr_t wxIntPtr;" >> temp_setup_prefix.h
+              echo "            typedef uintptr_t wxUIntPtr;" >> temp_setup_prefix.h
+              echo "        #else" >> temp_setup_prefix.h
+              echo "            typedef int wxIntPtr;" >> temp_setup_prefix.h
+              echo "            typedef unsigned int wxUIntPtr;" >> temp_setup_prefix.h
+              echo "        #endif" >> temp_setup_prefix.h
+              echo "        #define WXINTPTR_DEFINED 1" >> temp_setup_prefix.h
+              echo "        #define WXUINTPTR_DEFINED 1" >> temp_setup_prefix.h
+              echo "    #endif" >> temp_setup_prefix.h
+              echo "#endif" >> temp_setup_prefix.h
+              echo "" >> temp_setup_prefix.h
               # Combine our fixes with the original setup.h
               cat temp_setup_prefix.h "$SETUP_H_PATH" > temp_setup.h
               mv temp_setup.h "$SETUP_H_PATH"
