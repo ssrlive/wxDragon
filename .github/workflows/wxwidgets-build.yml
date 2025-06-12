@@ -64,7 +64,12 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-cc mingw-w64-x86_64-cmake mingw-w64-x86_64-make mingw-w64-x86_64-ninja mingw-w64-x86_64-clang
+          install: >-
+            git
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-pkg-config
 
       - name: Install platform dependencies (Non-Windows)
         if: matrix.setup_script != '' && matrix.target != 'windows-gnu-x64'
@@ -208,7 +213,7 @@ jobs:
           )
           
           CMAKE_ARGS+=(
-            -G "Ninja"
+            -G "MSYS Makefiles"
             -DwxBUILD_TOOLKIT=msw
           )
           
@@ -216,8 +221,8 @@ jobs:
           cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
         shell: msys2 {0}
 
-      - name: Build wxWidgets
-        if: steps.check_release.outputs.skip_build != 'true'
+      - name: Build wxWidgets (Non-Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           cd build
           
@@ -226,9 +231,21 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           cmake --build . --config Release --parallel ${NPROC}
+          
+      - name: Build wxWidgets (Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        run: |
+          cd build
+          
+          # Build with reduced parallelism to avoid memory issues
+          NPROC=2
+          echo "Building with ${NPROC} parallel jobs"
+          
+          cmake --build . --config Release --parallel ${NPROC}
+        shell: msys2 {0}
 
-      - name: Build wxDragon wrapper library
-        if: steps.check_release.outputs.skip_build != 'true'
+      - name: Build wxDragon wrapper library (Non-Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           # Build the wxDragon wrapper library that links against wxWidgets
           mkdir -p wxdragon_build
@@ -244,9 +261,6 @@ jobs:
             "windows-msvc-x64")
               CMAKE_ARGS+=(-G "Ninja")
               ;;
-            "windows-gnu-x64")
-              CMAKE_ARGS+=(-G "Ninja")
-              ;;
           esac
           
           echo "Configuring wxDragon wrapper with: cmake ${CMAKE_ARGS[@]} ../rust/wxdragon-sys/cpp"
@@ -256,9 +270,31 @@ jobs:
           NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
           echo "Building wxDragon wrapper with ${NPROC} parallel jobs"
           cmake --build . --config Release --parallel ${NPROC}
+          
+      - name: Build wxDragon wrapper library (Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        run: |
+          # Build the wxDragon wrapper library that links against wxWidgets
+          mkdir -p wxdragon_build
+          cd wxdragon_build
+          
+          CMAKE_ARGS=(
+            -DCMAKE_BUILD_TYPE=Release
+            -DWXWIDGETS_SOURCE_DIR="${GITHUB_WORKSPACE}/${WX_SOURCE_DIR}"
+            -G "MSYS Makefiles"
+          )
+          
+          echo "Configuring wxDragon wrapper with: cmake ${CMAKE_ARGS[@]} ../rust/wxdragon-sys/cpp"
+          cmake "${CMAKE_ARGS[@]}" "../rust/wxdragon-sys/cpp"
+          
+          # Build with reduced parallelism to avoid memory issues
+          NPROC=2
+          echo "Building wxDragon wrapper with ${NPROC} parallel jobs"
+          cmake --build . --config Release --parallel ${NPROC}
+        shell: msys2 {0}
 
-      - name: Package libraries
-        if: steps.check_release.outputs.skip_build != 'true'
+      - name: Package libraries (Non-Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           # Create packaging directory
           mkdir -p "dist/${{ matrix.artifact }}"
@@ -303,6 +339,47 @@ jobs:
           
           # Verify tarball
           echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
+          
+      - name: Package libraries (Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        run: |
+          # Create packaging directory
+          mkdir -p "dist/${{ matrix.artifact }}"
+          
+          # Copy wxWidgets libraries
+          if [ -d "build/lib" ]; then
+            cp -r build/lib/* "dist/${{ matrix.artifact }}/"
+          fi
+          
+          # Copy wxDragon wrapper library
+          if [ -d "wxdragon_build/lib" ]; then
+            cp -r wxdragon_build/lib/* "dist/${{ matrix.artifact }}/"
+          fi
+          
+          # Copy additional platform-specific library directories
+          # Windows GNU may have libraries in subdirectories
+          if [ -d "build/lib/gcc_x64_lib" ]; then
+            cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.artifact }}/"
+          fi
+          
+          # Create version info file
+          echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "Build Date: $(date -u)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "Includes wxDragon wrapper: libwxdragon.a" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          
+          # List contents for debugging
+          echo "Packaged libraries:"
+          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" | head -20
+          
+          # Create tarball
+          cd dist
+          tar -czf "${{ matrix.artifact }}.tar.gz" "${{ matrix.artifact }}/"
+          
+          # Verify tarball
+          echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
+        shell: msys2 {0}
 
       - name: Upload artifact for review
         if: steps.check_release.outputs.skip_build != 'true'
