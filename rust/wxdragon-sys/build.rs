@@ -457,7 +457,10 @@ fn link_windows_libraries(target_env: &str) {
                            env::var("MSYS2_PATH_TYPE").is_ok() ||
                            env::var("MINGW_PREFIX").is_ok();
             
-            println!("cargo:rustc-link-lib=stdc++");
+            // Only add dynamic stdc++ for non-MSYS2 environments
+            if !in_msys2 {
+                println!("cargo:rustc-link-lib=stdc++");
+            }
             println!("cargo:rustc-link-lib=gcc");
             println!("cargo:rustc-link-lib=mingw32");
             
@@ -466,10 +469,16 @@ fn link_windows_libraries(target_env: &str) {
                 println!("cargo:rustc-link-lib=ucrt");
                 println!("info: Using UCRT runtime for MSYS2/MinGW64 compatibility");
                 
-                // Ensure proper C++ standard library linking for MSYS2/MinGW64
-                // This fixes missing std::basic_streambuf symbols with GCC 15.1.0
-                println!("cargo:rustc-link-lib=gcc_s");
-                println!("cargo:rustc-link-lib=gcc_eh");
+                // Force static linking of C++ standard library to resolve missing symbols
+                // This overrides Rust's default dynamic stdc++ linking
+                println!("cargo:rustc-link-arg=-Wl,-Bstatic");
+                println!("cargo:rustc-link-arg=-lstdc++");
+                println!("cargo:rustc-link-arg=-lgcc_eh"); 
+                println!("cargo:rustc-link-arg=-Wl,-Bdynamic");
+                
+                // Additional GCC support libraries
+                println!("cargo:rustc-link-lib=static=gcc");
+                println!("info: Using static C++ standard library for MSYS2/MinGW64");
             } else {
                 // Fallback to MSVCRT for older/different MinGW distributions
                 println!("cargo:rustc-link-lib=msvcrt");
