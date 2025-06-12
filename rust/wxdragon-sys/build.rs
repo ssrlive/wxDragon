@@ -443,10 +443,23 @@ fn link_windows_libraries(target_env: &str) {
             println!("info: Using UCRT runtime for cross-compilation compatibility");
         } else {
             // Native Windows GNU builds
+            // Check if we're in MSYS2 environment which uses UCRT
+            let in_msys2 = env::var("MSYSTEM").is_ok() || 
+                           env::var("MSYS2_PATH_TYPE").is_ok() ||
+                           env::var("MINGW_PREFIX").is_ok();
+            
             println!("cargo:rustc-link-lib=stdc++");
             println!("cargo:rustc-link-lib=gcc");
             println!("cargo:rustc-link-lib=mingw32");
-            println!("cargo:rustc-link-lib=msvcrt");
+            
+            if in_msys2 {
+                // MSYS2/MinGW64 environments use UCRT for better compatibility
+                println!("cargo:rustc-link-lib=ucrt");
+                println!("info: Using UCRT runtime for MSYS2/MinGW64 compatibility");
+            } else {
+                // Fallback to MSVCRT for older/different MinGW distributions
+                println!("cargo:rustc-link-lib=msvcrt");
+            }
         }
     } else {
         // MSVC builds
@@ -674,10 +687,29 @@ fn build_wxdragon_wrapper(
             if target_env == "msvc" {
                 cmake_cmd.arg("-G").arg("Ninja");
             } else {
-                // GNU/MinGW64 - choose generator based on host platform
+                // GNU/MinGW64 - choose generator based on environment
                 if host_os == "windows" {
-                    // Building on Windows with MSYS2
-                    cmake_cmd.arg("-G").arg("MSYS Makefiles");
+                    // Check if we're in MSYS2 environment (like GitHub Actions)
+                    // MSYS2 usually sets these environment variables
+                    let in_msys2 = env::var("MSYSTEM").is_ok() || 
+                                   env::var("MSYS2_PATH_TYPE").is_ok() ||
+                                   env::var("MINGW_PREFIX").is_ok();
+                    
+                    if in_msys2 {
+                        // In MSYS2, use Unix Makefiles for better compatibility
+                        cmake_cmd.arg("-G").arg("Unix Makefiles");
+                        
+                        // Explicitly set compilers for MSYS2/MinGW64
+                        cmake_cmd.arg("-DCMAKE_C_COMPILER=gcc");
+                        cmake_cmd.arg("-DCMAKE_CXX_COMPILER=g++");
+                        cmake_cmd.arg("-DCMAKE_AR=ar");
+                        cmake_cmd.arg("-DCMAKE_MAKE_PROGRAM=make");
+                        
+                        println!("info: Detected MSYS2 environment, using Unix Makefiles generator");
+                    } else {
+                        // Native Windows MinGW (not MSYS2)
+                        cmake_cmd.arg("-G").arg("MSYS Makefiles");
+                    }
                 } else {
                     // Cross-compiling from Unix-like system (macOS/Linux)
                     cmake_cmd.arg("-G").arg("Unix Makefiles");
