@@ -28,7 +28,17 @@ fn main() {
             .clang_arg("-D__WXMSW__")
             .clang_arg("-D_FILE_OFFSET_BITS=64")
             .clang_arg("-DwxUSE_UNICODE=1")
-            .clang_arg("-DNDEBUG");
+            .clang_arg("-DNDEBUG")
+            .clang_arg("-D__WXD_BINDGEN__=1"); // Tell our headers this is bindgen
+            
+        // Add MSVC-specific configuration for bindgen
+        if target_env == "msvc" {
+            bindings_builder = bindings_builder
+                .clang_arg("-D_WIN32")
+                .clang_arg("-D_WINDOWS")
+                .clang_arg("-DWIN32")
+                .clang_arg("-D_MSC_VER=1900"); // Provide a reasonable MSVC version
+        }
     } else if target_os == "linux" {
         bindings_builder = bindings_builder
             .clang_arg("-D__WXGTK__")

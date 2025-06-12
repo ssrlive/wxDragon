@@ -1,8 +1,14 @@
 #ifndef WXD_TYPES_H
 #define WXD_TYPES_H
 
-// MSVC workarounds - define missing types before including wxWidgets headers
-#ifdef _MSC_VER
+// Use standard C types first
+#include <stdbool.h> 
+#include <stdint.h> // For integer types if needed
+#include <stddef.h> // For size_t
+
+// MSVC workarounds - define missing types after including standard headers
+// Only apply these when actually compiling with MSVC, not during bindgen
+#if defined(_MSC_VER) && !defined(__WXD_BINDGEN__)
     #ifndef wxIntPtr
         #ifdef _WIN64
             typedef intptr_t wxIntPtr;
@@ -23,11 +29,6 @@
         #define _WIN32 1
     #endif
 #endif
-
-// Use standard C types
-#include <stdbool.h> 
-#include <stdint.h> // For integer types if needed
-#include <stddef.h> // For size_t
 
 // --- Basic Types --- 
 typedef int wxd_Id;
