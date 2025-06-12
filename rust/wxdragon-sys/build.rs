@@ -555,12 +555,11 @@ fn build_wxdragon_wrapper(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
-    // Detect build profile - use Debug for debug builds, Release for release builds
-    let build_type = if cfg!(debug_assertions) {
-        "Debug"
-    } else {
-        "Release"
-    };
+    // Always build wrapper library in Release mode to match pre-built wxWidgets libraries
+    // This avoids Debug/Release runtime library mismatches on Windows MSVC
+    let build_type = "Release";
+    
+    println!("info: Building wxDragon wrapper library in {} mode", build_type);
 
     // Get the pre-built wxWidgets library directory
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
@@ -597,21 +596,34 @@ fn build_wxdragon_wrapper(
         );
 
         // Check for the built library in multiple possible locations
-        let possible_lib_paths = vec![
-            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join("wxdragon.lib"),
-            wrapper_build_dir.join("lib/wxdragon.lib"),
-            wrapper_build_dir.join("x64/wxdragon.lib"),
-            wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
-        ];
+        let possible_lib_paths = if target_env == "msvc" {
+            // Windows MSVC uses .lib files
+            vec![
+                wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
+                wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
+                wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
+                wrapper_build_dir.join("wxdragon.lib"),
+                wrapper_build_dir.join("lib/wxdragon.lib"),
+                wrapper_build_dir.join("x64/wxdragon.lib"),
+                wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+            ]
+        } else {
+            // Unix-like systems (Linux, macOS, Windows GNU) use .a files
+            vec![
+                wrapper_build_dir.join("lib/libwxdragon.a"),
+                wrapper_build_dir.join("libwxdragon.a"),
+                wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type)),
+                wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type)),
+                wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
+                wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
+            ]
+        };
 
         let mut library_path = None;
         for path in &possible_lib_paths {
@@ -655,7 +667,11 @@ fn build_wxdragon_wrapper(
             }
         };
         
-        let dest = wx_lib_dir.join("wxdragon.lib");
+        let dest = if target_env == "msvc" {
+            wx_lib_dir.join("wxdragon.lib")
+        } else {
+            wx_lib_dir.join("libwxdragon.a")
+        };
         std::fs::copy(&library_path, &dest)?;
         println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
@@ -845,65 +861,87 @@ fn build_wxdragon_wrapper(
     }
     
     if !output.status.success() {
-        // If cmake --build fails, try MSBuild directly as a fallback
-        println!("info: CMake build failed, trying MSBuild directly...");
-        
-        let mut msbuild_cmd = std::process::Command::new("msbuild");
-        msbuild_cmd
-            .current_dir(&wrapper_build_dir)
-            .arg("wxdragon.vcxproj")
-            .arg(&format!("/p:Configuration={}", build_type))
-            .arg("/p:Platform=x64")
-            .arg("/verbosity:detailed");
+        // If cmake --build fails and we're on Windows MSVC, try MSBuild directly as a fallback
+        if target_env == "msvc" {
+            println!("info: CMake build failed, trying MSBuild directly...");
             
-        println!("info: Running MSBuild command: {:?}", msbuild_cmd);
-        let msbuild_output = msbuild_cmd.output()?;
-        
-        let msbuild_stdout = String::from_utf8_lossy(&msbuild_output.stdout);
-        let msbuild_stderr = String::from_utf8_lossy(&msbuild_output.stderr);
-        
-        println!("MSBuild stdout:\n{}", msbuild_stdout);
-        if !msbuild_stderr.is_empty() {
-            println!("MSBuild stderr:\n{}", msbuild_stderr);
-        }
-        
-        if !msbuild_output.status.success() {
+            let mut msbuild_cmd = std::process::Command::new("msbuild");
+            msbuild_cmd
+                .current_dir(&wrapper_build_dir)
+                .arg("wxdragon.vcxproj")
+                .arg(&format!("/p:Configuration={}", build_type))
+                .arg("/p:Platform=x64")
+                .arg("/verbosity:detailed");
+                
+            println!("info: Running MSBuild command: {:?}", msbuild_cmd);
+            let msbuild_output = msbuild_cmd.output()?;
+            
+            let msbuild_stdout = String::from_utf8_lossy(&msbuild_output.stdout);
+            let msbuild_stderr = String::from_utf8_lossy(&msbuild_output.stderr);
+            
+            println!("MSBuild stdout:\n{}", msbuild_stdout);
+            if !msbuild_stderr.is_empty() {
+                println!("MSBuild stderr:\n{}", msbuild_stderr);
+            }
+            
+            if !msbuild_output.status.success() {
+                return Err(format!(
+                    "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{}\nCMake STDERR:\n{}\nMSBuild STDOUT:\n{}\nMSBuild STDERR:\n{}",
+                    stdout, stderr, msbuild_stdout, msbuild_stderr
+                )
+                .into());
+            }
+        } else {
             return Err(format!(
-                "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{}\nCMake STDERR:\n{}\nMSBuild STDOUT:\n{}\nMSBuild STDERR:\n{}",
-                stdout, stderr, msbuild_stdout, msbuild_stderr
+                "CMake build failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
+                stdout, stderr
             )
             .into());
-        } else {
-            // Even if CMake reported success, check if it actually built anything
-            // Look for compilation success indicators in the output
-            let build_successful = stdout.contains("Build succeeded") || 
-                                  stdout.contains("succeeded") || 
-                                  stdout.contains("wxdragon.lib") ||
-                                  stdout.contains("Building CXX object") ||
-                                  stdout.contains("Linking CXX static library");
-            
-            if !build_successful {
-                println!("warn: CMake reported success but no compilation indicators found. Output may indicate a silent failure.");
-            }
+        }
+    } else {
+        // Even if CMake reported success, check if it actually built anything
+        // Look for compilation success indicators in the output
+        let expected_lib_indicator = if target_env == "msvc" { "wxdragon.lib" } else { "libwxdragon.a" };
+        let build_successful = stdout.contains("Build succeeded") || 
+                              stdout.contains("succeeded") || 
+                              stdout.contains(expected_lib_indicator) ||
+                              stdout.contains("Building CXX object") ||
+                              stdout.contains("Linking CXX static library");
+        
+        if !build_successful {
+            println!("warn: CMake reported success but no compilation indicators found. Output may indicate a silent failure.");
         }
     }
 
-    // Check for the built library in multiple possible locations
-    let possible_lib_paths = vec![
-        wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
-        wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
-        wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
-        wrapper_build_dir.join("wxdragon.lib"),
-        wrapper_build_dir.join("lib/wxdragon.lib"),
-        wrapper_build_dir.join("x64/wxdragon.lib"),
-        wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
-        wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
-    ];
+    // Check for the built library in multiple possible locations (platform-specific)
+    let possible_lib_paths = if target_env == "msvc" {
+        // Windows MSVC uses .lib files
+        vec![
+            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join("wxdragon.lib"),
+            wrapper_build_dir.join("lib/wxdragon.lib"),
+            wrapper_build_dir.join("x64/wxdragon.lib"),
+            wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+        ]
+    } else {
+        // Unix-like systems (Linux, macOS, Windows GNU) use .a files
+        vec![
+            wrapper_build_dir.join("lib/libwxdragon.a"),
+            wrapper_build_dir.join("libwxdragon.a"),
+            wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type)),
+            wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type)),
+            wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
+            wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
+        ]
+    };
 
     let mut library_path = None;
     for path in &possible_lib_paths {
@@ -947,7 +985,11 @@ fn build_wxdragon_wrapper(
         }
     };
     
-    let dest = wx_lib_dir.join("wxdragon.lib");
+    let dest = if target_env == "msvc" {
+        wx_lib_dir.join("wxdragon.lib")
+    } else {
+        wx_lib_dir.join("libwxdragon.a")
+    };
     std::fs::copy(&library_path, &dest)?;
     println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
