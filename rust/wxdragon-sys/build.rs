@@ -465,6 +465,11 @@ fn link_windows_libraries(target_env: &str) {
                 // MSYS2/MinGW64 environments use UCRT for better compatibility
                 println!("cargo:rustc-link-lib=ucrt");
                 println!("info: Using UCRT runtime for MSYS2/MinGW64 compatibility");
+                
+                // Ensure proper C++ standard library linking for MSYS2/MinGW64
+                // This fixes missing std::basic_streambuf symbols with GCC 15.1.0
+                println!("cargo:rustc-link-lib=gcc_s");
+                println!("cargo:rustc-link-lib=gcc_eh");
             } else {
                 // Fallback to MSVCRT for older/different MinGW distributions
                 println!("cargo:rustc-link-lib=msvcrt");
@@ -803,6 +808,10 @@ fn build_wxdragon_wrapper(
                         // Let CMake find compilers naturally in MSYS2 environment
                         // Don't explicitly set compiler paths as MSYS2 handles this correctly
                         println!("info: Detected MSYS2 environment, using Unix Makefiles generator");
+                        
+                        // Add MSYS2/MinGW64 specific flags for C++ runtime compatibility
+                        cmake_cmd.arg("-DCMAKE_EXE_LINKER_FLAGS=-static-libgcc -static-libstdc++");
+                        println!("info: Added MSYS2/MinGW64 static C++ runtime flags");
                     } else {
                         // Native Windows MinGW (not MSYS2)
                         cmake_cmd.arg("-G").arg("MSYS Makefiles");
