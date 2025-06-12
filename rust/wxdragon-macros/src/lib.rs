@@ -353,10 +353,12 @@ fn generate_xrc_struct(input: XrcMacroInput) -> syn::Result<proc_macro2::TokenSt
             /// Create a new instance by loading the embedded XRC
             pub fn new(parent: Option<&dyn wxdragon::window::WxWidget>) -> Self {
                 let resource = wxdragon::xrc::XmlResource::get();
-                resource.init_all_handlers();
 
-                // Initialize platform-aware StaticBitmap handler for proper scaling on Windows
+                // Initialize platform-aware StaticBitmap handler BEFORE default handlers
+                // to ensure it gets registered first
                 resource.init_platform_aware_staticbitmap_handler();
+
+                resource.init_all_handlers();
 
                 resource.load_from_string(Self::XRC_DATA)
                     .unwrap_or_else(|err| panic!("Failed to load XRC data: {}", err));

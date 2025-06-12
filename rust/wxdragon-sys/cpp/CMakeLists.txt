@@ -60,6 +60,9 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
     message(STATUS "Setting Windows specific wxWidgets options")
     set(wxBUILD_TOOLKIT "msw" CACHE STRING "wxWidgets Toolkit")
+    # Define WXD_TARGET_WINDOWS for cross-compilation support in platform-aware components
+    add_compile_definitions(WXD_TARGET_WINDOWS)
+    message(STATUS "Added WXD_TARGET_WINDOWS compile definition for Windows target")
     # For Windows, you might need to set compiler/linker flags for static runtime if wxWidgets needs it
     # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")

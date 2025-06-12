@@ -6,10 +6,23 @@
 
 #include <wx/xrc/xmlres.h>
 #include <wx/xrc/xh_stbmp.h>  // Include for XRC_MAKE_INSTANCE macro
+#include <wx/xml/xml.h>       // Include for wxXmlNode
 #include <wx/statbmp.h>
-#ifdef __WXMSW__
+// Include generic StaticBitmap for Windows (both native and cross-compiled)
+#if defined(__WXMSW__) || defined(WXD_TARGET_WINDOWS)
 #include <wx/generic/statbmpg.h>
+#pragma message("wxDragon: Compiling with Windows StaticBitmap support (will use wxGenericStaticBitmap)")
+#ifdef __WXMSW__
+#pragma message("wxDragon: __WXMSW__ is defined (native Windows build)")
 #endif
+#ifdef WXD_TARGET_WINDOWS
+#pragma message("wxDragon: WXD_TARGET_WINDOWS is defined (cross-compilation target)")
+#endif
+#else
+#pragma message("wxDragon: Compiling for non-Windows platform (will use native wxStaticBitmap)")
+#endif
+
+
 
 /**
  * Custom XRC handler that creates platform-appropriate StaticBitmap widgets:
@@ -26,7 +39,7 @@ public:
         // Get the bitmap - can be from 'bitmap' attribute or child <bitmap> node
         wxBitmap bitmap = GetBitmap(wxT("bitmap"), wxART_OTHER);
 
-#ifdef __WXMSW__
+        #if defined(__WXMSW__) || defined(WXD_TARGET_WINDOWS)
         // On Windows, use wxGenericStaticBitmap for proper scaling
         wxGenericStaticBitmap* control = new wxGenericStaticBitmap(
             m_parentAsWindow,
@@ -54,7 +67,7 @@ public:
 
         SetupWindow(control);
         return control;
-#else
+        #else
         // On other platforms, use native wxStaticBitmap
         wxStaticBitmap* control = new wxStaticBitmap(
             m_parentAsWindow,
@@ -82,7 +95,7 @@ public:
 
         SetupWindow(control);
         return control;
-#endif
+        #endif
     }
 
     virtual bool CanHandle(wxXmlNode *node)
@@ -101,7 +114,7 @@ WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlRe
     wxXmlResource* res = reinterpret_cast<wxXmlResource*>(resource);
     if (!res) return;
 
-    // Add our custom handler - it will take precedence over the default one
+    // Add our custom handler - it should take precedence if registered after standard ones
     res->AddHandler(new WxdPlatformAwareStaticBitmapHandler());
 }
 
