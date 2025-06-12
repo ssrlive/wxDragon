@@ -699,12 +699,8 @@ fn build_wxdragon_wrapper(
                         // In MSYS2, use Unix Makefiles for better compatibility
                         cmake_cmd.arg("-G").arg("Unix Makefiles");
                         
-                        // Explicitly set compilers for MSYS2/MinGW64
-                        cmake_cmd.arg("-DCMAKE_C_COMPILER=gcc");
-                        cmake_cmd.arg("-DCMAKE_CXX_COMPILER=g++");
-                        cmake_cmd.arg("-DCMAKE_AR=ar");
-                        cmake_cmd.arg("-DCMAKE_MAKE_PROGRAM=make");
-                        
+                        // Let CMake find compilers naturally in MSYS2 environment
+                        // Don't explicitly set compiler paths as MSYS2 handles this correctly
                         println!("info: Detected MSYS2 environment, using Unix Makefiles generator");
                     } else {
                         // Native Windows MinGW (not MSYS2)
