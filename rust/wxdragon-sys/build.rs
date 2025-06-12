@@ -457,30 +457,21 @@ fn link_windows_libraries(target_env: &str) {
                            env::var("MSYS2_PATH_TYPE").is_ok() ||
                            env::var("MINGW_PREFIX").is_ok();
             
-            // Only add dynamic stdc++ for non-MSYS2 environments
-            if !in_msys2 {
-                println!("cargo:rustc-link-lib=stdc++");
-            }
-            println!("cargo:rustc-link-lib=gcc");
-            println!("cargo:rustc-link-lib=mingw32");
-            
             if in_msys2 {
-                // MSYS2/MinGW64 environments use UCRT for better compatibility
-                println!("cargo:rustc-link-lib=ucrt");
-                println!("info: Using UCRT runtime for MSYS2/MinGW64 compatibility");
-                
-                // Force static linking of C++ standard library to resolve missing symbols
-                // This overrides Rust's default dynamic stdc++ linking
-                println!("cargo:rustc-link-arg=-Wl,-Bstatic");
-                println!("cargo:rustc-link-arg=-lstdc++");
-                println!("cargo:rustc-link-arg=-lgcc_eh"); 
-                println!("cargo:rustc-link-arg=-Wl,-Bdynamic");
-                
-                // Additional GCC support libraries
+                // MSYS2/MinGW64 static libraries for fully static build (dependency-free executable)
+                println!("cargo:rustc-link-lib=static=stdc++");
                 println!("cargo:rustc-link-lib=static=gcc");
-                println!("info: Using static C++ standard library for MSYS2/MinGW64");
+                println!("cargo:rustc-link-lib=static=gcc_eh");
+                println!("cargo:rustc-link-lib=static=gcc_s");
+                println!("cargo:rustc-link-lib=mingw32");
+                println!("cargo:rustc-link-lib=ucrt");
+                println!("cargo:rustc-link-lib=static=winpthread");
+                println!("info: Using MSYS2/MinGW64 static libraries for dependency-free build");
             } else {
-                // Fallback to MSVCRT for older/different MinGW distributions
+                // Non-MSYS2 MinGW builds (dynamic linking)
+                println!("cargo:rustc-link-lib=stdc++");
+                println!("cargo:rustc-link-lib=gcc");
+                println!("cargo:rustc-link-lib=mingw32");
                 println!("cargo:rustc-link-lib=msvcrt");
             }
         }
@@ -818,9 +809,11 @@ fn build_wxdragon_wrapper(
                         // Don't explicitly set compiler paths as MSYS2 handles this correctly
                         println!("info: Detected MSYS2 environment, using Unix Makefiles generator");
                         
-                        // Add MSYS2/MinGW64 specific flags for C++ runtime compatibility
+                        // Add static linking flags for full static build (dependency-free executable)
+                        cmake_cmd.arg("-DCMAKE_CXX_FLAGS=-static-libgcc -static-libstdc++");
                         cmake_cmd.arg("-DCMAKE_EXE_LINKER_FLAGS=-static-libgcc -static-libstdc++");
-                        println!("info: Added MSYS2/MinGW64 static C++ runtime flags");
+                        cmake_cmd.arg("-DCMAKE_SHARED_LINKER_FLAGS=-static-libgcc -static-libstdc++");
+                        println!("info: Added MSYS2/MinGW64 static C++ runtime flags for dependency-free build");
                     } else {
                         // Native Windows MinGW (not MSYS2)
                         cmake_cmd.arg("-G").arg("MSYS Makefiles");
