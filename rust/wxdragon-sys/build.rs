@@ -546,6 +546,13 @@ fn build_wxdragon_wrapper(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
+    // Detect build profile - use Debug for debug builds, Release for release builds
+    let build_type = if cfg!(debug_assertions) {
+        "Debug"
+    } else {
+        "Release"
+    };
+
     // Get the pre-built wxWidgets library directory
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
         ("linux", "x86_64", _) => "wxwidgets-linux-x64",
@@ -565,18 +572,36 @@ fn build_wxdragon_wrapper(
     let wx_lib_dir = out_dir.join(artifact_name);
     let wrapper_build_dir = out_dir.join("wxdragon_wrapper_build");
 
-    // Skip build if already built (CMake puts libraries in lib/ subdirectory)
-    let output_lib = wrapper_build_dir.join("lib").join("libwxdragon.a");
+    // Skip build if already built (handle different generator outputs)
+    let output_lib = if target_env == "msvc" {
+        // Visual Studio generator puts libraries in config subdirectories
+        wrapper_build_dir.join(build_type).join("wxdragon.lib")
+    } else {
+        // Unix Makefiles generator puts libraries in lib/
+        wrapper_build_dir.join("lib").join("libwxdragon.a")
+    };
+
     if output_lib.exists() {
         println!(
             "info: Using cached wxDragon wrapper library at {:?}",
             output_lib
         );
 
-        // Copy to output directory for linking
-        let dest = out_dir.join(&artifact_name).join("libwxdragon.a");
-        std::fs::create_dir_all(dest.parent().unwrap())?;
+        // Copy the built library to the wxWidgets library directory for linking
+        let dest_filename = if target_env == "msvc" {
+            "wxdragon.lib"
+        } else {
+            "libwxdragon.a"
+        };
+        let dest = wx_lib_dir.join(dest_filename);
+        
+        if !output_lib.exists() {
+            return Err("wxDragon wrapper library was not built successfully".into());
+        }
+
         std::fs::copy(&output_lib, &dest)?;
+        println!("info: Successfully built wxDragon wrapper library");
+
         return Ok(());
     }
 
@@ -592,10 +617,11 @@ fn build_wxdragon_wrapper(
 
     // Prepare CMake command
     let mut cmake_cmd = std::process::Command::new("cmake");
+    
     cmake_cmd
         .current_dir(&wrapper_build_dir)
         .arg(&cpp_source_dir) // Use absolute path to cpp source directory
-        .arg("-DCMAKE_BUILD_TYPE=Release")
+        .arg(format!("-DCMAKE_BUILD_TYPE={}", build_type))
         .arg(format!("-DWXWIDGETS_LIB_DIR={}", wx_lib_dir.display()));
 
     // Pass Cargo feature flags to CMake
@@ -685,7 +711,9 @@ fn build_wxdragon_wrapper(
     match target_os {
         "windows" => {
             if target_env == "msvc" {
-                cmake_cmd.arg("-G").arg("Ninja");
+                // Use Visual Studio generator for better MSVC compatibility
+                cmake_cmd.arg("-G").arg("Visual Studio 17 2022");
+                cmake_cmd.arg("-A").arg("x64"); // Set architecture for Visual Studio generator
             } else {
                 // GNU/MinGW64 - choose generator based on environment
                 if host_os == "windows" {
@@ -740,7 +768,7 @@ fn build_wxdragon_wrapper(
         .arg("--build")
         .arg(".")
         .arg("--config")
-        .arg("Release");
+        .arg(build_type);
 
     let output = build_cmd.output()?;
     if !output.status.success() {
@@ -752,7 +780,13 @@ fn build_wxdragon_wrapper(
     }
 
     // Copy the built library to the wxWidgets library directory for linking
-    let dest = wx_lib_dir.join("libwxdragon.a");
+    let dest_filename = if target_env == "msvc" {
+        "wxdragon.lib"
+    } else {
+        "libwxdragon.a"
+    };
+    let dest = wx_lib_dir.join(dest_filename);
+    
     if !output_lib.exists() {
         return Err("wxDragon wrapper library was not built successfully".into());
     }
