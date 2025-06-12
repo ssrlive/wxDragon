@@ -36,8 +36,7 @@ fn main() {
             bindings_builder = bindings_builder
                 .clang_arg("-D_WIN32")
                 .clang_arg("-D_WINDOWS")
-                .clang_arg("-DWIN32")
-                .clang_arg("-D_MSC_VER=1900"); // Provide a reasonable MSVC version
+                .clang_arg("-DWIN32");
         }
     } else if target_os == "linux" {
         bindings_builder = bindings_builder
