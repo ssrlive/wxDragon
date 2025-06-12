@@ -38,11 +38,11 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
             _CRT_SECURE_NO_WARNINGS
             _CRT_NONSTDC_NO_WARNINGS
             _SCL_SECURE_NO_WARNINGS
-            _MSC_VER=${MSVC_VERSION}
             HAVE_INTPTR_T=1
             wxUSE_WEBVIEW_WEBKIT=0
             WXINTPTR_DEFINED=1
             __WXMSW__=1
+            WXD_MSVC_BUILD=1
         )
         # Set MSVC-specific compiler flags
         add_compile_options(/EHsc)  # Enable C++ exception handling

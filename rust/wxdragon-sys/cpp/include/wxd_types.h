@@ -1,14 +1,18 @@
 #ifndef WXD_TYPES_H
 #define WXD_TYPES_H
 
+// Apply MSVC workarounds first, before any other includes
+#include "wxd_msvc_workarounds.h"
+
 // Use standard C types first
 #include <stdbool.h> 
 #include <stdint.h> // For integer types if needed
 #include <stddef.h> // For size_t
 
 // MSVC workarounds - define missing types after including standard headers
-// Only apply these when actually compiling with MSVC, not during bindgen
-#if defined(_MSC_VER) && !defined(__WXD_BINDGEN__)
+// Apply when building with MSVC but not during bindgen
+#if (defined(_MSC_VER) || defined(WXD_MSVC_BUILD)) && !defined(__WXD_BINDGEN__)
+    // Pre-define wxIntPtr types before any wxWidgets headers are included
     #ifndef wxIntPtr
         #ifdef _WIN64
             typedef intptr_t wxIntPtr;
@@ -19,6 +23,12 @@
         #endif
     #endif
     
+    // Also define the Windows naming convention variants
+    #ifndef WXINTPTR_DEFINED
+        #define WXINTPTR_DEFINED 1
+        typedef wxIntPtr wxLongLong_t;
+    #endif
+    
     // Ensure Windows platform is properly detected
     #ifndef __WXMSW__
         #define __WXMSW__ 1
@@ -27,6 +37,10 @@
     // Fix atomic operations for MSVC by ensuring proper platform detection
     #ifndef _WIN32
         #define _WIN32 1
+    #endif
+    
+    #ifndef WIN32
+        #define WIN32 1
     #endif
 #endif
 
