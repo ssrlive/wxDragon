@@ -26,7 +26,6 @@ jobs:
           - os: ubuntu-latest
             target: linux-x64
             artifact: wxwidgets-linux-x64
-            shell: bash
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
@@ -34,7 +33,6 @@ jobs:
           - os: macos-latest  
             target: macos-x64
             artifact: wxwidgets-macos-x64
-            shell: bash
             setup_script: |
               # macOS has most dependencies built-in
               brew install cmake
@@ -42,7 +40,6 @@ jobs:
           - os: windows-latest
             target: windows-msvc-x64
             artifact: wxwidgets-windows-msvc-x64
-            shell: bash
             setup_script: |
               # Install Ninja for faster builds
               choco install ninja
@@ -50,10 +47,13 @@ jobs:
           - os: windows-latest
             target: windows-gnu-x64
             artifact: wxwidgets-windows-gnu-x64
-            shell: msys2 {0}
             setup_script: ""
     
     runs-on: ${{ matrix.os }}
+    
+    defaults:
+      run:
+        shell: bash
     
     steps:
       - uses: actions/checkout@v4
@@ -66,10 +66,14 @@ jobs:
           update: true
           install: git mingw-w64-x86_64-cc mingw-w64-x86_64-cmake mingw-w64-x86_64-make mingw-w64-x86_64-ninja mingw-w64-x86_64-clang
 
-      - name: Install platform dependencies
-        if: matrix.setup_script != ''
+      - name: Install platform dependencies (Non-Windows)
+        if: matrix.setup_script != '' && matrix.target != 'windows-gnu-x64'
         run: ${{ matrix.setup_script }}
-        shell: ${{ matrix.shell }}
+        
+      - name: Install platform dependencies (Windows GNU)
+        if: matrix.setup_script != '' && matrix.target == 'windows-gnu-x64'
+        run: ${{ matrix.setup_script }}
+        shell: msys2 {0}
 
       - name: Check if release already exists
         if: ${{ !inputs.force_rebuild }}
@@ -92,8 +96,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
 
-      - name: Download wxWidgets source
-        if: steps.check_release.outputs.skip_build != 'true'
+      - name: Download wxWidgets source (Non-Windows)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           WX_VERSION="${{ inputs.wx_version }}"
           WX_TARBALL="wxWidgets-${WX_VERSION}.tar.bz2"
@@ -106,10 +110,25 @@ jobs:
           tar -xjf "${WX_TARBALL}"
           
           echo "WX_SOURCE_DIR=wxWidgets-${WX_VERSION}" >> $GITHUB_ENV
-        shell: ${{ matrix.shell }}
+          
+      - name: Download wxWidgets source (Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        run: |
+          WX_VERSION="${{ inputs.wx_version }}"
+          WX_TARBALL="wxWidgets-${WX_VERSION}.tar.bz2"
+          WX_URL="https://github.com/wxWidgets/wxWidgets/releases/download/v${WX_VERSION}/${WX_TARBALL}"
+          
+          echo "Downloading wxWidgets ${WX_VERSION} from ${WX_URL}"
+          curl -L -o "${WX_TARBALL}" "${WX_URL}"
+          
+          echo "Extracting ${WX_TARBALL}"
+          tar -xjf "${WX_TARBALL}"
+          
+          echo "WX_SOURCE_DIR=wxWidgets-${WX_VERSION}" >> $GITHUB_ENV
+        shell: msys2 {0}
 
-      - name: Configure wxWidgets build
-        if: steps.check_release.outputs.skip_build != 'true'
+      - name: Configure wxWidgets build (Non-Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           mkdir -p build
           cd build
@@ -150,12 +169,6 @@ jobs:
                 -DwxBUILD_TOOLKIT=msw
               )
               ;;
-            "windows-gnu-x64")
-              CMAKE_ARGS+=(
-                -G "Ninja"
-                -DwxBUILD_TOOLKIT=msw
-              )
-              ;;
             "linux-x64")
               CMAKE_ARGS+=(
                 -DwxBUILD_TOOLKIT=gtk3
@@ -165,7 +178,43 @@ jobs:
           
           echo "Configuring with: cmake ${CMAKE_ARGS[@]} ../${WX_SOURCE_DIR}"
           cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
-        shell: ${{ matrix.shell }}
+          
+      - name: Configure wxWidgets build (Windows GNU)
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        run: |
+          mkdir -p build
+          cd build
+          
+          # Configure wxWidgets with all features enabled for static linking
+          CMAKE_ARGS=(
+            -DCMAKE_BUILD_TYPE=Release
+            -DwxBUILD_SHARED=OFF
+            -DwxBUILD_SAMPLES=OFF
+            -DwxBUILD_TESTS=OFF
+            -DwxBUILD_DEMOS=OFF
+            -DwxBUILD_BENCHMARKS=OFF
+            -DwxUSE_EXCEPTIONS=ON
+            -DwxUSE_GUI=ON
+            -DwxUSE_OPENGL=ON
+            -DwxUSE_HTML=ON
+            -DwxUSE_WEBVIEW=ON
+            -DwxUSE_MEDIACTRL=ON
+            -DwxUSE_STC=ON
+            -DwxUSE_XRC=ON
+            -DwxUSE_XML=ON
+            -DwxUSE_AUI=ON
+            -DwxUSE_PROPGRID=ON
+            -DwxUSE_LIBWEBP=OFF
+          )
+          
+          CMAKE_ARGS+=(
+            -G "Ninja"
+            -DwxBUILD_TOOLKIT=msw
+          )
+          
+          echo "Configuring with: cmake ${CMAKE_ARGS[@]} ../${WX_SOURCE_DIR}"
+          cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
+        shell: msys2 {0}
 
       - name: Build wxWidgets
         if: steps.check_release.outputs.skip_build != 'true'
@@ -177,7 +226,6 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           cmake --build . --config Release --parallel ${NPROC}
-        shell: ${{ matrix.shell }}
 
       - name: Build wxDragon wrapper library
         if: steps.check_release.outputs.skip_build != 'true'
@@ -208,7 +256,6 @@ jobs:
           NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
           echo "Building wxDragon wrapper with ${NPROC} parallel jobs"
           cmake --build . --config Release --parallel ${NPROC}
-        shell: ${{ matrix.shell }}
 
       - name: Package libraries
         if: steps.check_release.outputs.skip_build != 'true'
@@ -256,7 +303,6 @@ jobs:
           
           # Verify tarball
           echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
-        shell: ${{ matrix.shell }}
 
       - name: Upload artifact for review
         if: steps.check_release.outputs.skip_build != 'true'
