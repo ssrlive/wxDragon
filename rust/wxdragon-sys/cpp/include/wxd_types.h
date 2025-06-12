@@ -1,6 +1,29 @@
 #ifndef WXD_TYPES_H
 #define WXD_TYPES_H
 
+// MSVC workarounds - define missing types before including wxWidgets headers
+#ifdef _MSC_VER
+    #ifndef wxIntPtr
+        #ifdef _WIN64
+            typedef intptr_t wxIntPtr;
+            typedef uintptr_t wxUIntPtr;
+        #else
+            typedef int wxIntPtr;
+            typedef unsigned int wxUIntPtr;
+        #endif
+    #endif
+    
+    // Ensure Windows platform is properly detected
+    #ifndef __WXMSW__
+        #define __WXMSW__ 1
+    #endif
+    
+    // Fix atomic operations for MSVC by ensuring proper platform detection
+    #ifndef _WIN32
+        #define _WIN32 1
+    #endif
+#endif
+
 // Use standard C types
 #include <stdbool.h> 
 #include <stdint.h> // For integer types if needed
