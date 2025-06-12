@@ -604,12 +604,72 @@ fn build_wxdragon_wrapper(
         };
         let dest = wx_lib_dir.join(dest_filename);
         
-        if !output_lib.exists() {
-            return Err("wxDragon wrapper library was not built successfully".into());
+        // Check if the library was built successfully - try multiple possible locations
+        let mut library_found = false;
+        let mut actual_lib_path = None;
+        
+        if target_env == "msvc" {
+            // Visual Studio can put libraries in various locations, try them all
+            let possible_paths = vec![
+                wrapper_build_dir.join(build_type).join("wxdragon.lib"),
+                wrapper_build_dir.join("Debug").join("wxdragon.lib"),
+                wrapper_build_dir.join("Release").join("wxdragon.lib"),
+                wrapper_build_dir.join("wxdragon.lib"),
+                wrapper_build_dir.join("lib").join("wxdragon.lib"),
+            ];
+            
+            for path in possible_paths {
+                if path.exists() {
+                    library_found = true;
+                    actual_lib_path = Some(path);
+                    break;
+                }
+            }
+        } else {
+            // Unix-style builds
+            let possible_paths = vec![
+                wrapper_build_dir.join("lib").join("libwxdragon.a"),
+                wrapper_build_dir.join("libwxdragon.a"),
+            ];
+            
+            for path in possible_paths {
+                if path.exists() {
+                    library_found = true;
+                    actual_lib_path = Some(path);
+                    break;
+                }
+            }
         }
-
-        std::fs::copy(&output_lib, &dest)?;
-        println!("info: Successfully built wxDragon wrapper library");
+        
+        if !library_found {
+            // List the build directory contents for debugging
+            let mut debug_info = String::new();
+            debug_info.push_str(&format!("Expected library file not found. Build directory contents:\n"));
+            
+            if let Ok(entries) = std::fs::read_dir(&wrapper_build_dir) {
+                for entry in entries.flatten() {
+                    debug_info.push_str(&format!("  {:?}\n", entry.path()));
+                    
+                    // If it's a directory, list its contents too
+                    if entry.path().is_dir() {
+                        if let Ok(sub_entries) = std::fs::read_dir(entry.path()) {
+                            for sub_entry in sub_entries.flatten() {
+                                debug_info.push_str(&format!("    {:?}\n", sub_entry.path()));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return Err(format!(
+                "wxDragon wrapper library was not built successfully.\n{}\nExpected location: {:?}",
+                debug_info, output_lib
+            ).into());
+        }
+        
+        let actual_lib_path = actual_lib_path.unwrap();
+        std::fs::copy(&actual_lib_path, &dest)?;
+        println!("info: Successfully built wxDragon wrapper library at {:?}", actual_lib_path);
 
         return Ok(());
     }
@@ -800,12 +860,72 @@ fn build_wxdragon_wrapper(
     };
     let dest = wx_lib_dir.join(dest_filename);
     
-    if !output_lib.exists() {
-        return Err("wxDragon wrapper library was not built successfully".into());
+    // Check if the library was built successfully - try multiple possible locations
+    let mut library_found = false;
+    let mut actual_lib_path = None;
+    
+    if target_env == "msvc" {
+        // Visual Studio can put libraries in various locations, try them all
+        let possible_paths = vec![
+            wrapper_build_dir.join(build_type).join("wxdragon.lib"),
+            wrapper_build_dir.join("Debug").join("wxdragon.lib"),
+            wrapper_build_dir.join("Release").join("wxdragon.lib"),
+            wrapper_build_dir.join("wxdragon.lib"),
+            wrapper_build_dir.join("lib").join("wxdragon.lib"),
+        ];
+        
+        for path in possible_paths {
+            if path.exists() {
+                library_found = true;
+                actual_lib_path = Some(path);
+                break;
+            }
+        }
+    } else {
+        // Unix-style builds
+        let possible_paths = vec![
+            wrapper_build_dir.join("lib").join("libwxdragon.a"),
+            wrapper_build_dir.join("libwxdragon.a"),
+        ];
+        
+        for path in possible_paths {
+            if path.exists() {
+                library_found = true;
+                actual_lib_path = Some(path);
+                break;
+            }
+        }
     }
-
-    std::fs::copy(&output_lib, &dest)?;
-    println!("info: Successfully built wxDragon wrapper library");
+    
+    if !library_found {
+        // List the build directory contents for debugging
+        let mut debug_info = String::new();
+        debug_info.push_str(&format!("Expected library file not found. Build directory contents:\n"));
+        
+        if let Ok(entries) = std::fs::read_dir(&wrapper_build_dir) {
+            for entry in entries.flatten() {
+                debug_info.push_str(&format!("  {:?}\n", entry.path()));
+                
+                // If it's a directory, list its contents too
+                if entry.path().is_dir() {
+                    if let Ok(sub_entries) = std::fs::read_dir(entry.path()) {
+                        for sub_entry in sub_entries.flatten() {
+                            debug_info.push_str(&format!("    {:?}\n", sub_entry.path()));
+                        }
+                    }
+                }
+            }
+        }
+        
+        return Err(format!(
+            "wxDragon wrapper library was not built successfully.\n{}\nExpected location: {:?}",
+            debug_info, output_lib
+        ).into());
+    }
+    
+    let actual_lib_path = actual_lib_path.unwrap();
+    std::fs::copy(&actual_lib_path, &dest)?;
+    println!("info: Successfully built wxDragon wrapper library at {:?}", actual_lib_path);
 
     Ok(())
 }
