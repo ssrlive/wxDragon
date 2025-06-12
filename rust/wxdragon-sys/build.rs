@@ -596,80 +596,68 @@ fn build_wxdragon_wrapper(
             output_lib
         );
 
-        // Copy the built library to the wxWidgets library directory for linking
-        let dest_filename = if target_env == "msvc" {
-            "wxdragon.lib"
-        } else {
-            "libwxdragon.a"
-        };
-        let dest = wx_lib_dir.join(dest_filename);
-        
-        // Check if the library was built successfully - try multiple possible locations
-        let mut library_found = false;
-        let mut actual_lib_path = None;
-        
-        if target_env == "msvc" {
-            // Visual Studio can put libraries in various locations, try them all
-            let possible_paths = vec![
-                wrapper_build_dir.join(build_type).join("wxdragon.lib"),
-                wrapper_build_dir.join("Debug").join("wxdragon.lib"),
-                wrapper_build_dir.join("Release").join("wxdragon.lib"),
-                wrapper_build_dir.join("wxdragon.lib"),
-                wrapper_build_dir.join("lib").join("wxdragon.lib"),
-            ];
-            
-            for path in possible_paths {
-                if path.exists() {
-                    library_found = true;
-                    actual_lib_path = Some(path);
-                    break;
-                }
-            }
-        } else {
-            // Unix-style builds
-            let possible_paths = vec![
-                wrapper_build_dir.join("lib").join("libwxdragon.a"),
-                wrapper_build_dir.join("libwxdragon.a"),
-            ];
-            
-            for path in possible_paths {
-                if path.exists() {
-                    library_found = true;
-                    actual_lib_path = Some(path);
-                    break;
-                }
+        // Check for the built library in multiple possible locations
+        let possible_lib_paths = vec![
+            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
+            wrapper_build_dir.join("wxdragon.lib"),
+            wrapper_build_dir.join("lib/wxdragon.lib"),
+            wrapper_build_dir.join("x64/wxdragon.lib"),
+            wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+        ];
+
+        let mut library_path = None;
+        for path in &possible_lib_paths {
+            if path.exists() {
+                library_path = Some(path.clone());
+                println!("info: Found library at: {}", path.display());
+                break;
             }
         }
-        
-        if !library_found {
-            // List the build directory contents for debugging
-            let mut debug_info = String::new();
-            debug_info.push_str(&format!("Expected library file not found. Build directory contents:\n"));
-            
-            if let Ok(entries) = std::fs::read_dir(&wrapper_build_dir) {
-                for entry in entries.flatten() {
-                    debug_info.push_str(&format!("  {:?}\n", entry.path()));
-                    
-                    // If it's a directory, list its contents too
-                    if entry.path().is_dir() {
-                        if let Ok(sub_entries) = std::fs::read_dir(entry.path()) {
-                            for sub_entry in sub_entries.flatten() {
-                                debug_info.push_str(&format!("    {:?}\n", sub_entry.path()));
+
+        let library_path = match library_path {
+            Some(path) => path,
+            None => {
+                // List all files in build directory for debugging
+                fn list_directory_recursive(dir: &Path, prefix: &str) -> String {
+                    let mut result = String::new();
+                    if let Ok(entries) = std::fs::read_dir(dir) {
+                        for entry in entries.flatten() {
+                            let path = entry.path();
+                            result.push_str(&format!("{}  \"{}\"\n", prefix, path.display()));
+                            if path.is_dir() {
+                                result.push_str(&list_directory_recursive(&path, &format!("{}  ", prefix)));
                             }
                         }
                     }
+                    result
                 }
+
+                let build_contents = list_directory_recursive(&wrapper_build_dir, "");
+                
+                println!("Searched for library in these locations:");
+                for path in &possible_lib_paths {
+                    println!("  - {}", path.display());
+                }
+                
+                return Err(format!(
+                    "wxDragon wrapper library was not built successfully.\nExpected library file not found. Build directory contents:\n{}\nSearched locations:\n{}",
+                    build_contents,
+                    possible_lib_paths.iter().map(|p| format!("  - {}", p.display())).collect::<Vec<_>>().join("\n")
+                ).into());
             }
-            
-            return Err(format!(
-                "wxDragon wrapper library was not built successfully.\n{}\nExpected location: {:?}",
-                debug_info, output_lib
-            ).into());
-        }
+        };
         
-        let actual_lib_path = actual_lib_path.unwrap();
-        std::fs::copy(&actual_lib_path, &dest)?;
-        println!("info: Successfully built wxDragon wrapper library at {:?}", actual_lib_path);
+        let dest = wx_lib_dir.join("wxdragon.lib");
+        std::fs::copy(&library_path, &dest)?;
+        println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
         return Ok(());
     }
@@ -839,93 +827,129 @@ fn build_wxdragon_wrapper(
         .arg("--build")
         .arg(".")
         .arg("--config")
-        .arg(build_type);
+        .arg(build_type)
+        .arg("--target")
+        .arg("wxdragon")
+        .arg("--verbose");
 
+    println!("info: Running CMake build command: {:?}", build_cmd);
     let output = build_cmd.output()?;
+    
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    
+    // Always print build output for debugging, even on success
+    println!("CMake build stdout:\n{}", stdout);
+    if !stderr.is_empty() {
+        println!("CMake build stderr:\n{}", stderr);
+    }
+    
     if !output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!(
-            "CMake build failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
-            stdout, stderr
-        )
-        .into());
+        // If cmake --build fails, try MSBuild directly as a fallback
+        println!("info: CMake build failed, trying MSBuild directly...");
+        
+        let mut msbuild_cmd = std::process::Command::new("msbuild");
+        msbuild_cmd
+            .current_dir(&wrapper_build_dir)
+            .arg("wxdragon.vcxproj")
+            .arg(&format!("/p:Configuration={}", build_type))
+            .arg("/p:Platform=x64")
+            .arg("/verbosity:detailed");
+            
+        println!("info: Running MSBuild command: {:?}", msbuild_cmd);
+        let msbuild_output = msbuild_cmd.output()?;
+        
+        let msbuild_stdout = String::from_utf8_lossy(&msbuild_output.stdout);
+        let msbuild_stderr = String::from_utf8_lossy(&msbuild_output.stderr);
+        
+        println!("MSBuild stdout:\n{}", msbuild_stdout);
+        if !msbuild_stderr.is_empty() {
+            println!("MSBuild stderr:\n{}", msbuild_stderr);
+        }
+        
+        if !msbuild_output.status.success() {
+            return Err(format!(
+                "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{}\nCMake STDERR:\n{}\nMSBuild STDOUT:\n{}\nMSBuild STDERR:\n{}",
+                stdout, stderr, msbuild_stdout, msbuild_stderr
+            )
+            .into());
+        } else {
+            // Even if CMake reported success, check if it actually built anything
+            // Look for compilation success indicators in the output
+            let build_successful = stdout.contains("Build succeeded") || 
+                                  stdout.contains("succeeded") || 
+                                  stdout.contains("wxdragon.lib") ||
+                                  stdout.contains("Building CXX object") ||
+                                  stdout.contains("Linking CXX static library");
+            
+            if !build_successful {
+                println!("warn: CMake reported success but no compilation indicators found. Output may indicate a silent failure.");
+            }
+        }
     }
 
-    // Copy the built library to the wxWidgets library directory for linking
-    let dest_filename = if target_env == "msvc" {
-        "wxdragon.lib"
-    } else {
-        "libwxdragon.a"
-    };
-    let dest = wx_lib_dir.join(dest_filename);
-    
-    // Check if the library was built successfully - try multiple possible locations
-    let mut library_found = false;
-    let mut actual_lib_path = None;
-    
-    if target_env == "msvc" {
-        // Visual Studio can put libraries in various locations, try them all
-        let possible_paths = vec![
-            wrapper_build_dir.join(build_type).join("wxdragon.lib"),
-            wrapper_build_dir.join("Debug").join("wxdragon.lib"),
-            wrapper_build_dir.join("Release").join("wxdragon.lib"),
-            wrapper_build_dir.join("wxdragon.lib"),
-            wrapper_build_dir.join("lib").join("wxdragon.lib"),
-        ];
-        
-        for path in possible_paths {
-            if path.exists() {
-                library_found = true;
-                actual_lib_path = Some(path);
-                break;
-            }
-        }
-    } else {
-        // Unix-style builds
-        let possible_paths = vec![
-            wrapper_build_dir.join("lib").join("libwxdragon.a"),
-            wrapper_build_dir.join("libwxdragon.a"),
-        ];
-        
-        for path in possible_paths {
-            if path.exists() {
-                library_found = true;
-                actual_lib_path = Some(path);
-                break;
-            }
+    // Check for the built library in multiple possible locations
+    let possible_lib_paths = vec![
+        wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
+        wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
+        wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
+        wrapper_build_dir.join("wxdragon.lib"),
+        wrapper_build_dir.join("lib/wxdragon.lib"),
+        wrapper_build_dir.join("x64/wxdragon.lib"),
+        wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
+        wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+    ];
+
+    let mut library_path = None;
+    for path in &possible_lib_paths {
+        if path.exists() {
+            library_path = Some(path.clone());
+            println!("info: Found library at: {}", path.display());
+            break;
         }
     }
-    
-    if !library_found {
-        // List the build directory contents for debugging
-        let mut debug_info = String::new();
-        debug_info.push_str(&format!("Expected library file not found. Build directory contents:\n"));
-        
-        if let Ok(entries) = std::fs::read_dir(&wrapper_build_dir) {
-            for entry in entries.flatten() {
-                debug_info.push_str(&format!("  {:?}\n", entry.path()));
-                
-                // If it's a directory, list its contents too
-                if entry.path().is_dir() {
-                    if let Ok(sub_entries) = std::fs::read_dir(entry.path()) {
-                        for sub_entry in sub_entries.flatten() {
-                            debug_info.push_str(&format!("    {:?}\n", sub_entry.path()));
+
+    let library_path = match library_path {
+        Some(path) => path,
+        None => {
+            // List all files in build directory for debugging
+            fn list_directory_recursive(dir: &Path, prefix: &str) -> String {
+                let mut result = String::new();
+                if let Ok(entries) = std::fs::read_dir(dir) {
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        result.push_str(&format!("{}  \"{}\"\n", prefix, path.display()));
+                        if path.is_dir() {
+                            result.push_str(&list_directory_recursive(&path, &format!("{}  ", prefix)));
                         }
                     }
                 }
+                result
             }
+
+            let build_contents = list_directory_recursive(&wrapper_build_dir, "");
+            
+            println!("Searched for library in these locations:");
+            for path in &possible_lib_paths {
+                println!("  - {}", path.display());
+            }
+            
+            return Err(format!(
+                "wxDragon wrapper library was not built successfully.\nExpected library file not found. Build directory contents:\n{}\nSearched locations:\n{}",
+                build_contents,
+                possible_lib_paths.iter().map(|p| format!("  - {}", p.display())).collect::<Vec<_>>().join("\n")
+            ).into());
         }
-        
-        return Err(format!(
-            "wxDragon wrapper library was not built successfully.\n{}\nExpected location: {:?}",
-            debug_info, output_lib
-        ).into());
-    }
+    };
     
-    let actual_lib_path = actual_lib_path.unwrap();
-    std::fs::copy(&actual_lib_path, &dest)?;
-    println!("info: Successfully built wxDragon wrapper library at {:?}", actual_lib_path);
+    let dest = wx_lib_dir.join("wxdragon.lib");
+    std::fs::copy(&library_path, &dest)?;
+    println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
     Ok(())
 }
