@@ -325,9 +325,9 @@ jobs:
           
           # List contents for debugging
           echo "Packaged libraries:"
-          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" | head -20
+          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
           echo "Packaged headers:"
-          find "dist/${{ matrix.artifact }}" -name "*.h" | head -10
+          find "dist/${{ matrix.artifact }}" -name "*.h" 2>/dev/null | head -10 || true
           
           # Create tarball
           cd dist
@@ -374,9 +374,9 @@ jobs:
           
           # List contents for debugging
           echo "Packaged libraries:"
-          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" | head -20
+          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
           echo "Packaged headers:"
-          find "dist/${{ matrix.artifact }}" -name "*.h" | head -10
+          find "dist/${{ matrix.artifact }}" -name "*.h" 2>/dev/null | head -10 || true
           
           # Create tarball
           cd dist
