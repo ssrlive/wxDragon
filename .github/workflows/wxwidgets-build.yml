@@ -286,28 +286,34 @@ jobs:
             echo "Release $RELEASE_TAG already exists, updating with new artifacts"
           else
             echo "Creating new release $RELEASE_TAG"
+            
+            # Create release notes
+            cat > release_notes.md << 'EOF'
+          Pre-built static libraries for wxWidgets ${{ inputs.wx_version }} across all supported platforms.
+
+          ## Included Platforms
+          - Linux x64 (GTK3)
+          - macOS x64 (Cocoa) 
+          - Windows x64 (MSVC)
+          - Windows x64 (MinGW64)
+
+          ## Features Enabled
+          All libraries include support for:
+          - AUI (Advanced User Interface)
+          - Media Control
+          - WebView
+          - Styled Text Control (STC)
+          - XML Resources (XRC)
+          - OpenGL
+          - Property Grid
+
+          ## Usage
+          These libraries are automatically downloaded by wxDragon's build script. Manual usage is not typically needed.
+          EOF
+            
             gh release create "$RELEASE_TAG" \
               --title "wxWidgets ${{ inputs.wx_version }} Pre-built Libraries" \
-              --notes "Pre-built static libraries for wxWidgets ${{ inputs.wx_version }} across all supported platforms.
-
-## Included Platforms
-- Linux x64 (GTK3)
-- macOS x64 (Cocoa) 
-- Windows x64 (MSVC)
-- Windows x64 (MinGW64)
-
-## Features Enabled
-All libraries include support for:
-- AUI (Advanced User Interface)
-- Media Control
-- WebView
-- Styled Text Control (STC)
-- XML Resources (XRC)
-- OpenGL
-- Property Grid
-
-## Usage
-These libraries are automatically downloaded by wxDragon's build script. Manual usage is not typically needed."
+              --notes-file release_notes.md
           fi
           
           # Upload all new artifacts
