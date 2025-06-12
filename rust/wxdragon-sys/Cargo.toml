@@ -17,13 +17,11 @@ links = "wxdragon" # Crucial: Signals to Cargo this crate builds/links libwxdrag
 # Sys crates typically have no runtime Rust dependencies
 
 [build-dependencies]
-cmake = "0.1"       # For building the C++ library
-pkg-config = "0.3"  # For finding libgtk and its dependencies
+pkg-config = "0.3"  # For finding libgtk and its dependencies (Linux only)
 bindgen = "0.69"    # For generating Rust bindings from C/C++ headers
-reqwest = { version = "0.11", features = ["blocking"] } # For downloading wxWidgets source tarball
-tar = "0.4"           # For extracting .tar archives
-bzip2 = "0.4"         # For decompressing .bz2 archives (used by wxWidgets tarball)
-# Removed: cc, walkdir, shlex, cargo-emit (can be re-added if a specific need arises)
+reqwest = { version = "0.11", features = ["blocking"] } # For downloading pre-built libraries
+tar = "0.4"         # For extracting .tar archives
+flate2 = "1.0"      # For decompressing .gz archives (used by pre-built libraries)
 
 [features]
 default = []
