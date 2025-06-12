@@ -65,10 +65,10 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
+            base-devel
             git
-            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-make
             mingw-w64-x86_64-pkg-config
 
       - name: Install platform dependencies (Non-Windows)
@@ -187,12 +187,27 @@ jobs:
       - name: Configure wxWidgets build (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
         run: |
+          # Verify tools are available
+          echo "Checking build tools..."
+          which gcc g++ make cmake ar
+          gcc --version
+          make --version
+          cmake --version
+          
           mkdir -p build
           cd build
+          
+          # Set explicit paths for build tools
+          export CC=gcc
+          export CXX=g++
+          export CMAKE_MAKE_PROGRAM=make
           
           # Configure wxWidgets with all features enabled for static linking
           CMAKE_ARGS=(
             -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_C_COMPILER=gcc
+            -DCMAKE_CXX_COMPILER=g++
+            -DCMAKE_MAKE_PROGRAM=make
             -DwxBUILD_SHARED=OFF
             -DwxBUILD_SAMPLES=OFF
             -DwxBUILD_TESTS=OFF
