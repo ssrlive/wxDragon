@@ -754,9 +754,11 @@ fn build_wxdragon_wrapper(
     // Configure
     let output = cmake_cmd.output()?;
     if !output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!(
-            "CMake configure failed: {}",
-            String::from_utf8_lossy(&output.stderr)
+            "CMake configure failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
+            stdout, stderr
         )
         .into());
     }
@@ -772,9 +774,11 @@ fn build_wxdragon_wrapper(
 
     let output = build_cmd.output()?;
     if !output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!(
-            "CMake build failed: {}",
-            String::from_utf8_lossy(&output.stderr)
+            "CMake build failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
+            stdout, stderr
         )
         .into());
     }
