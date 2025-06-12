@@ -27,6 +27,31 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
     set(PLATFORM_NAME "windows")
     # Define WXD_TARGET_WINDOWS for cross-compilation support in platform-aware components
     add_compile_definitions(WXD_TARGET_WINDOWS __WXMSW__ _FILE_OFFSET_BITS=64 wxUSE_UNICODE=1 NDEBUG)
+    
+    # Add MSVC-specific definitions to fix compilation issues
+    if(MSVC)
+        add_compile_definitions(
+            _WINDOWS
+            WIN32
+            _WIN32
+            WXUSINGDLL=0
+            _CRT_SECURE_NO_WARNINGS
+            _CRT_NONSTDC_NO_WARNINGS
+            _SCL_SECURE_NO_WARNINGS
+            _MSC_VER=${MSVC_VERSION}
+            HAVE_INTPTR_T=1
+            wxUSE_WEBVIEW_WEBKIT=0
+            WXINTPTR_DEFINED=1
+            __WXMSW__=1
+        )
+        # Set MSVC-specific compiler flags
+        add_compile_options(/EHsc)  # Enable C++ exception handling
+        add_compile_options(/MP)    # Multi-processor compilation
+        add_compile_options(/bigobj) # Enable large object files for complex templates
+        # Disable specific warnings that cause issues with wxWidgets
+        add_compile_options(/wd4996) # Disable deprecated function warnings
+        add_compile_options(/wd4819) # Disable code page warnings
+    endif()
 elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     message(STATUS "Building for Linux")
     set(PLATFORM_NAME "linux")
