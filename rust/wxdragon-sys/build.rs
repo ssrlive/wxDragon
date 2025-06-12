@@ -459,14 +459,17 @@ fn link_windows_libraries(target_env: &str) {
             
             if in_msys2 {
                 // MSYS2/MinGW64 static libraries for fully static build (dependency-free executable)
-                println!("cargo:rustc-link-lib=static=stdc++");
-                println!("cargo:rustc-link-lib=static=gcc");
-                println!("cargo:rustc-link-lib=static=gcc_eh");
-                println!("cargo:rustc-link-lib=static=gcc_s");
+                // Use rustc-link-arg for static C++ runtime instead of static lib linking
+                println!("cargo:rustc-link-arg=-static-libgcc");
+                println!("cargo:rustc-link-arg=-static-libstdc++");
+                
+                // Standard libraries needed for MSYS2
+                println!("cargo:rustc-link-lib=stdc++");
+                println!("cargo:rustc-link-lib=gcc");
                 println!("cargo:rustc-link-lib=mingw32");
                 println!("cargo:rustc-link-lib=ucrt");
-                println!("cargo:rustc-link-lib=static=winpthread");
-                println!("info: Using MSYS2/MinGW64 static libraries for dependency-free build");
+                println!("cargo:rustc-link-lib=winpthread");
+                println!("info: Using MSYS2/MinGW64 static C++ runtime via rustc-link-arg");
             } else {
                 // Non-MSYS2 MinGW builds (dynamic linking)
                 println!("cargo:rustc-link-lib=stdc++");
