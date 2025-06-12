@@ -34,9 +34,16 @@ jobs:
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
             
-          - os: macos-latest  
+          - os: macos-13  
             target: macos-x64
             artifact: wxwidgets-macos-x64
+            setup_script: |
+              # macOS has most dependencies built-in
+              brew install cmake
+              
+          - os: macos-latest
+            target: macos-arm64
+            artifact: wxwidgets-macos-arm64
             setup_script: |
               # macOS has most dependencies built-in
               brew install cmake
@@ -169,6 +176,14 @@ jobs:
             "macos-x64")
               CMAKE_ARGS+=(
                 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+                -DCMAKE_OSX_ARCHITECTURES=x86_64
+                -DwxBUILD_TOOLKIT=osx_cocoa
+              )
+              ;;
+            "macos-arm64")
+              CMAKE_ARGS+=(
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+                -DCMAKE_OSX_ARCHITECTURES=arm64
                 -DwxBUILD_TOOLKIT=osx_cocoa
               )
               ;;
@@ -381,7 +396,8 @@ jobs:
 
           ## Included Platforms
           - Linux x64 (GTK3)
-          - macOS x64 (Cocoa) 
+          - macOS x64 (Cocoa, Intel)
+          - macOS ARM64 (Cocoa, Apple Silicon)
           - Windows x64 (MSVC)
           - Windows x64 (MinGW64)
 
