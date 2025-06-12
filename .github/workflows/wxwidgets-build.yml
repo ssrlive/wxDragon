@@ -71,16 +71,36 @@ jobs:
       
       - name: Setup MinGW64 (Windows GNU only)
         if: matrix.target == 'windows-gnu-x64'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            base-devel
-            git
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-pkg-config
+        run: |
+          # Install CMake first
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          
+          # Download WinLibs GCC 15.1.0 to match the user's local environment
+          echo "Downloading WinLibs GCC 15.1.0 (POSIX threads, UCRT)..."
+          curl -L -o winlibs-x86_64.zip "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r2.zip"
+          
+          echo "Extracting MinGW..."
+          7z x winlibs-x86_64.zip -o"C:\mingw64" -y
+          
+          # Find the actual mingw64 directory (may be nested)
+          MINGW_DIR=$(find /c/mingw64 -name "mingw64" -type d | head -1)
+          if [ -z "$MINGW_DIR" ]; then
+            # If not found, use the first directory that contains bin/gcc.exe
+            MINGW_DIR=$(find /c/mingw64 -name "gcc.exe" -type f | head -1 | xargs dirname | xargs dirname)
+          fi
+          
+          echo "Found MinGW at: $MINGW_DIR"
+          
+          # Add to PATH
+          echo "$MINGW_DIR/bin" >> $GITHUB_PATH
+          
+          # Set environment variables for CMake
+          echo "CMAKE_C_COMPILER=$MINGW_DIR/bin/gcc.exe" >> $GITHUB_ENV
+          echo "CMAKE_CXX_COMPILER=$MINGW_DIR/bin/g++.exe" >> $GITHUB_ENV
+          echo "CMAKE_MAKE_PROGRAM=$MINGW_DIR/bin/mingw32-make.exe" >> $GITHUB_ENV
+          
+          # Verify installation
+          "$MINGW_DIR/bin/gcc.exe" --version
 
       - name: Install platform dependencies (Non-Windows)
         if: matrix.setup_script != '' && matrix.target != 'windows-gnu-x64'
@@ -89,7 +109,6 @@ jobs:
       - name: Install platform dependencies (Windows GNU)
         if: matrix.setup_script != '' && matrix.target == 'windows-gnu-x64'
         run: ${{ matrix.setup_script }}
-        shell: msys2 {0}
 
       - name: Check if release already exists
         if: ${{ !inputs.force_rebuild }}
@@ -141,7 +160,6 @@ jobs:
           tar -xjf "${WX_TARBALL}"
           
           echo "WX_SOURCE_DIR=wxWidgets-${WX_VERSION}" >> $GITHUB_ENV
-        shell: msys2 {0}
 
       - name: Configure wxWidgets build (Non-Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
@@ -216,17 +234,12 @@ jobs:
           mkdir -p build
           cd build
           
-          # Set explicit paths for build tools
-          export CC=gcc
-          export CXX=g++
-          export CMAKE_MAKE_PROGRAM=make
-          
           # Configure wxWidgets with all features enabled for static linking
           CMAKE_ARGS=(
             -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_C_COMPILER=gcc
-            -DCMAKE_CXX_COMPILER=g++
-            -DCMAKE_MAKE_PROGRAM=make
+            -DCMAKE_C_COMPILER="${CMAKE_C_COMPILER}"
+            -DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
+            -DCMAKE_MAKE_PROGRAM="${CMAKE_MAKE_PROGRAM}"
             -DwxBUILD_SHARED=OFF
             -DwxBUILD_SAMPLES=OFF
             -DwxBUILD_TESTS=OFF
@@ -247,13 +260,12 @@ jobs:
           )
           
           CMAKE_ARGS+=(
-            -G "MSYS Makefiles"
+            -G "MinGW Makefiles"
             -DwxBUILD_TOOLKIT=msw
           )
           
           echo "Configuring with: cmake ${CMAKE_ARGS[@]} ../${WX_SOURCE_DIR}"
           cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
-        shell: msys2 {0}
 
       - name: Build wxWidgets (Non-Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
@@ -276,7 +288,6 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           cmake --build . --config Release --parallel ${NPROC}
-        shell: msys2 {0}
 
 
 
@@ -366,11 +377,12 @@ jobs:
             cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
           fi
           
-          # Create version info file
+          # Create version info file with compiler info
           echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
           echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
           echo "Build Date: $(date -u)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
           echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "Compiler: WinLibs GCC 15.1.0 (POSIX threads, UCRT)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
           
           # List contents for debugging
           echo "Packaged libraries:"
@@ -384,7 +396,6 @@ jobs:
           
           # Verify tarball
           echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
-        shell: msys2 {0}
 
       - name: Upload artifact for review
         if: steps.check_release.outputs.skip_build != 'true'
