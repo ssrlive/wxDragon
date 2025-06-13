@@ -29,35 +29,35 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux-x64
-            artifact: wxwidgets-linux-x64
+            build_types: [Release, Debug]
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
             
           - os: macos-13  
             target: macos-x64
-            artifact: wxwidgets-macos-x64
+            build_types: [Release, Debug]
             setup_script: |
               # macOS has most dependencies built-in
               brew install cmake
               
           - os: macos-latest
             target: macos-arm64
-            artifact: wxwidgets-macos-arm64
+            build_types: [Release, Debug]
             setup_script: |
               # macOS has most dependencies built-in
               brew install cmake
             
           - os: windows-latest
             target: windows-msvc-x64
-            artifact: wxwidgets-windows-msvc-x64
+            build_types: [Release, Debug]
             setup_script: |
               # Install Ninja for faster builds
               choco install ninja
             
           - os: windows-latest
             target: windows-gnu-x64
-            artifact: wxwidgets-windows-gnu-x64
+            build_types: [Release, Debug]
             setup_script: ""
     
     runs-on: ${{ matrix.os }}
@@ -128,13 +128,13 @@ jobs:
           echo "Checking for existing release: $RELEASE_TAG"
           
           # Check if release exists and has our artifact
-          RELEASE_EXISTS=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[] | select(.name=="${{ matrix.artifact }}.tar.gz") | .name' 2>/dev/null || echo "")
+          RELEASE_EXISTS=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[] | select(.name=="${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz") | .name' 2>/dev/null || echo "")
           
           if [ -n "$RELEASE_EXISTS" ]; then
-            echo "Release $RELEASE_TAG already has ${{ matrix.artifact }}.tar.gz"
+            echo "Release $RELEASE_TAG already has ${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz"
             echo "skip_build=true" >> $GITHUB_OUTPUT
           else
-            echo "Need to build ${{ matrix.artifact }}.tar.gz for release $RELEASE_TAG"
+            echo "Need to build ${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz for release $RELEASE_TAG"
             echo "skip_build=false" >> $GITHUB_OUTPUT
           fi
         env:
@@ -179,7 +179,7 @@ jobs:
           
           # Configure wxWidgets with all features enabled for static linking
           CMAKE_ARGS=(
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
             -DwxBUILD_SHARED=OFF
             -DwxBUILD_SAMPLES=OFF
             -DwxBUILD_TESTS=OFF
@@ -253,7 +253,7 @@ jobs:
           
           # Configure wxWidgets with all features enabled for static linking
           CMAKE_ARGS=(
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
             -DCMAKE_C_COMPILER="${CMAKE_C_COMPILER}"
             -DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
             -DCMAKE_MAKE_PROGRAM="${CMAKE_MAKE_PROGRAM}"
@@ -293,7 +293,7 @@ jobs:
           NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
           echo "Building with ${NPROC} parallel jobs"
           
-          cmake --build . --config Release --parallel ${NPROC}
+          cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
           
       - name: Build wxWidgets (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
@@ -304,17 +304,17 @@ jobs:
           NPROC=2
           echo "Building with ${NPROC} parallel jobs"
           
-          cmake --build . --config Release --parallel ${NPROC}
+          cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
 
       - name: Package libraries (Non-Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
         run: |
           # Create packaging directory
-          mkdir -p "dist/${{ matrix.artifact }}"
+          mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}"
           
           # Copy wxWidgets libraries
           if [ -d "build/lib" ]; then
-            cp -r build/lib/* "dist/${{ matrix.artifact }}/"
+            cp -r build/lib/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
           fi
           
           # Copy additional platform-specific library directories
@@ -322,10 +322,10 @@ jobs:
             "windows-"*)
               # Windows may have libraries in subdirectories
               if [ -d "build/lib/vc_x64_lib" ]; then
-                cp -r build/lib/vc_x64_lib/* "dist/${{ matrix.artifact }}/"
+                cp -r build/lib/vc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
               fi
               if [ -d "build/lib/gcc_x64_lib" ]; then
-                cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.artifact }}/"
+                cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
               fi
               ;;
           esac
@@ -333,21 +333,21 @@ jobs:
           # Copy wxWidgets headers (source headers + generated headers)
           echo "Packaging wxWidgets headers..."
           if [ -d "${WX_SOURCE_DIR}/include" ]; then
-            mkdir -p "dist/${{ matrix.artifact }}/include"
-            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.artifact }}/include/"
+            mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/include"
+            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/include/"
           fi
           
           # Copy generated headers from build directory
           if [ -d "build/lib/wx" ]; then
-            mkdir -p "dist/${{ matrix.artifact }}/wx"
-            cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
+            mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/wx"
+            cp -r build/lib/wx/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/wx/"
           fi
           
           # Special handling for Windows MSVC setup.h
           if [ "${{ matrix.target }}" = "windows-msvc-x64" ]; then
             echo "Creating MSVC-specific setup.h patch..."
             # Find the setup.h file
-            SETUP_H_PATH=$(find "dist/${{ matrix.artifact }}" -name "setup.h" | head -1)
+            SETUP_H_PATH=$(find "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}" -name "setup.h" | head -1)
             if [ -n "$SETUP_H_PATH" ]; then
               echo "Found setup.h at: $SETUP_H_PATH"
               # Create our MSVC fixes as a separate file
@@ -379,80 +379,80 @@ jobs:
           fi
           
           # Create version info file
-          echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build Date: $(date -u)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build Date: $(date -u)" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
           
           # List contents for debugging
           echo "Packaged libraries:"
-          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
+          find "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
           echo "Packaged headers:"
-          find "dist/${{ matrix.artifact }}" -name "*.h" 2>/dev/null | head -10 || true
+          find "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}" -name "*.h" 2>/dev/null | head -10 || true
           
           # Create tarball
           cd dist
-          tar -czf "${{ matrix.artifact }}.tar.gz" "${{ matrix.artifact }}/"
+          tar -czf "${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz" "${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
           
           # Verify tarball
-          echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
+          echo "Created tarball: $(ls -lh ${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz)"
           
       - name: Package libraries (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
         run: |
           # Create packaging directory
-          mkdir -p "dist/${{ matrix.artifact }}"
+          mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}"
           
           # Copy wxWidgets libraries
           if [ -d "build/lib" ]; then
-            cp -r build/lib/* "dist/${{ matrix.artifact }}/"
+            cp -r build/lib/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
           fi
           
           # Copy additional platform-specific library directories
           # Windows GNU may have libraries in subdirectories
           if [ -d "build/lib/gcc_x64_lib" ]; then
-            cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.artifact }}/"
+            cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
           fi
           
           # Copy wxWidgets headers (source headers + generated headers)
           echo "Packaging wxWidgets headers..."
           if [ -d "${WX_SOURCE_DIR}/include" ]; then
-            mkdir -p "dist/${{ matrix.artifact }}/include"
-            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.artifact }}/include/"
+            mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/include"
+            cp -r "${WX_SOURCE_DIR}/include/"* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/include/"
           fi
           
           # Copy generated headers from build directory
           if [ -d "build/lib/wx" ]; then
-            mkdir -p "dist/${{ matrix.artifact }}/wx"
-            cp -r build/lib/wx/* "dist/${{ matrix.artifact }}/wx/"
+            mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/wx"
+            cp -r build/lib/wx/* "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/wx/"
           fi
           
           # Create version info file with compiler info
-          echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build Date: $(date -u)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.artifact }}/VERSION.txt"
-          echo "Compiler: WinLibs GCC 15.1.0 (POSIX threads, UCRT)" >> "dist/${{ matrix.artifact }}/VERSION.txt"
+          echo "wxWidgets Version: ${{ inputs.wx_version }}" > "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build Target: ${{ matrix.target }}" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build Date: $(date -u)" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
+          echo "Compiler: WinLibs GCC 15.1.0 (POSIX threads, UCRT)" >> "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}/VERSION.txt"
           
           # List contents for debugging
           echo "Packaged libraries:"
-          find "dist/${{ matrix.artifact }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
+          find "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}" -name "*.a" -o -name "*.lib" 2>/dev/null | head -20 || true
           echo "Packaged headers:"
-          find "dist/${{ matrix.artifact }}" -name "*.h" 2>/dev/null | head -10 || true
+          find "dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}" -name "*.h" 2>/dev/null | head -10 || true
           
           # Create tarball
           cd dist
-          tar -czf "${{ matrix.artifact }}.tar.gz" "${{ matrix.artifact }}/"
+          tar -czf "${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz" "${{ matrix.target }}-${{ matrix.build_type | downcase }}/"
           
           # Verify tarball
-          echo "Created tarball: $(ls -lh ${{ matrix.artifact }}.tar.gz)"
+          echo "Created tarball: $(ls -lh ${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz)"
 
       - name: Upload artifact for review
         if: steps.check_release.outputs.skip_build != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.artifact }}.tar.gz
+          name: ${{ matrix.target }}-${{ matrix.build_type | downcase }}
+          path: dist/${{ matrix.target }}-${{ matrix.build_type | downcase }}.tar.gz
           retention-days: 7
 
   create-release:
