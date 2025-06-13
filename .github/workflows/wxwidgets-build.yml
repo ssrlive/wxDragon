@@ -29,35 +29,53 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux-x64
-            build_types: [Release, Debug]
+            build_type: Release
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
-            
-          - os: macos-13  
-            target: macos-x64
-            build_types: [Release, Debug]
+          - os: ubuntu-latest
+            target: linux-x64
+            build_type: Debug
             setup_script: |
-              # macOS has most dependencies built-in
+              sudo apt-get update
+              sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
+          - os: macos-13
+            target: macos-x64
+            build_type: Release
+            setup_script: |
               brew install cmake
-              
+          - os: macos-13
+            target: macos-x64
+            build_type: Debug
+            setup_script: |
+              brew install cmake
           - os: macos-latest
             target: macos-arm64
-            build_types: [Release, Debug]
+            build_type: Release
             setup_script: |
-              # macOS has most dependencies built-in
               brew install cmake
-            
+          - os: macos-latest
+            target: macos-arm64
+            build_type: Debug
+            setup_script: |
+              brew install cmake
           - os: windows-latest
             target: windows-msvc-x64
-            build_types: [Release, Debug]
+            build_type: Release
             setup_script: |
-              # Install Ninja for faster builds
               choco install ninja
-            
+          - os: windows-latest
+            target: windows-msvc-x64
+            build_type: Debug
+            setup_script: |
+              choco install ninja
           - os: windows-latest
             target: windows-gnu-x64
-            build_types: [Release, Debug]
+            build_type: Release
+            setup_script: ""
+          - os: windows-latest
+            target: windows-gnu-x64
+            build_type: Debug
             setup_script: ""
     
     runs-on: ${{ matrix.os }}
