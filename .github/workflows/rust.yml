@@ -37,11 +37,22 @@ jobs:
 
   build-msys-mingw64:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install 7zip
+        run: choco install 7zip
+
+      - name: Download and extract WinLibs GCC 15.1.0
+        shell: cmd
+        run: |
+          curl -L -o winlibs-x86_64.zip "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r2.zip"
+          7z x winlibs-x86_64.zip -oC:\mingw64 -y
+          echo C:\mingw64\mingw64\bin>>%GITHUB_PATH%
+          echo CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=C:\mingw64\mingw64\bin\gcc.exe>>%GITHUB_ENV%
+          echo CC=C:\mingw64\mingw64\bin\gcc.exe>>%GITHUB_ENV%
+          echo CXX=C:\mingw64\mingw64\bin\g++.exe>>%GITHUB_ENV%
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -55,15 +66,9 @@ jobs:
             mingw-w64-x86_64-clang
             mingw-w64-x86_64-toolchain
             make
+            p7zip
             --needed
-      - name: Download WinLibs GCC 15.1.0
-        run: |
-          curl -L -o winlibs-x86_64.zip "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r2.zip"
-          7z x winlibs-x86_64.zip -o"C:/mingw64" -y
-          echo "C:/mingw64/mingw64/bin" >> $GITHUB_PATH
-          echo "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=C:/mingw64/mingw64/bin/gcc.exe" >> $GITHUB_ENV
-          echo "CC=C:/mingw64/mingw64/bin/gcc.exe" >> $GITHUB_ENV
-          echo "CXX=C:/mingw64/mingw64/bin/g++.exe" >> $GITHUB_ENV
-          echo "PATH=C:/mingw64/mingw64/bin:$PATH" >> $GITHUB_ENV
+
       - name: Build
+        shell: msys2 {0}
         run: cargo build
