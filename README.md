@@ -161,6 +161,18 @@ sudo dnf install clang-devel pkg-config gtk3-devel libpng-devel libjpeg-devel me
 - Visual Studio Build Tools or Visual Studio with C++ support
 - Windows SDK
 - Ninja build system: `winget install --id=Ninja-build.Ninja -e`
+- **[REQUIRED] WinLibs GCC 15.1.0 UCRT toolchain** (must match the version used for prebuilt wxWidgets libraries)
+
+> ⚠️ **Important:** You must use the exact same MinGW/WinLibs GCC version as the prebuilt wxWidgets libraries (GCC 15.1.0 UCRT, WinLibs). Mismatched toolchains will cause linker errors for C++ symbols. Download from: https://github.com/brechtsanders/winlibs_mingw/releases/tag/15.1.0posix-13.0.0-ucrt-r2
+
+**Install WinLibs GCC 15.1.0 UCRT:**
+1. Download the release from [WinLibs GCC 15.1.0 UCRT](https://github.com/brechtsanders/winlibs_mingw/releases/tag/15.1.0posix-13.0.0-ucrt-r2)
+2. Extract to `C:\mingw64` (or another directory)
+3. Add `C:\mingw64\mingw64\bin` to your `PATH`
+4. Set the Rust linker:
+   ```bash
+   setx CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER "C:\mingw64\mingw64\bin\gcc.exe"
+   ```
 
 ### Building Your Project
 
@@ -183,16 +195,19 @@ wxDragon automatically downloads and builds wxWidgets during the first compilati
 
 ### Cross-Compilation (macOS → Windows)
 
-```bash
-# Install MinGW-w64 toolchain
-brew install mingw-w64
+> ⚠️ **Important:** For cross-compilation, you must use the same WinLibs GCC version as the prebuilt wxWidgets libraries. Install it via Homebrew or download the matching version manually if needed.
 
+```bash
+# Install MinGW-w64 toolchain (Homebrew may not always match the required version)
+brew install mingw-w64
+# Or download and use WinLibs GCC 15.1.0 UCRT manually for ABI compatibility
 # Add Windows target
 rustup target add x86_64-pc-windows-gnu
-
 # Build for Windows
 cargo build --target=x86_64-pc-windows-gnu --release
 ```
+
+> If you encounter linker errors for C++ symbols, double-check that your MinGW/WinLibs GCC version matches the prebuilt wxWidgets libraries exactly.
 
 ## Rich Widget Ecosystem
 
