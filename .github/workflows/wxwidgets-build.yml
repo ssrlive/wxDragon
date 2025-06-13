@@ -293,7 +293,7 @@ jobs:
           NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
           echo "Building with ${NPROC} parallel jobs"
           
-          cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
+          cmake --build . --parallel ${NPROC}
           
       - name: Build wxWidgets (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
@@ -304,7 +304,7 @@ jobs:
           NPROC=2
           echo "Building with ${NPROC} parallel jobs"
           
-          cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
+          cmake --build . --parallel ${NPROC}
 
       - name: Package libraries (Non-Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
