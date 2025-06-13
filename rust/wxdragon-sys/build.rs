@@ -249,6 +249,10 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
         "linux" => link_linux_libraries(),
         _ => panic!("Unsupported target OS: {}", target_os),
     }
+
+    if target_os == "windows" && target_env == "gnu" {
+        println!("cargo:rustc-link-arg=-v");
+    }
 }
 
 fn link_macos_libraries() {

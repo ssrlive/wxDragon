@@ -69,6 +69,15 @@ jobs:
             p7zip
             --needed
 
+      - name: Print GCC version and path
+        shell: msys2 {0}
+        run: |
+          gcc --version
+          which gcc
+          g++ --version
+          which g++
+          echo $PATH
+
       - name: Build
         shell: msys2 {0}
         run: cargo build --release
