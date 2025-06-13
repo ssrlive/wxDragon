@@ -53,31 +53,13 @@ jobs:
           echo CC=C:\mingw64\mingw64\bin\gcc.exe>>%GITHUB_ENV%
           echo CXX=C:\mingw64\mingw64\bin\g++.exe>>%GITHUB_ENV%
 
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            git 
-            mingw-w64-x86_64-cc 
-            mingw-w64-x86_64-cmake 
-            mingw-w64-x86_64-make 
-            mingw-w64-x86_64-rust 
-            mingw-w64-x86_64-clang
-            mingw-w64-x86_64-toolchain
-            make
-            p7zip
-            --needed
-
       - name: Print GCC version and path
-        shell: msys2 {0}
+        shell: cmd
         run: |
-          gcc --version
-          which gcc
-          g++ --version
-          which g++
-          echo $PATH
+          C:\mingw64\mingw64\bin\gcc.exe --version
+          C:\mingw64\mingw64\bin\g++.exe --version
+          echo %PATH%
 
       - name: Build
-        shell: msys2 {0}
+        shell: cmd
         run: cargo build --release
