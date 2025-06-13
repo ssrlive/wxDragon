@@ -114,13 +114,14 @@ fn download_prebuilt_libraries(
     target_env: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => "wxwidgets-linux-x64",
-        ("macos", "x86_64", _) => "wxwidgets-macos-x64",
-        ("macos", "aarch64", _) => "wxwidgets-macos-arm64",
-        ("windows", "x86_64", "msvc") => "wxwidgets-windows-msvc-x64",
-        ("windows", "x86_64", "gnu") => "wxwidgets-windows-gnu-x64",
+        ("linux", "x86_64", _) => format!("wxwidgets-{}-linux-x64-{}", wx_version, profile),
+        ("macos", "x86_64", _) => format!("wxwidgets-{}-macos-x64-{}", wx_version, profile),
+        ("macos", "aarch64", _) => format!("wxwidgets-{}-macos-arm64-{}", wx_version, profile),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile),
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile),
         _ => {
             return Err(format!(
                 "Unsupported target platform: {}-{}-{}",
@@ -136,7 +137,7 @@ fn download_prebuilt_libraries(
     );
 
     let tarball_dest_path = out_dir.join(format!("{}.tar.gz", artifact_name));
-    let extracted_path = out_dir.join(artifact_name);
+    let extracted_path = out_dir.join(&artifact_name);
 
     // Skip download if already extracted
     if extracted_path.exists() {
