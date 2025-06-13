@@ -463,13 +463,18 @@ fn link_windows_libraries(target_env: &str) {
                 println!("cargo:rustc-link-arg=-static-libgcc");
                 println!("cargo:rustc-link-arg=-static-libstdc++");
                 
+                // Add MSYS2 MinGW64 lib path to linker search path
+                if let Ok(msys2_root) = std::env::var("MSYSTEM_PREFIX") {
+                    println!("cargo:rustc-link-search=native={}/lib", msys2_root);
+                }
+                
                 // Standard libraries needed for MSYS2
                 println!("cargo:rustc-link-lib=stdc++");
                 println!("cargo:rustc-link-lib=gcc");
                 println!("cargo:rustc-link-lib=mingw32");
                 println!("cargo:rustc-link-lib=ucrt");
                 println!("cargo:rustc-link-lib=winpthread");
-                println!("info: Using MSYS2/MinGW64 static C++ runtime via rustc-link-arg");
+                println!("info: Using MSYS2/MinGW64 static C++ runtime via rustc-link-arg and explicit lib path");
             } else {
                 // Non-MSYS2 MinGW builds (dynamic linking)
                 println!("cargo:rustc-link-lib=stdc++");
