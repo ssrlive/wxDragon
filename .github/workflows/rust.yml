@@ -71,4 +71,4 @@ jobs:
 
       - name: Build
         shell: msys2 {0}
-        run: cargo build
+        run: cargo build --release
