@@ -411,7 +411,9 @@ jobs:
           # Create tarball
           cd dist
           ARTIFACT_NAME="wxwidgets-${{ inputs.wx_version }}-${{ matrix.target }}-$(echo "${{ matrix.build_type }}" | tr '[:upper:]' '[:lower:]')"
-          tar -czf "${ARTIFACT_NAME}.tar.gz" "${{ matrix.target }}-${{ matrix.build_type }}/"
+          mkdir -p "dist/${ARTIFACT_NAME}"
+          cp -r "${{ matrix.target }}-${{ matrix.build_type }}"/* "dist/${ARTIFACT_NAME}/"
+          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}/"
           
           # Verify tarball
           echo "Created tarball: $(ls -lh $ARTIFACT_NAME.tar.gz)"
@@ -462,7 +464,9 @@ jobs:
           # Create tarball
           cd dist
           ARTIFACT_NAME="wxwidgets-${{ inputs.wx_version }}-${{ matrix.target }}-$(echo "${{ matrix.build_type }}" | tr '[:upper:]' '[:lower:]')"
-          tar -czf "${ARTIFACT_NAME}.tar.gz" "${{ matrix.target }}-${{ matrix.build_type }}/"
+          mkdir -p "dist/${ARTIFACT_NAME}"
+          cp -r "${{ matrix.target }}-${{ matrix.build_type }}"/* "dist/${ARTIFACT_NAME}/"
+          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}/"
           
           # Verify tarball
           echo "Created tarball: $(ls -lh $ARTIFACT_NAME.tar.gz)"
