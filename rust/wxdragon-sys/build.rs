@@ -124,11 +124,12 @@ fn main() {
 
     // Add platform-specific headers
     if target_os == "windows" && target_env == "msvc" {
-        // For Windows MSVC, add the specific MSVC include path
-        let msvc_include = wx_lib_dir.join("include").join("msvc");
-        if msvc_include.exists() {
-            bindings_builder = bindings_builder.clang_arg(format!("-I{}", msvc_include.display()));
-            println!("info: Added Windows MSVC include path: {}", msvc_include.display());
+        // For Windows MSVC, the include/msvc/wx/setup.h has broken relative includes
+        // Use the working setup.h from include/wx/msw instead
+        let msw_include = wx_lib_dir.join("include").join("wx").join("msw");
+        if msw_include.exists() {
+            bindings_builder = bindings_builder.clang_arg(format!("-I{}", msw_include.display()));
+            println!("info: Added Windows MSVC alternative include path: {}", msw_include.display());
         }
     } else if target_os == "windows" && target_env == "gnu" {
         // For Windows GNU, look for the appropriate setup path based on build profile

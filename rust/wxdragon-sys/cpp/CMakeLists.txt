@@ -204,13 +204,15 @@ if(PLATFORM_NAME STREQUAL "macos")
 elseif(PLATFORM_NAME STREQUAL "windows")
     # For Windows, check the actual pre-built library structure
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_GENERATOR MATCHES "Visual Studio")
-        # For MSVC builds, check the MSVC-specific include path
-        set(WX_MSVC_INCLUDE_DIR "${WXWIDGETS_LIB_DIR}/include/msvc")
-        if(EXISTS "${WX_MSVC_INCLUDE_DIR}/wx/setup.h")
-            list(APPEND WX_INCLUDE_PATHS "${WX_MSVC_INCLUDE_DIR}")
-            message(STATUS "Found Windows MSVC-specific headers: ${WX_MSVC_INCLUDE_DIR}")
+        # For MSVC builds, the include/msvc/wx/setup.h tries to include files that don't exist
+        # in the pre-built package structure. Use the working setup.h from include/wx/msw instead.
+        set(WX_MSVC_SETUP_DIR "${WXWIDGETS_LIB_DIR}/include/wx/msw")
+        if(EXISTS "${WX_MSVC_SETUP_DIR}/setup.h")
+            # We need to add this as an additional include path for setup.h
+            list(APPEND WX_INCLUDE_PATHS "${WXWIDGETS_LIB_DIR}/include/wx/msw")
+            message(STATUS "Found Windows MSVC setup.h at: ${WX_MSVC_SETUP_DIR}")
         else()
-            message(WARNING "MSVC setup.h not found at: ${WX_MSVC_INCLUDE_DIR}/wx/setup.h")
+            message(WARNING "MSVC setup.h not found at: ${WX_MSVC_SETUP_DIR}/setup.h")
         endif()
     else()
         # For MinGW/GNU builds, check for MinGW-specific paths
