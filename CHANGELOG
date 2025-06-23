@@ -1,5 +1,65 @@
 # Changelog
 
+## 0.8.0
+
+### New Features
+- **Pre-built wxWidgets Library Integration**: Major build system enhancement with pre-built wxWidgets libraries
+  - Reduced build times from 20-30 minutes to seconds (99%+ improvement)
+  - macOS debug/release builds: ~5 seconds
+  - Windows cross-compilation: ~17 seconds 
+  - Automatic download of pre-built libraries from GitHub releases
+  - Support for both debug and release configurations
+  - Maintains full functionality with pre-built libraries
+
+### Enhancements
+- **Cross-Platform Build System**: Comprehensive build system improvements for all platforms
+  - Enhanced Windows MSVC build support with proper Visual Studio integration
+  - Improved MSYS2/MinGW64 build compatibility with static linking
+  - Fixed cross-compilation from macOS to Windows
+  - Unified library naming conventions and paths across platforms
+  - Complete static linking support for Windows builds with dependency-free executables
+- **CI/CD Improvements**: Extensive GitHub Actions workflow enhancements
+  - Automated pre-built wxWidgets library generation for all platforms
+  - Support for both debug and release library builds
+  - Improved artifact packaging and distribution
+  - Enhanced build diagnostics and error reporting
+
+### Bug Fixes
+- **Windows Build Fixes**: Resolved multiple Windows-specific build issues
+  - Fixed MSVC setup.h include path issues and Unicode definitions
+  - Resolved library placement and organization for Windows builds
+  - Fixed cmake path detection for cross-platform CI compatibility
+  - Corrected MSVC runtime linking based on build profile
+- **Static Linking**: Complete static linking implementation for Windows
+  - Resolved C++ standard library linking conflicts in MSYS2/MinGW64
+  - Fixed missing std::basic_streambuf symbols
+  - Added comprehensive static linking flags for all C++ runtime libraries
+
+## 0.7.1
+
+### New Features
+- **GenericStaticBitmap Widget**: Added GenericStaticBitmap widget for enhanced cross-platform compatibility
+  - Platform-aware StaticBitmap handling in XRC files
+  - Automatic use of wxGenericStaticBitmap on Windows for better rendering consistency
+  - Native wxStaticBitmap on other platforms for optimal performance
+  - Seamless integration with existing StaticBitmap API
+
+### Enhancements
+- **Platform-Aware XRC Handling**: Enhanced XRC system with platform-specific widget selection
+  - Intelligent StaticBitmap implementation selection based on target platform
+  - Improved cross-platform rendering consistency
+  - Better support for complex UI layouts across different operating systems
+
+### Bug Fixes
+- **Windows Build**: Fixed Windows build compatibility issues
+- **XRC Integration**: Resolved StaticBitmap rendering issues in XRC-loaded interfaces
+
+## 0.7.0
+
+### New Features
+- **Enhanced Build System**: Initial groundwork for pre-built library support
+- **Cross-Platform Improvements**: Better support for Windows and cross-compilation scenarios
+
 ## 0.6.8
 
 ### New Features
