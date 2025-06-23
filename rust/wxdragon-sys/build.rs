@@ -123,23 +123,13 @@ fn main() {
     }
 
     // Add platform-specific headers
-    if target_os == "windows" && target_env == "msvc" {
-        // For Windows MSVC, the include/msvc/wx/setup.h has broken relative includes
-        // Use the working setup.h from include/wx/msw instead
+    if target_os == "windows" {
+        // For both Windows MSVC and GNU builds, use the working setup.h from include/wx/msw
+        // This avoids issues with broken relative includes in platform-specific setup.h files
         let msw_include = wx_lib_dir.join("include").join("wx").join("msw");
         if msw_include.exists() {
             bindings_builder = bindings_builder.clang_arg(format!("-I{}", msw_include.display()));
-            println!("info: Added Windows MSVC alternative include path: {}", msw_include.display());
-        }
-    } else if target_os == "windows" && target_env == "gnu" {
-        // For Windows GNU, look for the appropriate setup path based on build profile
-        let gcc_lib_dir = wx_lib_dir.join("gcc_x64_lib");
-        let setup_subdir = if profile == "debug" { "mswud" } else { "mswu" };
-        let gcc_setup_dir = gcc_lib_dir.join(setup_subdir);
-        
-        if gcc_setup_dir.exists() {
-            bindings_builder = bindings_builder.clang_arg(format!("-I{}", gcc_setup_dir.display()));
-            println!("info: Added Windows GNU setup include path: {}", gcc_setup_dir.display());
+            println!("info: Added Windows setup include path: {}", msw_include.display());
         }
     } else if target_os == "macos" {
         // For macOS, look for the platform-specific paths

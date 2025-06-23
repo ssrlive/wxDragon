@@ -202,33 +202,14 @@ if(PLATFORM_NAME STREQUAL "macos")
         endif()
     endforeach()
 elseif(PLATFORM_NAME STREQUAL "windows")
-    # For Windows, check the actual pre-built library structure
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_GENERATOR MATCHES "Visual Studio")
-        # For MSVC builds, the include/msvc/wx/setup.h tries to include files that don't exist
-        # in the pre-built package structure. Use the working setup.h from include/wx/msw instead.
-        set(WX_MSVC_SETUP_DIR "${WXWIDGETS_LIB_DIR}/include/wx/msw")
-        if(EXISTS "${WX_MSVC_SETUP_DIR}/setup.h")
-            # We need to add this as an additional include path for setup.h
-            list(APPEND WX_INCLUDE_PATHS "${WXWIDGETS_LIB_DIR}/include/wx/msw")
-            message(STATUS "Found Windows MSVC setup.h at: ${WX_MSVC_SETUP_DIR}")
-        else()
-            message(WARNING "MSVC setup.h not found at: ${WX_MSVC_SETUP_DIR}/setup.h")
-        endif()
+    # For both Windows MSVC and GNU builds, use the working setup.h from include/wx/msw
+    # This avoids issues with broken relative includes in platform-specific setup.h files
+    set(WX_WINDOWS_SETUP_DIR "${WXWIDGETS_LIB_DIR}/include/wx/msw")
+    if(EXISTS "${WX_WINDOWS_SETUP_DIR}/setup.h")
+        list(APPEND WX_INCLUDE_PATHS "${WX_WINDOWS_SETUP_DIR}")
+        message(STATUS "Found Windows setup.h at: ${WX_WINDOWS_SETUP_DIR}")
     else()
-        # For MinGW/GNU builds, check for MinGW-specific paths
-        # Path depends on build type: mswu for release, mswud for debug
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(WX_GNU_SETUP_DIR "${WXWIDGETS_LIB_DIR}/gcc_x64_lib/mswud")
-        else()
-            set(WX_GNU_SETUP_DIR "${WXWIDGETS_LIB_DIR}/gcc_x64_lib/mswu")
-        endif()
-        
-        if(EXISTS "${WX_GNU_SETUP_DIR}/wx/setup.h")
-            list(APPEND WX_INCLUDE_PATHS "${WX_GNU_SETUP_DIR}")
-            message(STATUS "Found Windows GNU-specific headers: ${WX_GNU_SETUP_DIR}")
-        else()
-            message(WARNING "GNU setup.h not found at: ${WX_GNU_SETUP_DIR}/wx/setup.h")
-        endif()
+        message(WARNING "Windows setup.h not found at: ${WX_WINDOWS_SETUP_DIR}/setup.h")
     endif()
 elseif(PLATFORM_NAME STREQUAL "linux")
     # For Linux, check multiple possible locations for setup.h
