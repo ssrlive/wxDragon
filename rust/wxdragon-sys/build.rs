@@ -240,6 +240,24 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     // Add library search path
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
+    
+    // Debug: Show what libraries are actually available in the directory
+    if lib_dir.exists() {
+        println!("info: Library directory exists: {}", lib_dir.display());
+        if let Ok(entries) = std::fs::read_dir(&lib_dir) {
+            let mut lib_files: Vec<String> = Vec::new();
+            for entry in entries.flatten() {
+                let file_name = entry.file_name().to_string_lossy().to_string();
+                if file_name.ends_with(".a") || file_name.ends_with(".lib") {
+                    lib_files.push(file_name);
+                }
+            }
+            lib_files.sort();
+            println!("info: Available library files: {:?}", lib_files);
+        }
+    } else {
+        println!("cargo:warning=Library directory does not exist: {}", lib_dir.display());
+    }
 
     // Link wxdragon wrapper library (will be built separately or included in pre-built package)
     println!("cargo:rustc-link-lib=static=wxdragon");
@@ -332,6 +350,9 @@ fn link_windows_libraries(target_env: &str) {
     // Determine if we need debug suffix based on build profile
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
     let debug_suffix = if profile == "debug" { "d" } else { "" };
+    
+    println!("info: Windows library linking - Profile: {}, Debug suffix: '{}'", profile, debug_suffix);
+    println!("info: Target env: {}, Cross-compilation: {}", target_env, is_macos_to_windows_gnu);
 
     // For Windows GNU (both native and cross-compilation), use the actual library names from pre-built packages
     // Core wxWidgets libraries
