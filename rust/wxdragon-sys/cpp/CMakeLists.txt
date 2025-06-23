@@ -28,11 +28,9 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
     # Define WXD_TARGET_WINDOWS for cross-compilation support in platform-aware components
     add_compile_definitions(WXD_TARGET_WINDOWS __WXMSW__ _FILE_OFFSET_BITS=64 wxUSE_UNICODE=1 NDEBUG)
     
-    # Additional MSVC-specific Unicode definitions
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_GENERATOR MATCHES "Visual Studio")
-        add_compile_definitions(UNICODE _UNICODE)
-        message(STATUS "Added MSVC Unicode definitions")
-    endif()
+    # Windows requires UNICODE and _UNICODE for both MSVC and MinGW/GNU builds
+    add_compile_definitions(UNICODE _UNICODE)
+    message(STATUS "Added Windows Unicode definitions for all compilers")
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     message(STATUS "Building for Linux")
