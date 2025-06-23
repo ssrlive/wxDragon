@@ -60,6 +60,6 @@ jobs:
           C:\mingw64\mingw64\bin\g++.exe --version
           echo %PATH%
 
-            - name: Build
+      - name: Build
         shell: cmd
         run: cargo build --release
