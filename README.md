@@ -161,11 +161,11 @@ sudo dnf install clang-devel pkg-config gtk3-devel libpng-devel libjpeg-devel me
 - Visual Studio Build Tools or Visual Studio with C++ support
 - Windows SDK
 - Ninja build system: `winget install --id=Ninja-build.Ninja -e`
-- **[REQUIRED] WinLibs GCC 15.1.0 UCRT toolchain** (must match the version used for prebuilt wxWidgets libraries)
+- **[REQUIRED for MinGW builds] WinLibs GCC 15.1.0 UCRT toolchain** (must match the version used for prebuilt wxWidgets libraries)
 
-> ⚠️ **Important:** You must use the exact same MinGW/WinLibs GCC version as the prebuilt wxWidgets libraries (GCC 15.1.0 UCRT, WinLibs). Mismatched toolchains will cause linker errors for C++ symbols. Download from: https://github.com/brechtsanders/winlibs_mingw/releases/tag/15.1.0posix-13.0.0-ucrt-r2
+> ⚠️ **Important:** You must use the exact same MinGW/WinLibs GCC version as the prebuilt wxWidgets libraries (GCC 15.1.0 UCRT, WinLibs) for MinGW builds. Mismatched toolchains will cause linker errors for C++ symbols. Download from: https://github.com/brechtsanders/winlibs_mingw/releases/tag/15.1.0posix-13.0.0-ucrt-r2
 
-**Install WinLibs GCC 15.1.0 UCRT:**
+**Install WinLibs GCC 15.1.0 UCRT (for MinGW builds):**
 1. Download the release from [WinLibs GCC 15.1.0 UCRT](https://github.com/brechtsanders/winlibs_mingw/releases/tag/15.1.0posix-13.0.0-ucrt-r2)
 2. Extract to `C:\mingw64` (or another directory)
 3. Add `C:\mingw64\mingw64\bin` to your `PATH`
@@ -173,6 +173,28 @@ sudo dnf install clang-devel pkg-config gtk3-devel libpng-devel libjpeg-devel me
    ```bash
    setx CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER "C:\mingw64\mingw64\bin\gcc.exe"
    ```
+
+> **Note:**
+> When building on Windows with MinGW/WinLibs, always use a regular Windows shell (such as `cmd.exe` or PowerShell), **not** an MSYS2 shell. Using MSYS2 may cause your build to use the wrong GCC toolchain, resulting in linker errors due to ABI mismatches.
+>
+> The wxDragon CI is configured to use WinLibs GCC 15.1.0 UCRT in a Windows shell for all Windows GNU builds, ensuring ABI compatibility with the prebuilt wxWidgets libraries.
+
+### Building with MSVC on Windows
+
+**Prerequisites:**
+- Visual Studio 2019 or later (Community/Professional/Build Tools)
+- Windows 10 or 11 SDK
+- CMake
+
+**Instructions:**
+1. Open a "x64 Native Tools Command Prompt for VS 2019/2022" (or use the Developer PowerShell)
+2. Ensure `cl.exe` and `cmake.exe` are in your `PATH`
+3. Build your project:
+   ```bash
+   cargo build
+   ```
+
+> MSVC builds do **not** require the WinLibs toolchain. wxDragon will automatically use the correct prebuilt wxWidgets libraries for MSVC.
 
 ### Building Your Project
 

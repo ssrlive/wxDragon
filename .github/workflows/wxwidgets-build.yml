@@ -411,12 +411,12 @@ jobs:
           # Create tarball
           cd dist
           ARTIFACT_NAME="wxwidgets-${{ inputs.wx_version }}-${{ matrix.target }}-$(echo "${{ matrix.build_type }}" | tr '[:upper:]' '[:lower:]')"
-          mkdir -p "dist/${ARTIFACT_NAME}"
-          cp -r "${{ matrix.target }}-${{ matrix.build_type }}"/* "dist/${ARTIFACT_NAME}/"
-          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}/"
+          mv "${{ matrix.target }}-${{ matrix.build_type }}" "${ARTIFACT_NAME}"
+          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}"
           
           # Verify tarball
-          echo "Created tarball: $(ls -lh $ARTIFACT_NAME.tar.gz)"
+          echo "Created tarball: $(ls -lh ${ARTIFACT_NAME}.tar.gz)"
+          cd ..
           
       - name: Package libraries (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
@@ -464,12 +464,12 @@ jobs:
           # Create tarball
           cd dist
           ARTIFACT_NAME="wxwidgets-${{ inputs.wx_version }}-${{ matrix.target }}-$(echo "${{ matrix.build_type }}" | tr '[:upper:]' '[:lower:]')"
-          mkdir -p "dist/${ARTIFACT_NAME}"
-          cp -r "${{ matrix.target }}-${{ matrix.build_type }}"/* "dist/${ARTIFACT_NAME}/"
-          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}/"
+          mv "${{ matrix.target }}-${{ matrix.build_type }}" "${ARTIFACT_NAME}"
+          tar -czf "${ARTIFACT_NAME}.tar.gz" "${ARTIFACT_NAME}"
           
           # Verify tarball
-          echo "Created tarball: $(ls -lh $ARTIFACT_NAME.tar.gz)"
+          echo "Created tarball: $(ls -lh ${ARTIFACT_NAME}.tar.gz)"
+          cd ..
 
       - name: Upload artifact for review
         if: steps.check_release.outputs.skip_build != 'true'
