@@ -221,21 +221,22 @@ fn download_prebuilt_libraries(
 
 fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
-    // Get the pre-built library directory
+    // Get the pre-built library directory (same naming as download_prebuilt_libraries)
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => "wxwidgets-linux-x64",
-        ("macos", "x86_64", _) => "wxwidgets-macos-x64",
-        ("macos", "aarch64", _) => "wxwidgets-macos-arm64",
-        ("windows", "x86_64", "msvc") => "wxwidgets-windows-msvc-x64",
-        ("windows", "x86_64", "gnu") => "wxwidgets-windows-gnu-x64",
+        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{}", profile),
+        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
+        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
         _ => panic!(
             "Unsupported target platform: {}-{}-{}",
             target_os, target_arch, target_env
         ),
     };
 
-    let lib_dir = out_dir.join(artifact_name);
+    let lib_dir = out_dir.join(&artifact_name);
 
     // Add library search path
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
@@ -327,43 +328,47 @@ fn link_macos_libraries() {
 fn link_windows_libraries(target_env: &str) {
     // Check if this is cross-compilation from macOS to Windows GNU
     let is_macos_to_windows_gnu = cfg!(target_os = "macos") && target_env == "gnu";
+    
+    // Determine if we need debug suffix based on build profile
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+    let debug_suffix = if profile == "debug" { "d" } else { "" };
 
     // For Windows GNU (both native and cross-compilation), use the actual library names from pre-built packages
     // Core wxWidgets libraries
-    println!("cargo:rustc-link-lib=static=wxmsw33u_core");
-    println!("cargo:rustc-link-lib=static=wxmsw33u_adv");
-    println!("cargo:rustc-link-lib=static=wxbase33u");
-    println!("cargo:rustc-link-lib=static=wxmsw33u_gl");
-    println!("cargo:rustc-link-lib=static=wxmsw33u_propgrid");
-    println!("cargo:rustc-link-lib=static=wxmsw33u_html");
+    println!("cargo:rustc-link-lib=static=wxmsw33u{}_core", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxmsw33u{}_adv", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxbase33u{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxmsw33u{}_gl", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxmsw33u{}_propgrid", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxmsw33u{}_html", debug_suffix);
 
     // Conditional feature libraries
     if cfg!(feature = "aui") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u_aui");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{}_aui", debug_suffix);
     }
     if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u_media");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{}_media", debug_suffix);
     }
     if cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u_webview");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{}_webview", debug_suffix);
     }
     if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u_stc");
-        println!("cargo:rustc-link-lib=static=wxscintilla");
-        println!("cargo:rustc-link-lib=static=wxlexilla");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{}_stc", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxscintilla{}", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxlexilla{}", debug_suffix);
     }
     if cfg!(feature = "xrc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u_xrc");
-        println!("cargo:rustc-link-lib=static=wxbase33u_xml");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{}_xrc", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxbase33u{}_xml", debug_suffix);
     }
 
     // Third-party libraries (using the actual names from pre-built packages)
-    println!("cargo:rustc-link-lib=static=wxtiff");
-    println!("cargo:rustc-link-lib=static=wxjpeg");
-    println!("cargo:rustc-link-lib=static=wxpng");
-    println!("cargo:rustc-link-lib=static=wxregexu");
-    println!("cargo:rustc-link-lib=static=wxzlib");
-    println!("cargo:rustc-link-lib=static=wxexpat");
+    println!("cargo:rustc-link-lib=static=wxtiff{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxjpeg{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxpng{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxregexu{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxzlib{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxexpat{}", debug_suffix);
 
     // Runtime libraries
     if target_env == "gnu" {
@@ -579,13 +584,14 @@ fn build_wxdragon_wrapper(
     
     println!("info: Building wxDragon wrapper library in {} mode", build_type);
 
-    // Get the pre-built wxWidgets library directory
+    // Get the pre-built wxWidgets library directory (same naming as download_prebuilt_libraries)
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => "wxwidgets-linux-x64",
-        ("macos", "x86_64", _) => "wxwidgets-macos-x64",
-        ("macos", "aarch64", _) => "wxwidgets-macos-arm64",
-        ("windows", "x86_64", "msvc") => "wxwidgets-windows-msvc-x64",
-        ("windows", "x86_64", "gnu") => "wxwidgets-windows-gnu-x64",
+        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{}", profile),
+        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
+        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
         _ => {
             return Err(format!(
                 "Unsupported target platform: {}-{}-{}",
@@ -690,6 +696,12 @@ fn build_wxdragon_wrapper(
         } else {
             wx_lib_dir.join("libwxdragon.a")
         };
+        
+        // Ensure destination directory exists
+        if let Some(parent) = dest.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        
         std::fs::copy(&library_path, &dest)?;
         println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
@@ -707,7 +719,7 @@ fn build_wxdragon_wrapper(
         .unwrap_or_else(|_| Path::new("rust/wxdragon-sys/cpp").to_path_buf());
 
     // Prepare CMake command
-    let mut cmake_cmd = std::process::Command::new("cmake");
+    let mut cmake_cmd = std::process::Command::new("/opt/homebrew/bin/cmake");
     
     cmake_cmd
         .current_dir(&wrapper_build_dir)
@@ -861,7 +873,7 @@ fn build_wxdragon_wrapper(
     }
 
     // Build
-    let mut build_cmd = std::process::Command::new("cmake");
+    let mut build_cmd = std::process::Command::new("/opt/homebrew/bin/cmake");
     build_cmd
         .current_dir(&wrapper_build_dir)
         .arg("--build")
@@ -1014,6 +1026,12 @@ fn build_wxdragon_wrapper(
     } else {
         wx_lib_dir.join("libwxdragon.a")
     };
+    
+    // Ensure destination directory exists
+    if let Some(parent) = dest.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    
     std::fs::copy(&library_path, &dest)?;
     println!("info: Successfully built wxDragon wrapper library at {:?}", library_path);
 
