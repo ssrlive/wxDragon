@@ -1151,9 +1151,21 @@ fn build_wxdragon_wrapper(
         }
     };
     
-    let dest = if target_env == "msvc" {
-        wx_lib_dir.join("wxdragon.lib")
+    let dest = if target_os == "windows" {
+        // For Windows, copy to the platform-specific subdirectory where the linker expects it
+        let platform_lib_dir = match target_env {
+            "msvc" => wx_lib_dir.join("vc_x64_lib"),
+            "gnu" => wx_lib_dir.join("gcc_x64_lib"),
+            _ => wx_lib_dir,
+        };
+        
+        if target_env == "msvc" {
+            platform_lib_dir.join("wxdragon.lib")
+        } else {
+            platform_lib_dir.join("libwxdragon.a")
+        }
     } else {
+        // For non-Windows platforms, use the root directory
         wx_lib_dir.join("libwxdragon.a")
     };
     
