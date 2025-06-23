@@ -718,8 +718,13 @@ fn build_wxdragon_wrapper(
         .map(|manifest_dir| Path::new(&manifest_dir).join("cpp"))
         .unwrap_or_else(|_| Path::new("rust/wxdragon-sys/cpp").to_path_buf());
 
-    // Prepare CMake command
-    let mut cmake_cmd = std::process::Command::new("/opt/homebrew/bin/cmake");
+    // Prepare CMake command - use dynamic cmake detection
+    let cmake_executable = if cfg!(target_os = "macos") && std::path::Path::new("/opt/homebrew/bin/cmake").exists() {
+        "/opt/homebrew/bin/cmake"
+    } else {
+        "cmake" // Use cmake from PATH on other systems
+    };
+    let mut cmake_cmd = std::process::Command::new(cmake_executable);
     
     cmake_cmd
         .current_dir(&wrapper_build_dir)
@@ -873,7 +878,7 @@ fn build_wxdragon_wrapper(
     }
 
     // Build
-    let mut build_cmd = std::process::Command::new("/opt/homebrew/bin/cmake");
+    let mut build_cmd = std::process::Command::new(cmake_executable);
     build_cmd
         .current_dir(&wrapper_build_dir)
         .arg("--build")
