@@ -202,14 +202,20 @@ if(PLATFORM_NAME STREQUAL "macos")
         endif()
     endforeach()
 elseif(PLATFORM_NAME STREQUAL "windows")
-    # For both Windows MSVC and GNU builds, use the working setup.h from include/wx/msw
-    # This avoids issues with broken relative includes in platform-specific setup.h files
-    set(WX_WINDOWS_SETUP_DIR "${WXWIDGETS_LIB_DIR}/include/wx/msw")
-    if(EXISTS "${WX_WINDOWS_SETUP_DIR}/setup.h")
-        list(APPEND WX_INCLUDE_PATHS "${WX_WINDOWS_SETUP_DIR}")
-        message(STATUS "Found Windows setup.h at: ${WX_WINDOWS_SETUP_DIR}")
+    # For Windows builds, ensure setup.h is available at the expected location
+    # Copy from the working setup.h in include/wx/msw to include/wx if needed
+    set(WX_MSW_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/msw/setup.h")
+    set(WX_TARGET_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/setup.h")
+    
+    if(EXISTS "${WX_MSW_SETUP}" AND NOT EXISTS "${WX_TARGET_SETUP}")
+        file(COPY "${WX_MSW_SETUP}" DESTINATION "${WXWIDGETS_LIB_DIR}/include/wx/")
+        message(STATUS "Copied Windows setup.h from msw to wx directory")
+    endif()
+    
+    if(EXISTS "${WX_TARGET_SETUP}")
+        message(STATUS "Windows setup.h available at: ${WX_TARGET_SETUP}")
     else()
-        message(WARNING "Windows setup.h not found at: ${WX_WINDOWS_SETUP_DIR}/setup.h")
+        message(WARNING "Windows setup.h not found at expected location")
     endif()
 elseif(PLATFORM_NAME STREQUAL "linux")
     # For Linux, check multiple possible locations for setup.h

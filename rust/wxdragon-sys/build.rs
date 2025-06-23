@@ -124,12 +124,17 @@ fn main() {
 
     // Add platform-specific headers
     if target_os == "windows" {
-        // For both Windows MSVC and GNU builds, use the working setup.h from include/wx/msw
-        // This avoids issues with broken relative includes in platform-specific setup.h files
-        let msw_include = wx_lib_dir.join("include").join("wx").join("msw");
-        if msw_include.exists() {
-            bindings_builder = bindings_builder.clang_arg(format!("-I{}", msw_include.display()));
-            println!("info: Added Windows setup include path: {}", msw_include.display());
+        // For Windows builds, copy the working setup.h from include/wx/msw/setup.h to include/wx/setup.h
+        // This allows wx/platform.h to find wx/setup.h via relative include
+        let msw_setup = wx_lib_dir.join("include").join("wx").join("msw").join("setup.h");
+        let target_setup = wx_lib_dir.join("include").join("wx").join("setup.h");
+        
+        if msw_setup.exists() && !target_setup.exists() {
+            if let Err(e) = std::fs::copy(&msw_setup, &target_setup) {
+                println!("cargo:warning=Failed to copy setup.h: {}", e);
+            } else {
+                println!("info: Copied Windows setup.h from msw to wx directory");
+            }
         }
     } else if target_os == "macos" {
         // For macOS, look for the platform-specific paths
