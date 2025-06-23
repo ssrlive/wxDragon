@@ -78,6 +78,94 @@ fn main() {
 
     bindings_builder = bindings_builder.clang_arg(format!("--target={}", target));
 
+    // Skip library setup for docs.rs and rust-analyzer
+    if env::var("DOCS_RS").is_ok() || env::var("RUST_ANALYZER") == Ok("true".to_string()) {
+        let bindings = bindings_builder
+            .generate()
+            .expect("Unable to generate bindings");
+
+        bindings
+            .write_to_file(out_dir.join("bindings.rs"))
+            .expect("Couldn't write bindings!");
+
+        println!("info: Successfully generated FFI bindings");
+        return;
+    }
+
+    // --- 2. Download and Setup Pre-built Libraries ---
+    let wx_version = "3.3.0";
+
+    download_prebuilt_libraries(wx_version, &out_dir, &target_os, &target_env)
+        .expect("Failed to download pre-built wxWidgets libraries");
+
+    // --- 3. Add wxWidgets Include Paths to Bindgen ---
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+
+    let artifact_name = match (target_os.as_str(), target_arch.as_str(), target_env.as_str()) {
+        ("linux", "x86_64", _) => format!("wxwidgets-{}-linux-x64-{}", wx_version, profile),
+        ("macos", "x86_64", _) => format!("wxwidgets-{}-macos-x64-{}", wx_version, profile),
+        ("macos", "aarch64", _) => format!("wxwidgets-{}-macos-arm64-{}", wx_version, profile),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile),
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile),
+        _ => {
+            panic!("Unsupported target platform: {}-{}-{}", target_os, target_arch, target_env);
+        }
+    };
+
+    let wx_lib_dir = out_dir.join(&artifact_name);
+    
+    // Add main wxWidgets headers
+    let wx_main_include = wx_lib_dir.join("include");
+    if wx_main_include.exists() {
+        bindings_builder = bindings_builder.clang_arg(format!("-I{}", wx_main_include.display()));
+        println!("info: Added wxWidgets main include path: {}", wx_main_include.display());
+    }
+
+    // Add platform-specific headers
+    if target_os == "windows" && target_env == "msvc" {
+        // For Windows MSVC, add the specific MSVC include path
+        let msvc_include = wx_lib_dir.join("include").join("msvc");
+        if msvc_include.exists() {
+            bindings_builder = bindings_builder.clang_arg(format!("-I{}", msvc_include.display()));
+            println!("info: Added Windows MSVC include path: {}", msvc_include.display());
+        }
+    } else if target_os == "windows" && target_env == "gnu" {
+        // For Windows GNU, look for the appropriate setup path based on build profile
+        let gcc_lib_dir = wx_lib_dir.join("gcc_x64_lib");
+        let setup_subdir = if profile == "debug" { "mswud" } else { "mswu" };
+        let gcc_setup_dir = gcc_lib_dir.join(setup_subdir);
+        
+        if gcc_setup_dir.exists() {
+            bindings_builder = bindings_builder.clang_arg(format!("-I{}", gcc_setup_dir.display()));
+            println!("info: Added Windows GNU setup include path: {}", gcc_setup_dir.display());
+        }
+    } else if target_os == "macos" {
+        // For macOS, look for the platform-specific paths
+        let osx_setup_dirs = vec![
+            wx_lib_dir.join("lib").join("wx").join("include").join("osx_cocoa-unicode-static-3.3"),
+        ];
+        for setup_dir in osx_setup_dirs {
+            if setup_dir.exists() {
+                bindings_builder = bindings_builder.clang_arg(format!("-I{}", setup_dir.display()));
+                println!("info: Added macOS setup include path: {}", setup_dir.display());
+                break;
+            }
+        }
+    } else if target_os == "linux" {
+        // For Linux, look for GTK-specific paths
+        let gtk_setup_dirs = vec![
+            wx_lib_dir.join("lib").join("wx").join("include").join("gtk3-unicode-static-3.3"),
+        ];
+        for setup_dir in gtk_setup_dirs {
+            if setup_dir.exists() {
+                bindings_builder = bindings_builder.clang_arg(format!("-I{}", setup_dir.display()));
+                println!("info: Added Linux GTK setup include path: {}", setup_dir.display());
+                break;
+            }
+        }
+    }
+
     let bindings = bindings_builder
         .generate()
         .expect("Unable to generate bindings");
@@ -88,22 +176,11 @@ fn main() {
 
     println!("info: Successfully generated FFI bindings");
 
-    // Skip library setup for docs.rs and rust-analyzer
-    if env::var("DOCS_RS").is_ok() || env::var("RUST_ANALYZER") == Ok("true".to_string()) {
-        return;
-    }
-
-    // --- 2. Download and Setup Pre-built Libraries ---
-    let wx_version = "3.3.0";
-
-    download_prebuilt_libraries(wx_version, &out_dir, &target_os, &target_env)
-        .expect("Failed to download pre-built wxWidgets libraries");
-
-    // --- 3. Build wxDragon Wrapper ---
+    // --- 4. Build wxDragon Wrapper ---
     build_wxdragon_wrapper(&out_dir, &target_os, &target_env)
         .expect("Failed to build wxDragon wrapper library");
 
-    // --- 4. Setup Linking ---
+    // --- 5. Setup Linking ---
     setup_linking(&target_os, &target_env, &out_dir);
 }
 

@@ -199,18 +199,31 @@ if(PLATFORM_NAME STREQUAL "macos")
     endforeach()
 elseif(PLATFORM_NAME STREQUAL "windows")
     # For Windows, check the actual pre-built library structure
-    set(WX_PLATFORM_DIRS_TO_CHECK
-        "${WXWIDGETS_LIB_DIR}/mswu"
-        "${WXWIDGETS_LIB_DIR}/msw-unicode-static-3.3"
-        "${WXWIDGETS_LIB_DIR}/wx/include/msw-unicode-static-3.3"
-    )
-    foreach(dir IN LISTS WX_PLATFORM_DIRS_TO_CHECK)
-        if(EXISTS "${dir}/wx/setup.h")
-            list(APPEND WX_INCLUDE_PATHS "${dir}")
-            message(STATUS "Found Windows-specific headers: ${dir}")
-            break()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_GENERATOR MATCHES "Visual Studio")
+        # For MSVC builds, check the MSVC-specific include path
+        set(WX_MSVC_INCLUDE_DIR "${WXWIDGETS_LIB_DIR}/include/msvc")
+        if(EXISTS "${WX_MSVC_INCLUDE_DIR}/wx/setup.h")
+            list(APPEND WX_INCLUDE_PATHS "${WX_MSVC_INCLUDE_DIR}")
+            message(STATUS "Found Windows MSVC-specific headers: ${WX_MSVC_INCLUDE_DIR}")
+        else()
+            message(WARNING "MSVC setup.h not found at: ${WX_MSVC_INCLUDE_DIR}/wx/setup.h")
         endif()
-    endforeach()
+    else()
+        # For MinGW/GNU builds, check for MinGW-specific paths
+        # Path depends on build type: mswu for release, mswud for debug
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(WX_GNU_SETUP_DIR "${WXWIDGETS_LIB_DIR}/gcc_x64_lib/mswud")
+        else()
+            set(WX_GNU_SETUP_DIR "${WXWIDGETS_LIB_DIR}/gcc_x64_lib/mswu")
+        endif()
+        
+        if(EXISTS "${WX_GNU_SETUP_DIR}/wx/setup.h")
+            list(APPEND WX_INCLUDE_PATHS "${WX_GNU_SETUP_DIR}")
+            message(STATUS "Found Windows GNU-specific headers: ${WX_GNU_SETUP_DIR}")
+        else()
+            message(WARNING "GNU setup.h not found at: ${WX_GNU_SETUP_DIR}/wx/setup.h")
+        endif()
+    endif()
 elseif(PLATFORM_NAME STREQUAL "linux")
     # For Linux, check multiple possible locations for setup.h
     set(WX_PLATFORM_DIRS_TO_CHECK
