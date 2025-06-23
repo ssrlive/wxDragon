@@ -206,14 +206,14 @@ cd my-gui-app
 # Add wxdragon to Cargo.toml
 cargo add wxdragon
 
-# Build (wxWidgets will be downloaded and built automatically)
+# Build (pre-built wxWidgets libraries will be downloaded automatically)
 cargo build
 
 # Run
 cargo run
 ```
 
-wxDragon automatically downloads and builds wxWidgets during the first compilation. No manual wxWidgets installation required!
+wxDragon automatically downloads pre-built wxWidgets libraries during the first compilation, reducing build times from 20+ minutes to under 3 minutes. No manual wxWidgets installation required!
 
 ### Cross-Compilation (macOS → Windows)
 
