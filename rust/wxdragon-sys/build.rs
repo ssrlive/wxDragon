@@ -216,6 +216,18 @@ fn download_prebuilt_libraries(
         "info: Successfully extracted pre-built libraries to {:?}",
         extracted_path
     );
+    
+    // Debug: List what was actually extracted
+    if let Ok(entries) = std::fs::read_dir(&extracted_path) {
+        let mut files: Vec<String> = Vec::new();
+        for entry in entries.flatten() {
+            let file_name = entry.file_name().to_string_lossy().to_string();
+            files.push(file_name);
+        }
+        files.sort();
+        println!("info: Extracted files: {:?}", files);
+    }
+    
     Ok(())
 }
 
@@ -237,14 +249,21 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
     };
 
     let lib_dir = out_dir.join(&artifact_name);
+    
+    // For Windows GNU, libraries are in the gcc_x64_lib subdirectory
+    let actual_lib_dir = if target_os == "windows" && target_env == "gnu" {
+        lib_dir.join("gcc_x64_lib")
+    } else {
+        lib_dir
+    };
 
     // Add library search path
-    println!("cargo:rustc-link-search=native={}", lib_dir.display());
+    println!("cargo:rustc-link-search=native={}", actual_lib_dir.display());
     
     // Debug: Show what libraries are actually available in the directory
-    if lib_dir.exists() {
-        println!("info: Library directory exists: {}", lib_dir.display());
-        if let Ok(entries) = std::fs::read_dir(&lib_dir) {
+    if actual_lib_dir.exists() {
+        println!("info: Library directory exists: {}", actual_lib_dir.display());
+        if let Ok(entries) = std::fs::read_dir(&actual_lib_dir) {
             let mut lib_files: Vec<String> = Vec::new();
             for entry in entries.flatten() {
                 let file_name = entry.file_name().to_string_lossy().to_string();
@@ -256,7 +275,7 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
             println!("info: Available library files: {:?}", lib_files);
         }
     } else {
-        println!("cargo:warning=Library directory does not exist: {}", lib_dir.display());
+        println!("cargo:warning=Library directory does not exist: {}", actual_lib_dir.display());
     }
 
     // Link wxdragon wrapper library (will be built separately or included in pre-built package)
