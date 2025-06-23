@@ -494,8 +494,17 @@ fn link_windows_libraries(target_env: &str) {
             }
         }
     } else {
-        // MSVC builds
-        println!("cargo:rustc-link-lib=msvcrt");
+        // MSVC builds - use appropriate runtime based on build profile
+        let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+        if profile == "debug" {
+            // Link debug runtime libraries for debug builds
+            println!("cargo:rustc-link-lib=msvcrtd");
+            println!("info: Using debug MSVC runtime (msvcrtd) for debug build");
+        } else {
+            // Link release runtime libraries for release builds
+            println!("cargo:rustc-link-lib=msvcrt");
+            println!("info: Using release MSVC runtime (msvcrt) for release build");
+        }
     }
 
     // Windows system libraries
