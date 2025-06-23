@@ -311,7 +311,13 @@ jobs:
           NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
           echo "Building with ${NPROC} parallel jobs"
           
-          cmake --build . --parallel ${NPROC}
+          # For Windows MSVC, we need to specify the config explicitly
+          if [ "${{ matrix.target }}" = "windows-msvc-x64" ]; then
+            echo "Building Windows MSVC with config: ${{ matrix.build_type }}"
+            cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
+          else
+            cmake --build . --parallel ${NPROC}
+          fi
           
       - name: Build wxWidgets (Windows GNU)
         if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
