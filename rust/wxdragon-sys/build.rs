@@ -578,14 +578,13 @@ fn build_wxdragon_wrapper(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
-    // Always build wrapper library in Release mode to match pre-built wxWidgets libraries
-    // This avoids Debug/Release runtime library mismatches on Windows MSVC
-    let build_type = "Release";
+    // Build wrapper library in the same mode as Cargo profile to match runtime libraries
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+    let build_type = if profile == "debug" { "Debug" } else { "Release" };
     
     println!("info: Building wxDragon wrapper library in {} mode", build_type);
 
     // Get the pre-built wxWidgets library directory (same naming as download_prebuilt_libraries)
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
         ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{}", profile),
         ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
