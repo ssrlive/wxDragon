@@ -330,20 +330,33 @@ jobs:
           # Create packaging directory
           mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}"
           
-          # Copy wxWidgets libraries
-          if [ -d "build/lib" ]; then
-            cp -r build/lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
-          fi
-          
-          # Copy additional platform-specific library directories
+          # Platform-specific library packaging
           case "${{ matrix.target }}" in
-            "windows-"*)
-              # Windows may have libraries in subdirectories
+            "windows-msvc-"*)
+              # Windows MSVC: organize libraries in vc_x64_lib subdirectory only
               if [ -d "build/lib/vc_x64_lib" ]; then
-                cp -r build/lib/vc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
+                mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_x64_lib"
+                # Copy only .lib files (no .pdb files for release builds)
+                if [ "${{ matrix.build_type }}" = "Release" ]; then
+                  find build/lib/vc_x64_lib -name "*.lib" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_x64_lib/" \;
+                  echo "Copied .lib files only (excluding .pdb files for release build)"
+                else
+                  cp -r build/lib/vc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_x64_lib/"
+                  echo "Copied all files including .pdb files for debug build"
+                fi
               fi
-              if [ -d "build/lib/gcc_x64_lib" ]; then
-                cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
+              # Copy additional files from root lib directory (excluding duplicates)
+              if [ -d "build/lib" ]; then
+                find build/lib -maxdepth 1 -name "*.lib" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_x64_lib/" \; 2>/dev/null || true
+                find build/lib -maxdepth 1 -name "*.exe" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+                find build/lib -maxdepth 1 -name "*.dll" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+                find build/lib -maxdepth 1 -name "*.cmake" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+              fi
+              ;;
+            *)
+              # Non-Windows platforms: copy everything from build/lib
+              if [ -d "build/lib" ]; then
+                cp -r build/lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
               fi
               ;;
           esac
@@ -424,15 +437,19 @@ jobs:
           # Create packaging directory
           mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}"
           
-          # Copy wxWidgets libraries
-          if [ -d "build/lib" ]; then
-            cp -r build/lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
+          # Windows GNU: organize libraries in gcc_x64_lib subdirectory only (no duplicates)
+          if [ -d "build/lib/gcc_x64_lib" ]; then
+            mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}/gcc_x64_lib"
+            cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/gcc_x64_lib/"
+            echo "Copied libraries to gcc_x64_lib subdirectory"
           fi
           
-          # Copy additional platform-specific library directories
-          # Windows GNU may have libraries in subdirectories
-          if [ -d "build/lib/gcc_x64_lib" ]; then
-            cp -r build/lib/gcc_x64_lib/* "dist/${{ matrix.target }}-${{ matrix.build_type }}/"
+          # Copy additional files from root lib directory (excluding library duplicates)
+          if [ -d "build/lib" ]; then
+            find build/lib -maxdepth 1 -name "*.exe" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+            find build/lib -maxdepth 1 -name "*.dll" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+            find build/lib -maxdepth 1 -name "*.cmake" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
+            echo "Copied additional files (exe, dll, cmake) to root directory"
           fi
           
           # Copy wxWidgets headers (source headers + generated headers)

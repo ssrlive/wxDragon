@@ -250,9 +250,13 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     let lib_dir = out_dir.join(&artifact_name);
     
-    // For Windows GNU, libraries are in the gcc_x64_lib subdirectory
-    let actual_lib_dir = if target_os == "windows" && target_env == "gnu" {
-        lib_dir.join("gcc_x64_lib")
+    // For Windows, libraries are in platform-specific subdirectories
+    let actual_lib_dir = if target_os == "windows" {
+        match target_env {
+            "gnu" => lib_dir.join("gcc_x64_lib"),
+            "msvc" => lib_dir.join("vc_x64_lib"),
+            _ => lib_dir,
+        }
     } else {
         lib_dir
     };
