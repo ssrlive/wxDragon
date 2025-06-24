@@ -468,8 +468,57 @@ typedef void wxd_Image_t;          // Added if not present
 typedef void wxd_ImageList_t;      // Added
 typedef struct wxd_Icon_t wxd_Icon_t; // Assuming this pattern from Bitmap_t
 
-// DataView opaque types
-// ... existing code ...
+// --- Cursor type ---
+typedef struct wxd_Cursor_t wxd_Cursor_t;
+
+// --- Cursor Stock Types ---
+typedef enum {
+    WXD_CURSOR_NONE = 0,
+    WXD_CURSOR_ARROW = 1,           // Standard arrow cursor
+    WXD_CURSOR_RIGHT_ARROW = 2,     // Standard arrow pointing right
+    WXD_CURSOR_BULLSEYE = 3,        // Bullseye cursor
+    WXD_CURSOR_CHAR = 4,            // Rectangular character cursor
+    WXD_CURSOR_CROSS = 5,           // Cross cursor
+    WXD_CURSOR_HAND = 6,            // Hand cursor
+    WXD_CURSOR_IBEAM = 7,           // I-beam cursor for text
+    WXD_CURSOR_LEFT_BUTTON = 8,     // Represents a left mouse button
+    WXD_CURSOR_MAGNIFIER = 9,       // Magnifying glass cursor
+    WXD_CURSOR_MIDDLE_BUTTON = 10,  // Represents a middle mouse button
+    WXD_CURSOR_NO_ENTRY = 11,       // No entry sign cursor
+    WXD_CURSOR_PAINT_BRUSH = 12,    // Paint brush cursor
+    WXD_CURSOR_PENCIL = 13,         // Pencil cursor
+    WXD_CURSOR_POINT_LEFT = 14,     // Cursor pointing left
+    WXD_CURSOR_POINT_RIGHT = 15,    // Cursor pointing right
+    WXD_CURSOR_QUESTION_ARROW = 16, // Question mark cursor
+    WXD_CURSOR_RIGHT_BUTTON = 17,   // Represents a right mouse button
+    WXD_CURSOR_SIZENESW = 18,       // Resize cursor NE-SW
+    WXD_CURSOR_SIZENS = 19,         // Resize cursor N-S
+    WXD_CURSOR_SIZENWSE = 20,       // Resize cursor NW-SE
+    WXD_CURSOR_SIZEWE = 21,         // Resize cursor W-E
+    WXD_CURSOR_SIZING = 22,         // General sizing cursor
+    WXD_CURSOR_SPRAYCAN = 23,       // Spray can cursor
+    WXD_CURSOR_WAIT = 24,           // Hourglass/spinning wheel cursor
+    WXD_CURSOR_WATCH = 25,          // Watch cursor
+    WXD_CURSOR_BLANK = 26,          // Invisible cursor
+    WXD_CURSOR_DEFAULT = 27,        // Default cursor for the platform
+    WXD_CURSOR_ARROWWAIT = 28,      // Arrow with small hourglass
+    WXD_CURSOR_MAX                  // Number of stock cursors
+} wxd_StockCursor;
+
+// --- Bitmap Types for Cursor Creation ---
+typedef enum {
+    WXD_BITMAP_TYPE_INVALID = 0,
+    WXD_BITMAP_TYPE_BMP = 1,
+    WXD_BITMAP_TYPE_ICO = 2,
+    WXD_BITMAP_TYPE_CUR = 3,
+    WXD_BITMAP_TYPE_XBM = 4,
+    WXD_BITMAP_TYPE_XPM = 5,
+    WXD_BITMAP_TYPE_PNG = 6,
+    WXD_BITMAP_TYPE_JPEG = 7,
+    WXD_BITMAP_TYPE_GIF = 8,
+    WXD_BITMAP_TYPE_ANI = 9,
+    WXD_BITMAP_TYPE_ANY = 50
+} wxd_BitmapType;
 
 // For wxd_TreeItemId_t, wxTreeItemId internally holds a void* m_pItem.
 // We will pass this void* directly as an opaque pointer type for Rust.

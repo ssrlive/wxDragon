@@ -54,4 +54,45 @@ WXD_EXPORTED int wxd_Window_GetBackgroundStyle(wxd_Window_t* window);
 WXD_EXPORTED void wxd_Window_SetExtraStyle(wxd_Window_t* window, int64_t exStyle);
 WXD_EXPORTED int64_t wxd_Window_GetExtraStyle(wxd_Window_t* window);
 
+// Color management functions
+WXD_EXPORTED void wxd_Window_SetForegroundColor(wxd_Window_t* window, wxd_Colour_t color);
+WXD_EXPORTED wxd_Colour_t wxd_Window_GetForegroundColor(wxd_Window_t* window);
+WXD_EXPORTED wxd_Colour_t wxd_Window_GetBackgroundColor(wxd_Window_t* window);
+
+// Focus management functions
+WXD_EXPORTED void wxd_Window_SetFocus(wxd_Window_t* window);
+WXD_EXPORTED bool wxd_Window_HasFocus(wxd_Window_t* window);
+WXD_EXPORTED bool wxd_Window_CanAcceptFocus(wxd_Window_t* window);
+
+// Visibility functions
+WXD_EXPORTED bool wxd_Window_IsShown(wxd_Window_t* window);
+
+// Size constraint functions
+WXD_EXPORTED void wxd_Window_SetMaxSize(wxd_Window_t* window, wxd_Size size);
+WXD_EXPORTED wxd_Size wxd_Window_GetMaxSize(wxd_Window_t* window);
+
+// Window properties functions
+WXD_EXPORTED void wxd_Window_SetName(wxd_Window_t* window, const char* name);
+WXD_EXPORTED char* wxd_Window_GetName(wxd_Window_t* window); // Caller must free with wxd_free_string
+
+// --- Cursor Management Functions ---
+WXD_EXPORTED void wxd_Window_SetCursor(wxd_Window_t* window, wxd_Cursor_t* cursor);
+WXD_EXPORTED wxd_Cursor_t* wxd_Window_GetCursor(wxd_Window_t* window);
+
+// --- Z-Order Management Functions ---
+WXD_EXPORTED void wxd_Window_Raise(wxd_Window_t* window);
+WXD_EXPORTED void wxd_Window_Lower(wxd_Window_t* window);
+
+// --- Mouse Capture Functions ---
+WXD_EXPORTED void wxd_Window_CaptureMouse(wxd_Window_t* window);
+WXD_EXPORTED void wxd_Window_ReleaseMouse(wxd_Window_t* window);
+WXD_EXPORTED bool wxd_Window_HasCapture(wxd_Window_t* window);
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetCapture(); // Static function
+
+// --- Text Measurement Functions ---
+WXD_EXPORTED wxd_Size wxd_Window_GetTextExtent(wxd_Window_t* window, const char* text);
+WXD_EXPORTED void wxd_Window_GetFullTextExtent(wxd_Window_t* window, const char* text, wxd_Size* size, int* descent, int* external_leading, wxd_Font_t* font);
+WXD_EXPORTED int wxd_Window_GetCharHeight(wxd_Window_t* window);
+WXD_EXPORTED int wxd_Window_GetCharWidth(wxd_Window_t* window);
+
 #endif // WXD_WINDOW_BASE_H 

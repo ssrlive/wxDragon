@@ -17,6 +17,7 @@ members = [
     "examples/rust/custom_widget",
     "examples/rust/tokio_async_demo",
     "examples/rust/custom_dataview_renderer",
+    "examples/rust/window_features_test",
     # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]

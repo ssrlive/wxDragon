@@ -1,0 +1,7 @@
+[package]
+name = "window_features_test"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+wxdragon = { version = "0.8.0", path = "../../../rust/wxdragon" } 

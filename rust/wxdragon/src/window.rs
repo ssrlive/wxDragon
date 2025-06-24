@@ -630,6 +630,414 @@ pub trait WxWidget {
         }
     }
 
+    // --- Color Management ---
+
+    /// Sets the foreground color of the window.
+    ///
+    /// The foreground color is typically used for text and other foreground elements.
+    fn set_foreground_color(&self, color: crate::color::Colour) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetForegroundColor(handle, color.into());
+            }
+        }
+    }
+
+    /// Gets the foreground color of the window.
+    ///
+    /// # Returns
+    /// The current foreground color, or black if the window handle is invalid.
+    fn get_foreground_color(&self) -> crate::color::Colour {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return crate::color::Colour::new(0, 0, 0, 255); // Default black
+        }
+        let color = unsafe { ffi::wxd_Window_GetForegroundColor(handle) };
+        crate::color::Colour::new(color.r, color.g, color.b, color.a)
+    }
+
+    /// Gets the background color of the window.
+    ///
+    /// # Returns
+    /// The current background color, or white if the window handle is invalid.
+    fn get_background_color(&self) -> crate::color::Colour {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return crate::color::Colour::new(255, 255, 255, 255); // Default white
+        }
+        let color = unsafe { ffi::wxd_Window_GetBackgroundColor(handle) };
+        crate::color::Colour::new(color.r, color.g, color.b, color.a)
+    }
+
+    // --- Focus Management ---
+
+    /// Sets the focus to this window.
+    ///
+    /// This makes the window the active window that receives keyboard input.
+    fn set_focus(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_SetFocus(handle) };
+        }
+    }
+
+    /// Returns `true` if this window currently has focus.
+    fn has_focus(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_HasFocus(handle) }
+        } else {
+            false
+        }
+    }
+
+    /// Returns `true` if this window can accept focus.
+    ///
+    /// This is typically `true` for interactive controls like buttons and text fields,
+    /// and `false` for static controls like labels.
+    fn can_accept_focus(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_CanAcceptFocus(handle) }
+        } else {
+            false
+        }
+    }
+
+    // --- Visibility ---
+
+    /// Returns `true` if the window is currently shown.
+    ///
+    /// This checks the window's visibility state, which may be different from
+    /// whether it's actually visible on screen (e.g., if it's covered by other windows).
+    fn is_shown(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_IsShown(handle) }
+        } else {
+            false
+        }
+    }
+
+    /// Hides the window.
+    ///
+    /// This is equivalent to calling `show(false)`.
+    fn hide(&self) {
+        self.show(false);
+    }
+
+    // --- Size Constraints ---
+
+    /// Sets the maximum size for the window.
+    ///
+    /// The window will not be allowed to grow larger than this size.
+    /// Use `Size { width: -1, height: -1 }` to remove size constraints.
+    fn set_max_size(&self, size: crate::geometry::Size) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetMaxSize(handle, size.into());
+            }
+        }
+    }
+
+    /// Gets the maximum size for the window.
+    ///
+    /// # Returns
+    /// The maximum size, or `Size { width: -1, height: -1 }` if no maximum is set
+    /// or the window handle is invalid.
+    fn get_max_size(&self) -> crate::geometry::Size {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            crate::geometry::Size {
+                width: -1,
+                height: -1,
+            }
+        } else {
+            let size = unsafe { ffi::wxd_Window_GetMaxSize(handle) };
+            crate::geometry::Size {
+                width: size.width,
+                height: size.height,
+            }
+        }
+    }
+
+    // --- Window Properties ---
+
+    /// Sets the window name.
+    ///
+    /// The window name is different from the label and is used for identification
+    /// purposes, such as finding windows by name.
+    fn set_name(&self, name: &str) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            match std::ffi::CString::new(name) {
+                Ok(c_name) => unsafe {
+                    ffi::wxd_Window_SetName(handle, c_name.as_ptr());
+                },
+                Err(_) => {
+                    // Handle CString creation error (e.g., contains null bytes)
+                    // For now, do nothing if the string can't be converted
+                }
+            }
+        }
+    }
+
+    /// Gets the window name.
+    ///
+    /// # Returns
+    /// The window name, or an empty string if no name is set or an error occurs.
+    fn get_name(&self) -> String {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return String::new();
+        }
+        
+        let c_str_ptr = unsafe { ffi::wxd_Window_GetName(handle) };
+        if c_str_ptr.is_null() {
+            return String::new();
+        }
+        
+        let rust_string = unsafe {
+            let c_str = std::ffi::CStr::from_ptr(c_str_ptr);
+            let s = c_str.to_string_lossy().into_owned();
+            // Free the string allocated by C++
+            ffi::wxd_free_string(c_str_ptr);
+            s
+        };
+        rust_string
+    }
+
+    /// Attempts to close the window.
+    ///
+    /// This generates a close event which can be vetoed by the application.
+    /// For top-level windows, this is typically equivalent to clicking the close button.
+    ///
+    /// # Arguments
+    /// * `force` - If `true`, the window is destroyed even if the close event is vetoed
+    ///
+    /// # Returns
+    /// `true` if the window was closed, `false` if the close was vetoed
+    fn close(&self, force: bool) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Close(handle, force) }
+        } else {
+            false
+        }
+    }
+
+    // --- Cursor Management ---
+
+    /// Sets the cursor for this window.
+    ///
+    /// The cursor will be displayed when the mouse pointer is over this window.
+    /// Pass `None` to reset to the default cursor.
+    ///
+    /// # Arguments
+    /// * `cursor` - The cursor to set, or `None` for default
+    fn set_cursor(&self, cursor: Option<&crate::cursor::Cursor>) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            let cursor_ptr = cursor.map(|c| c.as_ptr()).unwrap_or(std::ptr::null_mut());
+            unsafe {
+                ffi::wxd_Window_SetCursor(handle, cursor_ptr);
+            }
+        }
+    }
+
+    /// Gets the cursor currently associated with this window.
+    ///
+    /// # Returns
+    /// `Some(Cursor)` if a cursor is set, `None` if no cursor is set or an error occurs
+    fn get_cursor(&self) -> Option<crate::cursor::Cursor> {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return None;
+        }
+
+        let cursor_ptr = unsafe { ffi::wxd_Window_GetCursor(handle) };
+        if cursor_ptr.is_null() {
+            None
+        } else {
+            unsafe { crate::cursor::Cursor::from_ptr(cursor_ptr) }
+        }
+    }
+
+    // --- Z-Order Management ---
+
+    /// Raises the window to the top of the window hierarchy (Z-order).
+    ///
+    /// This makes the window appear on top of other windows.
+    fn raise(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Raise(handle) };
+        }
+    }
+
+    /// Lowers the window to the bottom of the window hierarchy (Z-order).
+    ///
+    /// This makes the window appear behind other windows.
+    fn lower(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Lower(handle) };
+        }
+    }
+
+    // --- Mouse Capture ---
+
+    /// Directs all mouse input to this window.
+    ///
+    /// Use `release_mouse()` to release the capture.
+    /// Only one window can capture the mouse at a time.
+    fn capture_mouse(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_CaptureMouse(handle) };
+        }
+    }
+
+    /// Releases mouse capture.
+    ///
+    /// This should be called after `capture_mouse()` when mouse capture is no longer needed.
+    fn release_mouse(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_ReleaseMouse(handle) };
+        }
+    }
+
+    /// Returns `true` if this window currently has mouse capture.
+    fn has_capture(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_HasCapture(handle) }
+        } else {
+            false
+        }
+    }
+
+    /// Returns the window that currently has mouse capture.
+    ///
+    /// This is a static function that can be called on any window instance.
+    ///
+    /// # Returns
+    /// `Some(Window)` if a window has capture, `None` if no window has capture
+    fn get_capture() -> Option<Window> where Self: Sized {
+        let window_ptr = unsafe { ffi::wxd_Window_GetCapture() };
+        if window_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { Window::from_ptr(window_ptr) })
+        }
+    }
+
+    // --- Text Measurement ---
+
+    /// Gets the dimensions of the string as it would be drawn on the window with the currently selected font.
+    ///
+    /// # Arguments
+    /// * `text` - The text to measure
+    ///
+    /// # Returns
+    /// The size of the text in pixels
+    fn get_text_extent(&self, text: &str) -> crate::geometry::Size {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return crate::geometry::Size { width: 0, height: 0 };
+        }
+
+        match std::ffi::CString::new(text) {
+            Ok(c_text) => {
+                let size = unsafe { ffi::wxd_Window_GetTextExtent(handle, c_text.as_ptr()) };
+                crate::geometry::Size {
+                    width: size.width,
+                    height: size.height,
+                }
+            }
+            Err(_) => crate::geometry::Size { width: 0, height: 0 },
+        }
+    }
+
+    /// Gets the full dimensions of the string as it would be drawn on the window.
+    ///
+    /// This provides more detailed information than `get_text_extent()`.
+    ///
+    /// # Arguments
+    /// * `text` - The text to measure
+    /// * `font` - Optional font to use for measurement (uses window's font if None)
+    ///
+    /// # Returns
+    /// A tuple containing:
+    /// - `Size`: The width and height of the text
+    /// - `i32`: The descent (portion below baseline)
+    /// - `i32`: The external leading (spacing between lines)
+    fn get_full_text_extent(&self, text: &str, font: Option<&crate::font::Font>) -> (crate::geometry::Size, i32, i32) {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return (crate::geometry::Size { width: 0, height: 0 }, 0, 0);
+        }
+
+        match std::ffi::CString::new(text) {
+            Ok(c_text) => {
+                let mut size = wxdragon_sys::wxd_Size { width: 0, height: 0 };
+                let mut descent = 0i32;
+                let mut external_leading = 0i32;
+                let font_ptr = font.map(|f| f.as_ptr()).unwrap_or(std::ptr::null_mut());
+
+                unsafe {
+                    ffi::wxd_Window_GetFullTextExtent(
+                        handle,
+                        c_text.as_ptr(),
+                        &mut size as *mut _,
+                        &mut descent as *mut _,
+                        &mut external_leading as *mut _,
+                        font_ptr,
+                    );
+                }
+
+                (
+                    crate::geometry::Size {
+                        width: size.width,
+                        height: size.height,
+                    },
+                    descent,
+                    external_leading,
+                )
+            }
+            Err(_) => (crate::geometry::Size { width: 0, height: 0 }, 0, 0),
+        }
+    }
+
+    /// Returns the character height for this window using the current font.
+    ///
+    /// # Returns
+    /// The height of a character in pixels
+    fn get_char_height(&self) -> i32 {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_GetCharHeight(handle) }
+        } else {
+            0
+        }
+    }
+
+    /// Returns the average character width for this window using the current font.
+    ///
+    /// # Returns
+    /// The average width of a character in pixels
+    fn get_char_width(&self) -> i32 {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_GetCharWidth(handle) }
+        } else {
+            0
+        }
+    }
+
     // Other common methods (SetSize, GetSize, etc.) can be added here
     // if corresponding wxd_Window_* functions are added to the C API.
 }

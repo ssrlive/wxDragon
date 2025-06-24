@@ -29,6 +29,7 @@ extern "C" {
 // Include API categories
 #include "core/wxd_app.h"
 #include "core/wxd_window_base.h"
+#include "core/wxd_cursor.h"
 #if WXD_USE_XRC
 #include "core/wxd_xrc.h"
 #endif

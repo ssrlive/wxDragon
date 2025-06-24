@@ -2,6 +2,7 @@
 pub use crate::app::{call_after, main, set_top_window};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
+pub use crate::cursor::{Cursor, StockCursor, BitmapType, BusyCursor, set_cursor, begin_busy_cursor, end_busy_cursor, is_busy};
 pub use crate::datetime::DateTime;
 pub use crate::event::{Event, EventType, IdleEvent, IdleMode, WindowEventData, WxEvtHandler};
 // ADDED: Event category traits

@@ -6,6 +6,7 @@
 #include <cstdlib> // For free (though free typically comes from stdlib.h, cstdlib is C++ way)
 #include <wx/font.h> // For wxFont in SetFont
 #include <wx/settings.h> // For wxSystemSettings and wxSYS_DEFAULT_GUI_FONT
+#include <wx/cursor.h> // For wxCursor
 
 extern "C" {
 
@@ -351,6 +352,223 @@ WXD_EXPORTED int64_t wxd_Window_GetExtraStyle(wxd_Window_t* window) {
         return static_cast<int64_t>(wx_window->GetExtraStyle());
     }
     return 0; // Default fallback
+}
+
+// Color management functions
+WXD_EXPORTED void wxd_Window_SetForegroundColor(wxd_Window_t* window, wxd_Colour_t color) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetForegroundColour(wxColour(color.r, color.g, color.b, color.a));
+    }
+}
+
+WXD_EXPORTED wxd_Colour_t wxd_Window_GetForegroundColor(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxColour wx_color = wx_window->GetForegroundColour();
+        return { wx_color.Red(), wx_color.Green(), wx_color.Blue(), wx_color.Alpha() };
+    }
+    return { 0, 0, 0, 255 }; // Default black color
+}
+
+WXD_EXPORTED wxd_Colour_t wxd_Window_GetBackgroundColor(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxColour wx_color = wx_window->GetBackgroundColour();
+        return { wx_color.Red(), wx_color.Green(), wx_color.Blue(), wx_color.Alpha() };
+    }
+    return { 255, 255, 255, 255 }; // Default white color
+}
+
+// Focus management functions
+WXD_EXPORTED void wxd_Window_SetFocus(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetFocus();
+    }
+}
+
+WXD_EXPORTED bool wxd_Window_HasFocus(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->HasFocus();
+    }
+    return false;
+}
+
+WXD_EXPORTED bool wxd_Window_CanAcceptFocus(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->CanAcceptFocus();
+    }
+    return false;
+}
+
+// Visibility functions
+WXD_EXPORTED bool wxd_Window_IsShown(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->IsShown();
+    }
+    return false;
+}
+
+// Size constraint functions
+WXD_EXPORTED void wxd_Window_SetMaxSize(wxd_Window_t* window, wxd_Size size) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetMaxSize(wxSize(size.width, size.height));
+    }
+}
+
+WXD_EXPORTED wxd_Size wxd_Window_GetMaxSize(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return { -1, -1 }; // Default invalid size
+    }
+    wxSize wx_size = wx_window->GetMaxSize();
+    return { wx_size.GetWidth(), wx_size.GetHeight() };
+}
+
+// Window properties functions
+WXD_EXPORTED void wxd_Window_SetName(wxd_Window_t* window, const char* name) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetName(wxString::FromUTF8(name ? name : ""));
+    }
+}
+
+WXD_EXPORTED char* wxd_Window_GetName(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxString name = wx_window->GetName();
+        const wxScopedCharBuffer utf8_buf = name.ToUTF8();
+        if (utf8_buf.data()) {
+            return strdup(utf8_buf.data());
+        }
+    }
+    return strdup(""); // Return empty string if window is null or name is empty
+}
+
+// --- Cursor Management Functions ---
+WXD_EXPORTED void wxd_Window_SetCursor(wxd_Window_t* window, wxd_Cursor_t* cursor) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        if (cursor) {
+            wxCursor* wx_cursor = reinterpret_cast<wxCursor*>(cursor);
+            wx_window->SetCursor(*wx_cursor);
+        } else {
+            // Set to default cursor if null is passed
+            wx_window->SetCursor(wxNullCursor);
+        }
+    }
+}
+
+WXD_EXPORTED wxd_Cursor_t* wxd_Window_GetCursor(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wxCursor cursor = wx_window->GetCursor();
+        if (cursor.IsOk()) {
+            // Create a new wxCursor and return it
+            wxCursor* new_cursor = new wxCursor(cursor);
+            return reinterpret_cast<wxd_Cursor_t*>(new_cursor);
+        }
+    }
+    return nullptr;
+}
+
+// --- Z-Order Management Functions ---
+WXD_EXPORTED void wxd_Window_Raise(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Raise();
+    }
+}
+
+WXD_EXPORTED void wxd_Window_Lower(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Lower();
+    }
+}
+
+// --- Mouse Capture Functions ---
+WXD_EXPORTED void wxd_Window_CaptureMouse(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->CaptureMouse();
+    }
+}
+
+WXD_EXPORTED void wxd_Window_ReleaseMouse(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->ReleaseMouse();
+    }
+}
+
+WXD_EXPORTED bool wxd_Window_HasCapture(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->HasCapture();
+    }
+    return false;
+}
+
+WXD_EXPORTED wxd_Window_t* wxd_Window_GetCapture() {
+    wxWindow* captured_window = wxWindow::GetCapture();
+    return reinterpret_cast<wxd_Window_t*>(captured_window);
+}
+
+// --- Text Measurement Functions ---
+WXD_EXPORTED wxd_Size wxd_Window_GetTextExtent(wxd_Window_t* window, const char* text) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window && text) {
+        wxString wx_text = wxString::FromUTF8(text);
+        wxSize size = wx_window->GetTextExtent(wx_text);
+        return { size.GetWidth(), size.GetHeight() };
+    }
+    return { 0, 0 }; // Default size if window is null or text is null
+}
+
+WXD_EXPORTED void wxd_Window_GetFullTextExtent(wxd_Window_t* window, const char* text, wxd_Size* size, int* descent, int* external_leading, wxd_Font_t* font) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window || !text || !size) {
+        if (size) {
+            size->width = 0;
+            size->height = 0;
+        }
+        if (descent) *descent = 0;
+        if (external_leading) *external_leading = 0;
+        return;
+    }
+
+    wxString wx_text = wxString::FromUTF8(text);
+    wxFont* wx_font = font ? reinterpret_cast<wxFont*>(font) : nullptr;
+    
+    int w, h, desc, ext_lead;
+    wx_window->GetTextExtent(wx_text, &w, &h, &desc, &ext_lead, wx_font);
+    
+    size->width = w;
+    size->height = h;
+    if (descent) *descent = desc;
+    if (external_leading) *external_leading = ext_lead;
+}
+
+WXD_EXPORTED int wxd_Window_GetCharHeight(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->GetCharHeight();
+    }
+    return 0;
+}
+
+WXD_EXPORTED int wxd_Window_GetCharWidth(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->GetCharWidth();
+    }
+    return 0;
 }
 
 } // extern "C"

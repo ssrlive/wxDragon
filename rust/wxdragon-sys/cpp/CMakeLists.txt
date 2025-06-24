@@ -66,6 +66,8 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/checklistbox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/choice.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/clipboard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/collapsiblepane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cursor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/colourdialog.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/colourpickerctrl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/combobox.cpp
@@ -134,7 +136,6 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/collapsiblepane.cpp
 )
 
 # Add conditional sources based on features

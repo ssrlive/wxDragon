@@ -1681,6 +1681,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "window_features_test"
+version = "0.8.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
 name = "windows-sys"
 version = "0.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
