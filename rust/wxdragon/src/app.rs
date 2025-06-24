@@ -99,6 +99,78 @@ where
     }
 }
 
+/// Gets the current application instance for appearance operations.
+///
+/// This provides a convenient way to access appearance-related functions
+/// without having to import the appearance module.
+///
+/// # Returns
+/// `Some(App)` if an application instance exists, `None` otherwise.
+///
+/// # Example
+/// ```no_run
+/// use wxdragon::prelude::*;
+///
+/// wxdragon::main(|_| {
+///     // Enable dark mode support
+///     if let Some(app) = wxdragon::app::get_app() {
+///         app.set_appearance(Appearance::System);
+///     }
+///
+///     let frame = Frame::builder()
+///         .with_title("Dark Mode App")
+///         .build();
+///     frame.show(true);
+/// });
+/// ```
+pub fn get_app() -> Option<crate::appearance::App> {
+    crate::appearance::get_app()
+}
+
+/// Sets the application appearance mode.
+///
+/// This is a convenience function that gets the app and sets its appearance.
+/// On Windows, calling this with `Appearance::System` enables dark mode
+/// support when the system is using a dark theme.
+///
+/// # Arguments
+/// * `appearance` - The appearance mode to set
+///
+/// # Returns
+/// * `AppearanceResult::Ok` - The appearance was set successfully
+/// * `AppearanceResult::Failure` - Failed to set appearance (not supported)
+/// * `AppearanceResult::CannotChange` - Cannot change at this time (windows exist)
+///
+/// # Example
+/// ```no_run
+/// use wxdragon::prelude::*;
+///
+/// wxdragon::main(|_| {
+///     // Enable system appearance following (including dark mode on Windows)
+///     match wxdragon::app::set_appearance(Appearance::System) {
+///         AppearanceResult::Ok => println!("Dark mode support enabled"),
+///         AppearanceResult::Failure => println!("Dark mode not supported"),
+///         AppearanceResult::CannotChange => println!("Cannot change appearance now"),
+///     }
+///
+///     let frame = Frame::builder()
+///         .with_title("My App")
+///         .build();
+///     frame.show(true);
+/// });
+/// ```
+pub fn set_appearance(appearance: crate::appearance::Appearance) -> crate::appearance::AppearanceResult {
+    use crate::appearance::AppAppearance;
+    
+    if let Some(app) = get_app() {
+        app.set_appearance(appearance)
+    } else {
+        crate::appearance::AppearanceResult::Failure
+    }
+}
+
+
+
 /// Runs the wxWidgets application main loop, providing a safe entry point.
 ///
 /// This function initializes wxWidgets and starts the event loop. It takes a closure

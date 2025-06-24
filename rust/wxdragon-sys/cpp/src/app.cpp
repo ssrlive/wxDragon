@@ -151,17 +151,112 @@ void wxd_free_int_array(int* ptr) {
     }
 }
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
+// --- Appearance Support Implementation (wxWidgets 3.3.0+) ---
 
-//     // Dummy implementations to avoid linker errors in case Rust doesn't define them
-//     #pragma weak process_rust_callbacks
-//     void process_rust_callbacks() {
-//         // This is a weak symbol that will be replaced by the actual Rust implementation
-//         // If the Rust implementation is not available, this will be used instead
-//     }
+#if wxCHECK_VERSION(3, 3, 0)
+#include <wx/settings.h>
+#include <wx/systhemectrl.h>
+#endif
 
-// #ifdef __cplusplus
-// }
-// #endif
+// Set the application appearance mode
+wxd_AppearanceResult wxd_App_SetAppearance(wxd_App_t* app, wxd_Appearance appearance) {
+    if (!app) return WXD_APPEARANCE_RESULT_FAILURE;
+    
+#if wxCHECK_VERSION(3, 3, 0)
+    wxApp* wx_app = reinterpret_cast<wxApp*>(app);
+    
+    wxApp::Appearance wx_appearance;
+    switch (appearance) {
+        case WXD_APPEARANCE_LIGHT:
+            wx_appearance = wxApp::Appearance::Light;
+            break;
+        case WXD_APPEARANCE_DARK:
+            wx_appearance = wxApp::Appearance::Dark;
+            break;
+        case WXD_APPEARANCE_SYSTEM:
+        default:
+            wx_appearance = wxApp::Appearance::System;
+            break;
+    }
+    
+    wxApp::AppearanceResult result = wx_app->SetAppearance(wx_appearance);
+    
+    switch (result) {
+        case wxApp::AppearanceResult::Ok:
+            return WXD_APPEARANCE_RESULT_OK;
+        case wxApp::AppearanceResult::Failure:
+            return WXD_APPEARANCE_RESULT_FAILURE;
+        case wxApp::AppearanceResult::CannotChange:
+            return WXD_APPEARANCE_RESULT_CANNOT_CHANGE;
+    }
+    
+    return WXD_APPEARANCE_RESULT_FAILURE;
+#else
+    // For older wxWidgets versions, appearance is not supported
+    return WXD_APPEARANCE_RESULT_FAILURE;
+#endif
+}
+
+// Get system appearance information
+wxd_SystemAppearance_t* wxd_SystemSettings_GetAppearance() {
+#if wxCHECK_VERSION(3, 3, 0)
+    wxSystemAppearance appearance = wxSystemSettings::GetAppearance();
+    // Create a copy on the heap to return to Rust
+    wxSystemAppearance* heap_appearance = new wxSystemAppearance(appearance);
+    return reinterpret_cast<wxd_SystemAppearance_t*>(heap_appearance);
+#else
+    // For older wxWidgets versions, return null
+    return nullptr;
+#endif
+}
+
+// Check if the system is using dark mode
+bool wxd_SystemAppearance_IsDark(wxd_SystemAppearance_t* appearance) {
+    if (!appearance) return false;
+    
+#if wxCHECK_VERSION(3, 3, 0)
+    wxSystemAppearance* wx_appearance = reinterpret_cast<wxSystemAppearance*>(appearance);
+    return wx_appearance->IsDark();
+#else
+    return false;
+#endif
+}
+
+// Check if the system background is dark
+bool wxd_SystemAppearance_IsUsingDarkBackground(wxd_SystemAppearance_t* appearance) {
+    if (!appearance) return false;
+    
+#if wxCHECK_VERSION(3, 3, 0)
+    wxSystemAppearance* wx_appearance = reinterpret_cast<wxSystemAppearance*>(appearance);
+    return wx_appearance->IsUsingDarkBackground();
+#else
+    return false;
+#endif
+}
+
+// Get the system appearance name (mainly for macOS)
+char* wxd_SystemAppearance_GetName(wxd_SystemAppearance_t* appearance) {
+    if (!appearance) return strdup("");
+    
+#if wxCHECK_VERSION(3, 3, 0)
+    wxSystemAppearance* wx_appearance = reinterpret_cast<wxSystemAppearance*>(appearance);
+    wxString name = wx_appearance->GetName();
+    const wxScopedCharBuffer utf8_buf = name.ToUTF8();
+    if (utf8_buf.data()) {
+        return strdup(utf8_buf.data());
+    }
+#endif
+    return strdup("");
+}
+
+// Free system appearance object
+void wxd_SystemAppearance_Destroy(wxd_SystemAppearance_t* appearance) {
+    if (!appearance) return;
+    
+#if wxCHECK_VERSION(3, 3, 0)
+    wxSystemAppearance* wx_appearance = reinterpret_cast<wxSystemAppearance*>(appearance);
+    delete wx_appearance;
+#endif
+}
+
+// --- End of Appearance Support Implementation ---

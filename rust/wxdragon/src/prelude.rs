@@ -1,5 +1,6 @@
 // --- Core Types & Traits ---
-pub use crate::app::{call_after, main, set_top_window};
+pub use crate::app::{call_after, main, set_top_window, get_app, set_appearance};
+pub use crate::appearance::{Appearance, AppearanceResult, SystemAppearance, AppAppearance, get_system_appearance, is_system_dark_mode, get_app as get_app_for_appearance};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
 pub use crate::cursor::{Cursor, StockCursor, BitmapType, BusyCursor, set_cursor, begin_busy_cursor, end_busy_cursor, is_busy};

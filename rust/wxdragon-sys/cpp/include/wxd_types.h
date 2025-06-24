@@ -557,4 +557,25 @@ typedef int wxd_Id;
 // StyledTextCtrl type
 typedef struct wxd_StyledTextCtrl_t wxd_StyledTextCtrl_t;
 
+// --- Appearance Support (wxWidgets 3.3.0+) ---
+
+// Appearance modes for dark mode support
+typedef enum {
+    WXD_APPEARANCE_LIGHT = 0,   // Force light mode
+    WXD_APPEARANCE_DARK = 1,    // Force dark mode
+    WXD_APPEARANCE_SYSTEM = 2   // Follow system appearance
+} wxd_Appearance;
+
+// AppearanceResult for SetAppearance method
+typedef enum {
+    WXD_APPEARANCE_RESULT_OK = 0,           // Success
+    WXD_APPEARANCE_RESULT_FAILURE = 1,      // Failed to set appearance
+    WXD_APPEARANCE_RESULT_CANNOT_CHANGE = 2 // Cannot change (e.g., windows already exist)
+} wxd_AppearanceResult;
+
+// Forward declarations for appearance classes
+typedef struct wxd_SystemAppearance_t wxd_SystemAppearance_t;
+
+// --- End of Appearance Support ---
+
 #endif // WXD_TYPES_H 

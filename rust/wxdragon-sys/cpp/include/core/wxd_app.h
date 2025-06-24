@@ -17,4 +17,26 @@ WXD_EXPORTED void wxd_free_string(char* str);
 // New function to free an array of integers allocated by C++
 WXD_EXPORTED void wxd_free_int_array(int* ptr);
 
+// --- Appearance Support (wxWidgets 3.3.0+) ---
+
+// Set the application appearance mode (requires wxWidgets 3.3.0+)
+WXD_EXPORTED wxd_AppearanceResult wxd_App_SetAppearance(wxd_App_t* app, wxd_Appearance appearance);
+
+// Get system appearance information
+WXD_EXPORTED wxd_SystemAppearance_t* wxd_SystemSettings_GetAppearance();
+
+// Check if the system is using dark mode
+WXD_EXPORTED bool wxd_SystemAppearance_IsDark(wxd_SystemAppearance_t* appearance);
+
+// Check if the system background is dark
+WXD_EXPORTED bool wxd_SystemAppearance_IsUsingDarkBackground(wxd_SystemAppearance_t* appearance);
+
+// Get the system appearance name (mainly for macOS)
+WXD_EXPORTED char* wxd_SystemAppearance_GetName(wxd_SystemAppearance_t* appearance);
+
+// Free system appearance object
+WXD_EXPORTED void wxd_SystemAppearance_Destroy(wxd_SystemAppearance_t* appearance);
+
+// --- End of Appearance Support ---
+
 #endif // WXD_APP_H 
