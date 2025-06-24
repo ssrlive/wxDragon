@@ -100,21 +100,66 @@ WXD_EXPORTED wxd_Cursor_t* wxd_Cursor_CreateFromData(const unsigned char* bits, 
     }
     
     try {
-#ifdef __WXOSX__
-        // On macOS, we need to create a cursor from an image or bitmap
-        // The raw bits constructor is not available
-        // For now, return nullptr to indicate this functionality is not supported on macOS
-        // TODO: Implement by creating a wxImage from the bitmap data
-        return nullptr;
-#else
-        // On Windows and Linux, we can use the raw bits constructor
+#ifdef __WXMSW__
+        // On Windows, we need to create a cursor from a wxImage
+        // The raw bits constructor takes different parameters
+        
+        // Create bitmap from bits
+        wxBitmap bitmap = wxBitmap(reinterpret_cast<const char*>(bits), width, height);
+        
+        if (mask_bits) {
+            wxBitmap mask_bitmap = wxBitmap(reinterpret_cast<const char*>(mask_bits), width, height);
+            bitmap.SetMask(new wxMask(mask_bitmap));
+        }
+        
+        // Convert to image and set hotspot
+        wxImage image = bitmap.ConvertToImage();
+        image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, hotspot_x);
+        image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, hotspot_y);
+        
+        wxCursor* cursor = new wxCursor(image);
+        
+        if (cursor && cursor->IsOk()) {
+            return reinterpret_cast<wxd_Cursor_t*>(cursor);
+        } else {
+            delete cursor;
+            return nullptr;
+        }
+#elif defined(__WXGTK__)
+        // On GTK, we can use the raw bits constructor with foreground/background colors
         wxCursor* cursor;
         if (mask_bits) {
-            cursor = new wxCursor(reinterpret_cast<const char*>(bits), width, height, hotspot_x, hotspot_y, 
-                                 reinterpret_cast<const char*>(mask_bits));
+            cursor = new wxCursor(reinterpret_cast<const char*>(bits), width, height, hotspot_x, hotspot_y,
+                                 reinterpret_cast<const char*>(mask_bits), *wxWHITE, *wxBLACK);
         } else {
-            cursor = new wxCursor(reinterpret_cast<const char*>(bits), width, height, hotspot_x, hotspot_y);
+            // For GTK without mask, we need to create a simple bitmap
+            wxBitmap bitmap = wxBitmap(reinterpret_cast<const char*>(bits), width, height);
+            wxImage image = bitmap.ConvertToImage();
+            image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, hotspot_x);
+            image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, hotspot_y);
+            cursor = new wxCursor(image);
         }
+        
+        if (cursor && cursor->IsOk()) {
+            return reinterpret_cast<wxd_Cursor_t*>(cursor);
+        } else {
+            delete cursor;
+            return nullptr;
+        }
+#else
+        // On other platforms (macOS, etc.), try to use the image-based approach
+        wxBitmap bitmap = wxBitmap(reinterpret_cast<const char*>(bits), width, height);
+        
+        if (mask_bits) {
+            wxBitmap mask_bitmap = wxBitmap(reinterpret_cast<const char*>(mask_bits), width, height);
+            bitmap.SetMask(new wxMask(mask_bitmap));
+        }
+        
+        wxImage image = bitmap.ConvertToImage();
+        image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, hotspot_x);
+        image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, hotspot_y);
+        
+        wxCursor* cursor = new wxCursor(image);
         
         if (cursor && cursor->IsOk()) {
             return reinterpret_cast<wxd_Cursor_t*>(cursor);
