@@ -130,7 +130,7 @@ WXD_EXPORTED wxd_Cursor_t* wxd_Cursor_CreateFromData(const unsigned char* bits, 
         wxCursor* cursor;
         if (mask_bits) {
             cursor = new wxCursor(reinterpret_cast<const char*>(bits), width, height, hotspot_x, hotspot_y,
-                                 reinterpret_cast<const char*>(mask_bits), *wxWHITE, *wxBLACK);
+                                 reinterpret_cast<const char*>(mask_bits), wxWHITE, wxBLACK);
         } else {
             // For GTK without mask, we need to create a simple bitmap
             wxBitmap bitmap = wxBitmap(reinterpret_cast<const char*>(bits), width, height);

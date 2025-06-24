@@ -39,7 +39,7 @@ use wxdragon_sys as ffi;
 /// This enum controls how the application handles dark/light theming.
 /// Requires wxWidgets 3.3.0 or later for full functionality.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
+#[repr(C)]
 pub enum Appearance {
     /// Force light mode appearance regardless of system settings.
     Light = ffi::wxd_Appearance_WXD_APPEARANCE_LIGHT,
@@ -54,7 +54,7 @@ pub enum Appearance {
 ///
 /// Returned by `SetAppearance` to indicate the outcome of the operation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
+#[repr(C)]
 pub enum AppearanceResult {
     /// The appearance was set successfully.
     Ok = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_OK,
@@ -66,7 +66,7 @@ pub enum AppearanceResult {
 
 impl From<Appearance> for ffi::wxd_Appearance {
     fn from(appearance: Appearance) -> Self {
-        appearance as u32
+        appearance as ffi::wxd_Appearance
     }
 }
 

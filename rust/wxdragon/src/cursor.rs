@@ -5,7 +5,7 @@ use wxdragon_sys as ffi;
 
 /// Stock cursor types available in wxWidgets
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
+#[repr(C)]
 pub enum StockCursor {
     None = ffi::wxd_StockCursor_WXD_CURSOR_NONE,
     Arrow = ffi::wxd_StockCursor_WXD_CURSOR_ARROW,
@@ -40,7 +40,7 @@ pub enum StockCursor {
 
 /// Bitmap file types supported for cursor creation
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
+#[repr(C)]
 pub enum BitmapType {
     Invalid = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_INVALID,
     Bmp = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_BMP,
@@ -92,7 +92,7 @@ impl Cursor {
     /// let wait_cursor = Cursor::from_stock(StockCursor::Wait);
     /// ```
     pub fn from_stock(cursor_type: StockCursor) -> Option<Self> {
-        let ptr = unsafe { ffi::wxd_Cursor_CreateStock(cursor_type as u32) };
+        let ptr = unsafe { ffi::wxd_Cursor_CreateStock(cursor_type as ffi::wxd_StockCursor) };
         if ptr.is_null() {
             None
         } else {
@@ -121,7 +121,7 @@ impl Cursor {
         let ptr = unsafe {
             ffi::wxd_Cursor_CreateFromFile(
                 c_filename.as_ptr(),
-                bitmap_type as u32,
+                bitmap_type as ffi::wxd_BitmapType,
                 hotspot_x,
                 hotspot_y,
             )
