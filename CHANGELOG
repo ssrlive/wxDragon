@@ -1,5 +1,85 @@
 # Changelog
 
+## 0.8.1
+
+### New Features
+- **Comprehensive Cursor API**: Added complete cursor management system with full wxWidgets 3.3.0 feature parity
+  - 28 stock cursor types: Arrow, Hand, Cross, Wait, IBeam, Magnifier, sizing cursors, and more
+  - Multiple cursor creation methods: stock cursors, file loading, bitmap conversion, raw data
+  - Global cursor management with set_cursor() and busy cursor with nesting support
+  - RAII BusyCursor wrapper for automatic cleanup and exception safety
+  - Platform-aware implementation supporting macOS, Windows, and Linux
+  - Cursor properties API: hotspot access, validity checking, native handle access
+  - Per-window cursor management: set/get cursor for individual windows
+  - Complete memory safety with proper Drop implementation and error handling
+
+- **Dark Mode Support**: Added comprehensive dark mode support with wxWidgets 3.3.0+ appearance API
+  - System appearance detection: detect if system is using dark/light mode
+  - Application appearance control: set app to Light, Dark, or System mode
+  - Cross-platform support: full macOS support, Windows 10 v2004+ dark theme support, basic Linux support
+  - SystemAppearance API with platform-specific appearance name access (e.g., NSAppearanceNameDarkAqua)
+  - Thread-safe implementation with Send + Sync traits for async applications
+  - Conditional compilation with wxCHECK_VERSION guards for compatibility
+
+- **Enhanced Window Management**: Extended window functionality for modern UI development
+  - Z-order management: raise() and lower() methods for window layering
+  - Mouse capture: capture_mouse() and release_mouse() for advanced input handling
+  - Text measurement: get_text_extent() for precise UI layout calculations
+  - Integrated cursor management per window instance
+
+### Enhancements
+- **Cross-Platform Enum Compatibility**: Comprehensive enum type system improvements
+  - Fixed enum discriminant type compatibility across Linux/macOS (isize) and Windows (i32)
+  - Replaced platform-specific explicit discriminant values with automatic assignment
+  - Enhanced From implementations with explicit pattern matching for FFI constant mapping
+  - Improved type safety with proper #[repr(C)] usage for C ABI compatibility
+  - Consistent FFI constant usage following established patterns
+
+- **FFI Layer Enhancements**: Expanded C++ binding layer for new functionality
+  - Added comprehensive cursor FFI with 16 exported functions
+  - Added appearance API with platform-aware conditional compilation
+  - Enhanced window management FFI with z-order and mouse capture functions
+  - Improved enum constant generation and usage patterns
+
+### Bug Fixes
+- **Windows Build Compatibility**: Resolved platform-specific build issues
+  - Fixed Windows cursor constructor compatibility (C2661 compilation errors)
+  - Corrected platform-specific cursor creation for Windows vs GTK/other platforms
+  - Windows: Use wxImage-based cursor creation with hotspot options
+  - GTK: Use raw bits constructor with proper foreground/background color parameters
+  - Fixed cross-platform enum type mismatches in FFI layer
+
+- **Code Quality**: Addressed clippy warnings and improved code standards
+  - Fixed needless_borrows_for_generic_args warnings in build script
+  - Removed unnecessary reference operators in function calls
+  - Improved build script efficiency and clarity
+
+### Examples
+- **dark_mode_demo**: New comprehensive example demonstrating dark mode functionality
+  - System appearance detection and dark mode checking
+  - Application appearance mode switching (Light, Dark, System)
+  - Platform-specific appearance information display
+  - Demonstrates wxWidgets appearance limitations and best practices
+
+- **window_features_test**: Enhanced example showcasing cursor and window management
+  - Comprehensive cursor API demonstration with all 28 stock cursor types
+  - Window management features: z-order control, mouse capture, text measurement
+  - RAII BusyCursor usage patterns and cursor property access
+  - Interactive UI for testing all cursor and window features
+
+### Platform Support
+- Enhanced cross-platform compatibility for all supported platforms:
+  - ✅ **Linux**: Fixed enum type compatibility, cursor constructor issues
+  - ✅ **macOS**: Full dark mode support, comprehensive cursor API
+  - ✅ **Windows MSVC**: Fixed cursor constructor C2661 errors, enum type issues
+  - ✅ **Windows MinGW**: Cross-platform enum compatibility, cursor creation fixes
+
+### API Changes
+- Added new modules: `cursor`, `appearance` with comprehensive APIs
+- Enhanced `window` module with cursor management, z-order, and mouse capture
+- Extended `app` module with appearance control functionality
+- All new APIs follow wxDragon's established patterns for memory safety and error handling
+
 ## 0.8.0
 
 ### New Features
