@@ -32,59 +32,50 @@
 use std::ffi::CStr;
 use wxdragon_sys as ffi;
 
-// Direct constants for appearance - working around bindgen issues
-const WXD_APPEARANCE_LIGHT: u32 = 0;
-const WXD_APPEARANCE_DARK: u32 = 1;
-const WXD_APPEARANCE_SYSTEM: u32 = 2;
-
-const WXD_APPEARANCE_RESULT_OK: u32 = 0;
-const WXD_APPEARANCE_RESULT_FAILURE: u32 = 1;
-const WXD_APPEARANCE_RESULT_CANNOT_CHANGE: u32 = 2;
+// Use FFI-generated constants (following the cursor pattern)
 
 /// Application appearance modes for dark mode support.
 ///
 /// This enum controls how the application handles dark/light theming.
 /// Requires wxWidgets 3.3.0 or later for full functionality.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
 pub enum Appearance {
     /// Force light mode appearance regardless of system settings.
-    Light,
+    Light = ffi::wxd_Appearance_WXD_APPEARANCE_LIGHT,
     /// Force dark mode appearance regardless of system settings.
-    Dark,
+    Dark = ffi::wxd_Appearance_WXD_APPEARANCE_DARK,
     /// Follow the system appearance settings (recommended).
     /// This enables dark mode on Windows when the system is using dark theme.
-    System,
+    System = ffi::wxd_Appearance_WXD_APPEARANCE_SYSTEM,
 }
 
 /// Result of setting the application appearance.
 ///
 /// Returned by `SetAppearance` to indicate the outcome of the operation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
 pub enum AppearanceResult {
     /// The appearance was set successfully.
-    Ok,
+    Ok = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_OK,
     /// Failed to set the appearance (e.g., not supported on this platform).
-    Failure,
+    Failure = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_FAILURE,
     /// Cannot change the appearance at this time (e.g., windows already exist).
-    CannotChange,
+    CannotChange = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_CANNOT_CHANGE,
 }
 
 impl From<Appearance> for ffi::wxd_Appearance {
     fn from(appearance: Appearance) -> Self {
-        match appearance {
-            Appearance::Light => WXD_APPEARANCE_LIGHT,
-            Appearance::Dark => WXD_APPEARANCE_DARK,
-            Appearance::System => WXD_APPEARANCE_SYSTEM,
-        }
+        appearance as u32
     }
 }
 
 impl From<ffi::wxd_Appearance> for Appearance {
     fn from(appearance: ffi::wxd_Appearance) -> Self {
         match appearance {
-            WXD_APPEARANCE_LIGHT => Appearance::Light,
-            WXD_APPEARANCE_DARK => Appearance::Dark,
-            WXD_APPEARANCE_SYSTEM => Appearance::System,
+            ffi::wxd_Appearance_WXD_APPEARANCE_LIGHT => Appearance::Light,
+            ffi::wxd_Appearance_WXD_APPEARANCE_DARK => Appearance::Dark,
+            ffi::wxd_Appearance_WXD_APPEARANCE_SYSTEM => Appearance::System,
             _ => Appearance::System, // Default fallback
         }
     }
@@ -93,9 +84,9 @@ impl From<ffi::wxd_Appearance> for Appearance {
 impl From<ffi::wxd_AppearanceResult> for AppearanceResult {
     fn from(result: ffi::wxd_AppearanceResult) -> Self {
         match result {
-            WXD_APPEARANCE_RESULT_OK => AppearanceResult::Ok,
-            WXD_APPEARANCE_RESULT_FAILURE => AppearanceResult::Failure,
-            WXD_APPEARANCE_RESULT_CANNOT_CHANGE => AppearanceResult::CannotChange,
+            ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_OK => AppearanceResult::Ok,
+            ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_FAILURE => AppearanceResult::Failure,
+            ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_CANNOT_CHANGE => AppearanceResult::CannotChange,
             _ => AppearanceResult::Failure, // Default fallback
         }
     }
