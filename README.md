@@ -215,6 +215,67 @@ cargo run
 
 wxDragon automatically downloads pre-built wxWidgets libraries during the first compilation, reducing build times from 20+ minutes to under 3 minutes. No manual wxWidgets installation required!
 
+## Windows OS Theme Integration
+
+To enable native Windows theming and modern OS integration features (such as dark mode support, high-DPI awareness, and crisp visual styling), add a `build.rs` file to your project root:
+
+**Create `build.rs`:**
+
+```rust
+use embed_manifest::manifest::{ActiveCodePage, Setting, SupportedOS::*};
+use embed_manifest::{embed_manifest, new_manifest};
+
+fn main() {
+    // Check if we're building for Windows (either natively or cross-compiling)
+    let target = std::env::var("TARGET").unwrap_or_default();
+
+    if target.contains("windows") {
+        // Create a comprehensive manifest for Windows theming and modern features
+        let manifest = new_manifest("YourApp.Name")
+            // Enable modern Windows Common Controls (v6) for theming
+            .supported_os(Windows7..=Windows10)
+            // Set UTF-8 as active code page for better Unicode support
+            .active_code_page(ActiveCodePage::Utf8)
+            // Enable heap type optimization for better performance (if available)
+            .heap_type(embed_manifest::manifest::HeapType::SegmentHeap)
+            // Enable high-DPI awareness for crisp displays
+            .dpi_awareness(embed_manifest::manifest::DpiAwareness::PerMonitorV2)
+            // Enable long path support (if configured in Windows)
+            .long_path_aware(Setting::Enabled);
+
+        // Embed the manifest - this works even when cross-compiling!
+        if let Err(e) = embed_manifest(manifest) {
+            println!("cargo:warning=Failed to embed manifest: {}", e);
+            println!("cargo:warning=The application will still work but may lack optimal Windows theming");
+        }
+
+        // Tell Cargo to rerun this build script if the build script changes
+        println!("cargo:rerun-if-changed=build.rs");
+    }
+}
+```
+
+**Add the dependency to `Cargo.toml`:**
+
+```toml
+[build-dependencies]
+embed-manifest = "1.4"
+```
+
+**What this enables:**
+
+- ✅ **Modern Theming** - Windows Common Controls v6 for native Windows 10/11 styling
+- ✅ **Dark Mode Support** - Automatic dark mode integration when system uses dark theme
+- ✅ **High-DPI Awareness** - Crisp rendering on high-resolution displays (Per-Monitor V2)
+- ✅ **UTF-8 Support** - Better Unicode handling for international applications
+- ✅ **Performance Optimizations** - Segment heap for improved memory management
+- ✅ **Long Path Support** - Support for Windows long file paths when enabled
+- ✅ **Cross-Compilation Compatible** - Works when building Windows apps from macOS/Linux
+
+> **Note:** The manifest embedding works seamlessly with both native Windows builds (MSVC/MinGW) and cross-compilation from other platforms. Your application will automatically integrate with Windows theme changes and display properly on modern Windows systems.
+
+Without this manifest, your wxDragon application will still work but may appear with older Windows styling and lack some modern OS integration features.
+
 ### Cross-Compilation (macOS → Windows)
 
 > ⚠️ **Important:** For cross-compilation, you must use the same WinLibs GCC version as the prebuilt wxWidgets libraries. Install it via Homebrew or download the matching version manually if needed.
