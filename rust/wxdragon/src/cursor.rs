@@ -7,52 +7,52 @@ use wxdragon_sys as ffi;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum StockCursor {
-    None = ffi::wxd_StockCursor_WXD_CURSOR_NONE,
-    Arrow = ffi::wxd_StockCursor_WXD_CURSOR_ARROW,
-    RightArrow = ffi::wxd_StockCursor_WXD_CURSOR_RIGHT_ARROW,
-    Bullseye = ffi::wxd_StockCursor_WXD_CURSOR_BULLSEYE,
-    Char = ffi::wxd_StockCursor_WXD_CURSOR_CHAR,
-    Cross = ffi::wxd_StockCursor_WXD_CURSOR_CROSS,
-    Hand = ffi::wxd_StockCursor_WXD_CURSOR_HAND,
-    IBeam = ffi::wxd_StockCursor_WXD_CURSOR_IBEAM,
-    LeftButton = ffi::wxd_StockCursor_WXD_CURSOR_LEFT_BUTTON,
-    Magnifier = ffi::wxd_StockCursor_WXD_CURSOR_MAGNIFIER,
-    MiddleButton = ffi::wxd_StockCursor_WXD_CURSOR_MIDDLE_BUTTON,
-    NoEntry = ffi::wxd_StockCursor_WXD_CURSOR_NO_ENTRY,
-    PaintBrush = ffi::wxd_StockCursor_WXD_CURSOR_PAINT_BRUSH,
-    Pencil = ffi::wxd_StockCursor_WXD_CURSOR_PENCIL,
-    PointLeft = ffi::wxd_StockCursor_WXD_CURSOR_POINT_LEFT,
-    PointRight = ffi::wxd_StockCursor_WXD_CURSOR_POINT_RIGHT,
-    QuestionArrow = ffi::wxd_StockCursor_WXD_CURSOR_QUESTION_ARROW,
-    RightButton = ffi::wxd_StockCursor_WXD_CURSOR_RIGHT_BUTTON,
-    SizeNESW = ffi::wxd_StockCursor_WXD_CURSOR_SIZENESW,
-    SizeNS = ffi::wxd_StockCursor_WXD_CURSOR_SIZENS,
-    SizeNWSE = ffi::wxd_StockCursor_WXD_CURSOR_SIZENWSE,
-    SizeWE = ffi::wxd_StockCursor_WXD_CURSOR_SIZEWE,
-    Sizing = ffi::wxd_StockCursor_WXD_CURSOR_SIZING,
-    SprayCan = ffi::wxd_StockCursor_WXD_CURSOR_SPRAYCAN,
-    Wait = ffi::wxd_StockCursor_WXD_CURSOR_WAIT,
-    Watch = ffi::wxd_StockCursor_WXD_CURSOR_WATCH,
-    Blank = ffi::wxd_StockCursor_WXD_CURSOR_BLANK,
-    Default = ffi::wxd_StockCursor_WXD_CURSOR_DEFAULT,
-    ArrowWait = ffi::wxd_StockCursor_WXD_CURSOR_ARROWWAIT,
+    None,
+    Arrow,
+    RightArrow,
+    Bullseye,
+    Char,
+    Cross,
+    Hand,
+    IBeam,
+    LeftButton,
+    Magnifier,
+    MiddleButton,
+    NoEntry,
+    PaintBrush,
+    Pencil,
+    PointLeft,
+    PointRight,
+    QuestionArrow,
+    RightButton,
+    SizeNESW,
+    SizeNS,
+    SizeNWSE,
+    SizeWE,
+    Sizing,
+    SprayCan,
+    Wait,
+    Watch,
+    Blank,
+    Default,
+    ArrowWait,
 }
 
 /// Bitmap file types supported for cursor creation
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum BitmapType {
-    Invalid = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_INVALID,
-    Bmp = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_BMP,
-    Ico = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ICO,
-    Cur = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_CUR,
-    Xbm = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_XBM,
-    Xpm = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_XPM,
-    Png = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_PNG,
-    Jpeg = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_JPEG,
-    Gif = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_GIF,
-    Ani = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ANI,
-    Any = ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ANY,
+    Invalid,
+    Bmp,
+    Ico,
+    Cur,
+    Xbm,
+    Xpm,
+    Png,
+    Jpeg,
+    Gif,
+    Ani,
+    Any,
 }
 
 /// Represents a cursor object.
@@ -92,7 +92,38 @@ impl Cursor {
     /// let wait_cursor = Cursor::from_stock(StockCursor::Wait);
     /// ```
     pub fn from_stock(cursor_type: StockCursor) -> Option<Self> {
-        let ptr = unsafe { ffi::wxd_Cursor_CreateStock(cursor_type as ffi::wxd_StockCursor) };
+        let ffi_cursor_type = match cursor_type {
+            StockCursor::None => ffi::wxd_StockCursor_WXD_CURSOR_NONE,
+            StockCursor::Arrow => ffi::wxd_StockCursor_WXD_CURSOR_ARROW,
+            StockCursor::RightArrow => ffi::wxd_StockCursor_WXD_CURSOR_RIGHT_ARROW,
+            StockCursor::Bullseye => ffi::wxd_StockCursor_WXD_CURSOR_BULLSEYE,
+            StockCursor::Char => ffi::wxd_StockCursor_WXD_CURSOR_CHAR,
+            StockCursor::Cross => ffi::wxd_StockCursor_WXD_CURSOR_CROSS,
+            StockCursor::Hand => ffi::wxd_StockCursor_WXD_CURSOR_HAND,
+            StockCursor::IBeam => ffi::wxd_StockCursor_WXD_CURSOR_IBEAM,
+            StockCursor::LeftButton => ffi::wxd_StockCursor_WXD_CURSOR_LEFT_BUTTON,
+            StockCursor::Magnifier => ffi::wxd_StockCursor_WXD_CURSOR_MAGNIFIER,
+            StockCursor::MiddleButton => ffi::wxd_StockCursor_WXD_CURSOR_MIDDLE_BUTTON,
+            StockCursor::NoEntry => ffi::wxd_StockCursor_WXD_CURSOR_NO_ENTRY,
+            StockCursor::PaintBrush => ffi::wxd_StockCursor_WXD_CURSOR_PAINT_BRUSH,
+            StockCursor::Pencil => ffi::wxd_StockCursor_WXD_CURSOR_PENCIL,
+            StockCursor::PointLeft => ffi::wxd_StockCursor_WXD_CURSOR_POINT_LEFT,
+            StockCursor::PointRight => ffi::wxd_StockCursor_WXD_CURSOR_POINT_RIGHT,
+            StockCursor::QuestionArrow => ffi::wxd_StockCursor_WXD_CURSOR_QUESTION_ARROW,
+            StockCursor::RightButton => ffi::wxd_StockCursor_WXD_CURSOR_RIGHT_BUTTON,
+            StockCursor::SizeNESW => ffi::wxd_StockCursor_WXD_CURSOR_SIZENESW,
+            StockCursor::SizeNS => ffi::wxd_StockCursor_WXD_CURSOR_SIZENS,
+            StockCursor::SizeNWSE => ffi::wxd_StockCursor_WXD_CURSOR_SIZENWSE,
+            StockCursor::SizeWE => ffi::wxd_StockCursor_WXD_CURSOR_SIZEWE,
+            StockCursor::Sizing => ffi::wxd_StockCursor_WXD_CURSOR_SIZING,
+            StockCursor::SprayCan => ffi::wxd_StockCursor_WXD_CURSOR_SPRAYCAN,
+            StockCursor::Wait => ffi::wxd_StockCursor_WXD_CURSOR_WAIT,
+            StockCursor::Watch => ffi::wxd_StockCursor_WXD_CURSOR_WATCH,
+            StockCursor::Blank => ffi::wxd_StockCursor_WXD_CURSOR_BLANK,
+            StockCursor::Default => ffi::wxd_StockCursor_WXD_CURSOR_DEFAULT,
+            StockCursor::ArrowWait => ffi::wxd_StockCursor_WXD_CURSOR_ARROWWAIT,
+        };
+        let ptr = unsafe { ffi::wxd_Cursor_CreateStock(ffi_cursor_type) };
         if ptr.is_null() {
             None
         } else {
@@ -119,9 +150,22 @@ impl Cursor {
     pub fn from_file(filename: &str, bitmap_type: BitmapType, hotspot_x: i32, hotspot_y: i32) -> Option<Self> {
         let c_filename = CString::new(filename).ok()?;
         let ptr = unsafe {
+            let ffi_bitmap_type = match bitmap_type {
+                BitmapType::Invalid => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_INVALID,
+                BitmapType::Bmp => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_BMP,
+                BitmapType::Ico => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ICO,
+                BitmapType::Cur => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_CUR,
+                BitmapType::Xbm => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_XBM,
+                BitmapType::Xpm => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_XPM,
+                BitmapType::Png => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_PNG,
+                BitmapType::Jpeg => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_JPEG,
+                BitmapType::Gif => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_GIF,
+                BitmapType::Ani => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ANI,
+                BitmapType::Any => ffi::wxd_BitmapType_WXD_BITMAP_TYPE_ANY,
+            };
             ffi::wxd_Cursor_CreateFromFile(
                 c_filename.as_ptr(),
-                bitmap_type as ffi::wxd_BitmapType,
+                ffi_bitmap_type,
                 hotspot_x,
                 hotspot_y,
             )

@@ -42,12 +42,12 @@ use wxdragon_sys as ffi;
 #[repr(C)]
 pub enum Appearance {
     /// Force light mode appearance regardless of system settings.
-    Light = ffi::wxd_Appearance_WXD_APPEARANCE_LIGHT,
+    Light,
     /// Force dark mode appearance regardless of system settings.
-    Dark = ffi::wxd_Appearance_WXD_APPEARANCE_DARK,
+    Dark,
     /// Follow the system appearance settings (recommended).
     /// This enables dark mode on Windows when the system is using dark theme.
-    System = ffi::wxd_Appearance_WXD_APPEARANCE_SYSTEM,
+    System,
 }
 
 /// Result of setting the application appearance.
@@ -57,16 +57,20 @@ pub enum Appearance {
 #[repr(C)]
 pub enum AppearanceResult {
     /// The appearance was set successfully.
-    Ok = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_OK,
+    Ok,
     /// Failed to set the appearance (e.g., not supported on this platform).
-    Failure = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_FAILURE,
+    Failure,
     /// Cannot change the appearance at this time (e.g., windows already exist).
-    CannotChange = ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_CANNOT_CHANGE,
+    CannotChange,
 }
 
 impl From<Appearance> for ffi::wxd_Appearance {
     fn from(appearance: Appearance) -> Self {
-        appearance as ffi::wxd_Appearance
+        match appearance {
+            Appearance::Light => ffi::wxd_Appearance_WXD_APPEARANCE_LIGHT,
+            Appearance::Dark => ffi::wxd_Appearance_WXD_APPEARANCE_DARK,
+            Appearance::System => ffi::wxd_Appearance_WXD_APPEARANCE_SYSTEM,
+        }
     }
 }
 
