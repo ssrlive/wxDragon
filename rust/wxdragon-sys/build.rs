@@ -270,7 +270,7 @@ fn download_prebuilt_libraries(
     let gz_decoder = flate2::read::GzDecoder::new(tarball_file);
     let mut archive = tar::Archive::new(gz_decoder);
 
-    archive.unpack(&out_dir).map_err(|e| {
+    archive.unpack(out_dir).map_err(|e| {
         format!(
             "Failed to extract {} to {:?}: {}",
             artifact_name, out_dir, e
@@ -1035,7 +1035,7 @@ fn build_wxdragon_wrapper(
             msbuild_cmd
                 .current_dir(&wrapper_build_dir)
                 .arg("wxdragon.vcxproj")
-                .arg(&format!("/p:Configuration={}", build_type))
+                .arg(format!("/p:Configuration={}", build_type))
                 .arg("/p:Platform=x64")
                 .arg("/verbosity:detailed");
                 
