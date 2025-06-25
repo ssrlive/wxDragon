@@ -437,6 +437,48 @@ fn link_macos_libraries() {
         println!("cargo:rustc-link-lib=framework=AVKit");
         println!("cargo:rustc-link-lib=framework=CoreMedia");
     }
+
+    // Fix for ___isPlatformVersionAtLeast undefined symbol on macOS arm64
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    if target_arch == "aarch64" {
+        // Use xcrun to find the toolchain path
+        if let Ok(output) = std::process::Command::new("xcrun")
+            .args(&["--find", "clang"])
+            .output()
+        {
+            if output.status.success() {
+                let clang_path_str = String::from_utf8_lossy(&output.stdout);
+                let clang_path = clang_path_str.trim();
+                
+                // Construct the clang runtime library path from the clang path
+                // /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
+                // -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang
+                if let Some(clang_dir) = std::path::Path::new(clang_path).parent() {
+                    if let Some(usr_dir) = clang_dir.parent() {
+                        let clang_rt_path = usr_dir.join("lib").join("clang");
+                        
+                        // Try to find the clang runtime library
+                        if let Ok(entries) = std::fs::read_dir(&clang_rt_path) {
+                            for entry in entries.flatten() {
+                                if entry.file_type().map_or(false, |ft| ft.is_dir()) {
+                                    let version_dir = entry.path();
+                                    let lib_dir = version_dir.join("lib").join("darwin");
+                                    let clang_rt_lib = lib_dir.join("libclang_rt.osx.a");
+                                    
+                                    if clang_rt_lib.exists() {
+                                        println!("cargo:rustc-link-search=native={}", lib_dir.display());
+                                        println!("cargo:rustc-link-lib=static=clang_rt.osx");
+                                        println!("info: Added clang runtime library for macOS arm64: {}", clang_rt_lib.display());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn link_windows_libraries(target_env: &str) {
