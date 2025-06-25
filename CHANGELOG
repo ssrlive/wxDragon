@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.8.2
+
+### Bug Fixes
+- **Linux PIE Compatibility**: Fixed Position Independent Executable (PIE) linker errors on modern Linux distributions
+  - Added automatic PIE detection for Linux builds in CMakeLists.txt
+  - Checks for `--enable-default-pie` in GCC compiler flags to detect PIE-enabled systems
+  - Enables `CMAKE_POSITION_INDEPENDENT_CODE` when PIE is detected
+  - Maintains backward compatibility with non-PIE Linux systems
+  - Resolves `R_X86_64_32 relocation` errors on Ubuntu 17.04+, Debian 9+, Fedora 23+
+  - Fixes linker error: `relocation R_X86_64_32 against .rodata can not be used when making a PIE object; recompile with -fPIE`
+
+- **macOS arm64 Linking**: Fixed critical undefined symbol error for external projects using wxdragon from crates.io
+  - Resolved `___isPlatformVersionAtLeast` undefined symbol error on macOS arm64 with newer Xcode versions (16.4+)
+  - Added clang runtime library linking in build.rs for macOS arm64 builds
+  - Uses `xcrun --find clang` to dynamically locate the correct clang toolchain path
+  - Links `libclang_rt.osx.a` which provides the missing platform version checking symbols
+  - Fixed compatibility with macOS 15.5+ and newer Xcode toolchains
+  - Removed `.cargo/config.toml` that was masking the issue in CI testing
+  - Ensures CI accurately represents external project usage scenarios
+  - **Breaking**: External projects upgrading to 0.8.2 will now build successfully without requiring special configuration
+
+### Platform Support
+- ✅ **Enhanced Linux Compatibility**: Full support for modern Linux distributions with PIE enabled by default
+- ✅ **Enhanced macOS Compatibility**: Full support for macOS 15.5 with Xcode 16.4
+- ✅ **External Project Support**: Verified compatibility when used as a dependency from crates.io
+- ✅ **CI Accuracy**: GitHub Actions now properly tests the same conditions external projects face
+
 ## 0.8.1
 
 ### New Features
