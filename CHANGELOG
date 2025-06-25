@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.4
+
+### Bug Fixes
+- **XRC Style Registration**: Fixed critical bug where `wxBORDER_THEME` and other border styles were not recognized in XRC files
+  - Fixed `WxdPlatformAwareStaticBitmapHandler` constructor to properly call `AddWindowStyles()`
+  - Resolved "XRC error: unknown style flag 'wxBORDER_THEME'" errors when using border styles in StaticBitmap widgets
+  - All standard window border styles now work correctly in XRC files: `wxBORDER_THEME`, `wxBORDER_SIMPLE`, `wxBORDER_SUNKEN`, `wxBORDER_RAISED`, `wxBORDER_STATIC`, `wxBORDER_NONE`
+  - **Root Cause**: wxDragon's custom StaticBitmap XRC handler wasn't registering style constants at runtime
+  - **Impact**: Affects all platforms when using StaticBitmap widgets with border styles in XRC files
+  - **Breaking**: No breaking changes - this is a pure bug fix that enables previously broken functionality
+
+### Platform Support
+- ✅ **macOS**: Confirmed `wxBORDER_THEME` now works correctly in XRC files
+- ✅ **Windows**: Border styles now properly recognized in XRC StaticBitmap widgets  
+- ✅ **Linux**: Full XRC border style support restored
+
+### Technical Details
+- Enhanced `WxdPlatformAwareStaticBitmapHandler` to follow standard wxWidgets XRC handler patterns
+- Added proper style registration in handler constructor following wxWidgets best practices
+- Maintains platform-aware StaticBitmap functionality while fixing XRC compatibility
+- No performance impact - style registration occurs once during handler initialization
+
 ## 0.8.3
 
 ### New Features
