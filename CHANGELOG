@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.8.3
+
+### New Features
+- **WindowStyle Enum**: Added comprehensive WindowStyle enum according to wxWidgets 3.3.0 standards
+  - 20 standard window style flags: Border, Child, ClipChildren, ClipSiblings, Disabled, Group, Maximize, MaximizeBox, Minimize, MinimizeBox, Overlapped, Popup, SysMenu, TabStop, ThickFrame, Visible, VScroll, and more
+  - Type-safe bit flag operations using wxDragon's widget_style_enum macro
+  - Convenient style aliases: CHILD_WINDOW, ICONIC, SIZE_BOX, TILED for backward compatibility
+  - Default style set to Overlapped for standard window behavior
+
+- **Window Style Management API**: Added comprehensive window style management methods to WxWidget trait
+  - `set_style(style: WindowStyle)` - Set window style flags with type safety
+  - `set_style_raw(style: i64)` - Set raw style flags for advanced usage scenarios
+  - `get_style_raw() -> i64` - Get current window style flags as raw value
+  - `has_style(style: WindowStyle) -> bool` - Check if specific style flags are set
+  - `add_style(style: WindowStyle)` - Add styles while preserving existing ones
+  - `remove_style(style: WindowStyle)` - Remove specific styles without affecting others
+  - Support for combined styles using bitwise OR operator (`|`)
+
+### Enhancements
+- **C++ API Extensions**: Added window style management functions to the C API layer
+  - `wxd_Window_SetWindowStyle(window, style)` - Set window style implementation
+  - `wxd_Window_GetWindowStyle(window) -> i64` - Get window style implementation
+  - Enhanced wxd_window_base.h with comprehensive style management support
+
+- **Constants Generation**: Extended const_extractor tool with window style constants
+  - Added 20+ window style constants to const_extractor for cross-platform compatibility
+  - Generated WXD_WS_* constants for all supported platforms (GTK, MSW, OSX)
+  - Ensured consistent constant values across different operating systems
+  - Enhanced CMakeLists.txt and Makefile for const_extractor improvements
+
+- **API Exports**: Added WindowStyle enum to public API exports
+  - WindowStyle exported in prelude for convenient access
+  - Full integration with existing wxDragon patterns and conventions
+  - Comprehensive documentation with usage examples and platform notes
+
+### Code Quality
+- **Documentation**: Added extensive documentation for WindowStyle and related methods
+  - Detailed API documentation with practical usage examples
+  - Platform-specific behavior notes and style combination warnings
+  - Clear guidance on mutually exclusive styles (e.g., Child vs Popup)
+
+- **Example Enhancement**: Updated examples to demonstrate WindowStyle functionality
+  - Enhanced window_features_test example with style management demonstrations
+  - Updated simple example with improved UI structure using Panel and proper styling
+
+### Platform Support
+- Enhanced cross-platform window style constant generation for all supported platforms:
+  - ✅ **Linux (GTK)**: Full window style constant support with proper GTK mappings
+  - ✅ **Windows (MSW)**: Complete Windows-specific style constant generation
+  - ✅ **macOS (OSX)**: Native macOS window style constants with Cocoa compatibility
+  - Unified constant generation system ensuring consistent behavior across platforms
+
+### API Changes
+- Added new WindowStyle enum with comprehensive flag variants
+- Extended WxWidget trait with 6 new window style management methods
+- All new APIs follow wxDragon's established patterns for memory safety and type safety
+- No breaking changes - all additions are backward compatible
+
 ## 0.8.2
 
 ### Bug Fixes
