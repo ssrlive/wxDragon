@@ -23,7 +23,7 @@ fn test_window_functions(window: &Frame) {
     println!("\n=== Z-Order Management Tests ===");
     println!("Raising window to top of Z-order...");
     window.raise();
-    
+
     println!("Lowering window to bottom of Z-order...");
     window.lower();
 
@@ -38,7 +38,7 @@ fn test_window_functions(window: &Frame) {
 
 fn test_cursor_functionality(window: &Frame) {
     println!("Testing stock cursors...");
-    
+
     // Test all stock cursors
     let stock_cursors = [
         (StockCursor::Arrow, "Arrow"),
@@ -57,60 +57,63 @@ fn test_cursor_functionality(window: &Frame) {
         (StockCursor::Blank, "Blank"),
         (StockCursor::ArrowWait, "Arrow with Wait"),
     ];
-    
+
     for (cursor_type, name) in &stock_cursors {
         if let Some(cursor) = Cursor::from_stock(*cursor_type) {
             println!("✓ Created {} cursor (valid: {})", name, cursor.is_ok());
-            
+
             // Test cursor properties
             let hotspot = cursor.get_hotspot();
             println!("  Hotspot: ({}, {})", hotspot.x, hotspot.y);
-            
+
             // Test setting cursor on window
             window.set_cursor(Some(&cursor));
             println!("  Set {} cursor on window", name);
-            
+
             // Brief pause to see the cursor change
             std::thread::sleep(std::time::Duration::from_millis(500));
         } else {
             println!("✗ Failed to create {} cursor", name);
         }
     }
-    
+
     // Test cursor copy
     if let Some(hand_cursor) = Cursor::from_stock(StockCursor::Hand) {
         if let Some(copied_cursor) = hand_cursor.copy() {
-            println!("✓ Successfully copied hand cursor (valid: {})", copied_cursor.is_ok());
+            println!(
+                "✓ Successfully copied hand cursor (valid: {})",
+                copied_cursor.is_ok()
+            );
         } else {
             println!("✗ Failed to copy hand cursor");
         }
     }
-    
+
     // Test global cursor functions
     println!("\nTesting global cursor functions...");
-    
+
     if let Some(wait_cursor) = Cursor::from_stock(StockCursor::Wait) {
         println!("Setting global cursor to wait...");
         set_cursor(Some(&wait_cursor));
         std::thread::sleep(std::time::Duration::from_millis(1000));
-        
+
         println!("Resetting global cursor to default...");
         set_cursor(None);
     }
-    
+
     // Test busy cursor functionality
     println!("\nTesting busy cursor functionality...");
     println!("Is busy: {}", is_busy());
-    
+
     println!("Beginning busy cursor with default wait cursor...");
     begin_busy_cursor(None);
     println!("Is busy: {}", is_busy());
     std::thread::sleep(std::time::Duration::from_millis(1000));
-    
+
     println!("Ending busy cursor...");
     end_busy_cursor();
     println!("Is busy: {}", is_busy());
-    
+
     // Test BusyCursor RAII wrapper
     println!("\nTesting BusyCursor RAII wrapper...");
     {
@@ -119,7 +122,7 @@ fn test_cursor_functionality(window: &Frame) {
         std::thread::sleep(std::time::Duration::from_millis(1000));
     }
     println!("After busy scope - is busy: {}", is_busy());
-    
+
     // Test custom busy cursor
     if let Some(watch_cursor) = Cursor::from_stock(StockCursor::Watch) {
         println!("\nTesting custom busy cursor...");
@@ -128,7 +131,7 @@ fn test_cursor_functionality(window: &Frame) {
         std::thread::sleep(std::time::Duration::from_millis(1000));
     }
     println!("After custom busy cursor - is busy: {}", is_busy());
-    
+
     // Reset window cursor to default
     window.set_cursor(None);
     println!("\nCursor testing completed! Window cursor reset to default.");
@@ -150,4 +153,4 @@ fn main() {
         // Test all the new window functions
         test_window_functions(&frame);
     });
-} 
+}

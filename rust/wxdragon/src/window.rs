@@ -19,6 +19,46 @@ crate::widget_style_enum!(
     default_variant: ValidateRecursively
 );
 
+// Use the widget_style_enum macro to define WindowStyle
+crate::widget_style_enum!(
+    name: WindowStyle,
+    doc: "Standard window style flags that control fundamental window behaviors and appearance according to wxWidgets 3.3.0.",
+    variants: {
+        Border: ffi::WXD_WS_BORDER, "The window has a thin-line border.",
+        Child: ffi::WXD_WS_CHILD, "The window is a child window. Cannot have a menu bar and cannot be used with Popup style.",
+        ClipChildren: ffi::WXD_WS_CLIPCHILDREN, "Excludes the area occupied by child windows when drawing occurs within the parent window.",
+        ClipSiblings: ffi::WXD_WS_CLIPSIBLINGS, "Clips child windows relative to each other to prevent overlap drawing issues.",
+        Disabled: ffi::WXD_WS_DISABLED, "The window is initially disabled and cannot receive user input.",
+        Group: ffi::WXD_WS_GROUP, "The window is the first control of a group of controls for dialog navigation.",
+        Maximize: ffi::WXD_WS_MAXIMIZE, "The window is initially maximized.",
+        MaximizeBox: ffi::WXD_WS_MAXIMIZEBOX, "The window has a maximize button. Cannot be combined with ContextHelp extra style.",
+        Minimize: ffi::WXD_WS_MINIMIZE, "The window is initially minimized.",
+        MinimizeBox: ffi::WXD_WS_MINIMIZEBOX, "The window has a minimize button. Cannot be combined with ContextHelp extra style.",
+        Overlapped: ffi::WXD_WS_OVERLAPPED, "The window is an overlapped window with a title bar and border.",
+        Popup: ffi::WXD_WS_POPUP, "The window is a pop-up window. Cannot be used with Child style.",
+        SysMenu: ffi::WXD_WS_SYSMENU, "The window has a system menu on its title bar. Caption style must also be specified.",
+        TabStop: ffi::WXD_WS_TABSTOP, "The window can receive keyboard focus when the user presses the TAB key.",
+        ThickFrame: ffi::WXD_WS_THICKFRAME, "The window has a sizing border.",
+        Visible: ffi::WXD_WS_VISIBLE, "The window is initially visible.",
+        VScroll: ffi::WXD_WS_VSCROLL, "The window has a vertical scroll bar."
+    },
+    default_variant: Overlapped
+);
+
+impl WindowStyle {
+    /// Alias for `Child` - marks the window as a child window.
+    pub const CHILD_WINDOW: WindowStyle = WindowStyle::Child;
+
+    /// Alias for `Minimize` - the window is initially minimized/iconified.
+    pub const ICONIC: WindowStyle = WindowStyle::Minimize;
+
+    /// Alias for `ThickFrame` - the window has a sizing border.
+    pub const SIZE_BOX: WindowStyle = WindowStyle::ThickFrame;
+
+    /// Alias for `Overlapped` - the window is an overlapped window with title bar and border.
+    pub const TILED: WindowStyle = WindowStyle::Overlapped;
+}
+
 /// Background style for windows, affecting how background painting is handled.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BackgroundStyle {
@@ -793,12 +833,12 @@ pub trait WxWidget {
         if handle.is_null() {
             return String::new();
         }
-        
+
         let c_str_ptr = unsafe { ffi::wxd_Window_GetName(handle) };
         if c_str_ptr.is_null() {
             return String::new();
         }
-        
+
         let rust_string = unsafe {
             let c_str = std::ffi::CStr::from_ptr(c_str_ptr);
             let s = c_str.to_string_lossy().into_owned();
@@ -926,7 +966,10 @@ pub trait WxWidget {
     ///
     /// # Returns
     /// `Some(Window)` if a window has capture, `None` if no window has capture
-    fn get_capture() -> Option<Window> where Self: Sized {
+    fn get_capture() -> Option<Window>
+    where
+        Self: Sized,
+    {
         let window_ptr = unsafe { ffi::wxd_Window_GetCapture() };
         if window_ptr.is_null() {
             None
@@ -947,7 +990,10 @@ pub trait WxWidget {
     fn get_text_extent(&self, text: &str) -> crate::geometry::Size {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            return crate::geometry::Size { width: 0, height: 0 };
+            return crate::geometry::Size {
+                width: 0,
+                height: 0,
+            };
         }
 
         match std::ffi::CString::new(text) {
@@ -958,7 +1004,10 @@ pub trait WxWidget {
                     height: size.height,
                 }
             }
-            Err(_) => crate::geometry::Size { width: 0, height: 0 },
+            Err(_) => crate::geometry::Size {
+                width: 0,
+                height: 0,
+            },
         }
     }
 
@@ -975,15 +1024,29 @@ pub trait WxWidget {
     /// - `Size`: The width and height of the text
     /// - `i32`: The descent (portion below baseline)
     /// - `i32`: The external leading (spacing between lines)
-    fn get_full_text_extent(&self, text: &str, font: Option<&crate::font::Font>) -> (crate::geometry::Size, i32, i32) {
+    fn get_full_text_extent(
+        &self,
+        text: &str,
+        font: Option<&crate::font::Font>,
+    ) -> (crate::geometry::Size, i32, i32) {
         let handle = self.handle_ptr();
         if handle.is_null() {
-            return (crate::geometry::Size { width: 0, height: 0 }, 0, 0);
+            return (
+                crate::geometry::Size {
+                    width: 0,
+                    height: 0,
+                },
+                0,
+                0,
+            );
         }
 
         match std::ffi::CString::new(text) {
             Ok(c_text) => {
-                let mut size = wxdragon_sys::wxd_Size { width: 0, height: 0 };
+                let mut size = wxdragon_sys::wxd_Size {
+                    width: 0,
+                    height: 0,
+                };
                 let mut descent = 0i32;
                 let mut external_leading = 0i32;
                 let font_ptr = font.map(|f| f.as_ptr()).unwrap_or(std::ptr::null_mut());
@@ -1008,7 +1071,14 @@ pub trait WxWidget {
                     external_leading,
                 )
             }
-            Err(_) => (crate::geometry::Size { width: 0, height: 0 }, 0, 0),
+            Err(_) => (
+                crate::geometry::Size {
+                    width: 0,
+                    height: 0,
+                },
+                0,
+                0,
+            ),
         }
     }
 
@@ -1036,6 +1106,135 @@ pub trait WxWidget {
         } else {
             0
         }
+    }
+
+    // --- Window Style Management ---
+
+    /// Sets the window style flags.
+    ///
+    /// Window styles control fundamental behaviors and appearance of the window.
+    /// You can combine multiple styles using the bitwise OR operator (`|`).
+    ///
+    /// # Arguments
+    /// * `style` - The window style flags to set
+    ///
+    /// # Example
+    /// ```ignore
+    /// use wxdragon::prelude::*;
+    ///
+    /// // Set window to be visible with a caption and resize border
+    /// window.set_style(WindowStyle::Visible | WindowStyle::Caption | WindowStyle::ThickFrame);
+    ///
+    /// // Make window a popup window
+    /// window.set_style(WindowStyle::Popup | WindowStyle::Visible);
+    /// ```
+    ///
+    /// # Note
+    /// Some style changes may not take effect until the window is recreated or refreshed.
+    /// Certain style combinations are mutually exclusive (e.g., Child and Popup).
+    fn set_style(&self, style: WindowStyle) {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetWindowStyle(window_ptr, style.bits());
+            }
+        }
+    }
+
+    /// Sets window style flags using raw i64 value.
+    ///
+    /// This is provided for cases where you need to set flags not covered by the enum.
+    /// For normal usage, prefer `set_style()` with the WindowStyle enum.
+    ///
+    /// # Arguments
+    /// * `style` - The raw style flags value
+    fn set_style_raw(&self, style: i64) {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe {
+                ffi::wxd_Window_SetWindowStyle(window_ptr, style);
+            }
+        }
+    }
+
+    /// Gets the current window style flags as raw value.
+    ///
+    /// # Returns
+    /// The currently set window style flags for this window as a raw i64 value.
+    /// Use `WindowStyle` variants to check for specific flags.
+    ///
+    /// # Example
+    /// ```ignore
+    /// let current_style = window.get_style_raw();
+    /// if (current_style & WindowStyle::Visible.bits()) != 0 {
+    ///     println!("Window is visible");
+    /// }
+    /// ```
+    fn get_style_raw(&self) -> i64 {
+        let window_ptr = self.handle_ptr();
+        if !window_ptr.is_null() {
+            unsafe { ffi::wxd_Window_GetWindowStyle(window_ptr) }
+        } else {
+            0
+        }
+    }
+
+    /// Checks if a specific window style flag is set.
+    ///
+    /// # Arguments
+    /// * `style` - The style flag to check for
+    ///
+    /// # Returns
+    /// `true` if the style flag is set, `false` otherwise
+    ///
+    /// # Example
+    /// ```ignore
+    /// if window.has_style(WindowStyle::Visible) {
+    ///     println!("Window is visible");
+    /// }
+    ///
+    /// if window.has_style(WindowStyle::Caption | WindowStyle::SysMenu) {
+    ///     println!("Window has both caption and system menu");
+    /// }
+    /// ```
+    fn has_style(&self, style: WindowStyle) -> bool {
+        let current_style = self.get_style_raw();
+        (current_style & style.bits()) == style.bits()
+    }
+
+    /// Adds window style flags to the current set.
+    ///
+    /// This is equivalent to `set_style_raw(get_style_raw() | new_style.bits())`
+    /// but more convenient for adding flags without removing existing ones.
+    ///
+    /// # Arguments
+    /// * `style` - The style flags to add
+    ///
+    /// # Example
+    /// ```ignore
+    /// // Add visible flag while preserving other styles
+    /// window.add_style(WindowStyle::Visible);
+    /// ```
+    fn add_style(&self, style: WindowStyle) {
+        let current_style = self.get_style_raw();
+        self.set_style_raw(current_style | style.bits());
+    }
+
+    /// Removes window style flags from the current set.
+    ///
+    /// This removes the specified flags while preserving other flags.
+    ///
+    /// # Arguments
+    /// * `style` - The style flags to remove
+    ///
+    /// # Example
+    /// ```ignore
+    /// // Remove maximize box while preserving other styles
+    /// window.remove_style(WindowStyle::MaximizeBox);
+    /// ```
+    fn remove_style(&self, style: WindowStyle) {
+        let current_style = self.get_style_raw();
+        self.set_style_raw(current_style & !style.bits());
     }
 
     // Other common methods (SetSize, GetSize, etc.) can be added here

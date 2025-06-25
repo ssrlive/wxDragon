@@ -90,7 +90,9 @@ impl From<ffi::wxd_AppearanceResult> for AppearanceResult {
         match result {
             ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_OK => AppearanceResult::Ok,
             ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_FAILURE => AppearanceResult::Failure,
-            ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_CANNOT_CHANGE => AppearanceResult::CannotChange,
+            ffi::wxd_AppearanceResult_WXD_APPEARANCE_RESULT_CANNOT_CHANGE => {
+                AppearanceResult::CannotChange
+            }
             _ => AppearanceResult::Failure, // Default fallback
         }
     }
@@ -106,7 +108,7 @@ pub struct SystemAppearance {
 
 impl SystemAppearance {
     /// Creates a SystemAppearance from a raw pointer.
-    /// 
+    ///
     /// # Safety
     /// The pointer must be valid and point to a wxd_SystemAppearance_t object.
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_SystemAppearance_t) -> Option<Self> {
@@ -153,9 +155,7 @@ impl SystemAppearance {
             if c_str.is_null() {
                 String::new()
             } else {
-                let result = CStr::from_ptr(c_str)
-                    .to_string_lossy()
-                    .into_owned();
+                let result = CStr::from_ptr(c_str).to_string_lossy().into_owned();
                 ffi::wxd_free_string(c_str);
                 result
             }
@@ -273,7 +273,7 @@ pub struct App {
 
 impl App {
     /// Creates an App wrapper from a raw pointer.
-    /// 
+    ///
     /// # Safety
     /// The pointer must be valid and point to a wxd_App_t object.
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_App_t) -> Option<Self> {
@@ -312,4 +312,4 @@ pub fn get_app() -> Option<App> {
         let ptr = ffi::wxd_GetApp();
         App::from_ptr(ptr)
     }
-} 
+}

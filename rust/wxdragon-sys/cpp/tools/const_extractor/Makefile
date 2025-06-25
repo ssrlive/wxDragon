@@ -1,36 +1,51 @@
 SHELL=/bin/bash # Explicitly set shell for $(shell ...) compatibility
-CXX = g++
-# IMPORTANT: Ensure WX_CONFIG points to the correct wx-config script.
-# Example: /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdragon-sys-SOMEHASH/out/build/wxwidgets_build/wx-config
-WX_CONFIG = /Users/allen/Documents/RustProjects/wxdragon/target/debug/build/wxdragon-sys-47c25ea934952589/out/build/wxwidgets_build/wx-config # Removed quotes
 
-# Get compiler and linker flags from wx-config
-CXXFLAGS_CMD = $(WX_CONFIG) --cxxflags --unicode=yes --debug=yes
-LIBS_CMD = $(WX_CONFIG) --libs core,base,adv --unicode=yes --debug=yes
+# ==============================================================================
+# CMAKE-BASED BUILD WITH PREBUILT WXWIDGETS
+# ==============================================================================
+# Since wxDragon now uses prebuilt libraries, we use CMake with the provided
+# wxWidgetsConfig.cmake for proper configuration instead of manual setup.
 
-CXXFLAGS := $(shell $(CXXFLAGS_CMD))
-LIBS := $(shell $(LIBS_CMD))
-
-$(info Building with WX_CONFIG: $(WX_CONFIG))
-$(info CXXFLAGS_CMD: $(CXXFLAGS_CMD))
-$(info Resolved CXXFLAGS: $(CXXFLAGS))
-$(info LIBS_CMD: $(LIBS_CMD))
-$(info Resolved LIBS: $(LIBS))
-
+BUILD_DIR = build
 TARGET_EXEC = const_extractor
 
-# Source files
-SOURCES = main.cpp
+.PHONY: all clean configure build
 
-# Default target is now the bundle
-all: $(TARGET_EXEC)
+# Default target
+all: build
 
-$(TARGET_EXEC): $(SOURCES)
-	@echo "Compiling and linking $(TARGET_EXEC)..."
-	$(CXX) $(SOURCES) -o $(TARGET_EXEC) $(CXXFLAGS) $(LIBS)
-	@echo "Build finished."
+# Configure the build with CMake
+configure:
+	@echo "Configuring const_extractor with CMake..."
+	@mkdir -p $(BUILD_DIR)
+	cd $(BUILD_DIR) && cmake ..
 
+# Build the project
+build: configure
+	@echo "Building const_extractor..."
+	cd $(BUILD_DIR) && $(MAKE)
+	@if [ -f $(BUILD_DIR)/$(TARGET_EXEC) ]; then \
+		cp $(BUILD_DIR)/$(TARGET_EXEC) ./$(TARGET_EXEC); \
+		echo "const_extractor built successfully!"; \
+	else \
+		echo "Build failed - executable not found"; \
+		exit 1; \
+	fi
+
+# Clean build artifacts
 clean:
-	rm -f $(TARGET_EXEC) $(SOURCES:.cpp=.o)
+	@echo "Cleaning build files..."
+	rm -rf $(BUILD_DIR)
+	rm -f $(TARGET_EXEC)
 
-.PHONY: all clean 
+# For backward compatibility - direct build without intermediate steps
+$(TARGET_EXEC): build
+
+# Show help
+help:
+	@echo "Available targets:"
+	@echo "  all        - Configure and build (default)"
+	@echo "  configure  - Configure build with CMake"
+	@echo "  build      - Build the project"
+	@echo "  clean      - Remove build files"
+	@echo "  help       - Show this help" 

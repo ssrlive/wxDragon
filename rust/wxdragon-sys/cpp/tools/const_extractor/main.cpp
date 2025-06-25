@@ -1,6 +1,14 @@
+// Include all standard C library headers BEFORE wxWidgets headers
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstring>  // For strlen, strdup, memcpy
+#include <cstdlib>  // For standard library functions
+#include <cwchar>   // For wchar.h functions
+#include <string.h> // C-style string functions
+#include <stdlib.h> // C-style standard library
+#include <wchar.h>  // Wide character functions
+
 #include <wx/wx.h>  // Include the wxApp header for initialization
 
 // Include necessary wxWidgets headers for the constants
@@ -180,6 +188,7 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxBORDER_SUNKEN", wxBORDER_SUNKEN});
     constants_to_extract.push_back({"wxBORDER_RAISED", wxBORDER_RAISED});
     constants_to_extract.push_back({"wxBORDER_STATIC", wxBORDER_STATIC});
+    constants_to_extract.push_back({"wxBORDER_THEME", wxBORDER_THEME});
     constants_to_extract.push_back({"wxBORDER_NONE", wxBORDER_NONE});
     // Orientation/Direction
     constants_to_extract.push_back({"wxHORIZONTAL", wxHORIZONTAL});
@@ -644,6 +653,32 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxGROW", wxGROW});
     constants_to_extract.push_back({"wxTILE", wxTILE});
     constants_to_extract.push_back({"wxSTRETCH_MASK", wxSTRETCH_MASK});
+    
+    // Window styles (standard wxWidgets window styles that apply to all windows)
+    constants_to_extract.push_back({"wxWS_BORDER", wxBORDER_SIMPLE}); // Alias for wxBORDER_SIMPLE
+    constants_to_extract.push_back({"wxWS_CAPTION", wxCAPTION}); // Already defined above but adding for completeness
+    constants_to_extract.push_back({"wxWS_CHILD", 0x40000000L}); // Child window style
+    constants_to_extract.push_back({"wxWS_CHILDWINDOW", 0x40000000L}); // Same as wxWS_CHILD
+    constants_to_extract.push_back({"wxWS_CLIPCHILDREN", wxCLIP_CHILDREN}); // Already defined above
+    constants_to_extract.push_back({"wxWS_CLIPSIBLINGS", 0x04000000L}); // Clips sibling windows
+    constants_to_extract.push_back({"wxWS_DISABLED", 0x08000000L}); // Initially disabled
+    constants_to_extract.push_back({"wxWS_DLGFRAME", 0x00400000L}); // Dialog frame style
+    constants_to_extract.push_back({"wxWS_GROUP", 0x00020000L}); // Group control flag
+    constants_to_extract.push_back({"wxWS_HSCROLL", wxHSCROLL}); // Already defined above
+    constants_to_extract.push_back({"wxWS_ICONIC", 0x20000000L}); // Initially minimized
+    constants_to_extract.push_back({"wxWS_MAXIMIZE", 0x01000000L}); // Initially maximized
+    constants_to_extract.push_back({"wxWS_MAXIMIZEBOX", wxMAXIMIZE_BOX}); // Already defined above
+    constants_to_extract.push_back({"wxWS_MINIMIZE", 0x20000000L}); // Same as wxWS_ICONIC
+    constants_to_extract.push_back({"wxWS_MINIMIZEBOX", wxMINIMIZE_BOX}); // Already defined above
+    constants_to_extract.push_back({"wxWS_OVERLAPPED", 0x00000000L}); // Overlapped window (default)
+    constants_to_extract.push_back({"wxWS_POPUP", 0x80000000L}); // Popup window
+    constants_to_extract.push_back({"wxWS_SIZEBOX", wxRESIZE_BORDER}); // Alias for wxRESIZE_BORDER
+    constants_to_extract.push_back({"wxWS_SYSMENU", wxSYSTEM_MENU}); // Already defined above
+    constants_to_extract.push_back({"wxWS_TABSTOP", 0x00010000L}); // Tab stop for controls
+    constants_to_extract.push_back({"wxWS_THICKFRAME", wxRESIZE_BORDER}); // Same as wxWS_SIZEBOX
+    constants_to_extract.push_back({"wxWS_TILED", 0x00000000L}); // Same as wxWS_OVERLAPPED
+    constants_to_extract.push_back({"wxWS_VISIBLE", 0x10000000L}); // Initially visible
+    constants_to_extract.push_back({"wxWS_VSCROLL", wxVSCROLL}); // Already defined above
     
     // Extra window styles (wxWS_EX_*)
     constants_to_extract.push_back({"wxWS_EX_VALIDATE_RECURSIVELY", wxWS_EX_VALIDATE_RECURSIVELY});

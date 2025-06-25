@@ -18,7 +18,10 @@ widget_style_enum!(
         BorderNone: ffi::WXD_BORDER_NONE, "No border.",
         BorderSimple: ffi::WXD_BORDER_SIMPLE, "A simple border.",
         BorderRaised: ffi::WXD_BORDER_RAISED, "A raised border.",
-        BorderSunken: ffi::WXD_BORDER_SUNKEN, "A sunken border."
+        BorderSunken: ffi::WXD_BORDER_SUNKEN, "A sunken border.",
+        BorderStatic: ffi::WXD_BORDER_STATIC, "A static border.",
+        BorderTheme: ffi::WXD_BORDER_THEME, "A theme border.",
+        BorderDefault: ffi::WXD_BORDER_DEFAULT, "A default border."
     },
     default_variant: TabTraversal
 );

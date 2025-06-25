@@ -1,9 +1,15 @@
 // --- Core Types & Traits ---
-pub use crate::app::{call_after, main, set_top_window, get_app, set_appearance};
-pub use crate::appearance::{Appearance, AppearanceResult, SystemAppearance, AppAppearance, get_system_appearance, is_system_dark_mode, get_app as get_app_for_appearance};
+pub use crate::app::{call_after, get_app, main, set_appearance, set_top_window};
+pub use crate::appearance::{
+    get_app as get_app_for_appearance, get_system_appearance, is_system_dark_mode, AppAppearance,
+    Appearance, AppearanceResult, SystemAppearance,
+};
 pub use crate::clipboard::{Clipboard, ClipboardLocker};
 pub use crate::color::{colours, Colour};
-pub use crate::cursor::{Cursor, StockCursor, BitmapType, BusyCursor, set_cursor, begin_busy_cursor, end_busy_cursor, is_busy};
+pub use crate::cursor::{
+    begin_busy_cursor, end_busy_cursor, is_busy, set_cursor, BitmapType, BusyCursor, Cursor,
+    StockCursor,
+};
 pub use crate::datetime::DateTime;
 pub use crate::event::{Event, EventType, IdleEvent, IdleMode, WindowEventData, WxEvtHandler};
 // ADDED: Event category traits
@@ -16,7 +22,9 @@ pub use crate::id::{Id, ID_ANY, ID_CANCEL, ID_HIGHEST, ID_NO, ID_OK, ID_YES};
 pub use crate::sizers::WxSizer;
 pub use crate::types::Style;
 pub use crate::utils::WxdArrayString;
-pub use crate::window::{BackgroundStyle, ExtraWindowStyle, Window, WxWidget, WxWidgetDowncast};
+pub use crate::window::{
+    BackgroundStyle, ExtraWindowStyle, Window, WindowStyle, WxWidget, WxWidgetDowncast,
+};
 
 // --- Sizers ---
 pub use crate::sizers::box_sizer::{BoxSizer, BoxSizerBuilder};

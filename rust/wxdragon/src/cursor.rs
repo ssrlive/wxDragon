@@ -1,5 +1,5 @@
-use crate::geometry::Point;
 use crate::bitmap::Bitmap;
+use crate::geometry::Point;
 use std::ffi::CString;
 use wxdragon_sys as ffi;
 
@@ -56,21 +56,21 @@ pub enum BitmapType {
 }
 
 /// Represents a cursor object.
-/// 
+///
 /// A cursor is a small bitmap usually used for denoting where the mouse pointer is,
 /// with a picture that might indicate the interpretation of a mouse click.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use wxdragon::prelude::*;
-/// 
+///
 /// // Create a stock cursor
 /// let hand_cursor = Cursor::from_stock(StockCursor::Hand);
-/// 
+///
 /// // Create a cursor from a file
 /// let custom_cursor = Cursor::from_file("my_cursor.cur", BitmapType::Cur, 8, 8);
-/// 
+///
 /// // Use the cursor on a window
 /// window.set_cursor(Some(&hand_cursor));
 /// ```
@@ -79,13 +79,13 @@ pub struct Cursor(pub(crate) *mut ffi::wxd_Cursor_t);
 
 impl Cursor {
     /// Creates a cursor from a stock cursor type.
-    /// 
+    ///
     /// # Arguments
     /// * `cursor_type` - The stock cursor type to create
-    /// 
+    ///
     /// # Returns
     /// A new `Cursor` instance, or `None` if creation failed
-    /// 
+    ///
     /// # Examples
     /// ```rust
     /// let cursor = Cursor::from_stock(StockCursor::Hand);
@@ -130,24 +130,29 @@ impl Cursor {
             Some(Self(ptr))
         }
     }
-    
+
     /// Creates a cursor from a file.
-    /// 
+    ///
     /// # Arguments
     /// * `filename` - Path to the cursor file
     /// * `bitmap_type` - The type of bitmap file
     /// * `hotspot_x` - X coordinate of the cursor hotspot
     /// * `hotspot_y` - Y coordinate of the cursor hotspot
-    /// 
+    ///
     /// # Returns
     /// A new `Cursor` instance, or `None` if creation failed
-    /// 
+    ///
     /// # Examples
     /// ```rust
     /// let cursor = Cursor::from_file("cursor.cur", BitmapType::Cur, 8, 8);
     /// let png_cursor = Cursor::from_file("cursor.png", BitmapType::Png, 16, 16);
     /// ```
-    pub fn from_file(filename: &str, bitmap_type: BitmapType, hotspot_x: i32, hotspot_y: i32) -> Option<Self> {
+    pub fn from_file(
+        filename: &str,
+        bitmap_type: BitmapType,
+        hotspot_x: i32,
+        hotspot_y: i32,
+    ) -> Option<Self> {
         let c_filename = CString::new(filename).ok()?;
         let ptr = unsafe {
             let ffi_bitmap_type = match bitmap_type {
@@ -176,9 +181,9 @@ impl Cursor {
             Some(Self(ptr))
         }
     }
-    
+
     /// Creates a cursor from raw bitmap data.
-    /// 
+    ///
     /// # Arguments
     /// * `bits` - Raw bitmap data (1 bit per pixel)
     /// * `width` - Width of the cursor in pixels
@@ -186,10 +191,10 @@ impl Cursor {
     /// * `hotspot_x` - X coordinate of the cursor hotspot
     /// * `hotspot_y` - Y coordinate of the cursor hotspot
     /// * `mask_bits` - Optional mask data (1 bit per pixel for transparency)
-    /// 
+    ///
     /// # Returns
     /// A new `Cursor` instance, or `None` if creation failed
-    /// 
+    ///
     /// # Safety
     /// The `bits` slice must contain at least `(width * height + 7) / 8` bytes.
     /// If `mask_bits` is provided, it must also contain the same amount of data.
@@ -204,18 +209,18 @@ impl Cursor {
         if width <= 0 || height <= 0 {
             return None;
         }
-        
+
         let expected_size = ((width * height + 7) / 8) as usize;
         if bits.len() < expected_size {
             return None;
         }
-        
+
         if let Some(mask) = mask_bits {
             if mask.len() < expected_size {
                 return None;
             }
         }
-        
+
         let mask_ptr = mask_bits.map(|m| m.as_ptr()).unwrap_or(std::ptr::null());
         let ptr = unsafe {
             ffi::wxd_Cursor_CreateFromData(
@@ -227,19 +232,19 @@ impl Cursor {
                 mask_ptr,
             )
         };
-        
+
         if ptr.is_null() {
             None
         } else {
             Some(Self(ptr))
         }
     }
-    
+
     /// Creates a cursor from a bitmap/image.
-    /// 
+    ///
     /// # Arguments
     /// * `bitmap` - The bitmap to convert to a cursor
-    /// 
+    ///
     /// # Returns
     /// A new `Cursor` instance, or `None` if creation failed
     pub fn from_bitmap(bitmap: &Bitmap) -> Option<Self> {
@@ -250,9 +255,9 @@ impl Cursor {
             Some(Self(ptr))
         }
     }
-    
+
     /// Creates a copy of this cursor.
-    /// 
+    ///
     /// # Returns
     /// A new `Cursor` instance that is a copy of this one, or `None` if copying failed
     pub fn copy(&self) -> Option<Self> {
@@ -263,61 +268,61 @@ impl Cursor {
             Some(Self(ptr))
         }
     }
-    
+
     /// Returns true if the cursor is valid and can be used.
-    /// 
+    ///
     /// # Returns
     /// `true` if the cursor is valid, `false` otherwise
     pub fn is_ok(&self) -> bool {
         unsafe { ffi::wxd_Cursor_IsOk(self.0) }
     }
-    
+
     /// Gets the hotspot coordinates of the cursor.
-    /// 
+    ///
     /// The hotspot is the point at which the mouse is actually considered to be
     /// when this cursor is used.
-    /// 
+    ///
     /// # Returns
     /// A `Point` containing the hotspot coordinates, or (-1, -1) if not available
     pub fn get_hotspot(&self) -> Point {
         let point = unsafe { ffi::wxd_Cursor_GetHotSpot(self.0) };
         Point::new(point.x, point.y)
     }
-    
+
     /// Gets the native handle of the cursor (platform-specific).
-    /// 
+    ///
     /// # Returns
     /// A raw pointer to the native cursor handle, or null if not available
-    /// 
+    ///
     /// # Safety
     /// The returned pointer should not be used to modify the cursor and may
     /// only be valid for the lifetime of this `Cursor` instance.
     pub unsafe fn get_handle(&self) -> *mut std::ffi::c_void {
         ffi::wxd_Cursor_GetHandle(self.0)
     }
-    
+
     /// Sets the native handle of the cursor (platform-specific).
-    /// 
+    ///
     /// # Arguments
     /// * `handle` - Raw pointer to the native cursor handle
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the handle is valid and compatible with the current platform.
     /// This function is only supported on Windows.
     pub unsafe fn set_handle(&self, handle: *mut std::ffi::c_void) {
         ffi::wxd_Cursor_SetHandle(self.0, handle);
     }
-    
+
     /// Returns the raw underlying pointer.
-    /// 
+    ///
     /// # Safety
     /// This is intended for internal use by wxDragon and should not be used directly.
     pub(crate) fn as_ptr(&self) -> *mut ffi::wxd_Cursor_t {
         self.0
     }
-    
+
     /// Creates a new Cursor wrapper from a raw pointer.
-    /// 
+    ///
     /// # Safety
     /// The caller must ensure the pointer is valid and manages its lifetime correctly.
     pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_Cursor_t) -> Option<Self> {
@@ -327,7 +332,7 @@ impl Cursor {
             Some(Self(ptr))
         }
     }
-    
+
     /// Checks if the underlying pointer is null.
     pub fn is_null(&self) -> bool {
         self.0.is_null()
@@ -351,15 +356,15 @@ unsafe impl Sync for Cursor {}
 // Global cursor functions
 
 /// Sets the global cursor for the application.
-/// 
+///
 /// # Arguments
 /// * `cursor` - The cursor to set globally, or `None` to reset to default
-/// 
+///
 /// # Examples
 /// ```rust
 /// let wait_cursor = Cursor::from_stock(StockCursor::Wait);
 /// set_cursor(Some(&wait_cursor));
-/// 
+///
 /// // Reset to default
 /// set_cursor(None);
 /// ```
@@ -371,22 +376,22 @@ pub fn set_cursor(cursor: Option<&Cursor>) {
 }
 
 /// Begins a busy cursor state.
-/// 
+///
 /// This function sets a wait/busy cursor globally and maintains a stack of busy states.
 /// You must call [`end_busy_cursor`] to restore the previous cursor.
-/// 
+///
 /// # Arguments
 /// * `cursor` - Optional custom busy cursor. If `None`, uses the default wait cursor
-/// 
+///
 /// # Examples
 /// ```rust
 /// // Use default wait cursor
 /// begin_busy_cursor(None);
-/// 
+///
 /// // Use custom busy cursor
 /// let custom_wait = Cursor::from_stock(StockCursor::Watch);
 /// begin_busy_cursor(Some(&custom_wait));
-/// 
+///
 /// // Don't forget to end the busy state
 /// end_busy_cursor();
 /// ```
@@ -398,9 +403,9 @@ pub fn begin_busy_cursor(cursor: Option<&Cursor>) {
 }
 
 /// Ends the current busy cursor state.
-/// 
+///
 /// This function restores the cursor that was active before the last call to [`begin_busy_cursor`].
-/// 
+///
 /// # Examples
 /// ```rust
 /// begin_busy_cursor(None);
@@ -414,10 +419,10 @@ pub fn end_busy_cursor() {
 }
 
 /// Returns true if a busy cursor is currently active.
-/// 
+///
 /// # Returns
 /// `true` if a busy cursor is currently being displayed, `false` otherwise
-/// 
+///
 /// # Examples
 /// ```rust
 /// assert!(!is_busy());
@@ -431,10 +436,10 @@ pub fn is_busy() -> bool {
 }
 
 /// Helper struct for automatic busy cursor management.
-/// 
+///
 /// This struct automatically begins a busy cursor when created and ends it when dropped,
 /// ensuring proper cleanup even if an error occurs.
-/// 
+///
 /// # Examples
 /// ```rust
 /// {
@@ -449,10 +454,10 @@ pub struct BusyCursor {
 
 impl BusyCursor {
     /// Creates a new busy cursor state.
-    /// 
+    ///
     /// # Arguments
     /// * `cursor` - Optional custom busy cursor. If `None`, uses the default wait cursor
-    /// 
+    ///
     /// # Returns
     /// A `BusyCursor` instance that will automatically restore the cursor when dropped
     pub fn new(cursor: Option<&Cursor>) -> Self {
@@ -465,4 +470,4 @@ impl Drop for BusyCursor {
     fn drop(&mut self) {
         end_busy_cursor();
     }
-} 
+}

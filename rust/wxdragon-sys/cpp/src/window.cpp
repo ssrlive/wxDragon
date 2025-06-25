@@ -565,10 +565,26 @@ WXD_EXPORTED int wxd_Window_GetCharHeight(wxd_Window_t* window) {
 
 WXD_EXPORTED int wxd_Window_GetCharWidth(wxd_Window_t* window) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
-    if (wx_window) {
-        return wx_window->GetCharWidth();
+    if (!wx_window) {
+        return 0;
     }
-    return 0;
+    return wx_window->GetCharWidth();
+}
+
+// Window style functions
+WXD_EXPORTED void wxd_Window_SetWindowStyle(wxd_Window_t* window, int64_t style) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->SetWindowStyle(static_cast<long>(style));
+    }
+}
+
+WXD_EXPORTED int64_t wxd_Window_GetWindowStyle(wxd_Window_t* window) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return static_cast<int64_t>(wx_window->GetWindowStyle());
+    }
+    return 0; // Default fallback
 }
 
 } // extern "C"

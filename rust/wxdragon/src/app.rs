@@ -159,17 +159,17 @@ pub fn get_app() -> Option<crate::appearance::App> {
 ///     frame.show(true);
 /// });
 /// ```
-pub fn set_appearance(appearance: crate::appearance::Appearance) -> crate::appearance::AppearanceResult {
+pub fn set_appearance(
+    appearance: crate::appearance::Appearance,
+) -> crate::appearance::AppearanceResult {
     use crate::appearance::AppAppearance;
-    
+
     if let Some(app) = get_app() {
         app.set_appearance(appearance)
     } else {
         crate::appearance::AppearanceResult::Failure
     }
 }
-
-
 
 /// Runs the wxWidgets application main loop, providing a safe entry point.
 ///

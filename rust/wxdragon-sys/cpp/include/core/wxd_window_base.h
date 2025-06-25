@@ -95,4 +95,8 @@ WXD_EXPORTED void wxd_Window_GetFullTextExtent(wxd_Window_t* window, const char*
 WXD_EXPORTED int wxd_Window_GetCharHeight(wxd_Window_t* window);
 WXD_EXPORTED int wxd_Window_GetCharWidth(wxd_Window_t* window);
 
+// --- Window Style Functions ---
+WXD_EXPORTED void wxd_Window_SetWindowStyle(wxd_Window_t* window, int64_t style);
+WXD_EXPORTED int64_t wxd_Window_GetWindowStyle(wxd_Window_t* window);
+
 #endif // WXD_WINDOW_BASE_H 
