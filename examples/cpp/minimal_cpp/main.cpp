@@ -1,175 +1,172 @@
-// Clean wxWidgets C++ example demonstrating wxAUI functionality
+// XRC Test Application - Testing border styles on different platforms
 #include <wx/wx.h>
-#include <wx/aui/aui.h>
-#include <wx/textctrl.h>
+#include <wx/xrc/xmlres.h>
+#include <wx/panel.h>
 #include <wx/button.h>
+#include <wx/stattext.h>
 #include <wx/sizer.h>
 
 // Define a new application type
-class MyApp : public wxApp
+class XrcTestApp : public wxApp
 {
 public:
     virtual bool OnInit();
 };
 
 // Define a new frame type
-class MyFrame : public wxFrame
+class XrcTestFrame : public wxFrame
 {
 public:
-    MyFrame(const wxString& title);
-    virtual ~MyFrame();
+    XrcTestFrame();
 
 private:
-    wxAuiManager m_mgr;
-    
+    void OnTestSimple(wxCommandEvent& event);
+    void OnTestTheme(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
-    void OnSavePerspective(wxCommandEvent& event);
-    void OnLoadPerspective(wxCommandEvent& event);
     
-    wxString m_savedPerspective;
+    wxPanel* m_currentPanel;
     
     wxDECLARE_EVENT_TABLE();
 };
 
-// Event table for MyFrame
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+// Event IDs
+enum
+{
+    ID_TEST_SIMPLE = 1000,
+    ID_TEST_THEME = 1001
+};
+
+// Event table for XrcTestFrame
+wxBEGIN_EVENT_TABLE(XrcTestFrame, wxFrame)
+    EVT_MENU(ID_TEST_SIMPLE, XrcTestFrame::OnTestSimple)
+    EVT_MENU(ID_TEST_THEME, XrcTestFrame::OnTestTheme)
+    EVT_MENU(wxID_EXIT, XrcTestFrame::OnExit)
 wxEND_EVENT_TABLE()
 
 // Main program
-wxIMPLEMENT_APP(MyApp);
+wxIMPLEMENT_APP(XrcTestApp);
 
-// MyApp implementation
-bool MyApp::OnInit()
+// XrcTestApp implementation
+bool XrcTestApp::OnInit()
 {
     if (!wxApp::OnInit())
         return false;
 
-    MyFrame *frame = new MyFrame("AUI Manager Demo");
+    // Initialize XRC system
+    wxXmlResource::Get()->InitAllHandlers();
+    
+    // Load our XRC file
+    if (!wxXmlResource::Get()->Load("test_panel.xrc"))
+    {
+        wxLogError("Failed to load XRC resource file 'test_panel.xrc'");
+        return false;
+    }
+
+    XrcTestFrame *frame = new XrcTestFrame();
     frame->Show(true);
     return true;
 }
 
-// MyFrame implementation
-MyFrame::MyFrame(const wxString& title)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
+// XrcTestFrame implementation
+XrcTestFrame::XrcTestFrame()
+    : wxFrame(NULL, wxID_ANY, "XRC Border Style Test", wxDefaultPosition, wxSize(600, 400)),
+      m_currentPanel(nullptr)
 {
-    // Initialize the AUI manager
-    m_mgr.SetManagedWindow(this);
-    
     // Create menu
-    wxMenu *fileMenu = new wxMenu;
-    fileMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
+    wxMenu *testMenu = new wxMenu;
+    testMenu->Append(ID_TEST_SIMPLE, "Test &Simple Border\tCtrl-S", "Test panel with wxBORDER_SIMPLE");
+    testMenu->Append(ID_TEST_THEME, "Test &Theme Border\tCtrl-T", "Test panel with wxBORDER_THEME");
+    testMenu->AppendSeparator();
+    testMenu->Append(wxID_EXIT, "E&xit\tAlt-X", "Quit this program");
     
     wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(fileMenu, "&File");
+    menuBar->Append(testMenu, "&Test");
     SetMenuBar(menuBar);
     
-    // Create a panel with buttons for saving/loading perspective
-    wxPanel* toolPanel = new wxPanel(this, wxID_ANY);
-    wxBoxSizer* toolSizer = new wxBoxSizer(wxHORIZONTAL);
+    // Create a main sizer
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     
-    wxButton* saveButton = new wxButton(toolPanel, wxID_ANY, "Save Perspective");
-    wxButton* loadButton = new wxButton(toolPanel, wxID_ANY, "Load Perspective");
+    // Add instructions
+    wxStaticText* instructions = new wxStaticText(this, wxID_ANY, 
+        "Use the Test menu to load panels with different border styles.\n"
+        "This will help us identify if the issue is platform-specific.");
+    mainSizer->Add(instructions, 0, wxEXPAND | wxALL, 10);
     
-    toolSizer->Add(saveButton, 1, wxEXPAND | wxALL, 5);
-    toolSizer->Add(loadButton, 1, wxEXPAND | wxALL, 5);
-    
-    toolPanel->SetSizer(toolSizer);
-    
-    // Connect event handlers for buttons
-    saveButton->Bind(wxEVT_BUTTON, &MyFrame::OnSavePerspective, this);
-    loadButton->Bind(wxEVT_BUTTON, &MyFrame::OnLoadPerspective, this);
-    
-    // Create some text controls for the panes
-    wxTextCtrl* text1 = new wxTextCtrl(this, wxID_ANY, "Text Control 1", 
-                                      wxDefaultPosition, wxSize(200, 150),
-                                      wxTE_MULTILINE);
-                                      
-    wxTextCtrl* text2 = new wxTextCtrl(this, wxID_ANY, "Text Control 2", 
-                                      wxDefaultPosition, wxSize(200, 150),
-                                      wxTE_MULTILINE);
-                                      
-    wxTextCtrl* text3 = new wxTextCtrl(this, wxID_ANY, "Text Control 3", 
-                                      wxDefaultPosition, wxSize(200, 150),
-                                      wxTE_MULTILINE);
-    
-    // Add the panes to the manager with different directions
-    m_mgr.AddPane(toolPanel, wxAuiPaneInfo()
-                 .Name("toolbar")
-                 .Caption("Toolbar")
-                 .CaptionVisible(true)
-                 .Top()
-                 .ToolbarPane());
-    
-    m_mgr.AddPane(text1, wxAuiPaneInfo()
-                 .Name("text1")
-                 .Caption("Left Pane")
-                 .CaptionVisible(true)
-                 .Left()
-                 .MinSize(wxSize(200, 200))
-                 .BestSize(wxSize(300, 300))
-                 .Floatable(true)
-                 .Movable(true)
-                 .CloseButton(true)
-                 .MaximizeButton(true));
-    
-    m_mgr.AddPane(text2, wxAuiPaneInfo()
-                 .Name("text2")
-                 .Caption("Bottom Pane")
-                 .CaptionVisible(true)
-                 .Bottom()
-                 .MinSize(wxSize(200, 200))
-                 .BestSize(wxSize(300, 300))
-                 .Floatable(true)
-                 .Movable(true)
-                 .CloseButton(true)
-                 .MaximizeButton(true));
-    
-    m_mgr.AddPane(text3, wxAuiPaneInfo()
-                 .Name("text3")
-                 .Caption("Center Pane")
-                 .CaptionVisible(true)
-                 .CenterPane()
-                 .MinSize(wxSize(200, 200))
-                 .Floatable(true)
-                 .Movable(true)
-                 .CloseButton(true)
-                 .MaximizeButton(true));
-    
-    // Commit all changes
-    m_mgr.Update();
+    SetSizer(mainSizer);
     
     CreateStatusBar();
-    SetStatusText("Drag the caption bars to move panes around");
+    SetStatusText("Ready - Use Test menu to load XRC panels");
 }
 
-MyFrame::~MyFrame()
+void XrcTestFrame::OnTestSimple(wxCommandEvent& WXUNUSED(event))
 {
-    // Deinitialize the AUI manager
-    m_mgr.UnInit();
-}
-
-void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event))
-{
-    Close(true);
-}
-
-void MyFrame::OnSavePerspective(wxCommandEvent& WXUNUSED(event))
-{
-    m_savedPerspective = m_mgr.SavePerspective();
-    SetStatusText("Perspective saved");
-}
-
-void MyFrame::OnLoadPerspective(wxCommandEvent& WXUNUSED(event))
-{
-    if (!m_savedPerspective.IsEmpty())
+    // Remove current panel if any
+    if (m_currentPanel)
     {
-        m_mgr.LoadPerspective(m_savedPerspective);
-        SetStatusText("Perspective loaded");
+        m_currentPanel->Destroy();
+        m_currentPanel = nullptr;
+    }
+    
+    // Try to load panel with wxBORDER_SIMPLE
+    m_currentPanel = wxXmlResource::Get()->LoadPanel(this, "test_panel");
+    
+    if (m_currentPanel)
+{
+        // Add to sizer
+        wxSizer* sizer = GetSizer();
+        if (sizer)
+        {
+            sizer->Add(m_currentPanel, 1, wxEXPAND | wxALL, 5);
+            Layout();
+        }
+        SetStatusText("SUCCESS: Loaded panel with wxBORDER_SIMPLE");
+        
+        // Log the actual style
+        long style = m_currentPanel->GetWindowStyleFlag();
+        wxLogMessage("Panel style flags: 0x%08lX", style);
     }
     else
     {
-        SetStatusText("No perspective to load");
+        SetStatusText("FAILED: Could not load panel with wxBORDER_SIMPLE");
+        wxLogError("Failed to load test_panel from XRC");
     }
+}
+
+void XrcTestFrame::OnTestTheme(wxCommandEvent& WXUNUSED(event))
+{
+    // Remove current panel if any
+    if (m_currentPanel)
+    {
+        m_currentPanel->Destroy();
+        m_currentPanel = nullptr;
+    }
+    
+    // Try to load panel with wxBORDER_THEME
+    m_currentPanel = wxXmlResource::Get()->LoadPanel(this, "theme_panel");
+    
+    if (m_currentPanel)
+    {
+        // Add to sizer
+        wxSizer* sizer = GetSizer();
+        if (sizer)
+        {
+            sizer->Add(m_currentPanel, 1, wxEXPAND | wxALL, 5);
+            Layout();
+        }
+        SetStatusText("SUCCESS: Loaded panel with wxBORDER_THEME");
+        
+        // Log the actual style
+        long style = m_currentPanel->GetWindowStyleFlag();
+        wxLogMessage("Panel style flags: 0x%08lX", style);
+    }
+    else
+    {
+        SetStatusText("FAILED: Could not load panel with wxBORDER_THEME");
+        wxLogError("Failed to load theme_panel from XRC");
+    }
+}
+
+void XrcTestFrame::OnExit(wxCommandEvent& WXUNUSED(event))
+{
+    Close(true);
 } 

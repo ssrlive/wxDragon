@@ -32,7 +32,12 @@
 class WxdPlatformAwareStaticBitmapHandler : public wxXmlResourceHandler
 {
 public:
-    WxdPlatformAwareStaticBitmapHandler() {}
+    WxdPlatformAwareStaticBitmapHandler() 
+    {
+        // Register all standard window styles (including border styles)
+        // This is required for XRC to recognize style flags like wxBORDER_THEME
+        AddWindowStyles();
+    }
 
     virtual wxObject *DoCreateResource()
     {
