@@ -37,18 +37,10 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(PLATFORM_NAME "linux")
     add_compile_definitions(__WXGTK__ _FILE_OFFSET_BITS=64 NDEBUG)
     
-    # Check if PIE is enabled by default and add -fPIE for compatibility
-    execute_process(
-        COMMAND ${CMAKE_C_COMPILER} -v
-        ERROR_VARIABLE GCC_VERSION_OUTPUT
-        OUTPUT_QUIET
-    )
-    if(GCC_VERSION_OUTPUT MATCHES "--enable-default-pie")
-        message(STATUS "Detected PIE-enabled Linux distribution, adding -fPIE compilation flag")
-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    else()
-        message(STATUS "PIE not detected as default, using standard compilation")
-    endif()
+    # Always enable position independent code on Linux to prevent PIE-related linking errors
+    # This is the standard approach for modern Linux distributions
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    message(STATUS "Enabled position independent code (-fPIE) for Linux compatibility")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
