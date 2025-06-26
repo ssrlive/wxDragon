@@ -279,7 +279,7 @@ extern "C" {
         void* userData;
     };
 
-    int WXDLLEXPORT wxListCompareFunction(wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) {
+    int wxCALLBACK wxListCompareFunction(wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData) {
         SortCallbackData* cbData = (SortCallbackData*)sortData;
         if (!cbData || !cbData->cmpFunc) return 0;
         
