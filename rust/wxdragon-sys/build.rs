@@ -227,11 +227,14 @@ fn download_prebuilt_libraries(
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
         }
-        ("windows", "x86", "msvc") => {
+        ("windows", "i686", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
         }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
+        }
+        ("windows", "i686", "gnu") => {
+            format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
         }
         _ => {
             return Err(format!(
@@ -353,6 +356,8 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
         ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
         ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
         ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
+        ("windows", "i686", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
+        ("windows", "i686", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
         _ => panic!(
             "Unsupported target platform: {}-{}-{}",
             target_os, target_arch, target_env
@@ -363,9 +368,10 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     // For Windows, libraries are in platform-specific subdirectories
     let actual_lib_dir = if target_os == "windows" {
+        let arch_suffix = if target_arch == "i686" { "x86" } else { "x64" };
         match target_env {
-            "gnu" => lib_dir.join("gcc_x64_lib"),
-            "msvc" => lib_dir.join("vc_x64_lib"),
+            "gnu" => lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
+            "msvc" => lib_dir.join(format!("vc_{}_lib", arch_suffix)),
             _ => lib_dir,
         }
     } else {
@@ -490,7 +496,7 @@ fn link_macos_libraries() {
     if target_arch == "aarch64" {
         // Use xcrun to find the toolchain path
         if let Ok(output) = std::process::Command::new("xcrun")
-            .args(&["--find", "clang"])
+            .args(["--find", "clang"])
             .output()
         {
             if output.status.success() {
@@ -507,7 +513,7 @@ fn link_macos_libraries() {
                         // Try to find the clang runtime library
                         if let Ok(entries) = std::fs::read_dir(&clang_rt_path) {
                             for entry in entries.flatten() {
-                                if entry.file_type().map_or(false, |ft| ft.is_dir()) {
+                                if entry.file_type().is_ok_and(|ft| ft.is_dir()) {
                                     let version_dir = entry.path();
                                     let lib_dir = version_dir.join("lib").join("darwin");
                                     let clang_rt_lib = lib_dir.join("libclang_rt.osx.a");
@@ -830,8 +836,9 @@ fn build_wxdragon_wrapper(
         ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
         ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
         ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
-        ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
+        ("windows", "i686", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
         ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
+        ("windows", "i686", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
         _ => {
             return Err(format!(
                 "Unsupported target platform: {}-{}-{}",
@@ -1027,11 +1034,14 @@ fn build_wxdragon_wrapper(
                 // Set target architecture
                 if target_arch == "x86_64" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
+                } else if target_arch == "i686" {
+                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
                 }
 
                 // For cross-compilation from Unix to Windows GNU, we need to set up MinGW toolchain
                 if target_env == "gnu" && host_os != "windows" {
                     // Try to find MinGW-w64 cross compiler
+                    // For i686, the compiler is usually i686-w64-mingw32-g++
                     let cross_compiler = format!("{}-w64-mingw32-g++", target_arch);
 
                     // Check if the cross compiler exists
@@ -1057,6 +1067,8 @@ fn build_wxdragon_wrapper(
                 cmake_cmd.arg("-DCMAKE_SYSTEM_NAME=Linux");
                 if target_arch == "x86_64" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
+                } else if target_arch == "i686" {
+                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
                 }
             }
             _ => {}
@@ -1068,7 +1080,13 @@ fn build_wxdragon_wrapper(
             if target_env == "msvc" {
                 // Use Visual Studio generator for better MSVC compatibility
                 cmake_cmd.arg("-G").arg("Visual Studio 17 2022");
-                cmake_cmd.arg("-A").arg("x64"); // Set architecture for Visual Studio generator
+                // Set architecture for Visual Studio generator
+                let vs_arch = if target_arch == "i686" {
+                    "Win32"
+                } else {
+                    "x64"
+                };
+                cmake_cmd.arg("-A").arg(vs_arch);
             } else {
                 // GNU/MinGW64 - choose generator based on environment
                 if host_os == "windows" {
@@ -1157,11 +1175,16 @@ fn build_wxdragon_wrapper(
             println!("info: CMake build failed, trying MSBuild directly...");
 
             let mut msbuild_cmd = std::process::Command::new("msbuild");
+            let msbuild_platform = if target_arch == "i686" {
+                "Win32"
+            } else {
+                "x64"
+            };
             msbuild_cmd
                 .current_dir(&wrapper_build_dir)
                 .arg("wxdragon.vcxproj")
                 .arg(format!("/p:Configuration={}", build_type))
-                .arg("/p:Platform=x64")
+                .arg(format!("/p:Platform={}", msbuild_platform))
                 .arg("/verbosity:detailed");
 
             println!("info: Running MSBuild command: {:?}", msbuild_cmd);
@@ -1285,9 +1308,10 @@ fn build_wxdragon_wrapper(
 
     let dest = if target_os == "windows" {
         // For Windows, copy to the platform-specific subdirectory where the linker expects it
+        let arch_suffix = if target_arch == "i686" { "x86" } else { "x64" };
         let platform_lib_dir = match target_env {
-            "msvc" => wx_lib_dir.join("vc_x64_lib"),
-            "gnu" => wx_lib_dir.join("gcc_x64_lib"),
+            "msvc" => wx_lib_dir.join(format!("vc_{}_lib", arch_suffix)),
+            "gnu" => wx_lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
             _ => wx_lib_dir,
         };
 
