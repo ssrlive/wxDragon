@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.8.5
+
+### Bug Fixes
+- **Linux PIE Compatibility**: Enhanced Position Independent Executable (PIE) compilation support for modern Linux distributions
+  - Replaced unreliable PIE detection with standard `CMAKE_POSITION_INDEPENDENT_CODE ON` approach
+  - Always enables position independent code on Linux for maximum compatibility
+  - Resolves `relocation R_X86_64_32 against .rodata can not be used when making a PIE object` compilation errors
+  - Uses standard CMake methodology for handling position-independent compilation
+  - **Impact**: Fixes build failures on PIE-enabled Linux distributions (Ubuntu 17.04+, Debian 9+, Fedora 23+)
+
+- **32-bit Windows MSVC Support**: Added comprehensive support for 32-bit Windows MSVC builds (`i686-pc-windows-msvc`)
+  - **Platform Detection**: Enhanced build script to support both `"x86"` and `"i686"` architecture naming variants
+    - Fixed `Unsupported target platform: windows-x86-msvc` error in CI environments
+    - Added dual architecture support throughout all platform detection functions
+    - Unified artifact matching logic for consistent 32-bit target handling
+  - **C++ Calling Convention**: Fixed calling convention mismatch in `wxListCompareFunction` for 32-bit Windows
+    - Replaced `WXDLLEXPORT` with `wxCALLBACK` macro for proper calling convention
+    - Ensures `__stdcall` on 32-bit Windows, `__cdecl` on 64-bit Windows
+    - Resolves C2664 compilation errors: `cannot convert argument 1 from 'int (__cdecl *)' to 'wxListCtrlCompare'`
+  - **Library Directory Detection**: Enhanced prebuilt library detection for 32-bit Windows packages
+    - Added fallback logic from `vc_x86_lib/` to `vc_lib/` directory structure
+    - Accommodates actual 32-bit package structure using generic `vc_lib/` directories
+    - Maintains proper debug library suffix handling (`d` suffix for debug builds)
+  - **32-bit Literal Compatibility**: Fixed literal overflow in `treectrl.rs` for 32-bit targets
+    - Replaced hardcoded 64-bit literal `0x8000_0000_0000_0000` with architecture-agnostic `(usize::MAX / 2)`
+    - Prevents compilation errors when `usize` is 32-bit on Windows x86 targets
+    - Maintains identical functionality across all architectures
+
+### Platform Support
+- ✅ **Enhanced Linux Compatibility**: Improved PIE support for all modern Linux distributions
+- ✅ **New Windows 32-bit Support**: Full `i686-pc-windows-msvc` target support added
+- ✅ **CI Integration**: GitHub Actions now supports 32-bit Windows MSVC builds
+- ✅ **Cross-Architecture**: Unified support for both `"x86"` and `"i686"` architecture detection
+
+### Technical Details
+- Simplified Linux CMake configuration by removing complex PIE detection logic
+- Enhanced Windows build system with robust architecture variant handling
+- Improved cross-platform consistency in platform detection and library management
+- Maintains backward compatibility while adding support for new target configurations
+
 ## 0.8.4
 
 ### Bug Fixes
