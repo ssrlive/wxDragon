@@ -113,13 +113,13 @@ fn main() {
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
         }
-        ("windows", "i686", "msvc") => {
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
         }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
         }
-        ("windows", "i686", "gnu") => {
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
         }
         _ => {
@@ -230,13 +230,13 @@ fn download_prebuilt_libraries(
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
         }
-        ("windows", "i686", "msvc") => {
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
         }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
         }
-        ("windows", "i686", "gnu") => {
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
         }
         _ => {
@@ -359,8 +359,8 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
         ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
         ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
         ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
-        ("windows", "i686", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
-        ("windows", "i686", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
         _ => panic!(
             "Unsupported target platform: {}-{}-{}",
             target_os, target_arch, target_env
@@ -371,7 +371,7 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     // For Windows, libraries are in platform-specific subdirectories
     let actual_lib_dir = if target_os == "windows" {
-        let arch_suffix = if target_arch == "i686" { "x86" } else { "x64" };
+        let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
         match target_env {
             "gnu" => lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
             "msvc" => lib_dir.join(format!("vc_{}_lib", arch_suffix)),
@@ -839,9 +839,9 @@ fn build_wxdragon_wrapper(
         ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
         ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
         ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
-        ("windows", "i686", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
         ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
-        ("windows", "i686", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
         _ => {
             return Err(format!(
                 "Unsupported target platform: {}-{}-{}",
@@ -1037,7 +1037,7 @@ fn build_wxdragon_wrapper(
                 // Set target architecture
                 if target_arch == "x86_64" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
-                } else if target_arch == "i686" {
+                } else if target_arch == "i686" || target_arch == "x86" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
                 }
 
@@ -1070,7 +1070,7 @@ fn build_wxdragon_wrapper(
                 cmake_cmd.arg("-DCMAKE_SYSTEM_NAME=Linux");
                 if target_arch == "x86_64" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
-                } else if target_arch == "i686" {
+                } else if target_arch == "i686" || target_arch == "x86" {
                     cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
                 }
             }
@@ -1084,7 +1084,7 @@ fn build_wxdragon_wrapper(
                 // Use Visual Studio generator for better MSVC compatibility
                 cmake_cmd.arg("-G").arg("Visual Studio 17 2022");
                 // Set architecture for Visual Studio generator
-                let vs_arch = if target_arch == "i686" {
+                let vs_arch = if target_arch == "i686" || target_arch == "x86" {
                     "Win32"
                 } else {
                     "x64"
@@ -1178,7 +1178,7 @@ fn build_wxdragon_wrapper(
             println!("info: CMake build failed, trying MSBuild directly...");
 
             let mut msbuild_cmd = std::process::Command::new("msbuild");
-            let msbuild_platform = if target_arch == "i686" {
+            let msbuild_platform = if target_arch == "i686" || target_arch == "x86" {
                 "Win32"
             } else {
                 "x64"
@@ -1311,7 +1311,7 @@ fn build_wxdragon_wrapper(
 
     let dest = if target_os == "windows" {
         // For Windows, copy to the platform-specific subdirectory where the linker expects it
-        let arch_suffix = if target_arch == "i686" { "x86" } else { "x64" };
+        let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
         let platform_lib_dir = match target_env {
             "msvc" => wx_lib_dir.join(format!("vc_{}_lib", arch_suffix)),
             "gnu" => wx_lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
