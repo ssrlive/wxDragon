@@ -113,6 +113,9 @@ fn main() {
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
         }
+        ("windows", "x86", "msvc") => {
+            format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
+        }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
         }
@@ -223,6 +226,9 @@ fn download_prebuilt_libraries(
         ("macos", "aarch64", _) => format!("wxwidgets-{}-macos-arm64-{}", wx_version, profile),
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
+        }
+        ("windows", "x86", "msvc") => {
+            format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
         }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
@@ -824,6 +830,7 @@ fn build_wxdragon_wrapper(
         ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
         ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
         ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
+        ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
         ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
         _ => {
             return Err(format!(
