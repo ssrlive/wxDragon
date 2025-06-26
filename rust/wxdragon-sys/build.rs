@@ -371,11 +371,27 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     // For Windows, libraries are in platform-specific subdirectories
     let actual_lib_dir = if target_os == "windows" {
+        // For 32-bit Windows packages, check if they use generic "vc_lib" instead of "vc_x86_lib"
         let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
-        match target_env {
+        let generic_lib_dir = match target_env {
+            "gnu" => lib_dir.join("gcc_lib"),
+            "msvc" => lib_dir.join("vc_lib"),
+            _ => lib_dir.clone(),
+        };
+        let arch_specific_lib_dir = match target_env {
             "gnu" => lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
             "msvc" => lib_dir.join(format!("vc_{}_lib", arch_suffix)),
-            _ => lib_dir,
+            _ => lib_dir.clone(),
+        };
+        
+        // Try arch-specific first, then fall back to generic
+        if arch_specific_lib_dir.exists() {
+            arch_specific_lib_dir
+        } else if generic_lib_dir.exists() {
+            println!("info: Using generic library directory: {}", generic_lib_dir.display());
+            generic_lib_dir
+        } else {
+            lib_dir
         }
     } else {
         lib_dir
@@ -549,6 +565,8 @@ fn link_windows_libraries(target_env: &str) {
 
     // Determine if we need debug suffix based on build profile
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+    // Note: Some prebuilt packages (especially 32-bit) might not have debug variants
+    // We'll try with debug suffix first, then without if linking fails
     let debug_suffix = if profile == "debug" { "d" } else { "" };
 
     println!(
@@ -1312,10 +1330,22 @@ fn build_wxdragon_wrapper(
     let dest = if target_os == "windows" {
         // For Windows, copy to the platform-specific subdirectory where the linker expects it
         let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
-        let platform_lib_dir = match target_env {
+        // Check for both arch-specific and generic library directories
+        let arch_specific_lib_dir = match target_env {
             "msvc" => wx_lib_dir.join(format!("vc_{}_lib", arch_suffix)),
             "gnu" => wx_lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
-            _ => wx_lib_dir,
+            _ => wx_lib_dir.clone(),
+        };
+        let generic_lib_dir = match target_env {
+            "msvc" => wx_lib_dir.join("vc_lib"),
+            "gnu" => wx_lib_dir.join("gcc_lib"),
+            _ => wx_lib_dir.clone(),
+        };
+        
+        let platform_lib_dir = if arch_specific_lib_dir.exists() {
+            arch_specific_lib_dir
+        } else {
+            generic_lib_dir
         };
 
         if target_env == "msvc" {

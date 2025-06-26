@@ -134,7 +134,7 @@ impl TreeItemId {
             // Basic sanity check on the pointer before accepting it
             if ptr_value % std::mem::align_of::<*mut std::ffi::c_void>() == 0  // Properly aligned
                 && ptr_value > 0x1000  // Not in null/low memory range
-                && ptr_value < 0x8000_0000_0000_0000
+                && ptr_value < (usize::MAX / 2)
             // Not in kernel space
             {
                 // Additional check: try to verify the TreeItemId is valid
@@ -208,7 +208,7 @@ impl Drop for TreeItemId {
                 // On macOS ARM64, user space addresses are typically in a specific range
                 if ptr_value % std::mem::align_of::<*mut std::ffi::c_void>() == 0  // Properly aligned
                     && ptr_value > 0x1000  // Not in null/low memory range
-                    && ptr_value < 0x8000_0000_0000_0000
+                    && ptr_value < (usize::MAX / 2)
                 // Not in kernel space
                 {
                     // Additional validation: check if the TreeItemId is valid before freeing
@@ -716,7 +716,7 @@ impl TreeCtrl {
                 let ptr_value = ptr as usize;
                 if ptr_value % std::mem::align_of::<TreeItemId>() == 0  // Properly aligned
                     && ptr_value > 0x1000  // Not in null/low memory range
-                    && ptr_value < 0x8000_0000_0000_0000
+                    && ptr_value < (usize::MAX / 2)
                 // Not in kernel space (macOS ARM64)
                 {
                     unsafe {
@@ -728,7 +728,7 @@ impl TreeCtrl {
                         if !possible_tree_item.ptr.is_null()
                             && internal_ptr % std::mem::align_of::<*mut std::ffi::c_void>() == 0
                             && internal_ptr > 0x1000
-                            && internal_ptr < 0x8000_0000_0000_0000
+                            && internal_ptr < (usize::MAX / 2)
                         {
                             // Final validation: check if the TreeItemId is actually valid
                             if ffi::wxd_TreeItemId_IsOk(possible_tree_item.ptr) {
