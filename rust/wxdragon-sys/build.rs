@@ -113,11 +113,14 @@ fn main() {
         ("windows", "x86_64", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
         }
-        ("windows", "x86", "msvc") => {
+        ("windows", "i686", "msvc") => {
             format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
         }
         ("windows", "x86_64", "gnu") => {
             format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
+        }
+        ("windows", "i686", "gnu") => {
+            format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
         }
         _ => {
             panic!(
