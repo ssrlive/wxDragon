@@ -1,5 +1,83 @@
 # Changelog
 
+## 0.8.6
+
+### New Features
+- **RichTextCtrl Widget**: Added comprehensive RichTextCtrl widget for advanced rich text editing
+  - Full-featured rich text control with formatting capabilities (bold, italic, underline)
+  - Color support for both text and background colors with selection-based and range-based methods
+  - Complete file operations with native file dialogs (RTF and TXT format support)
+  - Comprehensive API with 600+ lines of Rust bindings covering text manipulation, styling, and formatting
+  - Support for undo/redo operations, clipboard integration (cut, copy, paste)
+  - Advanced text selection and manipulation features
+  - Seamless integration with gallery example showcasing all functionality
+  - XRC support for loading RichTextCtrl from XML resource files
+
+- **Generic Scrolling Trait (WxScrollable)**: Implemented comprehensive scrolling functionality for multiple widgets
+  - Generic `WxScrollable` trait following the same inheritance pattern as `WxWidget` trait
+  - Universal scrolling methods: `show_position()`, `scroll_into_view()`, `is_position_visible()`, `get_last_position()`
+  - Cross-platform compatibility with intelligent widget detection (TextCtrl, RichTextCtrl, StyledTextCtrl)
+  - Applied to key scrollable widgets: RichTextCtrl, TextCtrl, ListCtrl, TreeCtrl, ScrolledWindow, StyledTextCtrl
+  - Enables auto-scroll functionality perfect for log display and content navigation
+  - Type-safe position-based scrolling with fallback mechanisms for different widget types
+
+### Enhancements
+- **Enhanced Gallery Example**: Significantly expanded gallery with comprehensive RichText demonstration
+  - Rich text editing with formatting buttons (bold, italic, underline, font size control)
+  - Color manipulation tools (text color, background color, reset functionality)
+  - Professional file operations using native file dialogs with proper error handling
+  - Scrolling demonstrations with auto-scroll for log-like behavior
+  - Real-time status updates showing cursor position and selection information
+  - Advanced text manipulation showcasing the full power of RichTextCtrl
+
+- **File Dialog Integration**: Enhanced file operations throughout examples
+  - Proper save/load functionality with native file dialogs supporting multiple formats
+  - Smart file type detection based on file extensions
+  - Error handling with user-friendly status messages
+  - Support for both RTF (rich text format) and TXT (plain text) files
+
+- **Event System Enhancement**: Extended event system for rich text functionality
+  - Added comprehensive RichText event constants (261-264) for stylesheet and content events
+  - Enhanced event mapping in C++ layer with proper feature guards
+  - Improved conditional compilation system for optional richtext feature
+
+### Technical Enhancements
+- **C++ API Extensions**: Added extensive C++ binding layer for rich text and scrolling
+  - 75+ exported RichText functions covering all major functionality
+  - Cross-platform scrolling implementations with intelligent widget detection
+  - Enhanced window management with scrolling function additions
+  - Proper memory management and error handling in C++ layer
+
+- **Feature System**: Improved optional feature compilation
+  - RichText functionality properly gated behind `richtext` feature flag
+  - Conditional compilation throughout codebase for better modularity
+  - Enhanced CMakeLists.txt with richtext conditional compilation support
+
+- **API Exports**: Enhanced public API structure
+  - Added `WxScrollable` trait to prelude for easy access
+  - Improved module organization with dedicated scrollable functionality
+  - Enhanced widget trait implementations following established patterns
+
+### Examples
+- **Enhanced Gallery**: Major improvements to the gallery example
+  - New comprehensive RichText tab with full functionality demonstration
+  - Updated imports and dependencies for modern wxDragon patterns
+  - Improved user interface and interaction patterns
+
+### Platform Support
+- Enhanced cross-platform compatibility for all supported platforms:
+  - ✅ **Linux**: Full RichText and scrolling support with GTK backend
+  - ✅ **macOS**: Complete rich text functionality with native file dialogs
+  - ✅ **Windows MSVC/MinGW**: Full feature parity across all Windows builds
+  - Consistent behavior and performance across all platforms
+
+### API Changes
+- Added new `scrollable` module with comprehensive scrolling trait
+- Extended `widgets` module with RichTextCtrl implementation
+- Enhanced `event` system with rich text event support
+- All new APIs follow wxDragon's established patterns for memory safety and type consistency
+- No breaking changes - all additions are backward compatible
+
 ## 0.8.5
 
 ### Bug Fixes
