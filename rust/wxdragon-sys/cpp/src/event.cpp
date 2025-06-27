@@ -38,6 +38,9 @@
 #include <wx/utils.h>
 #include <wx/rearrangectrl.h> // ADDED: For wxEVT_REARRANGE_LIST
 #include <wx/collpane.h> // ADDED: For wxEVT_COLLAPSIBLEPANE_CHANGED
+#if WXD_USE_RICHTEXT
+#include <wx/richtext/richtextctrl.h> // ADDED: For richtext events
+#endif
 
 struct wxd_Event_t { wxEvent* event; };
 
@@ -764,6 +767,21 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_STC_INDICATOR_RELEASE: return wxEVT_STC_INDICATOR_RELEASE;
         case WXD_EVENT_TYPE_STC_AUTOCOMP_CANCELLED: return wxEVT_STC_AUTOCOMP_CANCELLED;
         case WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED: return wxEVT_STC_AUTOCOMP_CHAR_DELETED;
+        #endif
+        
+        // RichText events - only available when richtext feature is enabled
+        #if WXD_USE_RICHTEXT
+        case WXD_EVENT_TYPE_RICHTEXT_CHARACTER: return wxEVT_RICHTEXT_CHARACTER;
+        case WXD_EVENT_TYPE_RICHTEXT_DELETE: return wxEVT_RICHTEXT_DELETE;
+        case WXD_EVENT_TYPE_RICHTEXT_RETURN: return wxEVT_RICHTEXT_RETURN;
+        case WXD_EVENT_TYPE_RICHTEXT_CONTENT_INSERTED: return wxEVT_RICHTEXT_CONTENT_INSERTED;
+        case WXD_EVENT_TYPE_RICHTEXT_CONTENT_DELETED: return wxEVT_RICHTEXT_CONTENT_DELETED;
+        case WXD_EVENT_TYPE_RICHTEXT_STYLE_CHANGED: return wxEVT_RICHTEXT_STYLE_CHANGED;
+        case WXD_EVENT_TYPE_RICHTEXT_SELECTION_CHANGED: return wxEVT_RICHTEXT_SELECTION_CHANGED;
+        case WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGING: return wxEVT_RICHTEXT_STYLESHEET_CHANGING;
+        case WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGED: return wxEVT_RICHTEXT_STYLESHEET_CHANGED;
+        case WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACING: return wxEVT_RICHTEXT_STYLESHEET_REPLACING;
+        case WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED: return wxEVT_RICHTEXT_STYLESHEET_REPLACED;
         #endif
         
         default: return wxEVT_NULL;

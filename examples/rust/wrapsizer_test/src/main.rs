@@ -31,7 +31,7 @@ fn main() {
         // Add some buttons to the wrap sizer
         for i in 1..=12 {
             let button = Button::builder(&panel)
-                .with_label(&format!("Button {}", i))
+                .with_label(&format!("Button {i}"))
                 .build();
             wrap_sizer.add(&button, 0, SizerFlag::All, 5);
         }
@@ -57,7 +57,7 @@ fn main() {
         // Add some checkboxes to the second wrap sizer
         for i in 1..=8 {
             let checkbox = CheckBox::builder(&panel)
-                .with_label(&format!("Option {}", i))
+                .with_label(&format!("Option {i}"))
                 .build();
             wrap_sizer2.add(&checkbox, 0, SizerFlag::All, 5);
         }
@@ -81,7 +81,7 @@ fn main() {
         // Add some buttons to the grid
         for i in 1..=6 {
             let button = Button::builder(&panel)
-                .with_label(&format!("Grid {}", i))
+                .with_label(&format!("Grid {i}"))
                 .build();
             grid_sizer.add(&button, 0, SizerFlag::Expand, 0);
         }

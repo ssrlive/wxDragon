@@ -182,6 +182,7 @@ fn get_class_mapping() -> HashMap<&'static str, &'static str> {
     map.insert("wxFontPickerCtrl", "wxdragon::widgets::FontPickerCtrl");
     map.insert("wxMediaCtrl", "wxdragon::widgets::MediaCtrl");
     map.insert("wxTimePickerCtrl", "wxdragon::widgets::TimePickerCtrl");
+    map.insert("wxRichTextCtrl", "wxdragon::widgets::RichTextCtrl");
 
     // AUI widgets
     map.insert("wxAuiManager", "wxdragon::widgets::AuiManager");
@@ -477,7 +478,7 @@ fn parse_xrc_content(content: &str) -> syn::Result<Vec<XrcObject>> {
                     let attr = attr.map_err(|e| {
                         Error::new(
                             proc_macro2::Span::call_site(),
-                            format!("XML parsing error: {}", e),
+                            format!("XML parsing error: {e}"),
                         )
                     })?;
 
@@ -508,7 +509,7 @@ fn parse_xrc_content(content: &str) -> syn::Result<Vec<XrcObject>> {
             Err(e) => {
                 return Err(Error::new(
                     proc_macro2::Span::call_site(),
-                    format!("XML parsing error: {}", e),
+                    format!("XML parsing error: {e}"),
                 ))
             }
             _ => {}

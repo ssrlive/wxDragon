@@ -76,7 +76,7 @@ fn main() {
         bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=0");
     }
 
-    bindings_builder = bindings_builder.clang_arg(format!("--target={}", target));
+    bindings_builder = bindings_builder.clang_arg(format!("--target={target}"));
 
     // Skip library setup for docs.rs and rust-analyzer
     if env::var("DOCS_RS").is_ok() || env::var("RUST_ANALYZER") == Ok("true".to_string()) {
@@ -107,26 +107,23 @@ fn main() {
         target_arch.as_str(),
         target_env.as_str(),
     ) {
-        ("linux", "x86_64", _) => format!("wxwidgets-{}-linux-x64-{}", wx_version, profile),
-        ("macos", "x86_64", _) => format!("wxwidgets-{}-macos-x64-{}", wx_version, profile),
-        ("macos", "aarch64", _) => format!("wxwidgets-{}-macos-arm64-{}", wx_version, profile),
+        ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
+        ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
+        ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
         ("windows", "x86_64", "msvc") => {
-            format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
         }
         ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
         }
         ("windows", "x86_64", "gnu") => {
-            format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
         }
         ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
         }
         _ => {
-            panic!(
-                "Unsupported target platform: {}-{}-{}",
-                target_os, target_arch, target_env
-            );
+            panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}");
         }
     };
 
@@ -155,7 +152,7 @@ fn main() {
 
         if msw_setup.exists() && !target_setup.exists() {
             if let Err(e) = std::fs::copy(&msw_setup, &target_setup) {
-                println!("cargo:warning=Failed to copy setup.h: {}", e);
+                println!("cargo:warning=Failed to copy setup.h: {e}");
             } else {
                 println!("info: Copied Windows setup.h from msw to wx directory");
             }
@@ -224,51 +221,43 @@ fn download_prebuilt_libraries(
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-{}-linux-x64-{}", wx_version, profile),
-        ("macos", "x86_64", _) => format!("wxwidgets-{}-macos-x64-{}", wx_version, profile),
-        ("macos", "aarch64", _) => format!("wxwidgets-{}-macos-arm64-{}", wx_version, profile),
+        ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
+        ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
+        ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
         ("windows", "x86_64", "msvc") => {
-            format!("wxwidgets-{}-windows-msvc-x64-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
         }
         ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-{}-windows-msvc-x86-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
         }
         ("windows", "x86_64", "gnu") => {
-            format!("wxwidgets-{}-windows-gnu-x64-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
         }
         ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-{}-windows-gnu-x86-{}", wx_version, profile)
+            format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
         }
         _ => {
             return Err(format!(
-                "Unsupported target platform: {}-{}-{}",
-                target_os, target_arch, target_env
+                "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
             )
             .into())
         }
     };
 
     let download_url = format!(
-        "https://github.com/AllenDang/wxDragon/releases/download/wxwidgets-{}/{}.tar.gz",
-        wx_version, artifact_name
+        "https://github.com/AllenDang/wxDragon/releases/download/wxwidgets-{wx_version}/{artifact_name}.tar.gz"
     );
 
-    let tarball_dest_path = out_dir.join(format!("{}.tar.gz", artifact_name));
+    let tarball_dest_path = out_dir.join(format!("{artifact_name}.tar.gz"));
     let extracted_path = out_dir.join(&artifact_name);
 
     // Skip download if already extracted
     if extracted_path.exists() {
-        println!(
-            "info: Using cached pre-built libraries at {:?}",
-            extracted_path
-        );
+        println!("info: Using cached pre-built libraries at {extracted_path:?}");
         return Ok(());
     }
 
-    println!(
-        "info: Downloading pre-built libraries from: {}",
-        download_url
-    );
+    println!("info: Downloading pre-built libraries from: {download_url}");
 
     // Download the pre-built libraries
     let client = reqwest::blocking::Client::builder()
@@ -279,7 +268,7 @@ fn download_prebuilt_libraries(
     let resp = client
         .get(&download_url)
         .send()
-        .map_err(|e| format!("Failed to download {}: {}", download_url, e))?;
+        .map_err(|e| format!("Failed to download {download_url}: {e}"))?;
 
     if !resp.status().is_success() {
         return Err(format!(
@@ -291,48 +280,34 @@ fn download_prebuilt_libraries(
     }
 
     // Save the tarball
-    let mut out_file = File::create(&tarball_dest_path).map_err(|e| {
-        format!(
-            "Failed to create destination file {:?}: {}",
-            tarball_dest_path, e
-        )
-    })?;
+    let mut out_file = File::create(&tarball_dest_path)
+        .map_err(|e| format!("Failed to create destination file {tarball_dest_path:?}: {e}"))?;
     let content = resp
         .bytes()
-        .map_err(|e| format!("Failed to read response content: {}", e))?;
+        .map_err(|e| format!("Failed to read response content: {e}"))?;
     std::io::copy(&mut content.as_ref(), &mut out_file)
-        .map_err(|e| format!("Failed to write downloaded content: {}", e))?;
+        .map_err(|e| format!("Failed to write downloaded content: {e}"))?;
 
-    println!(
-        "info: Downloaded pre-built libraries to {:?}",
-        tarball_dest_path
-    );
+    println!("info: Downloaded pre-built libraries to {tarball_dest_path:?}");
 
     // Extract the tarball
     let tarball_file = File::open(&tarball_dest_path)
-        .map_err(|e| format!("Failed to open tarball {:?}: {}", tarball_dest_path, e))?;
+        .map_err(|e| format!("Failed to open tarball {tarball_dest_path:?}: {e}"))?;
     let gz_decoder = flate2::read::GzDecoder::new(tarball_file);
     let mut archive = tar::Archive::new(gz_decoder);
 
-    archive.unpack(out_dir).map_err(|e| {
-        format!(
-            "Failed to extract {} to {:?}: {}",
-            artifact_name, out_dir, e
-        )
-    })?;
+    archive
+        .unpack(out_dir)
+        .map_err(|e| format!("Failed to extract {artifact_name} to {out_dir:?}: {e}"))?;
 
     if !extracted_path.exists() {
         return Err(format!(
-            "Extraction did not result in expected directory: {:?}. Check tarball structure.",
-            extracted_path
+            "Extraction did not result in expected directory: {extracted_path:?}. Check tarball structure."
         )
         .into());
     }
 
-    println!(
-        "info: Successfully extracted pre-built libraries to {:?}",
-        extracted_path
-    );
+    println!("info: Successfully extracted pre-built libraries to {extracted_path:?}");
 
     // Debug: List what was actually extracted
     if let Ok(entries) = std::fs::read_dir(&extracted_path) {
@@ -342,7 +317,7 @@ fn download_prebuilt_libraries(
             files.push(file_name);
         }
         files.sort();
-        println!("info: Extracted files: {:?}", files);
+        println!("info: Extracted files: {files:?}");
     }
 
     Ok(())
@@ -354,17 +329,18 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
 
     // Get the pre-built library directory (same naming as download_prebuilt_libraries)
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{}", profile),
-        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
-        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
-        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
-        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
-        _ => panic!(
-            "Unsupported target platform: {}-{}-{}",
-            target_os, target_arch, target_env
-        ),
+        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
+        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
+        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
+            format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
+        }
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
+            format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
+        }
+        _ => panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}"),
     };
 
     let lib_dir = out_dir.join(&artifact_name);
@@ -372,23 +348,30 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
     // For Windows, libraries are in platform-specific subdirectories
     let actual_lib_dir = if target_os == "windows" {
         // For 32-bit Windows packages, check if they use generic "vc_lib" instead of "vc_x86_lib"
-        let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
+        let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
+            "x86"
+        } else {
+            "x64"
+        };
         let generic_lib_dir = match target_env {
             "gnu" => lib_dir.join("gcc_lib"),
             "msvc" => lib_dir.join("vc_lib"),
             _ => lib_dir.clone(),
         };
         let arch_specific_lib_dir = match target_env {
-            "gnu" => lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
-            "msvc" => lib_dir.join(format!("vc_{}_lib", arch_suffix)),
+            "gnu" => lib_dir.join(format!("gcc_{arch_suffix}_lib")),
+            "msvc" => lib_dir.join(format!("vc_{arch_suffix}_lib")),
             _ => lib_dir.clone(),
         };
-        
+
         // Try arch-specific first, then fall back to generic
         if arch_specific_lib_dir.exists() {
             arch_specific_lib_dir
         } else if generic_lib_dir.exists() {
-            println!("info: Using generic library directory: {}", generic_lib_dir.display());
+            println!(
+                "info: Using generic library directory: {}",
+                generic_lib_dir.display()
+            );
             generic_lib_dir
         } else {
             lib_dir
@@ -418,7 +401,7 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
                 }
             }
             lib_files.sort();
-            println!("info: Available library files: {:?}", lib_files);
+            println!("info: Available library files: {lib_files:?}");
         }
     } else {
         println!(
@@ -435,7 +418,7 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
         "macos" => link_macos_libraries(),
         "windows" => link_windows_libraries(target_env),
         "linux" => link_linux_libraries(),
-        _ => panic!("Unsupported target OS: {}", target_os),
+        _ => panic!("Unsupported target OS: {target_os}"),
     }
 
     if target_os == "windows" && target_env == "gnu" {
@@ -461,15 +444,20 @@ fn link_macos_libraries() {
     if cfg!(feature = "webview") {
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.3");
     }
+    if cfg!(feature = "richtext") {
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_richtext-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+    }
     if cfg!(feature = "xrc") || cfg!(feature = "webview") {
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
     }
     if cfg!(feature = "stc") {
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.3");
     }
     if cfg!(feature = "xrc") {
         println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
     }
 
     // Third-party libraries
@@ -569,57 +557,52 @@ fn link_windows_libraries(target_env: &str) {
     // We'll try with debug suffix first, then without if linking fails
     let debug_suffix = if profile == "debug" { "d" } else { "" };
 
-    println!(
-        "info: Windows library linking - Profile: {}, Debug suffix: '{}'",
-        profile, debug_suffix
-    );
-    println!(
-        "info: Target env: {}, Cross-compilation: {}",
-        target_env, is_macos_to_windows_gnu
-    );
+    println!("info: Windows library linking - Profile: {profile}, Debug suffix: '{debug_suffix}'");
+    println!("info: Target env: {target_env}, Cross-compilation: {is_macos_to_windows_gnu}");
 
     // For Windows GNU (both native and cross-compilation), use the actual library names from pre-built packages
     // Core wxWidgets libraries
-    println!("cargo:rustc-link-lib=static=wxmsw33u{}_core", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxmsw33u{}_adv", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxbase33u{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxmsw33u{}_gl", debug_suffix);
-    println!(
-        "cargo:rustc-link-lib=static=wxmsw33u{}_propgrid",
-        debug_suffix
-    );
-    println!("cargo:rustc-link-lib=static=wxmsw33u{}_html", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_core");
+    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_adv");
+    println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_gl");
+    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_propgrid");
 
     // Conditional feature libraries
     if cfg!(feature = "aui") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{}_aui", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_aui");
+    }
+    if cfg!(feature = "richtext") {
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_richtext");
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_html");
+        println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}_xml");
     }
     if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{}_media", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_media");
     }
     if cfg!(feature = "webview") {
-        println!(
-            "cargo:rustc-link-lib=static=wxmsw33u{}_webview",
-            debug_suffix
-        );
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_webview");
+    }
+    if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_html");
+        println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}_xml");
     }
     if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{}_stc", debug_suffix);
-        println!("cargo:rustc-link-lib=static=wxscintilla{}", debug_suffix);
-        println!("cargo:rustc-link-lib=static=wxlexilla{}", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_stc");
+        println!("cargo:rustc-link-lib=static=wxscintilla{debug_suffix}");
+        println!("cargo:rustc-link-lib=static=wxlexilla{debug_suffix}");
     }
     if cfg!(feature = "xrc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{}_xrc", debug_suffix);
-        println!("cargo:rustc-link-lib=static=wxbase33u{}_xml", debug_suffix);
+        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_xrc");
     }
 
     // Third-party libraries (using the actual names from pre-built packages)
-    println!("cargo:rustc-link-lib=static=wxtiff{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxjpeg{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxpng{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxregexu{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxzlib{}", debug_suffix);
-    println!("cargo:rustc-link-lib=static=wxexpat{}", debug_suffix);
+    println!("cargo:rustc-link-lib=static=wxtiff{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxjpeg{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxpng{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxregexu{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxzlib{debug_suffix}");
+    println!("cargo:rustc-link-lib=static=wxexpat{debug_suffix}");
 
     // Runtime libraries
     if target_env == "gnu" {
@@ -676,8 +659,7 @@ fn link_windows_libraries(target_env: &str) {
                             }
                         } else {
                             println!(
-                                "cargo:warning=Could not get parent directory from libgcc path: {}",
-                                libgcc_path_str
+                                "cargo:warning=Could not get parent directory from libgcc path: {libgcc_path_str}"
                             );
                         }
                     } else {
@@ -688,8 +670,7 @@ fn link_windows_libraries(target_env: &str) {
                 } else {
                     let stderr = String::from_utf8_lossy(&output.stderr);
                     println!(
-                        "cargo:warning=Failed to run '{} -print-libgcc-file-name': {}",
-                        gcc_path, stderr
+                        "cargo:warning=Failed to run '{gcc_path} -print-libgcc-file-name': {stderr}"
                     );
                     println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
                 }
@@ -726,7 +707,7 @@ fn link_windows_libraries(target_env: &str) {
 
                 // Add MSYS2 MinGW64 lib path to linker search path
                 if let Ok(msys2_root) = std::env::var("MSYSTEM_PREFIX") {
-                    println!("cargo:rustc-link-search=native={}/lib", msys2_root);
+                    println!("cargo:rustc-link-search=native={msys2_root}/lib");
                 }
 
                 // Standard libraries needed for MSYS2
@@ -795,11 +776,17 @@ fn link_linux_libraries() {
     if cfg!(feature = "aui") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.3");
     }
+    if cfg!(feature = "richtext") {
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_richtext-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+    }
     if cfg!(feature = "webview") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.3");
     }
     if cfg!(feature = "xrc") || cfg!(feature = "webview") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
     }
     if cfg!(feature = "media-ctrl") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
@@ -821,7 +808,7 @@ fn link_linux_libraries() {
     // GTK and system libraries via pkg-config
     let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
     for l in lib.libs {
-        println!("cargo:rustc-link-lib={}", l);
+        println!("cargo:rustc-link-lib={l}");
     }
 
     println!("cargo:rustc-link-lib=X11");
@@ -846,24 +833,24 @@ fn build_wxdragon_wrapper(
         "Release"
     };
 
-    println!(
-        "info: Building wxDragon wrapper library in {} mode",
-        build_type
-    );
+    println!("info: Building wxDragon wrapper library in {build_type} mode");
 
     // Get the pre-built wxWidgets library directory (same naming as download_prebuilt_libraries)
     let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{}", profile),
-        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{}", profile),
-        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{}", profile),
-        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{}", profile),
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x86-{}", profile),
-        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{}", profile),
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x86-{}", profile),
+        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
+        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
+        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
+        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
+        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
+            format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
+        }
+        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
+        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
+            format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
+        }
         _ => {
             return Err(format!(
-                "Unsupported target platform: {}-{}-{}",
-                target_os, target_arch, target_env
+                "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
             )
             .into())
         }
@@ -882,36 +869,33 @@ fn build_wxdragon_wrapper(
     };
 
     if output_lib.exists() {
-        println!(
-            "info: Using cached wxDragon wrapper library at {:?}",
-            output_lib
-        );
+        println!("info: Using cached wxDragon wrapper library at {output_lib:?}");
 
         // Check for the built library in multiple possible locations
         let possible_lib_paths = if target_env == "msvc" {
             // Windows MSVC uses .lib files
             vec![
-                wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
-                wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
-                wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("{build_type}/wxdragon.lib")),
+                wrapper_build_dir.join(format!("lib/{build_type}/wxdragon.lib")),
+                wrapper_build_dir.join(format!("x64/{build_type}/wxdragon.lib")),
                 wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
                 wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
                 wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
                 wrapper_build_dir.join("wxdragon.lib"),
                 wrapper_build_dir.join("lib/wxdragon.lib"),
                 wrapper_build_dir.join("x64/wxdragon.lib"),
-                wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
-                wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
-                wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
-                wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+                wrapper_build_dir.join(format!("Win32/{build_type}/wxdragon.lib")),
+                wrapper_build_dir.join(format!("lib/Win32/{build_type}/wxdragon.lib")),
+                wrapper_build_dir.join(format!("out/{build_type}/wxdragon.lib")),
+                wrapper_build_dir.join(format!("bin/{build_type}/wxdragon.lib")),
             ]
         } else {
             // Unix-like systems (Linux, macOS, Windows GNU) use .a files
             vec![
                 wrapper_build_dir.join("lib/libwxdragon.a"),
                 wrapper_build_dir.join("libwxdragon.a"),
-                wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type)),
-                wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type)),
+                wrapper_build_dir.join(format!("lib/{build_type}/libwxdragon.a")),
+                wrapper_build_dir.join(format!("{build_type}/libwxdragon.a")),
                 wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
                 wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
             ]
@@ -939,7 +923,7 @@ fn build_wxdragon_wrapper(
                             if path.is_dir() {
                                 result.push_str(&list_directory_recursive(
                                     &path,
-                                    &format!("{}  ", prefix),
+                                    &format!("{prefix}  "),
                                 ));
                             }
                         }
@@ -974,10 +958,7 @@ fn build_wxdragon_wrapper(
         }
 
         std::fs::copy(&library_path, &dest)?;
-        println!(
-            "info: Successfully built wxDragon wrapper library at {:?}",
-            library_path
-        );
+        println!("info: Successfully built wxDragon wrapper library at {library_path:?}");
 
         return Ok(());
     }
@@ -1004,7 +985,7 @@ fn build_wxdragon_wrapper(
     cmake_cmd
         .current_dir(&wrapper_build_dir)
         .arg(&cpp_source_dir) // Use absolute path to cpp source directory
-        .arg(format!("-DCMAKE_BUILD_TYPE={}", build_type))
+        .arg(format!("-DCMAKE_BUILD_TYPE={build_type}"))
         .arg(format!("-DWXWIDGETS_LIB_DIR={}", wx_lib_dir.display()));
 
     // Pass Cargo feature flags to CMake
@@ -1036,6 +1017,14 @@ fn build_wxdragon_wrapper(
         "-DwxdUSE_XRC={}",
         if cfg!(feature = "xrc") { "ON" } else { "OFF" }
     ));
+    cmake_cmd.arg(format!(
+        "-DwxdUSE_RICHTEXT={}",
+        if cfg!(feature = "richtext") {
+            "ON"
+        } else {
+            "OFF"
+        }
+    ));
 
     // Platform-specific CMake configuration
     // Detect host platform for cross-compilation scenarios
@@ -1063,7 +1052,7 @@ fn build_wxdragon_wrapper(
                 if target_env == "gnu" && host_os != "windows" {
                     // Try to find MinGW-w64 cross compiler
                     // For i686, the compiler is usually i686-w64-mingw32-g++
-                    let cross_compiler = format!("{}-w64-mingw32-g++", target_arch);
+                    let cross_compiler = format!("{target_arch}-w64-mingw32-g++");
 
                     // Check if the cross compiler exists
                     if std::process::Command::new("which")
@@ -1072,12 +1061,9 @@ fn build_wxdragon_wrapper(
                         .map(|o| o.status.success())
                         .unwrap_or(false)
                     {
-                        cmake_cmd.arg(format!("-DCMAKE_CXX_COMPILER={}", cross_compiler));
-                        cmake_cmd.arg(format!(
-                            "-DCMAKE_C_COMPILER={}-w64-mingw32-gcc",
-                            target_arch
-                        ));
-                        println!("info: Using MinGW-w64 cross compiler: {}", cross_compiler);
+                        cmake_cmd.arg(format!("-DCMAKE_CXX_COMPILER={cross_compiler}"));
+                        cmake_cmd.arg(format!("-DCMAKE_C_COMPILER={target_arch}-w64-mingw32-gcc"));
+                        println!("info: Using MinGW-w64 cross compiler: {cross_compiler}");
                     } else {
                         println!("cargo:warning=MinGW-w64 cross compiler not found. Cross-compilation to Windows GNU may fail.");
                         println!("cargo:warning=Consider installing mingw-w64 with: brew install mingw-w64");
@@ -1159,11 +1145,9 @@ fn build_wxdragon_wrapper(
     if !output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!(
-            "CMake configure failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
-            stdout, stderr
-        )
-        .into());
+        return Err(
+            format!("CMake configure failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}").into(),
+        );
     }
 
     // Build
@@ -1178,16 +1162,16 @@ fn build_wxdragon_wrapper(
         .arg("wxdragon")
         .arg("--verbose");
 
-    println!("info: Running CMake build command: {:?}", build_cmd);
+    println!("info: Running CMake build command: {build_cmd:?}");
     let output = build_cmd.output()?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
     // Always print build output for debugging, even on success
-    println!("CMake build stdout:\n{}", stdout);
+    println!("CMake build stdout:\n{stdout}");
     if !stderr.is_empty() {
-        println!("CMake build stderr:\n{}", stderr);
+        println!("CMake build stderr:\n{stderr}");
     }
 
     if !output.status.success() {
@@ -1204,34 +1188,31 @@ fn build_wxdragon_wrapper(
             msbuild_cmd
                 .current_dir(&wrapper_build_dir)
                 .arg("wxdragon.vcxproj")
-                .arg(format!("/p:Configuration={}", build_type))
-                .arg(format!("/p:Platform={}", msbuild_platform))
+                .arg(format!("/p:Configuration={build_type}"))
+                .arg(format!("/p:Platform={msbuild_platform}"))
                 .arg("/verbosity:detailed");
 
-            println!("info: Running MSBuild command: {:?}", msbuild_cmd);
+            println!("info: Running MSBuild command: {msbuild_cmd:?}");
             let msbuild_output = msbuild_cmd.output()?;
 
             let msbuild_stdout = String::from_utf8_lossy(&msbuild_output.stdout);
             let msbuild_stderr = String::from_utf8_lossy(&msbuild_output.stderr);
 
-            println!("MSBuild stdout:\n{}", msbuild_stdout);
+            println!("MSBuild stdout:\n{msbuild_stdout}");
             if !msbuild_stderr.is_empty() {
-                println!("MSBuild stderr:\n{}", msbuild_stderr);
+                println!("MSBuild stderr:\n{msbuild_stderr}");
             }
 
             if !msbuild_output.status.success() {
                 return Err(format!(
-                    "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{}\nCMake STDERR:\n{}\nMSBuild STDOUT:\n{}\nMSBuild STDERR:\n{}",
-                    stdout, stderr, msbuild_stdout, msbuild_stderr
+                    "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{stdout}\nCMake STDERR:\n{stderr}\nMSBuild STDOUT:\n{msbuild_stdout}\nMSBuild STDERR:\n{msbuild_stderr}"
                 )
                 .into());
             }
         } else {
-            return Err(format!(
-                "CMake build failed:\nSTDOUT:\n{}\nSTDERR:\n{}",
-                stdout, stderr
-            )
-            .into());
+            return Err(
+                format!("CMake build failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}").into(),
+            );
         }
     } else {
         // Even if CMake reported success, check if it actually built anything
@@ -1256,27 +1237,27 @@ fn build_wxdragon_wrapper(
     let possible_lib_paths = if target_env == "msvc" {
         // Windows MSVC uses .lib files
         vec![
-            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("{build_type}/wxdragon.lib")),
+            wrapper_build_dir.join(format!("lib/{build_type}/wxdragon.lib")),
+            wrapper_build_dir.join(format!("x64/{build_type}/wxdragon.lib")),
             wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
             wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
             wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
             wrapper_build_dir.join("wxdragon.lib"),
             wrapper_build_dir.join("lib/wxdragon.lib"),
             wrapper_build_dir.join("x64/wxdragon.lib"),
-            wrapper_build_dir.join(format!("Win32/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("lib/Win32/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("out/{}/wxdragon.lib", build_type)),
-            wrapper_build_dir.join(format!("bin/{}/wxdragon.lib", build_type)),
+            wrapper_build_dir.join(format!("Win32/{build_type}/wxdragon.lib")),
+            wrapper_build_dir.join(format!("lib/Win32/{build_type}/wxdragon.lib")),
+            wrapper_build_dir.join(format!("out/{build_type}/wxdragon.lib")),
+            wrapper_build_dir.join(format!("bin/{build_type}/wxdragon.lib")),
         ]
     } else {
         // Unix-like systems (Linux, macOS, Windows GNU) use .a files
         vec![
             wrapper_build_dir.join("lib/libwxdragon.a"),
             wrapper_build_dir.join("libwxdragon.a"),
-            wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type)),
-            wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type)),
+            wrapper_build_dir.join(format!("lib/{build_type}/libwxdragon.a")),
+            wrapper_build_dir.join(format!("{build_type}/libwxdragon.a")),
             wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
             wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
         ]
@@ -1302,10 +1283,8 @@ fn build_wxdragon_wrapper(
                         let path = entry.path();
                         result.push_str(&format!("{}  \"{}\"\n", prefix, path.display()));
                         if path.is_dir() {
-                            result.push_str(&list_directory_recursive(
-                                &path,
-                                &format!("{}  ", prefix),
-                            ));
+                            result
+                                .push_str(&list_directory_recursive(&path, &format!("{prefix}  ")));
                         }
                     }
                 }
@@ -1329,11 +1308,15 @@ fn build_wxdragon_wrapper(
 
     let dest = if target_os == "windows" {
         // For Windows, copy to the platform-specific subdirectory where the linker expects it
-        let arch_suffix = if target_arch == "i686" || target_arch == "x86" { "x86" } else { "x64" };
+        let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
+            "x86"
+        } else {
+            "x64"
+        };
         // Check for both arch-specific and generic library directories
         let arch_specific_lib_dir = match target_env {
-            "msvc" => wx_lib_dir.join(format!("vc_{}_lib", arch_suffix)),
-            "gnu" => wx_lib_dir.join(format!("gcc_{}_lib", arch_suffix)),
+            "msvc" => wx_lib_dir.join(format!("vc_{arch_suffix}_lib")),
+            "gnu" => wx_lib_dir.join(format!("gcc_{arch_suffix}_lib")),
             _ => wx_lib_dir.clone(),
         };
         let generic_lib_dir = match target_env {
@@ -1341,7 +1324,7 @@ fn build_wxdragon_wrapper(
             "gnu" => wx_lib_dir.join("gcc_lib"),
             _ => wx_lib_dir.clone(),
         };
-        
+
         let platform_lib_dir = if arch_specific_lib_dir.exists() {
             arch_specific_lib_dir
         } else {
@@ -1364,10 +1347,7 @@ fn build_wxdragon_wrapper(
     }
 
     std::fs::copy(&library_path, &dest)?;
-    println!(
-        "info: Successfully built wxDragon wrapper library at {:?}",
-        library_path
-    );
+    println!("info: Successfully built wxDragon wrapper library at {library_path:?}");
 
     Ok(())
 }

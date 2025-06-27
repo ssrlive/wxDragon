@@ -592,7 +592,7 @@ impl CustomDataViewVirtualListModel {
         Self::new(
             initial_size,
             (),
-            |_, row, col| Variant::String(format!("Item ({}, {})", row, col)),
+            |_, row, col| Variant::String(format!("Item ({row}, {col})")),
             None::<fn(&(), usize, usize, &Variant) -> bool>,
             None::<fn(&(), usize, usize) -> Option<DataViewItemAttr>>,
             None::<fn(&(), usize, usize) -> bool>,

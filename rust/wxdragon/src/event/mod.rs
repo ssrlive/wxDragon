@@ -436,6 +436,38 @@ impl EventType {
     pub const STC_AUTOCOMP_CHAR_DELETED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
 
+    // RichText events
+    pub const RICHTEXT_LEFT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_LEFT_CLICK);
+    pub const RICHTEXT_RIGHT_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_RIGHT_CLICK);
+    pub const RICHTEXT_MIDDLE_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_MIDDLE_CLICK);
+    pub const RICHTEXT_LEFT_DCLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_LEFT_DCLICK);
+    pub const RICHTEXT_RETURN: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_RETURN);
+    pub const RICHTEXT_CHARACTER: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CHARACTER);
+    pub const RICHTEXT_DELETE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_DELETE);
+    pub const RICHTEXT_CONTENT_INSERTED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CONTENT_INSERTED);
+    pub const RICHTEXT_CONTENT_DELETED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CONTENT_DELETED);
+    pub const RICHTEXT_STYLE_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLE_CHANGED);
+    pub const RICHTEXT_SELECTION_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_SELECTION_CHANGED);
+    pub const RICHTEXT_STYLESHEET_CHANGING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGING);
+    pub const RICHTEXT_STYLESHEET_CHANGED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGED);
+    pub const RICHTEXT_STYLESHEET_REPLACING: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACING);
+    pub const RICHTEXT_STYLESHEET_REPLACED: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED);
+
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {
         self.0
@@ -545,8 +577,9 @@ impl Event {
             None
         } else {
             // Convert i32 to the C enum type
-            let c_enum_val =
-                unsafe { std::mem::transmute::<i32, ffi::WXDEventTypeCEnum>(event_type_c) };
+            let c_enum_val = event_type_c
+                .try_into()
+                .unwrap_or(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_NULL);
             Some(EventType(c_enum_val))
         }
     }

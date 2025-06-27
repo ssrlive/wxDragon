@@ -256,6 +256,9 @@ impl TextCtrl {
 // Apply common trait implementations for this widget
 implement_widget_traits_with_target!(TextCtrl, window, Window);
 
+// Implement scrolling functionality for TextCtrl (useful for multiline text)
+impl crate::scrollable::WxScrollable for TextCtrl {}
+
 // Use the widget_builder macro for TextCtrl
 widget_builder!(
     name: TextCtrl,

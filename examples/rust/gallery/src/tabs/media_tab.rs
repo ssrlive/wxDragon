@@ -25,13 +25,12 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
     let animation_size = match image::load_from_memory(animation_bytes) {
         Ok(anim_image) => {
             let (w, h) = anim_image.dimensions();
-            println!("Loaded animation dimensions: {}x{}", w, h);
+            println!("Loaded animation dimensions: {w}x{h}");
             Size::new(w as i32, h as i32)
         }
         Err(e) => {
             println!(
-                "Failed to load animation metadata to get size: {}. Falling back to default.",
-                e
+                "Failed to load animation metadata to get size: {e}. Falling back to default."
             );
             Size::new(100, 100) // Fallback size
         }
@@ -107,7 +106,7 @@ pub fn create_media_tab(notebook: &Notebook) -> MediaControls {
             }
         }
         Err(e) => {
-            println!("[MediaTab] Failed to load static bitmap: {}", e);
+            println!("[MediaTab] Failed to load static bitmap: {e}");
             let bmp_error_label = StaticText::builder(&panel)
                 .with_label("StaticBitmap: Failed to load from bytes")
                 .build();

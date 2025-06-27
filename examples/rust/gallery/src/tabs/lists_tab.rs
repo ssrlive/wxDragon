@@ -424,7 +424,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let listbox_status_label_clone = listbox_status_label.clone();
     list_box.on_selection_changed(move |event_data| {
         if let Some(selection_str) = event_data.get_string() {
-            listbox_status_label_clone.set_label(&format!("List Selection: {}", selection_str));
+            listbox_status_label_clone.set_label(&format!("List Selection: {selection_str}"));
         }
         if let Some(index) = event_data.get_selection() {
             println!(
@@ -467,7 +467,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let choice_status_label_clone = choice_status_label.clone();
     choice_ctrl.on_selection_changed(move |event_data| {
         if let Some(selected_string) = event_data.get_string() {
-            choice_status_label_clone.set_label(&format!("Choice Selection: {}", selected_string));
+            choice_status_label_clone.set_label(&format!("Choice Selection: {selected_string}"));
         } else {
             choice_status_label_clone.set_label("Choice Selection: None");
         }
@@ -477,7 +477,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let combo_status_label_clone = combo_status_label.clone();
     combo_box.on_selection_changed(move |event_data| {
         if let Some(selected_string) = event_data.get_string() {
-            combo_status_label_clone.set_label(&format!("Combo Selected: {}", selected_string));
+            combo_status_label_clone.set_label(&format!("Combo Selected: {selected_string}"));
         } else {
             combo_status_label_clone.set_label("Combo Selected: None");
         }
@@ -486,13 +486,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let combo_status_label_clone = combo_status_label.clone();
     combo_box.on_text_updated(move |event_data| {
         if let Some(current_text) = event_data.get_string() {
-            combo_status_label_clone.set_label(&format!("Combo Text: {}", current_text));
+            combo_status_label_clone.set_label(&format!("Combo Text: {current_text}"));
         }
     });
 
     combo_box.on_enter_pressed(move |event_data| {
         if let Some(current_text) = event_data.get_string() {
-            println!("ComboBox Enter: {}", current_text);
+            println!("ComboBox Enter: {current_text}");
         }
     });
 
@@ -525,7 +525,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             let text_ctrl = list_ctrl_clone.edit_label(selected_item as i64);
             text_ctrl.set_value("New Label");
             // You can access the TextCtrl here if needed
-            list_ctrl_status_label_clone.set_label(&format!("Editing item {}", selected_item));
+            list_ctrl_status_label_clone.set_label(&format!("Editing item {selected_item}"));
         } else {
             list_ctrl_status_label_clone.set_label("Please select an item to edit");
         }
@@ -541,7 +541,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         let new_idx = list_ctrl_clone.insert_item(count as i64, &new_item_text, None);
         list_ctrl_clone.set_item_text_by_column(new_idx as i64, 1, "New Description");
         list_ctrl_clone.set_item_text_by_column(new_idx as i64, 2, "0");
-        list_ctrl_status_label_clone.set_label(&format!("Added new item {}", new_idx));
+        list_ctrl_status_label_clone.set_label(&format!("Added new item {new_idx}"));
     });
 
     // Remove button
@@ -552,10 +552,10 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
         if selected_item >= 0 {
             // Delete the selected item
             if list_ctrl_clone.delete_item(selected_item as i64) {
-                list_ctrl_status_label_clone.set_label(&format!("Removed item {}", selected_item));
+                list_ctrl_status_label_clone.set_label(&format!("Removed item {selected_item}"));
             } else {
                 list_ctrl_status_label_clone
-                    .set_label(&format!("Failed to remove item {}", selected_item));
+                    .set_label(&format!("Failed to remove item {selected_item}"));
             }
         } else {
             list_ctrl_status_label_clone.set_label("Please select an item to remove");
@@ -595,7 +595,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
             let label = event_data
                 .get_label()
                 .unwrap_or_else(|| String::from("<no label>"));
-            list_ctrl_status_label_clone.set_label(&format!("Label changed to: {}", label));
+            list_ctrl_status_label_clone.set_label(&format!("Label changed to: {label}"));
         }
     });
 
@@ -641,7 +641,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let combo_status_label_selected = combo_status_label.clone();
     combo_box.on_selection_changed(move |event_data| {
         if let Some(selected_string) = event_data.get_string() {
-            combo_status_label_selected.set_label(&format!("Combo Selected: {}", selected_string));
+            combo_status_label_selected.set_label(&format!("Combo Selected: {selected_string}"));
         } else {
             combo_status_label_selected.set_label("Combo Selected: None");
         }
@@ -650,13 +650,13 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     let combo_status_label_text_changed = combo_status_label.clone();
     combo_box.on_text_updated(move |event_data| {
         if let Some(current_text) = event_data.get_string() {
-            combo_status_label_text_changed.set_label(&format!("Combo Text: {}", current_text));
+            combo_status_label_text_changed.set_label(&format!("Combo Text: {current_text}"));
         }
     });
 
     combo_box.on_enter_pressed(move |event_data| {
         if let Some(text_val) = event_data.get_string() {
-            println!("ComboBox Enter: {}", text_val);
+            println!("ComboBox Enter: {text_val}");
         } else {
             println!("ComboBox Enter: (no text in event data)");
         }
@@ -702,7 +702,7 @@ pub fn create_lists_tab(notebook: &Notebook, _frame: &Frame) -> ListsTabControls
     rearrangelist.on_rearranged(move |_| {
         let order = rearrangelist_clone.get_current_order();
         rearrangelist_status_label_clone
-            .set_label(&format!("Rearranged: current order is {:?}", order));
+            .set_label(&format!("Rearranged: current order is {order:?}"));
     });
 
     // Button event handlers for RearrangeList

@@ -219,7 +219,7 @@ where
     };
 
     if exit_code != 0 {
-        panic!("Application exited with code: {}", exit_code);
+        panic!("Application exited with code: {exit_code}");
     }
 
     Ok(())

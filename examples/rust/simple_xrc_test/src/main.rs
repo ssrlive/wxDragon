@@ -185,7 +185,7 @@ fn main() {
         show_dialog_btn.on_click(move |_event_data| {
             println!("Show dialog button clicked!");
             let result = dialog_clone.show_modal();
-            println!("Dialog closed with result: {}", result);
+            println!("Dialog closed with result: {result}");
         });
 
         // Action button
@@ -241,18 +241,18 @@ fn main() {
         let statusbar_clone4 = statusbar.clone();
         value_slider.on_scroll_changed(move |event_data| {
             let value = event_data.get_position().unwrap_or(0);
-            println!("Slider value: {}", value);
-            status_clone4.set_label(&format!("Slider: {}", value));
+            println!("Slider value: {value}");
+            status_clone4.set_label(&format!("Slider: {value}"));
             gauge_clone.set_value(value);
-            statusbar_clone4.set_status_text(&format!("Value: {}", value), 0);
+            statusbar_clone4.set_status_text(&format!("Value: {value}"), 0);
         });
 
         // Spin control
         let status_clone5 = status_label.clone();
         number_spin.on_value_changed(move |event_data| {
             let value = event_data.get_value();
-            println!("Spin control value: {}", value);
-            status_clone5.set_label(&format!("Number: {}", value));
+            println!("Spin control value: {value}");
+            status_clone5.set_label(&format!("Number: {value}"));
         });
 
         // Text controls
@@ -286,16 +286,16 @@ fn main() {
         let status_clone10 = status_label.clone();
         choice_combo.on_selection_changed(move |event_data| {
             let selection = event_data.get_selection().unwrap_or(0);
-            println!("Choice selected: {}", selection);
-            status_clone10.set_label(&format!("Choice: {}", selection));
+            println!("Choice selected: {selection}");
+            status_clone10.set_label(&format!("Choice: {selection}"));
         });
 
         // List box
         let status_clone11 = status_label.clone();
         items_list.on_selection_changed(move |event_data| {
             let selection = event_data.get_selection().unwrap_or(0);
-            println!("List item selected: {}", selection);
-            status_clone11.set_label(&format!("Item: {}", selection));
+            println!("List item selected: {selection}");
+            status_clone11.set_label(&format!("Item: {selection}"));
         });
 
         // Set up dialog button handlers

@@ -859,6 +859,9 @@ impl HasItemData for ListCtrl {
 // Implement common widget traits
 implement_widget_traits_with_target!(ListCtrl, window, Window);
 
+// Implement scrolling functionality for ListCtrl
+impl crate::scrollable::WxScrollable for ListCtrl {}
+
 // Use the widget_builder macro for ListCtrl
 widget_builder!(
     name: ListCtrl,

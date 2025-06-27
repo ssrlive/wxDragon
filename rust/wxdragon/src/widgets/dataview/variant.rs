@@ -267,14 +267,14 @@ impl Default for Variant {
 impl std::fmt::Debug for Variant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Variant::Bool(val) => write!(f, "Bool({})", val),
-            Variant::Int32(val) => write!(f, "Int32({})", val),
-            Variant::Int64(val) => write!(f, "Int64({})", val),
-            Variant::Double(val) => write!(f, "Double({})", val),
-            Variant::String(val) => write!(f, "String({})", val),
-            Variant::DateTime(val) => write!(f, "DateTime({:?})", val),
+            Variant::Bool(val) => write!(f, "Bool({val})"),
+            Variant::Int32(val) => write!(f, "Int32({val})"),
+            Variant::Int64(val) => write!(f, "Int64({val})"),
+            Variant::Double(val) => write!(f, "Double({val})"),
+            Variant::String(val) => write!(f, "String({val})"),
+            Variant::DateTime(val) => write!(f, "DateTime({val:?})"),
             Variant::Bitmap(_) => write!(f, "Bitmap(...)"),
-            Variant::BitmapBorrowed(ptr) => write!(f, "BitmapBorrowed({:?})", ptr),
+            Variant::BitmapBorrowed(ptr) => write!(f, "BitmapBorrowed({ptr:?})"),
         }
     }
 }

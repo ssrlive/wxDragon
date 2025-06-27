@@ -1778,6 +1778,9 @@ impl StyledTextCtrl {
 // Apply common trait implementations for this widget
 implement_widget_traits_with_target!(StyledTextCtrl, window, Window);
 
+// Implement scrolling functionality for StyledTextCtrl
+impl crate::scrollable::WxScrollable for StyledTextCtrl {}
+
 // Use the widget_builder macro for StyledTextCtrl
 widget_builder!(
     name: StyledTextCtrl,

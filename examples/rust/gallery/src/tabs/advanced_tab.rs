@@ -211,7 +211,7 @@ impl AdvancedTabControls {
                 let mut status = String::new();
                 std::fmt::Write::write_fmt(
                     &mut status,
-                    format_args!("Tree Selection: Item {:?}", selected_item),
+                    format_args!("Tree Selection: Item {selected_item:?}"),
                 )
                 .unwrap();
                 tree_status_label_clone.set_label(&status);
@@ -227,7 +227,7 @@ impl AdvancedTabControls {
             let current_value = gauge_clone_for_inc.get_value();
             let new_value = std::cmp::min(current_value + 10, 100);
             gauge_clone_for_inc.set_value(new_value);
-            gauge_status_label_clone_for_inc.set_label(&format!("Gauge Value: {}%", new_value));
+            gauge_status_label_clone_for_inc.set_label(&format!("Gauge Value: {new_value}%"));
         });
 
         let gauge_clone_for_reset = self.gauge.clone();
@@ -243,21 +243,21 @@ impl AdvancedTabControls {
         self.slider.on_thumb_track(move |event_data| {
             let value = event_data.get_position().unwrap_or(0);
             gauge_clone.set_value(value);
-            gauge_status_label_clone.set_label(&format!("Gauge Value: {}", value));
+            gauge_status_label_clone.set_label(&format!("Gauge Value: {value}"));
         });
 
         // Timer for Gauge Pulse
         let gauge_status_label_clone_timer = self.gauge_status_label.clone();
         self.slider.on_scroll_changed(move |event_data| {
             let value = event_data.get_position().unwrap_or(0);
-            gauge_status_label_clone_timer.set_label(&format!("Gauge Value: {}", value));
+            gauge_status_label_clone_timer.set_label(&format!("Gauge Value: {value}"));
         });
 
         // SpinCtrl Event Binding
         let spin_ctrl_label_clone = self.spin_ctrl_label.clone();
         self.spin_ctrl.on_value_changed(move |event| {
             let value = event.get_value();
-            spin_ctrl_label_clone.set_label(&format!("Spin Value: {}", value));
+            spin_ctrl_label_clone.set_label(&format!("Spin Value: {value}"));
             println!(
                 "SPINCTRL Event (Advanced Tab): ID: {}, Value: {}",
                 event.base.get_id(),
@@ -344,7 +344,7 @@ fn add_dnd_demo(panel: &Panel, sizer: &BoxSizer) {
 
             // Start the drag operation
             let result = drop_source.do_drag_drop(true);
-            println!("Drag result: {}", result);
+            println!("Drag result: {result}");
         }
     });
 
@@ -353,7 +353,7 @@ fn add_dnd_demo(panel: &Panel, sizer: &BoxSizer) {
         .with_on_drop_text({
             let dropped_text = dropped_text.clone();
             move |text, x, y| {
-                println!("Text dropped at ({}, {}): {}", x, y, text);
+                println!("Text dropped at ({x}, {y}): {text}");
                 dropped_text.set_value(text);
                 true // Accept the drop
             }
@@ -436,7 +436,7 @@ fn add_dnd_demo(panel: &Panel, sizer: &BoxSizer) {
                     let new_text = if current_text.is_empty() {
                         file
                     } else {
-                        format!("{}\n{}", current_text, file)
+                        format!("{current_text}\n{file}")
                     };
                     file_list.set_value(&new_text);
                 }

@@ -99,4 +99,10 @@ WXD_EXPORTED int wxd_Window_GetCharWidth(wxd_Window_t* window);
 WXD_EXPORTED void wxd_Window_SetWindowStyle(wxd_Window_t* window, int64_t style);
 WXD_EXPORTED int64_t wxd_Window_GetWindowStyle(wxd_Window_t* window);
 
+// --- Scrolling Functions ---
+WXD_EXPORTED void wxd_Window_ShowPosition(wxd_Window_t* window, int64_t position);
+WXD_EXPORTED void wxd_Window_ScrollIntoView(wxd_Window_t* window, int64_t position, int keyCode);
+WXD_EXPORTED bool wxd_Window_IsPositionVisible(wxd_Window_t* window, int64_t position);
+WXD_EXPORTED int64_t wxd_Window_GetLastPosition(wxd_Window_t* window);
+
 #endif // WXD_WINDOW_BASE_H 

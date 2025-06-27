@@ -60,7 +60,7 @@ impl XmlResource {
         if success {
             Ok(())
         } else {
-            Err(format!("Failed to load XRC file: {}", filename))
+            Err(format!("Failed to load XRC file: {filename}"))
         }
     }
 

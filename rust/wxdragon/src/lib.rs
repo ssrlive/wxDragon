@@ -23,6 +23,7 @@ pub mod geometry;
 pub mod id;
 pub mod menus;
 pub mod prelude;
+pub mod scrollable;
 pub mod sizers;
 pub mod timer;
 pub mod types;

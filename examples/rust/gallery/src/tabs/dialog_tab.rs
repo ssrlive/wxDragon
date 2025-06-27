@@ -499,8 +499,8 @@ impl DialogTabControls {
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 let path_option = dialog.get_path();
                 let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
-                status_label_clone_open.set_label(&format!("Opened: {}", path_str));
-                println!("File Dialog: Opened file: {}", path_str);
+                status_label_clone_open.set_label(&format!("Opened: {path_str}"));
+                println!("File Dialog: Opened file: {path_str}");
             } else {
                 status_label_clone_open.set_label("Open cancelled.");
                 println!("File Dialog: Open cancelled.");
@@ -520,8 +520,8 @@ impl DialogTabControls {
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 let path_option = dialog.get_path();
                 let path_str = path_option.unwrap_or_else(|| "(None)".to_string());
-                status_label_clone_save.set_label(&format!("Saved to: {}", path_str));
-                println!("File Dialog: Saved to file: {}", path_str);
+                status_label_clone_save.set_label(&format!("Saved to: {path_str}"));
+                println!("File Dialog: Saved to file: {path_str}");
             } else {
                 status_label_clone_save.set_label("Save cancelled.");
                 println!("File Dialog: Save cancelled.");
@@ -541,8 +541,8 @@ impl DialogTabControls {
             .build();
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(text) = dialog.get_value() {
-                    status_label_clone_text.set_label(&format!("Entered: {}", text));
-                    println!("Text Entry Dialog: Entered text: {}", text);
+                    status_label_clone_text.set_label(&format!("Entered: {text}"));
+                    println!("Text Entry Dialog: Entered text: {text}");
                 } else {
                     status_label_clone_text.set_label("Input: No value.");
                     println!("Text Entry Dialog: Input: No value returned.");
@@ -597,10 +597,10 @@ impl DialogTabControls {
                 .build();
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(colour) = dialog.get_colour() {
-                    status_label_clone_colour.set_label(&format!("Chosen: {:?}", colour));
+                    status_label_clone_colour.set_label(&format!("Chosen: {colour:?}"));
                     colour_sample_panel_clone.set_background_color(colour);
                     colour_sample_panel_clone.refresh(true, None);
-                    println!("Colour Dialog: Chosen colour: {:?}", colour);
+                    println!("Colour Dialog: Chosen colour: {colour:?}");
                 }
             } else {
                 status_label_clone_colour.set_label("Colour choice cancelled.");
@@ -656,7 +656,7 @@ impl DialogTabControls {
                     keep_going = dialog.update(i, None);
                 }
                 if !keep_going {
-                    println!("Progress Dialog: Aborted by user at {}%", i);
+                    println!("Progress Dialog: Aborted by user at {i}%");
                     break;
                 }
             }
@@ -683,8 +683,8 @@ impl DialogTabControls {
                     println!("NotificationMessage: Shown.");
                 }
                 Err(e) => {
-                    status_label_clone_notify.set_label(&format!("Notify Err: {:?}", e));
-                    println!("NotificationMessage Error: {:?}", e);
+                    status_label_clone_notify.set_label(&format!("Notify Err: {e:?}"));
+                    println!("NotificationMessage Error: {e:?}");
                 }
             }
         });
@@ -694,8 +694,8 @@ impl DialogTabControls {
         let fpc_clone = self.file_picker_ctrl.clone();
         self.file_picker_ctrl.on_file_changed(move |_event| {
             let path = fpc_clone.get_path();
-            fpc_status_label_clone.set_label(&format!("FilePicker Path: {}", path));
-            println!("FilePickerCtrl changed: {}", path);
+            fpc_status_label_clone.set_label(&format!("FilePicker Path: {path}"));
+            println!("FilePickerCtrl changed: {path}");
         });
 
         // Event handler for DirPickerCtrl
@@ -703,8 +703,8 @@ impl DialogTabControls {
         let dpc_clone = self.dir_picker_ctrl.clone();
         self.dir_picker_ctrl.on_dir_changed(move |_event| {
             let path = dpc_clone.get_path();
-            dpc_status_label_clone.set_label(&format!("DirPicker Path: {}", path));
-            println!("DirPickerCtrl changed: {}", path);
+            dpc_status_label_clone.set_label(&format!("DirPicker Path: {path}"));
+            println!("DirPickerCtrl changed: {path}");
         });
 
         // Event handler for FontPickerCtrl
@@ -721,10 +721,10 @@ impl DialogTabControls {
                     font.get_style(),
                     font.get_weight()
                 );
-                font_desc = format!("Font: {}", font_desc_base);
+                font_desc = format!("Font: {font_desc_base}");
             }
             font_pc_status_label_clone.set_label(&font_desc);
-            println!("{}", font_desc);
+            println!("{font_desc}");
         });
 
         // SingleChoiceDialog button
@@ -745,12 +745,12 @@ impl DialogTabControls {
 
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(selection) = dialog.get_string_selection() {
-                    status_label_clone_choice.set_label(&format!("Choice: {}", selection));
-                    println!("SingleChoiceDialog: Selected '{}'", selection);
+                    status_label_clone_choice.set_label(&format!("Choice: {selection}"));
+                    println!("SingleChoiceDialog: Selected '{selection}'");
 
                     // Alternatively, get selection index
                     let index = dialog.get_selection();
-                    println!("SingleChoiceDialog: Selected index {}", index);
+                    println!("SingleChoiceDialog: Selected index {index}");
                 } else {
                     status_label_clone_choice.set_label("Choice: None selected");
                     println!("SingleChoiceDialog: No selection retrieved");
@@ -792,9 +792,9 @@ impl DialogTabControls {
                         .join(", ");
                     let strings_str = string_selections.join(", ");
 
-                    status_label_clone_multi.set_label(&format!("Choices: {}", strings_str));
-                    println!("MultiChoiceDialog: Selected indices [{}]", indices_str);
-                    println!("MultiChoiceDialog: Selected strings [{}]", strings_str);
+                    status_label_clone_multi.set_label(&format!("Choices: {strings_str}"));
+                    println!("MultiChoiceDialog: Selected indices [{indices_str}]");
+                    println!("MultiChoiceDialog: Selected strings [{strings_str}]");
                 } else {
                     status_label_clone_multi.set_label("Choices: None selected");
                     println!("MultiChoiceDialog: No selections made");
@@ -814,7 +814,7 @@ impl DialogTabControls {
 
             if dialog.show_modal() == wxdragon::id::ID_OK {
                 if let Some(path) = dialog.get_path() {
-                    println!("Directory: {}", path);
+                    println!("Directory: {path}");
                 } else {
                     println!("Directory: None selected");
                 }

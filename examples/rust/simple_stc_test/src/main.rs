@@ -63,23 +63,23 @@ impl MainFrame {
         stc.on_stc_modified(move |_| {
             let length = stc_copy2.get_length();
             let lines = stc_copy2.get_line_count();
-            println!("Text modified - Length: {}, Lines: {}", length, lines);
+            println!("Text modified - Length: {length}, Lines: {lines}");
         });
 
         let stc_copy3 = stc.clone();
         stc.on_stc_margin_click(move |event| {
             let pos = event.get_position().unwrap_or(0);
             let line = stc_copy3.line_from_position(pos);
-            println!("Margin clicked at line: {}", line);
+            println!("Margin clicked at line: {line}");
 
             // Toggle marker on clicked line
             let markers = stc_copy3.marker_get(line);
             if markers & 1 != 0 {
                 stc_copy3.marker_delete(line, 0);
-                println!("Removed marker from line {}", line);
+                println!("Removed marker from line {line}");
             } else {
                 stc_copy3.marker_add(line, 0);
-                println!("Added marker to line {}", line);
+                println!("Added marker to line {line}");
             }
         });
 

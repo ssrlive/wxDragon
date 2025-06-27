@@ -50,7 +50,7 @@ impl AsyncMessageHandler {
             match self.receiver.try_recv() {
                 Ok(message) => {
                     processed_count += 1;
-                    println!("Processing message: {:?}", message);
+                    println!("Processing message: {message:?}");
                     self.handle_message(message);
                 }
                 Err(tokio_mpsc::error::TryRecvError::Empty) => {
@@ -67,10 +67,7 @@ impl AsyncMessageHandler {
 
         let has_more = processed_count == 10;
         if processed_count > 0 {
-            println!(
-                "Processed {} messages, has_more: {}",
-                processed_count, has_more
-            );
+            println!("Processed {processed_count} messages, has_more: {has_more}");
         }
 
         // If we processed the maximum number of messages, there might be more
@@ -81,14 +78,14 @@ impl AsyncMessageHandler {
     fn handle_message(&mut self, message: AsyncMessage) {
         match message {
             AsyncMessage::UpdateCounter(count) => {
-                self.counter_text.set_label(&format!("Counter: {}", count));
+                self.counter_text.set_label(&format!("Counter: {count}"));
             }
             AsyncMessage::UpdateStatus(status) => {
                 self.status_text.set_label(&status);
             }
             AsyncMessage::TaskCompleted(task_name) => {
                 self.status_text
-                    .set_label(&format!("Task completed: {}", task_name));
+                    .set_label(&format!("Task completed: {task_name}"));
             }
         }
     }
@@ -174,7 +171,7 @@ async fn main() {
                     println!("Counter task started");
                     for i in 1..=20 {
                         tokio::time::sleep(Duration::from_millis(500)).await;
-                        println!("Sending counter update: {}", i);
+                        println!("Sending counter update: {i}");
                         if sender_counter.send(AsyncMessage::UpdateCounter(i)).is_err() {
                             println!("Failed to send counter message");
                             break;
@@ -197,7 +194,7 @@ async fn main() {
 
                     for status in statuses.iter() {
                         tokio::time::sleep(Duration::from_secs(1)).await;
-                        println!("Sending status update: {}", status);
+                        println!("Sending status update: {status}");
                         if sender_status
                             .send(AsyncMessage::UpdateStatus(status.to_string()))
                             .is_err()

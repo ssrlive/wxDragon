@@ -112,7 +112,7 @@ fn main() {
         copy_button.on_click(move |_| {
             let text = text_ctrl_copy.get_value();
             if clipboard.set_text(&text) {
-                println!("Text copied to clipboard: {}", text);
+                println!("Text copied to clipboard: {text}");
             } else {
                 println!("Failed to copy text to clipboard");
             }
@@ -122,7 +122,7 @@ fn main() {
         paste_button.on_click(move |_| {
             if let Some(text) = clipboard.get_text() {
                 text_ctrl_paste.set_value(&text);
-                println!("Text pasted from clipboard: {}", text);
+                println!("Text pasted from clipboard: {text}");
             } else {
                 println!("No text on clipboard or clipboard access failed");
             }
@@ -196,7 +196,7 @@ fn main() {
 
             // Add the file to the data object
             file_data.add_file(file_path);
-            println!("Adding file to clipboard: {}", file_path);
+            println!("Adding file to clipboard: {file_path}");
 
             // Try to set the file to clipboard
             if let Some(_locker) = clipboard_file.locker() {
@@ -229,13 +229,13 @@ fn main() {
                         } else {
                             // Display the file paths in the text control
                             let file_list = files.join("\n");
-                            println!("Files pasted from clipboard:\n{}", file_list);
+                            println!("Files pasted from clipboard:\n{file_list}");
                             file_text_ctrl_paste.set_value(&file_list);
                         }
                     } else {
                         // Fallback to text for files
                         if let Some(text) = clipboard_paste.get_text() {
-                            println!("Retrieved file path as text: {}", text);
+                            println!("Retrieved file path as text: {text}");
                             file_text_ctrl_paste.set_value(&text);
                         } else {
                             println!("Failed to get files from clipboard");

@@ -564,7 +564,7 @@ impl BasicTabControls {
         let text_ctrl_clone_bind_events = self.text_ctrl.clone();
         self.text_ctrl.on_text_enter(move |event| {
             if let Some(text) = event.get_string() {
-                println!("Text Enter (from bind_events): {}", text);
+                println!("Text Enter (from bind_events): {text}");
                 if let Ok(num) = text.parse::<i32>() {
                     let min = spin_button_clone_bind_events.min();
                     let max = spin_button_clone_bind_events.max();
@@ -588,7 +588,7 @@ impl BasicTabControls {
                 event_data.get_id(),
                 radio1_label_str
             );
-            radio_status_label_clone1.set_label(&format!("Selected: {}", radio1_label_str));
+            radio_status_label_clone1.set_label(&format!("Selected: {radio1_label_str}"));
         });
 
         let radio_status_label_clone2 = self.radio_status_label.clone();
@@ -602,7 +602,7 @@ impl BasicTabControls {
                 event_data.get_id(),
                 radio2_label_str
             );
-            radio_status_label_clone2.set_label(&format!("Selected: {}", radio2_label_str));
+            radio_status_label_clone2.set_label(&format!("Selected: {radio2_label_str}"));
         });
 
         // ToggleButton Event Binding
@@ -610,7 +610,7 @@ impl BasicTabControls {
         self.toggle_button.on_toggle(move |event| {
             let is_on = event.is_checked().unwrap_or(false);
             toggle_status_label_clone.set_label(if is_on { "ON" } else { "OFF" });
-            println!("ToggleButton clicked, is_on: {}", is_on);
+            println!("ToggleButton clicked, is_on: {is_on}");
         });
 
         // SpinButton Event Bindings
@@ -618,7 +618,7 @@ impl BasicTabControls {
         self.spin_button.on_spin(move |event| {
             let value = event.get_int().unwrap_or(0);
             text_ctrl_clone.set_value(&value.to_string());
-            println!("SpinButton changed to: {}", value);
+            println!("SpinButton changed to: {value}");
         });
 
         // RadioBox Event binding
@@ -626,7 +626,7 @@ impl BasicTabControls {
         self.radio_box.on_selected(move |event| {
             let selection = event.get_selection().unwrap_or(0);
             let selection_string = radio_box_clone.get_string(selection);
-            println!("RadioBox selected: {} ({})", selection_string, selection);
+            println!("RadioBox selected: {selection_string} ({selection})");
         });
 
         // TimePicker event
@@ -647,13 +647,10 @@ impl BasicTabControls {
         let bitmap_combo_box_clone = self.bitmap_combo_box.clone();
         self.bitmap_combo_box.on_selection_changed(move |event| {
             let selection_idx = event.get_selection().unwrap_or(0);
-            let mut log_output = format!("BitmapComboBox selected item {}", selection_idx);
+            let mut log_output = format!("BitmapComboBox selected item {selection_idx}");
 
             let item_str = bitmap_combo_box_clone.get_string(selection_idx as u32);
-            log_output.push_str(&format!(
-                ", Selected Item [{}]: '{}'",
-                selection_idx, item_str
-            ));
+            log_output.push_str(&format!(", Selected Item [{selection_idx}]: '{item_str}'"));
 
             if let Some(bitmap) = bitmap_combo_box_clone.get_item_bitmap(selection_idx as u32) {
                 log_output.push_str(&format!(
@@ -665,7 +662,7 @@ impl BasicTabControls {
                 log_output.push_str(", Item has no bitmap or bitmap is invalid");
             }
 
-            println!("{}", log_output);
+            println!("{log_output}");
         });
 
         // SearchCtrl Event Handlers
@@ -723,7 +720,7 @@ impl BasicTabControls {
                     selected_date.day()
                 );
                 calendar_label_clone.set_label(&date_str);
-                println!("CALENDAR_SEL_CHANGED: Date: {}", date_str);
+                println!("CALENDAR_SEL_CHANGED: Date: {date_str}");
             }
         });
 
@@ -745,8 +742,8 @@ impl BasicTabControls {
         let spinctrld_clone = self.spinctrl_double.clone();
         self.spinctrl_double.on_value_changed(move |_event| {
             let current_value = spinctrld_clone.get_value();
-            spinctrld_label_clone.set_label(&format!("{:.2}", current_value));
-            println!("SpinCtrlDouble Value: {:.2}", current_value);
+            spinctrld_label_clone.set_label(&format!("{current_value:.2}"));
+            println!("SpinCtrlDouble Value: {current_value:.2}");
         });
 
         // ScrollBar event
@@ -754,17 +751,17 @@ impl BasicTabControls {
         let scroll_bar_clone = self.scroll_bar.clone();
         self.scroll_bar.on_thumb_track(move |_event| {
             let pos = scroll_bar_clone.thumb_position();
-            scrollbar_status_label_clone.set_label(&format!("{}", pos));
-            println!("Scroll Pos: {}", pos);
+            scrollbar_status_label_clone.set_label(&format!("{pos}"));
+            println!("Scroll Pos: {pos}");
         });
 
         // Colour picker event
         let colour_label_clone = self.colour_label.clone();
         self.colour_picker.on_colour_changed(move |event| {
             let colour = event.get_colour();
-            let label_text = format!("{:?}", colour);
+            let label_text = format!("{colour:?}");
             colour_label_clone.set_label(&label_text);
-            println!("ColourPicker changed: {:?}", colour);
+            println!("ColourPicker changed: {colour:?}");
         });
 
         // Hyperlink event

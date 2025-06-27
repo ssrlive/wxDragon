@@ -121,8 +121,8 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
         let status_index = (i - 4) % statuses.len();
 
         initial_employees.push(Employee {
-            id: format!("{:03}", i),
-            name: format!("Employee {}", i),
+            id: format!("{i:03}"),
+            name: format!("Employee {i}"),
             department: departments[dept_index].to_string(),
             active: (i % 2 == 0),
             performance: (i % 100) as i32,
@@ -330,7 +330,7 @@ pub fn create_dataview_virtual_tab(parent: &impl WxWidget) -> DataViewVirtualTab
     dvc.on_item_activated(move |event| {
         match event.get_row() {
             Some(row_index) => {
-                println!("Double-clicked on row: {}", row_index);
+                println!("Double-clicked on row: {row_index}");
                 // Get employee data for the clicked row
                 let employees_borrow = employees_for_click.borrow();
                 if let Some(employee) = employees_borrow.get(row_index as usize) {

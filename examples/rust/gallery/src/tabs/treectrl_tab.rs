@@ -65,9 +65,9 @@ impl TreeCtrlTabControls {
                     }
                     // Handle standard types
                     else if let Some(text) = item_data.downcast_ref::<String>() {
-                        info_text_clone.set_label(&format!("Text: {}", text));
+                        info_text_clone.set_label(&format!("Text: {text}"));
                     } else if let Some(number) = item_data.downcast_ref::<i32>() {
-                        info_text_clone.set_label(&format!("Number: {}", number));
+                        info_text_clone.set_label(&format!("Number: {number}"));
                     } else if item_data.downcast_ref::<()>().is_some() {
                         info_text_clone.set_label("This item has empty data (unit type)");
                     } else {
@@ -125,7 +125,7 @@ pub fn create_treectrl_tab(parent: &Notebook) -> TreeCtrlTabControls {
         {
             icons.push(image_list.add_bitmap(&bmp));
         } else {
-            println!("Failed to load icon {:?} for TreeCtrl ImageList", art_id);
+            println!("Failed to load icon {art_id:?} for TreeCtrl ImageList");
             icons.push(-1); // Placeholder if icon loading fails
         }
     }

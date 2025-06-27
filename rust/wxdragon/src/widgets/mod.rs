@@ -43,6 +43,8 @@ pub mod panel;
 pub mod radio_button;
 pub mod radiobox;
 pub mod rearrangelist;
+#[cfg(feature = "richtext")]
+pub mod richtextctrl;
 pub mod scrollbar;
 pub mod scrolled_window;
 pub mod search_ctrl;
@@ -127,6 +129,11 @@ pub use radio_button::{RadioButton, RadioButtonBuilder, RadioButtonStyle};
 pub use radiobox::RadioBox;
 pub use rearrangelist::{
     RearrangeList, RearrangeListEvent, RearrangeListEventData, RearrangeListStyle,
+};
+#[cfg(feature = "richtext")]
+pub use richtextctrl::{
+    RichTextCtrl, RichTextCtrlBuilder, RichTextCtrlEvent, RichTextCtrlEventData, RichTextCtrlStyle,
+    RichTextFileType,
 };
 pub use scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 pub use scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};

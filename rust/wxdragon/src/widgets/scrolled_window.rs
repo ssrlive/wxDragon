@@ -122,6 +122,9 @@ impl ScrolledWindow {
 // Apply common trait implementations
 implement_widget_traits_with_target!(ScrolledWindow, panel, Panel);
 
+// Implement scrolling functionality for ScrolledWindow
+impl crate::scrollable::WxScrollable for ScrolledWindow {}
+
 // Use widget_builder macro for the builder implementation
 widget_builder!(
     name: ScrolledWindow,

@@ -29,7 +29,7 @@ fn main() {
         // Add buttons to fill the grid
         for i in 1..=9 {
             let button = Button::builder(&panel)
-                .with_label(&format!("Button {}", i))
+                .with_label(&format!("Button {i}"))
                 .build();
             grid_sizer.add(&button, 0, SizerFlag::Expand, 0);
         }
@@ -59,7 +59,7 @@ fn main() {
         // Add some checkboxes to the second grid
         for i in 1..=8 {
             let checkbox = CheckBox::builder(&panel)
-                .with_label(&format!("Option {}", i))
+                .with_label(&format!("Option {i}"))
                 .build();
             grid_sizer2.add(&checkbox, 0, SizerFlag::Expand, 0);
         }
@@ -89,7 +89,7 @@ fn main() {
         // Add some text controls to the flex grid
         for i in 1..=4 {
             let text_ctrl = TextCtrl::builder(&panel)
-                .with_value(&format!("Text {}", i))
+                .with_value(&format!("Text {i}"))
                 .build();
             flex_sizer.add(&text_ctrl, 0, SizerFlag::Expand, 0);
         }

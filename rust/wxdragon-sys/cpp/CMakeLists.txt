@@ -51,6 +51,7 @@ option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" ON)
 option(wxdUSE_STC "Use Styled Text Control widget" ON)
 option(wxdUSE_XRC "Use XML Resource (XRC) support" ON)
 option(wxdUSE_WEBVIEW "Use the Webview widget" ON)
+option(wxdUSE_RICHTEXT "Use Rich Text Control widget" ON)
 
 # --- wxDragon Library Sources ---
 set(WXDRAGON_SOURCES
@@ -171,6 +172,10 @@ if (wxdUSE_WEBVIEW)
     # list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/webview.cpp)
 endif()
 
+if (wxdUSE_RICHTEXT)
+    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/richtextctrl.cpp)
+endif()
+
 message(STATUS "wxDragon sources: ${WXDRAGON_SOURCES}")
 
 # --- Create wxDragon Static Library ---
@@ -270,6 +275,12 @@ if (wxdUSE_XRC)
     target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=1)
 else()
     target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=0)
+endif()
+
+if (wxdUSE_RICHTEXT)
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=0)
 endif()
 
 # --- Add Library Search Directory ---

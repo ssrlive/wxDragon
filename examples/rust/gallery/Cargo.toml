@@ -5,8 +5,13 @@ edition = "2021"
 
 [dependencies]
 # Depend on the safe wrapper crate now
-wxdragon = { path = "../../../rust/wxdragon", features = ["aui"] }
+wxdragon = { path = "../../../rust/wxdragon" }
 image = { version = "0.25.1", default-features = false, features = ["png", "gif"] }
 
 [build-dependencies]
 embed-manifest = "1.4"
+
+[features]
+default = ["aui", "richtext"]
+aui = ["wxdragon/aui"]
+richtext = ["wxdragon/richtext"]

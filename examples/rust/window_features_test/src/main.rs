@@ -17,7 +17,7 @@ fn test_window_functions(window: &Frame) {
 
     let char_height = window.get_char_height();
     let char_width = window.get_char_width();
-    println!("Character height: {}, width: {}", char_height, char_width);
+    println!("Character height: {char_height}, width: {char_width}");
 
     // Test z-order management
     println!("\n=== Z-Order Management Tests ===");
@@ -68,12 +68,12 @@ fn test_cursor_functionality(window: &Frame) {
 
             // Test setting cursor on window
             window.set_cursor(Some(&cursor));
-            println!("  Set {} cursor on window", name);
+            println!("  Set {name} cursor on window");
 
             // Brief pause to see the cursor change
             std::thread::sleep(std::time::Duration::from_millis(500));
         } else {
-            println!("✗ Failed to create {} cursor", name);
+            println!("✗ Failed to create {name} cursor");
         }
     }
 

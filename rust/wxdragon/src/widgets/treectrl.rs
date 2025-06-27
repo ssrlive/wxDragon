@@ -142,18 +142,14 @@ impl TreeItemId {
                     Some(TreeItemId { ptr })
                 } else {
                     eprintln!(
-                        "Warning: C++ returned invalid TreeItemId pointer {:p}, rejecting",
-                        ptr
+                        "Warning: C++ returned invalid TreeItemId pointer {ptr:p}, rejecting"
                     );
                     // Free the invalid pointer since we were supposed to take ownership
                     ffi::wxd_TreeItemId_Free(ptr);
                     None
                 }
             } else {
-                eprintln!(
-                    "Warning: C++ returned corrupted TreeItemId pointer {:p}, rejecting",
-                    ptr
-                );
+                eprintln!("Warning: C++ returned corrupted TreeItemId pointer {ptr:p}, rejecting");
                 None
             }
         }
@@ -804,6 +800,9 @@ impl TreeCtrl {
 
 // Apply common trait implementations for this widget
 implement_widget_traits_with_target!(TreeCtrl, window, Window);
+
+// Implement scrolling functionality for TreeCtrl
+impl crate::scrollable::WxScrollable for TreeCtrl {}
 
 // Use the widget_builder macro for TreeCtrl
 widget_builder!(

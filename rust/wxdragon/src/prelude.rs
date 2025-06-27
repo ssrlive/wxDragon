@@ -151,6 +151,11 @@ pub use crate::widgets::radio_button::{RadioButton, RadioButtonBuilder, RadioBut
 pub use crate::widgets::radiobox::{RadioBox, RadioBoxBuilder, RadioBoxStyle};
 // Added RearrangeList
 pub use crate::widgets::rearrangelist::{RearrangeList, RearrangeListBuilder, RearrangeListStyle};
+#[cfg(feature = "richtext")]
+pub use crate::widgets::richtextctrl::{
+    RichTextCtrl, RichTextCtrlBuilder, RichTextCtrlEvent, RichTextCtrlEventData, RichTextCtrlStyle,
+    RichTextFileType,
+};
 pub use crate::widgets::scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 pub use crate::widgets::scrolled_window::{
     ScrolledWindow, ScrolledWindowBuilder, ScrolledWindowStyle,
@@ -255,3 +260,6 @@ pub use crate::xrc::{FromXrcPtr, WindowXrcMethods, XmlResource}; // Added XRC fu
 
 // --- Macros for custom widget development ---
 pub use crate::custom_widget;
+
+// --- Scrolling ---
+pub use crate::scrollable::WxScrollable;

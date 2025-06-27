@@ -13,6 +13,8 @@ use tabs::dataview_virtual_tab::create_dataview_virtual_tab;
 use tabs::dialog_tab::create_dialog_tab;
 use tabs::lists_tab::create_lists_tab;
 use tabs::media_tab::create_media_tab;
+#[cfg(feature = "richtext")]
+use tabs::richtext_tab::create_richtext_tab;
 use tabs::treectrl_tab::create_treectrl_tab;
 
 // Tool IDs - used in main.rs
@@ -115,6 +117,8 @@ fn main() {
         let color_controls = create_color_tab(&notebook, &frame);
         let dataview_virtual_controls = create_dataview_virtual_tab(&notebook);
         let dataview_tree_controls = create_dataview_tree_tab(&notebook);
+        #[cfg(feature = "richtext")]
+        let richtext_controls = create_richtext_tab(&notebook, &frame);
 
         // --- ToolBar Setup ---
         let tb_style = ToolBarStyle::Text | ToolBarStyle::Default;
@@ -231,6 +235,13 @@ fn main() {
             false,
             next_image_id(),
         );
+        #[cfg(feature = "richtext")]
+        notebook.add_page(
+            &richtext_controls.panel,
+            "Rich Text",
+            false,
+            next_image_id(),
+        );
 
         // --- Set Frame Sizer ---
         let main_sizer = BoxSizer::builder(Orientation::Vertical).build();
@@ -285,13 +296,11 @@ fn main() {
                 );
 
             println!(
-                "Notebook PageChanged: New={}, Old={}, NewLabel='{}', OldLabel='{}'",
-                new_page_index, old_page_index, new_page_text, old_page_text
+                "Notebook PageChanged: New={new_page_index}, Old={old_page_index}, NewLabel='{new_page_text}', OldLabel='{old_page_text}'"
             );
             frame_clone_page_changed.set_status_text(
                 &format!(
-                    "Switched from tab '{}' to '{}'",
-                    old_page_text, new_page_text
+                    "Switched from tab '{old_page_text}' to '{new_page_text}'"
                 ),
                 0,
             );
@@ -317,8 +326,7 @@ fn main() {
                 );
 
             println!(
-                "Notebook PageChanging: New={}, Old={}, NewLabel='{}', OldLabel='{}'",
-                new_page_index, old_page_index, new_page_text, old_page_text
+                "Notebook PageChanging: New={new_page_index}, Old={old_page_index}, NewLabel='{new_page_text}', OldLabel='{old_page_text}'"
             );
         });
 
@@ -330,6 +338,8 @@ fn main() {
         media_controls.bind_events();
         tree_controls.bind_events();
         aui_controls.bind_events();
+        #[cfg(feature = "richtext")]
+        richtext_controls.bind_events();
 
         // --- Final Setup ---
         frame.show(true);

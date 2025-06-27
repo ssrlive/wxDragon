@@ -68,7 +68,7 @@ fn main() {
 
                     // Draw progress text
                     ctx.set_text_foreground(Colour::rgb(0, 0, 0));
-                    let text = format!("{}%", progress);
+                    let text = format!("{progress}%");
                     let (text_width, text_height) = ctx.get_text_extent(&text);
                     let text_x = rect.x + (rect.width - text_width) / 2;
                     let text_y = rect.y + (rect.height - text_height) / 2;
