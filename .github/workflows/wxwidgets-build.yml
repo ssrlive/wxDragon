@@ -290,9 +290,6 @@ jobs:
                 -DWIN32=1
                 -D_WIN32=1
                 -D__WXMSW__=1
-                -D_WIN32_WINNT=0x0601
-                -DWINVER=0x0601
-                -DNTDDI_VERSION=0x06010000
               )
               ;;
             "linux-x64")
@@ -512,8 +509,8 @@ jobs:
           echo "Build Date: $(date -u)" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
           echo "Build OS: ${{ matrix.os }}" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
           if [[ "${{ matrix.target }}" == "i686-win7-windows-msvc" ]]; then
-            echo "Windows 7 Compatible: Yes" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
-            echo "Min Windows Version: 6.1 (Windows 7)" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
+            echo "Windows 7 Compatible: Yes (not specifically targeted)" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
+            echo "Architecture: i686 (32-bit)" >> "dist/${{ matrix.target }}-${{ matrix.build_type }}/VERSION.txt"
           fi
           
           # List contents for debugging
