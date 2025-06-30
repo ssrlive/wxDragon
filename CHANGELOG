@@ -1,5 +1,84 @@
 # Changelog
 
+## 0.8.7
+
+### New Features
+- **Universal Widget Casting System**: Added comprehensive runtime widget type determination and casting for all 41 wxDragon widgets
+  - Type-safe casting with `window.as_widget::<T>()` method using wxWidgets RTTI (GetClassName)
+  - Zero performance overhead with O(1) string comparison and graceful failure handling
+  - Complete coverage for all widget types: basic widgets (Button, TextCtrl), advanced widgets (TreeCtrl, DataView), container widgets (Frame, Notebook), and specialized widgets (ActivityIndicator, Calendar)
+  - Automatic macro-based implementation for 37 standard widgets plus manual implementations for 4 complex widgets (Frame, SplitterWindow, CommandLinkButton, ScrolledWindow)
+  - Enables powerful dynamic UI manipulation and significantly improves developer experience for complex applications
+
+- **Windows 7 Target Support**: Added comprehensive Windows 7 compatible wxWidgets library support with pre-built binaries
+  - **Official Target Detection**: Native support for official Windows 7 Rust targets (`i686-win7-windows-msvc`, `x86_64-win7-windows-msvc`)
+  - **Environment Variable Override**: `WXDRAGON_TARGET_OVERRIDE` support for manual Windows 7 library selection
+  - **Pre-built Libraries**: Complete wxWidgets 3.3.0 libraries for both 32-bit and 64-bit Windows 7 targets
+  - **Build System Integration**: Enhanced build.rs with TARGET environment variable detection and fallback mechanisms
+  - **Cross-Architecture Support**: Full support for both i686 (32-bit) and x86_64 (64-bit) Windows 7 architectures
+  - **Usage Examples**: 
+    - Direct: `cargo build --target i686-win7-windows-msvc` (when target is available)
+    - Override: `WXDRAGON_TARGET_OVERRIDE=i686-win7-windows-msvc cargo build --target i686-pc-windows-msvc`
+
+### Enhancements
+- **Enhanced Virtual List Example**: Added comprehensive `virtual_list_demo` example showcasing advanced DataView usage
+  - Adaptive pooling system for efficient large dataset handling
+  - Configuration-driven virtual list management
+  - Demonstrates best practices for virtual list implementations with thousands of items
+  - Advanced error handling and item context management
+
+- **Improved C++ String Handling**: Fixed GetLabel/GetString API consistency across all widgets
+  - Enhanced RichTextCtrl: GetValue, GetRange, GetSelectedText methods
+  - Enhanced StyledTextCtrl: GetText, GetSelectedText, GetLineText methods  
+  - Enhanced CommandEvent: GetString method
+  - Unified copy_wxstring_to_buffer pattern for consistent string handling across all widgets
+
+- **wxWidgets Build Workflow**: Comprehensive build system for Windows 7 pre-built libraries
+  - Automated GitHub Actions workflow for building Windows 7 compatible wxWidgets libraries
+  - Support for both debug and release configurations for i686 and x86_64 architectures
+  - Proper library organization with vc_lib (32-bit) and vc_x64_lib (64-bit) directory structures
+  - Enhanced version information and Windows 7 compatibility metadata in distributed packages
+
+### Technical Enhancements
+- **Widget Casting Infrastructure**: Added comprehensive macro system for universal widget casting
+  - `impl_widget_cast!` macro for automatic casting implementation across standard widgets
+  - Manual casting implementations for complex widget patterns (tuple structs, composition patterns)
+  - Enhanced window base functionality with GetClassName support for reliable type verification
+
+- **Build System Improvements**: Enhanced cross-platform build compatibility
+  - TARGET environment variable detection for official Windows 7 targets
+  - Fallback logic maintaining backward compatibility with existing target detection
+  - Improved library directory detection with architecture-specific handling
+  - Enhanced setup_linking function with consistent artifact name resolution
+
+- **FFI Layer Extensions**: Expanded C++ binding layer for new functionality
+  - Enhanced window management API with GetClassName for widget type identification
+  - Improved string handling functions across all widget types
+  - Better memory management for string operations and widget casting
+
+### Platform Support
+- ✅ **Windows 7 Compatibility**: Full support for Windows 7 (32-bit and 64-bit) with dedicated pre-built libraries
+- ✅ **Enhanced Windows MSVC**: Improved Windows MSVC build support with proper library organization
+- ✅ **Cross-Platform Widget Casting**: Universal widget casting works consistently across Linux, macOS, and Windows
+- ✅ **Build System Robustness**: Enhanced build reliability across all supported platforms
+
+### Examples
+- **virtual_list_demo**: New comprehensive example demonstrating advanced virtual list functionality
+  - Showcases adaptive pooling for handling large datasets efficiently
+  - Demonstrates configuration-driven virtual list management
+  - Includes error handling and best practices for virtual list implementations
+
+### API Changes
+- Added `as_widget::<T>()` method to all widgets via `WxWidget` trait for runtime type casting
+- Enhanced window module with GetClassName functionality for type identification
+- All new APIs follow wxDragon's established patterns for memory safety and type consistency
+- No breaking changes - all additions are backward compatible
+
+### Migration Notes
+- **Windows 7 Users**: Can now use dedicated Windows 7 targets for better compatibility
+- **Widget Casting**: Existing code continues to work unchanged; new casting functionality is purely additive
+- **Build System**: Enhanced target detection is transparent to existing users
+
 ## 0.8.6
 
 ### New Features
