@@ -358,7 +358,7 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           # For Windows MSVC, we need to specify the config explicitly
-          if [[ "${{ matrix.target }}" == "windows-msvc-"* ]]; then
+          if [[ "${{ matrix.target }}" == "windows-msvc-"* ]] || [[ "${{ matrix.target }}" == "i686-win7-windows-msvc" ]]; then
             echo "Building Windows MSVC with config: ${{ matrix.build_type }}"
             cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
           else
