@@ -274,3 +274,6 @@ impl WindowEvents for ListBox {}
 
 // Add XRC Support - enables ListBox to be created from XRC-managed pointers
 impl_xrc_support!(ListBox, { window });
+
+// Widget casting support for ListBox
+impl_widget_cast!(ListBox, "wxListBox", { window });

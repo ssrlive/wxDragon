@@ -160,3 +160,6 @@ implement_widget_traits_with_target!(BitmapButton, window, Window);
 
 // Add XRC Support - enables BitmapButton to be created from XRC-managed pointers
 impl_xrc_support!(BitmapButton, { window });
+
+// Widget casting support for BitmapButton
+impl_widget_cast!(BitmapButton, "wxBitmapButton", { window });

@@ -71,3 +71,6 @@ impl WindowEvents for StaticLine {}
 
 // Add XRC Support - enables StaticLine to be created from XRC-managed pointers
 impl_xrc_support!(StaticLine, { window });
+
+// Widget casting support for StaticLine
+impl_widget_cast!(StaticLine, "wxStaticLine", { window });

@@ -73,3 +73,6 @@ impl WindowEvents for StaticBox {}
 
 // Add XRC Support - enables StaticBox to be created from XRC-managed pointers
 impl_xrc_support!(StaticBox, { window });
+
+// Widget casting support for StaticBox
+impl_widget_cast!(StaticBox, "wxStaticBox", { window });

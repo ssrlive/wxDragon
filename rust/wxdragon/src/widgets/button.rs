@@ -402,3 +402,6 @@ widget_style_enum!(
     },
     default_variant: Default
 );
+
+// Enable widget casting for Button
+impl_widget_cast!(Button, "wxButton", composition);

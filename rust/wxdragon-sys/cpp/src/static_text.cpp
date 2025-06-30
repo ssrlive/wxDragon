@@ -59,31 +59,16 @@ WXD_EXPORTED void wxd_StaticText_SetLabel(wxd_StaticText_t* stext, const char* l
 }
 
 WXD_EXPORTED int wxd_StaticText_GetLabel(wxd_StaticText_t* stext, char* buffer, int buffer_len) {
+    if (!stext || !buffer || buffer_len <= 0) return -1; 
     wxStaticText* wx_stext = reinterpret_cast<wxStaticText*>(stext);
-    if (!wx_stext) {
-         // To match previous logic of wxd_Button_GetLabel which returned 0 on error for button ptr.
-         // but for consistency with copy_wxstring_to_buffer, if stext is null, we should probably still
-         // indicate how much an empty string would take, or a dedicated error. Let's return 0 for null widget.
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0; // For null widget ptr
-    }
-    // The check `!buffer || buffer_len <= 0` is handled by the utility if we want to return needed length.
-    // The original code returned -1. Let's align with the button's logic to return needed_len+1 or 0/error.
-    // If buffer is null or buffer_len is 0, copy_wxstring_to_buffer returns needed length.
-    // If stext is null, this won't be reached. The old code returned -1 on bad buffer.
-    // Our utility now handles bad buffer by returning needed length.
-
     wxString label = wx_stext->GetLabel();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(label, buffer, (size_t)buffer_len);
-    
-    // The old logic for this function returned 0 on success, and required_len if buffer was too small.
-    // This is different from other GetLabel/GetValue functions.
-    // Let's make it consistent: return required_len+1 if buffer is too small/null, or 0 on success if copied.
-    if (buffer && (size_t)buffer_len > needed_len_no_null) {
-        return 0; // Success, copied fully
-    } else {
-        return (int)(needed_len_no_null + 1); // Buffer too small or null, return needed size (incl. null)
-    }
+    return wxd_cpp_utils::copy_wxstring_to_buffer(label, buffer, static_cast<size_t>(buffer_len));
+}
+
+WXD_EXPORTED void wxd_StaticText_Wrap(wxd_StaticText_t* stext, int width) {
+    if (!stext) return;
+    wxStaticText* wx_stext = reinterpret_cast<wxStaticText*>(stext);
+    wx_stext->Wrap(width);
 }
 
 } // extern "C" 

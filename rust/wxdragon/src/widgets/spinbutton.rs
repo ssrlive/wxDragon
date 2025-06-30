@@ -181,3 +181,6 @@ impl WindowEvents for SpinButton {}
 
 // Add XRC Support - enables SpinButton to be created from XRC-managed pointers
 impl_xrc_support!(SpinButton, { window });
+
+// Widget casting support for SpinButton
+impl_widget_cast!(SpinButton, "wxSpinButton", { window });

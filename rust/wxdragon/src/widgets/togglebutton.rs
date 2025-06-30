@@ -166,3 +166,6 @@ widget_builder!(
 
 // Add XRC Support - enables ToggleButton to be created from XRC-managed pointers
 impl_xrc_support!(ToggleButton, { window });
+
+// Widget casting support for ToggleButton
+impl_widget_cast!(ToggleButton, "wxToggleButton", { window });

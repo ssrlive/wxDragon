@@ -360,3 +360,6 @@ impl WindowEvents for ToolBar {}
 // Add XRC support
 // XRC Support - enables ToolBar to be created from XRC-managed pointers
 impl_xrc_support!(ToolBar, { window });
+
+// Widget casting support for ToolBar
+impl_widget_cast!(ToolBar, "wxToolBar", { window });

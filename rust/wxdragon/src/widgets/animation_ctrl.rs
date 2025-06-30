@@ -120,3 +120,6 @@ impl WindowEvents for AnimationCtrl {}
 
 // Add XRC Support - enables AnimationCtrl to be created from XRC-managed pointers
 impl_xrc_support!(AnimationCtrl, { window });
+
+// Widget casting support for AnimationCtrl
+impl_widget_cast!(AnimationCtrl, "wxAnimationCtrl", { window });

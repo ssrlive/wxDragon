@@ -294,3 +294,6 @@ impl WindowEvents for TextCtrl {}
 
 // XRC Support - enables TextCtrl to be created from XRC-managed pointers
 impl_xrc_support!(TextCtrl, { window });
+
+// Widget casting support for TextCtrl
+impl_widget_cast!(TextCtrl, "wxTextCtrl", { window });

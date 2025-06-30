@@ -89,3 +89,6 @@ impl WindowEvents for Panel {}
 
 // XRC Support - enables Panel to be created from XRC-managed pointers
 impl_xrc_support!(Panel, { window });
+
+// Widget casting support for Panel
+impl_widget_cast!(Panel, "wxPanel", { window });

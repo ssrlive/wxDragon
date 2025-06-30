@@ -264,3 +264,6 @@ impl WindowEvents for StaticBitmap {}
 
 // Add XRC Support - enables StaticBitmap to be created from XRC-managed pointers
 impl_xrc_support!(StaticBitmap, { window });
+
+// Widget casting support for StaticBitmap
+impl_widget_cast!(StaticBitmap, "wxStaticBitmap", { window });

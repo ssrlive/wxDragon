@@ -241,3 +241,6 @@ impl WindowEvents for Choice {}
 
 // Add XRC Support - enables Choice to be created from XRC-managed pointers
 impl_xrc_support!(Choice, { window });
+
+// Widget casting support for Choice
+impl_widget_cast!(Choice, "wxChoice", { window });

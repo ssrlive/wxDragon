@@ -3,6 +3,8 @@
 #include <wx/wx.h>
 #include <wx/scrolbar.h> // Include wxScrollBar header
 
+
+
 extern "C" {
 
 // Implementation for wxd_ScrollBar_Create

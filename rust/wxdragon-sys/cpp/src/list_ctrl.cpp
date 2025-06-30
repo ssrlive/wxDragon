@@ -138,15 +138,10 @@ extern "C" {
     }
 
     WXD_EXPORTED int wxd_ListEvent_GetLabel(wxd_Event_t* event, char* buffer, int buffer_len) {
-        if (!event) { // Simplified check
-            if (buffer && buffer_len > 0) buffer[0] = '\0';
-            return -1; // Or 0?
-        }
+        if (!event || !buffer || buffer_len <= 0) return -1;
         wxListEvent* evt = static_cast<wxListEvent*>(reinterpret_cast<wxEvent*>(event));
-        wxString label = evt->GetLabel(); // or evt->GetText()
-        
-        size_t source_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(label, buffer, static_cast<size_t>(buffer_len));
-        return static_cast<int>(source_len_no_null);
+        wxString label = evt->GetLabel();
+        return wxd_cpp_utils::copy_wxstring_to_buffer(label, buffer, static_cast<size_t>(buffer_len));
     }
 
     WXD_EXPORTED bool wxd_ListEvent_IsEditCancelled(wxd_Event_t* event) {

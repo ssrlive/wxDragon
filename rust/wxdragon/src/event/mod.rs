@@ -654,6 +654,26 @@ impl Event {
         }
     }
 
+    /// Gets the wheel rotation value associated with a mouse wheel event.
+    /// Returns the wheel rotation amount in multiples of wheel delta.
+    /// Positive values indicate forward/up scrolling, negative values indicate backward/down scrolling.
+    pub fn get_wheel_rotation(&self) -> i32 {
+        if self.0.is_null() {
+            return 0;
+        }
+        unsafe { ffi::wxd_MouseEvent_GetWheelRotation(self.0) }
+    }
+
+    /// Gets the wheel delta value associated with a mouse wheel event.
+    /// This is the basic unit of wheel rotation, typically 120 on most systems.
+    /// The actual rotation can be calculated as get_wheel_rotation() / get_wheel_delta().
+    pub fn get_wheel_delta(&self) -> i32 {
+        if self.0.is_null() {
+            return 120; // Default wheel delta
+        }
+        unsafe { ffi::wxd_MouseEvent_GetWheelDelta(self.0) }
+    }
+
     /// Gets the key code associated with a key event.
     pub fn get_key_code(&self) -> Option<i32> {
         if self.0.is_null() {

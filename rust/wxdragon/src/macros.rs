@@ -535,7 +535,7 @@ macro_rules! custom_widget {
                         )*
                     };
 
-                    let mut widget = $name {
+                    let widget = $name {
                         panel: panel.clone(),
                         config: config.clone(),
                     };
@@ -593,6 +593,63 @@ macro_rules! custom_widget {
             }
 
             // Let the underlying Panel handle memory management
+        }
+    };
+}
+
+/// Implements widget casting capability for a widget type.
+///
+/// This macro generates the FromWindowWithClassName trait implementation
+/// for a widget, enabling it to be safely cast from a generic Window
+/// using wxWidgets' built-in RTTI system.
+///
+/// # Parameters
+/// * `widget` - The widget type name (e.g., StaticText, Button)
+/// * `class_name` - The corresponding wxWidgets class name (e.g., "wxStaticText")
+/// * `construction` - How to construct the widget from a Window:
+///   - `{ window }` - For widgets that only need a window field (like StaticText)
+///   - `composition` - For widgets that use new_from_composition (like Button)
+///
+/// # Examples
+/// ```ignore
+/// // For StaticText (simple window field pattern):
+/// impl_widget_cast!(StaticText, "wxStaticText", { window });
+///
+/// // For Button (composition pattern):
+/// impl_widget_cast!(Button, "wxButton", composition);
+///
+/// // Usage:
+/// if let Some(text) = window.as_widget::<StaticText>() {
+///     text.set_label("Hello");
+/// }
+/// ```
+#[macro_export]
+macro_rules! impl_widget_cast {
+    // Pattern for widgets that use new_from_composition
+    ($widget:ident, $class_name:literal, composition) => {
+        impl $crate::window::FromWindowWithClassName for $widget {
+            fn class_name() -> &'static str {
+                $class_name
+            }
+
+            unsafe fn from_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+                let window = $crate::window::Window::from_ptr(ptr);
+                Self::new_from_composition(window, std::ptr::null_mut())
+            }
+        }
+    };
+
+    // Pattern for widgets that only need { window }
+    ($widget:ident, $class_name:literal, { $field:ident }) => {
+        impl $crate::window::FromWindowWithClassName for $widget {
+            fn class_name() -> &'static str {
+                $class_name
+            }
+
+            unsafe fn from_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+                let $field = $crate::window::Window::from_ptr(ptr);
+                Self { $field }
+            }
         }
     };
 }

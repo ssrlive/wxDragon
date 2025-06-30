@@ -166,3 +166,16 @@ impl crate::xrc::XrcSupport for ScrolledWindow {
         }
     }
 }
+
+// Manual widget casting support for ScrolledWindow - composition structure needs custom handling  
+impl crate::window::FromWindowWithClassName for ScrolledWindow {
+    fn class_name() -> &'static str {
+        "wxScrolledWindow"
+    }
+
+    unsafe fn from_ptr(ptr: *mut ffi::wxd_Window_t) -> Self {
+        ScrolledWindow {
+            panel: Panel::from_ptr(ptr as *mut ffi::wxd_Panel_t),
+        }
+    }
+}

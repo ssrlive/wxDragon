@@ -66,6 +66,7 @@ pub mod togglebutton;
 pub mod toolbar;
 pub mod treebook;
 pub mod treectrl;
+pub mod virtual_list;
 
 // Add ImageList module
 pub mod imagelist;
@@ -160,6 +161,9 @@ pub use toolbar::ToolBar;
 pub use treebook::Treebook;
 pub use treebook::TreebookBuilder;
 pub use treectrl::{TreeCtrl, TreeCtrlBuilder};
+pub use virtual_list::{
+    VirtualList, VirtualListDataSource, VirtualListItemRenderer, VirtualListLayoutMode,
+};
 
 // Re-export ImageList
 pub use imagelist::ImageList;

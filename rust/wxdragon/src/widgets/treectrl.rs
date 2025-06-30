@@ -829,3 +829,6 @@ impl WindowEvents for TreeCtrl {}
 
 // Add XRC Support - enables TreeCtrl to be created from XRC-managed pointers
 impl_xrc_support!(TreeCtrl, { window });
+
+// Widget casting support for TreeCtrl
+impl_widget_cast!(TreeCtrl, "wxTreeCtrl", { window });

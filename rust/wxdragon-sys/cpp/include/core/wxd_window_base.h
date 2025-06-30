@@ -75,6 +75,10 @@ WXD_EXPORTED wxd_Size wxd_Window_GetMaxSize(wxd_Window_t* window);
 WXD_EXPORTED void wxd_Window_SetName(wxd_Window_t* window, const char* name);
 WXD_EXPORTED char* wxd_Window_GetName(wxd_Window_t* window); // Caller must free with wxd_free_string
 
+// Window finding functions
+WXD_EXPORTED wxd_Window_t* wxd_Window_FindWindowByName(wxd_Window_t* window, const char* name);
+WXD_EXPORTED wxd_Window_t* wxd_Window_FindWindowById(wxd_Window_t* window, int id);
+
 // --- Cursor Management Functions ---
 WXD_EXPORTED void wxd_Window_SetCursor(wxd_Window_t* window, wxd_Cursor_t* cursor);
 WXD_EXPORTED wxd_Cursor_t* wxd_Window_GetCursor(wxd_Window_t* window);
@@ -104,5 +108,8 @@ WXD_EXPORTED void wxd_Window_ShowPosition(wxd_Window_t* window, int64_t position
 WXD_EXPORTED void wxd_Window_ScrollIntoView(wxd_Window_t* window, int64_t position, int keyCode);
 WXD_EXPORTED bool wxd_Window_IsPositionVisible(wxd_Window_t* window, int64_t position);
 WXD_EXPORTED int64_t wxd_Window_GetLastPosition(wxd_Window_t* window);
+
+// Widget type identification using wxWidgets' built-in RTTI
+WXD_EXPORTED const char* wxd_Window_GetClassName(wxd_Window_t* window);
 
 #endif // WXD_WINDOW_BASE_H 

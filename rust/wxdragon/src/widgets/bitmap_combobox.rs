@@ -213,3 +213,6 @@ impl WindowEvents for BitmapComboBox {}
 
 // Add XRC Support - enables BitmapComboBox to be created from XRC-managed pointers
 impl_xrc_support!(BitmapComboBox, { window });
+
+// Widget casting support for BitmapComboBox
+impl_widget_cast!(BitmapComboBox, "wxBitmapComboBox", { window });

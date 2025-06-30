@@ -57,16 +57,12 @@ WXD_EXPORTED void wxd_RadioBox_SetSelection(wxd_RadioBox_t* self, int n) {
 }
 
 WXD_EXPORTED int wxd_RadioBox_GetString(wxd_RadioBox_t* self, int n, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxRadioBox* rbox = (wxRadioBox*)self;
-    if (!rbox) return 0;
-    if (n < 0 || (unsigned int)n >= rbox->GetCount()) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0; // Invalid index
-    }
+    if (n < 0 || (unsigned int)n >= rbox->GetCount()) return -1;
 
     wxString item = rbox->GetString((unsigned int)n);
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(item, buffer, (size_t)buffer_len);
-    return (int)(needed_len_no_null + 1); // Return required size including null terminator
+    return wxd_cpp_utils::copy_wxstring_to_buffer(item, buffer, (size_t)buffer_len);
 }
 
 WXD_EXPORTED unsigned int wxd_RadioBox_GetCount(wxd_RadioBox_t* self) {

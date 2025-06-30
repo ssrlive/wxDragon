@@ -102,3 +102,6 @@ impl WindowEvents for ActivityIndicator {}
 
 // Add XRC Support - enables ActivityIndicator to be created from XRC-managed pointers
 impl_xrc_support!(ActivityIndicator, { window });
+
+// Widget casting support for ActivityIndicator
+impl_widget_cast!(ActivityIndicator, "wxActivityIndicator", { window });

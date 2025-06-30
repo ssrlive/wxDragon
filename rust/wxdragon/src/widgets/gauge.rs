@@ -98,3 +98,6 @@ impl WindowEvents for Gauge {}
 
 // Add XRC Support - enables Gauge to be created from XRC-managed pointers
 impl_xrc_support!(Gauge, { window });
+
+// Widget casting support for Gauge
+impl_widget_cast!(Gauge, "wxGauge", { window });

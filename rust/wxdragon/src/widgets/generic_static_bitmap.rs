@@ -236,3 +236,6 @@ impl WindowEvents for GenericStaticBitmap {}
 
 // Add XRC Support - enables GenericStaticBitmap to be created from XRC-managed pointers
 impl_xrc_support!(GenericStaticBitmap, { window });
+
+// Widget casting support for GenericStaticBitmap
+impl_widget_cast!(GenericStaticBitmap, "wxGenericStaticBitmap", { window });

@@ -205,3 +205,6 @@ impl WindowEvents for CollapsiblePane {}
 
 // Add XRC Support - enables CollapsiblePane to be created from XRC-managed pointers
 impl_xrc_support!(CollapsiblePane, { window });
+
+// Widget casting support for CollapsiblePane
+impl_widget_cast!(CollapsiblePane, "wxCollapsiblePane", { window });

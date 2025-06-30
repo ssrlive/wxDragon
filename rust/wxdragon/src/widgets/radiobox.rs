@@ -227,3 +227,6 @@ impl WindowEvents for RadioBox {}
 
 // Add XRC Support - enables RadioBox to be created from XRC-managed pointers
 impl_xrc_support!(RadioBox, { window });
+
+// Widget casting support for RadioBox
+impl_widget_cast!(RadioBox, "wxRadioBox", { window });

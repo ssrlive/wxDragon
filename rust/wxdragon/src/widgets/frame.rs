@@ -375,9 +375,29 @@ impl Frame {
 
 implement_widget_traits_with_target!(Frame, window, Window);
 
-// XRC Support - enables Frame to be created from XRC-managed pointers
-impl_xrc_support!(Frame, {
-    window,
-    parent_ptr: std::ptr::null_mut(),
-    _marker: PhantomData
-});
+// Manual XRC Support for Frame - complex structure needs custom handling
+#[cfg(feature = "xrc")]
+impl crate::xrc::XrcSupport for Frame {
+    unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        Frame {
+            window: Window::from_ptr(ptr),
+            parent_ptr: std::ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+// Manual widget casting support for Frame - complex structure needs custom handling  
+impl crate::window::FromWindowWithClassName for Frame {
+    fn class_name() -> &'static str {
+        "wxFrame"
+    }
+
+    unsafe fn from_ptr(ptr: *mut ffi::wxd_Window_t) -> Self {
+        Frame {
+            window: Window::from_ptr(ptr),
+            parent_ptr: std::ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+}

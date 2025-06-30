@@ -38,16 +38,10 @@ WXD_EXPORTED void wxd_StyledTextCtrl_SetText(wxd_StyledTextCtrl_t* self, const c
 }
 
 WXD_EXPORTED int wxd_StyledTextCtrl_GetText(wxd_StyledTextCtrl_t* self, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxStyledTextCtrl* ctrl = (wxStyledTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString text = ctrl->GetText();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
 }
 
 WXD_EXPORTED void wxd_StyledTextCtrl_AppendText(wxd_StyledTextCtrl_t* self, const char* text) {
@@ -193,16 +187,10 @@ WXD_EXPORTED int wxd_StyledTextCtrl_GetSelectionEnd(wxd_StyledTextCtrl_t* self) 
 }
 
 WXD_EXPORTED int wxd_StyledTextCtrl_GetSelectedText(wxd_StyledTextCtrl_t* self, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxStyledTextCtrl* ctrl = (wxStyledTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString text = ctrl->GetSelectedText();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
 }
 
 WXD_EXPORTED void wxd_StyledTextCtrl_SetSelectionMode(wxd_StyledTextCtrl_t* self, int selectionMode) {
@@ -261,16 +249,10 @@ WXD_EXPORTED int wxd_StyledTextCtrl_PositionFromLine(wxd_StyledTextCtrl_t* self,
 }
 
 WXD_EXPORTED int wxd_StyledTextCtrl_GetLineText(wxd_StyledTextCtrl_t* self, int line, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxStyledTextCtrl* ctrl = (wxStyledTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString text = ctrl->GetLine(line);
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(text, buffer, (size_t)buffer_len);
 }
 
 WXD_EXPORTED int wxd_StyledTextCtrl_GetLineLength(wxd_StyledTextCtrl_t* self, int line) {

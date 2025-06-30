@@ -130,6 +130,9 @@ impl WindowEvents for DirPickerCtrl {}
 // Add XRC Support - enables DirPickerCtrl to be created from XRC-managed pointers
 impl_xrc_support!(DirPickerCtrl, { window });
 
+// Widget casting support for DirPickerCtrl
+impl_widget_cast!(DirPickerCtrl, "wxDirPickerCtrl", { window });
+
 // Use the widget_builder macro to generate the DirPickerCtrlBuilder implementation
 widget_builder!(
     name: DirPickerCtrl,

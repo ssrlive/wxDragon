@@ -225,6 +225,9 @@ impl WindowEvents for CheckListBox {}
 // Add XRC Support - enables CheckListBox to be created from XRC-managed pointers
 impl_xrc_support!(CheckListBox, { window });
 
+// Widget casting support for CheckListBox
+impl_widget_cast!(CheckListBox, "wxCheckListBox", { window });
+
 widget_builder!(
     name: CheckListBox,
     parent_type: &'a dyn WxWidget,

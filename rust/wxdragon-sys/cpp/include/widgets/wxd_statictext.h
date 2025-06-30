@@ -8,5 +8,6 @@ WXD_EXPORTED wxd_StaticText_t* wxd_StaticText_Create(wxd_Window_t* parent, wxd_I
 WXD_EXPORTED void wxd_StaticText_Destroy(wxd_StaticText_t* stext); // Generic might suffice
 WXD_EXPORTED void wxd_StaticText_SetLabel(wxd_StaticText_t* stext, const char* label);
 WXD_EXPORTED int wxd_StaticText_GetLabel(wxd_StaticText_t* stext, char* buffer, int buffer_len);
+WXD_EXPORTED void wxd_StaticText_Wrap(wxd_StaticText_t* stext, int width);
 
 #endif // WXD_STATICTEXT_H 

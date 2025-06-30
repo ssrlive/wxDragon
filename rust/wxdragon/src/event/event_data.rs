@@ -48,6 +48,20 @@ impl MouseEventData {
         self.event.get_position()
     }
 
+    /// Gets the wheel rotation value for mouse wheel events.
+    /// Returns the wheel rotation amount in multiples of wheel delta.
+    /// Positive values indicate forward/up scrolling, negative values indicate backward/down scrolling.
+    pub fn get_wheel_rotation(&self) -> i32 {
+        self.event.get_wheel_rotation()
+    }
+
+    /// Gets the wheel delta value for mouse wheel events.
+    /// This is the basic unit of wheel rotation, typically 120 on most systems.
+    /// The actual rotation can be calculated as get_wheel_rotation() / get_wheel_delta().
+    pub fn get_wheel_delta(&self) -> i32 {
+        self.event.get_wheel_delta()
+    }
+
     pub fn skip(&self, skip: bool) {
         self.event.skip(skip);
     }

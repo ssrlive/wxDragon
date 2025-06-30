@@ -433,14 +433,11 @@ extern "C" void wxd_Event_Skip(wxd_Event_t* event, bool skip) {
 
 // Accessors for specific event types
 WXD_EXPORTED int wxd_CommandEvent_GetString(wxd_Event_t* event, char* buffer, int buffer_len) {
+    if (!event || !buffer || buffer_len <= 0) return -1;
     wxCommandEvent* cmdEvent = wxDynamicCast((wxEvent*)event, wxCommandEvent);
-    if (!cmdEvent) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0; // Return 0 if not a command event or event is null
-    }
+    if (!cmdEvent) return -1; // Return -1 if not a command event
     wxString str = cmdEvent->GetString();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(str, buffer, (size_t)buffer_len);
-    return (int)(needed_len_no_null + 1); // Return required size including null terminator
+    return wxd_cpp_utils::copy_wxstring_to_buffer(str, buffer, (size_t)buffer_len);
 }
 
 WXD_EXPORTED bool wxd_CommandEvent_IsChecked(wxd_Event_t* event) {
@@ -475,12 +472,12 @@ WXD_EXPORTED int wxd_KeyEvent_GetKeyCode(wxd_Event_t* event) {
 
 // ADDED: Implementation for wxd_CommandEvent_GetInt
 WXD_EXPORTED int wxd_CommandEvent_GetInt(wxd_Event_t* event) {
-    if (!event) return -1;
-    wxEvent* baseEvent = static_cast<wxEvent*>(static_cast<void*>(event)); // Cast via void*
-    wxCommandEvent* cmdEvent = dynamic_cast<wxCommandEvent*>(baseEvent);
-    if (!cmdEvent) return -1; // Not a command event or derived
-
-    return cmdEvent->GetInt();
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxCommandEvent* command_event = wxDynamicCast(wx_event, wxCommandEvent);
+    if (!command_event) return 0;
+    
+    return command_event->GetInt();
 }
 
 // ADDED: Scroll Event Data Accessors
@@ -995,4 +992,23 @@ WXD_EXPORTED void wxd_IdleEvent_SetMode(int mode) {
 
 WXD_EXPORTED int wxd_IdleEvent_GetMode() {
     return static_cast<int>(wxIdleEvent::GetMode());
+}
+
+// Mouse wheel event functions
+WXD_EXPORTED int wxd_MouseEvent_GetWheelRotation(wxd_Event_t* event) {
+    if (!event) return 0;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxMouseEvent* mouse_event = wxDynamicCast(wx_event, wxMouseEvent);
+    if (!mouse_event) return 0;
+    
+    return mouse_event->GetWheelRotation();
+}
+
+WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event) {
+    if (!event) return 120; // Default wheel delta
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxMouseEvent* mouse_event = wxDynamicCast(wx_event, wxMouseEvent);
+    if (!mouse_event) return 120;
+    
+    return mouse_event->GetWheelDelta();
 }

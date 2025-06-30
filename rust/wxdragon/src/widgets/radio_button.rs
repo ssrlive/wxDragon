@@ -145,3 +145,6 @@ impl WindowEvents for RadioButton {}
 
 // Add XRC Support - enables RadioButton to be created from XRC-managed pointers
 impl_xrc_support!(RadioButton, { window });
+
+// Widget casting support for RadioButton
+impl_widget_cast!(RadioButton, "wxRadioButton", { window });

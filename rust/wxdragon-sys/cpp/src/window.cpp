@@ -460,6 +460,28 @@ WXD_EXPORTED char* wxd_Window_GetName(wxd_Window_t* window) {
     return strdup(""); // Return empty string if window is null or name is empty
 }
 
+// Window finding functions
+WXD_EXPORTED wxd_Window_t* wxd_Window_FindWindowByName(wxd_Window_t* window, const char* name) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window || !name) {
+        return nullptr;
+    }
+    
+    wxString windowName = wxString::FromUTF8(name);
+    wxWindow* child = wx_window->FindWindow(windowName);
+    return reinterpret_cast<wxd_Window_t*>(child);
+}
+
+WXD_EXPORTED wxd_Window_t* wxd_Window_FindWindowById(wxd_Window_t* window, int id) {
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (!wx_window) {
+        return nullptr;
+    }
+    
+    wxWindow* child = wx_window->FindWindow(id);
+    return reinterpret_cast<wxd_Window_t*>(child);
+}
+
 // --- Cursor Management Functions ---
 WXD_EXPORTED void wxd_Window_SetCursor(wxd_Window_t* window, wxd_Cursor_t* cursor) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
@@ -738,6 +760,27 @@ WXD_EXPORTED int64_t wxd_Window_GetLastPosition(wxd_Window_t* window) {
 
     // Default fallback
     return 0;
+}
+
+
+
+// Get wxWidgets class name using built-in RTTI
+WXD_EXPORTED const char* wxd_Window_GetClassName(wxd_Window_t* window) {
+    if (!window) return nullptr;
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    
+    // Get the class name and convert from wxChar* to const char*
+    const wxChar* wx_class_name = wx_window->GetClassInfo()->GetClassName();
+    
+    // Convert wxString to std::string, then to const char*
+    wxString wx_str(wx_class_name);
+    std::string std_str = wx_str.ToStdString();
+    
+    // We need to return a persistent string, so we'll use a static approach
+    // This is a simple implementation - in production you might want a more sophisticated approach
+    static std::string persistent_name;
+    persistent_name = std_str;
+    return persistent_name.c_str();
 }
 
 } // extern "C"

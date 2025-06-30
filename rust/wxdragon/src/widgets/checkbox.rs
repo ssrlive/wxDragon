@@ -159,3 +159,6 @@ implement_widget_traits_with_target!(CheckBox, window, Window);
 
 // XRC Support - enables CheckBox to be created from XRC-managed pointers
 impl_xrc_support!(CheckBox, { window });
+
+// Widget casting support for CheckBox
+impl_widget_cast!(CheckBox, "wxCheckBox", { window });

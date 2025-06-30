@@ -43,16 +43,10 @@ WXD_EXPORTED void wxd_RichTextCtrl_SetValue(wxd_RichTextCtrl_t* self, const char
 
 // Get the value of the wxRichTextCtrl
 WXD_EXPORTED int wxd_RichTextCtrl_GetValue(wxd_RichTextCtrl_t* self, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxRichTextCtrl* ctrl = (wxRichTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString value = ctrl->GetValue();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(value, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(value, buffer, (size_t)buffer_len);
 }
 
 // Write text to the wxRichTextCtrl
@@ -90,16 +84,10 @@ WXD_EXPORTED int wxd_RichTextCtrl_GetLength(wxd_RichTextCtrl_t* self) {
 
 // Get text in a specific range
 WXD_EXPORTED int wxd_RichTextCtrl_GetRange(wxd_RichTextCtrl_t* self, wxd_Long_t from, wxd_Long_t to, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxRichTextCtrl* ctrl = (wxRichTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString range_text = ctrl->GetRange(from, to);
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(range_text, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(range_text, buffer, (size_t)buffer_len);
 }
 
 // Set selection range
@@ -124,16 +112,10 @@ WXD_EXPORTED void wxd_RichTextCtrl_GetSelection(wxd_RichTextCtrl_t* self, wxd_Lo
 
 // Get selected text
 WXD_EXPORTED int wxd_RichTextCtrl_GetSelectedText(wxd_RichTextCtrl_t* self, char* buffer, int buffer_len) {
+    if (!self || !buffer || buffer_len <= 0) return -1;
     wxRichTextCtrl* ctrl = (wxRichTextCtrl*)self;
-    if (!ctrl) {
-        if (buffer && buffer_len > 0) buffer[0] = '\0';
-        return 0;
-    }
-    
     wxString selected_text = ctrl->GetStringSelection();
-    size_t needed_len_no_null = wxd_cpp_utils::copy_wxstring_to_buffer(selected_text, buffer, (size_t)buffer_len);
-    
-    return (int)(needed_len_no_null + 1);
+    return wxd_cpp_utils::copy_wxstring_to_buffer(selected_text, buffer, (size_t)buffer_len);
 }
 
 // Editing operations

@@ -179,3 +179,6 @@ impl<'a> SpinCtrlBuilder<'a> {
 
 // Add XRC Support - enables SpinCtrl to be created from XRC-managed pointers
 impl_xrc_support!(SpinCtrl, { window });
+
+// Widget casting support for SpinCtrl
+impl_widget_cast!(SpinCtrl, "wxSpinCtrl", { window });

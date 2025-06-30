@@ -122,3 +122,6 @@ impl ScrollEvents for Slider {}
 
 // Add XRC Support - enables Slider to be created from XRC-managed pointers
 impl_xrc_support!(Slider, { window });
+
+// Widget casting support for Slider
+impl_widget_cast!(Slider, "wxSlider", { window });

@@ -308,3 +308,6 @@ impl WindowEvents for Notebook {}
 
 // Add XRC Support - enables Notebook to be created from XRC-managed pointers
 impl_xrc_support!(Notebook, { window });
+
+// Widget casting support for Notebook
+impl_widget_cast!(Notebook, "wxNotebook", { window });

@@ -278,3 +278,6 @@ impl WindowEvents for Treebook {}
 
 // Add XRC Support - enables Treebook to be created from XRC-managed pointers
 impl_xrc_support!(Treebook, { window });
+
+// Widget casting support for Treebook
+impl_widget_cast!(Treebook, "wxTreebook", { window });

@@ -25,7 +25,7 @@ widget_style_enum!(
 );
 
 /// Represents a wxScrollBar widget.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScrollBar {
     window: Window,
 }
@@ -115,3 +115,6 @@ impl ScrollEvents for ScrollBar {}
 
 // Add XRC Support - enables ScrollBar to be created from XRC-managed pointers
 impl_xrc_support!(ScrollBar, { window });
+
+// Widget casting support for ScrollBar
+impl_widget_cast!(ScrollBar, "wxScrollBar", { window });

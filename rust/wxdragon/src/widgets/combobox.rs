@@ -311,3 +311,6 @@ impl WindowEvents for ComboBox {}
 
 // Add XRC Support - enables ComboBox to be created from XRC-managed pointers
 impl_xrc_support!(ComboBox, { window });
+
+// Widget casting support for ComboBox
+impl_widget_cast!(ComboBox, "wxComboBox", { window });

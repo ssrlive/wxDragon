@@ -187,3 +187,6 @@ impl TextEvents for SearchCtrl {}
 
 // Add XRC Support - enables SearchCtrl to be created from XRC-managed pointers
 impl_xrc_support!(SearchCtrl, { window });
+
+// Widget casting support for SearchCtrl
+impl_widget_cast!(SearchCtrl, "wxSearchCtrl", { window });

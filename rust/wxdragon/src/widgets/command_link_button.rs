@@ -80,3 +80,26 @@ impl CommandLinkButton {
 // Use the implement_widget_traits_with_target! macro to implement standard traits
 // with Button as the target type for Deref
 implement_widget_traits_with_target!(CommandLinkButton, button, Button);
+
+// Manual XRC Support for CommandLinkButton - composition structure needs custom handling
+#[cfg(feature = "xrc")]
+impl crate::xrc::XrcSupport for CommandLinkButton {
+    unsafe fn from_xrc_ptr(ptr: *mut wxdragon_sys::wxd_Window_t) -> Self {
+        let window = Window::from_ptr(ptr);
+        let button = Button::new_from_composition(window, std::ptr::null_mut());
+        CommandLinkButton { button }
+    }
+}
+
+// Manual widget casting support for CommandLinkButton - composition structure needs custom handling  
+impl crate::window::FromWindowWithClassName for CommandLinkButton {
+    fn class_name() -> &'static str {
+        "wxCommandLinkButton"
+    }
+
+    unsafe fn from_ptr(ptr: *mut ffi::wxd_Window_t) -> Self {
+        let window = Window::from_ptr(ptr);
+        let button = Button::new_from_composition(window, std::ptr::null_mut());
+        CommandLinkButton { button }
+    }
+}

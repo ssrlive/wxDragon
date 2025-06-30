@@ -935,3 +935,6 @@ impl WindowEvents for ListCtrl {}
 
 // Add XRC Support - enables ListCtrl to be created from XRC-managed pointers
 impl_xrc_support!(ListCtrl, { window });
+
+// Widget casting support for ListCtrl
+impl_widget_cast!(ListCtrl, "wxListCtrl", { window });

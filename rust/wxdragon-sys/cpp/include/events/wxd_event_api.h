@@ -104,6 +104,10 @@ WXD_EXPORTED bool wxd_IdleEvent_MoreRequested(wxd_Event_t* event);
 WXD_EXPORTED void wxd_IdleEvent_SetMode(int mode);
 WXD_EXPORTED int wxd_IdleEvent_GetMode();
 
+// Mouse wheel event functions
+WXD_EXPORTED int wxd_MouseEvent_GetWheelRotation(wxd_Event_t* event);
+WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event);
+
 #ifdef __cplusplus
 }
 #endif

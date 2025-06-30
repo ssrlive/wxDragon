@@ -165,6 +165,9 @@ impl WindowEvents for CalendarCtrl {}
 // Add XRC Support - enables CalendarCtrl to be created from XRC-managed pointers
 impl_xrc_support!(CalendarCtrl, { window });
 
+// Widget casting support for CalendarCtrl
+impl_widget_cast!(CalendarCtrl, "wxCalendarCtrl", { window });
+
 // Use the widget_builder macro for CalendarCtrl
 widget_builder!(
     name: CalendarCtrl,

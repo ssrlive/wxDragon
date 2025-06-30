@@ -96,6 +96,9 @@ impl WindowEvents for ColourPickerCtrl {}
 // Add XRC Support - enables ColourPickerCtrl to be created from XRC-managed pointers
 impl_xrc_support!(ColourPickerCtrl, { window });
 
+// Widget casting support for ColourPickerCtrl
+impl_widget_cast!(ColourPickerCtrl, "wxColourPickerCtrl", { window });
+
 widget_builder!(
     name: ColourPickerCtrl,
     parent_type: &'a dyn WxWidget,

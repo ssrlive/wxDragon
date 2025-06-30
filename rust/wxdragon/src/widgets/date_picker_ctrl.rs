@@ -185,3 +185,6 @@ widget_builder!(
 
 // Use the implement_widget_traits_with_target macro to implement traits
 implement_widget_traits_with_target!(DatePickerCtrl, window, Window);
+
+// Widget casting support for DatePickerCtrl
+impl_widget_cast!(DatePickerCtrl, "wxDatePickerCtrl", { window });

@@ -114,6 +114,14 @@ impl StaticText {
             String::new()
         }
     }
+
+    /// Wraps the text to the specified width in pixels.
+    /// This enables automatic word wrapping for multi-line text display.
+    pub fn wrap(&self, width: i32) {
+        unsafe {
+            ffi::wxd_StaticText_Wrap(self.window.as_ptr() as *mut ffi::wxd_StaticText_t, width);
+        }
+    }
 }
 
 // Use the macro to implement all the standard traits
@@ -123,3 +131,6 @@ impl WindowEvents for StaticText {}
 
 // XRC Support - enables StaticText to be created from XRC-managed pointers
 impl_xrc_support!(StaticText, { window });
+
+// Enable widget casting for StaticText
+impl_widget_cast!(StaticText, "wxStaticText", { window });
