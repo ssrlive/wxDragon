@@ -46,6 +46,28 @@ jobs:
         SET LIBCLANG_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin"
         cargo build --target i686-pc-windows-msvc
 
+  build-i686-win7-windows-msvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Windows 7 32-bit target
+      run: rustup target add i686-win7-windows-msvc
+    - name: Build for Windows 7 (32-bit)
+      run: |
+        SET LIBCLANG_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin"
+        cargo build --target i686-win7-windows-msvc
+
+  build-x86_64-win7-windows-msvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Windows 7 64-bit target
+      run: rustup target add x86_64-win7-windows-msvc
+    - name: Build for Windows 7 (64-bit)
+      run: |
+        SET LIBCLANG_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin"
+        cargo build --target x86_64-win7-windows-msvc
+
   build-msys-mingw64:
     runs-on: windows-latest
     steps:

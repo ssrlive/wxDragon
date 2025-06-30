@@ -99,31 +99,36 @@ fn main() {
         .expect("Failed to download pre-built wxWidgets libraries");
 
     // --- 3. Add wxWidgets Include Paths to Bindgen ---
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-
-    let artifact_name = match (
-        target_os.as_str(),
-        target_arch.as_str(),
-        target_env.as_str(),
-    ) {
-        ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
-        ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
-        ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
-        ("windows", "x86_64", "msvc") => {
-            format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
-        }
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
-        }
-        ("windows", "x86_64", "gnu") => {
-            format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
-        }
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
-        }
+    
+    // Check for official Windows 7 targets first
+    let target_triple = env::var("TARGET").unwrap_or_default();
+    let artifact_name = match target_triple.as_str() {
+        "i686-win7-windows-msvc" => format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}"),
+        "x86_64-win7-windows-msvc" => format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}"),
         _ => {
-            panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}");
+            // Fall back to standard target detection
+            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+            match (target_os.as_str(), target_arch.as_str(), target_env.as_str()) {
+                ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
+                ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
+                ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
+                ("windows", "x86_64", "msvc") => {
+                    format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
+                }
+                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
+                    format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
+                }
+                ("windows", "x86_64", "gnu") => {
+                    format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
+                }
+                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
+                    format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
+                }
+                _ => {
+                    panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}");
+                }
+            }
         }
     };
 
@@ -217,30 +222,39 @@ fn download_prebuilt_libraries(
     target_os: &str,
     target_env: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-
-    let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
-        ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
-        ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
-        ("windows", "x86_64", "msvc") => {
-            format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
-        }
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
-        }
-        ("windows", "x86_64", "gnu") => {
-            format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
-        }
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
-        }
+    
+    // Check for official Windows 7 targets first
+    let target_triple = env::var("TARGET").unwrap_or_default();
+    let artifact_name = match target_triple.as_str() {
+        "i686-win7-windows-msvc" => format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}"),
+        "x86_64-win7-windows-msvc" => format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}"),
         _ => {
-            return Err(format!(
-                "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
-            )
-            .into())
+            // Fall back to standard target detection
+            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+            match (target_os, target_arch.as_str(), target_env) {
+                ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
+                ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
+                ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
+                ("windows", "x86_64", "msvc") => {
+                    format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
+                }
+                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
+                    format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
+                }
+                ("windows", "x86_64", "gnu") => {
+                    format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
+                }
+                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
+                    format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
+                }
+                _ => {
+                    return Err(format!(
+                        "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
+                    )
+                    .into())
+                }
+            }
         }
     };
 
@@ -324,29 +338,40 @@ fn download_prebuilt_libraries(
 }
 
 fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
-    // Get the pre-built library directory (same naming as download_prebuilt_libraries)
-    let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
-        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
-        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
-        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
-        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
+    // Check for official Windows 7 targets first (same logic as download function)
+    let target_triple = env::var("TARGET").unwrap_or_default();
+    let artifact_name = match target_triple.as_str() {
+        "i686-win7-windows-msvc" => format!("wxwidgets-3.3.0-i686-win7-windows-msvc-{profile}"),
+        "x86_64-win7-windows-msvc" => format!("wxwidgets-3.3.0-x86_64-win7-windows-msvc-{profile}"),
+        _ => {
+            // Fall back to standard target detection
+            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+            match (target_os, target_arch.as_str(), target_env) {
+                ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
+                ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
+                ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
+                ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
+                ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
+                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
+                    format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
+                }
+                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
+                    format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
+                }
+                _ => panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}"),
+            }
         }
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
-        }
-        _ => panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}"),
     };
 
     let lib_dir = out_dir.join(&artifact_name);
 
     // For Windows, libraries are in platform-specific subdirectories
     let actual_lib_dir = if target_os == "windows" {
+        // Get target architecture for directory naming
+        let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+        
         // For 32-bit Windows packages, check if they use generic "vc_lib" instead of "vc_x86_lib"
         let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
             "x86"
