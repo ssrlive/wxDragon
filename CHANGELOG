@@ -1,5 +1,61 @@
 # Changelog
 
+## 0.8.8
+
+### New Features
+- **Enhanced Virtual List System**: Major refactoring with comprehensive bug fixes and performance improvements
+  - **New Cache Algorithm**: Introduced progressive measurement cache system with LRU eviction (100-item limit)
+  - **Horizontal Layout Support**: Complete implementation of horizontal virtual list layout mode
+    - Items arranged horizontally (columns) with proper width calculation
+    - Text wrapping and natural flow measurement for horizontal text content
+    - Seamless switching between vertical and horizontal modes
+  - **Two-Pass Measurement System**: Implemented sophisticated measurement approach for consistent positioning
+    - PASS 1: Determine potentially visible items using cache-first approach
+    - PASS 2: Measure only confirmed visible items to avoid position inconsistencies
+    - Eliminates measurement window shifting that caused item overlap issues
+
+### Bug Fixes
+- **Virtual List Critical Issues**: Resolved multiple severe rendering and interaction problems
+  - **Vertical Mode Overlap Fix**: Fixed items overlapping in vertical mode due to improper panel positioning
+    - Newly created panels are now hidden until properly positioned to prevent visual artifacts
+    - Corrected initial panel sizing to use proper dimensions instead of temporary placeholder sizes
+  - **Mouse Wheel vs Scrollbar Coordination**: Fixed synchronization issues between different scroll methods
+    - Implemented boundary-based end-of-list detection instead of aggressive ratio-based triggers
+    - Mouse wheel scrolling now uses the same safety padding logic as scrollbar dragging
+    - Eliminated false triggers when scrolling near the end of content
+  - **Last Item Clipping Resolution**: Fixed persistent clipping of the final item when scrolling to the end
+    - Added configurable safety padding (20px default) to ensure last item full visibility
+    - Enhanced end-of-list positioning logic with fresh measurement integration
+    - Applied consistent safety padding across both scrollbar dragging and mouse wheel scrolling
+  - **Scroll Position Consistency**: Resolved scroll position coordination problems between input methods
+    - Fixed mouse wheel becoming non-functional after scrollbar drag to end
+    - Implemented directional scroll detection to prevent infinite positioning loops
+    - Enhanced total content size synchronization with proper padding coordination
+
+### Examples
+- **virtual_list_demo**: Enhanced example with comprehensive testing scenarios
+  - Demonstrates both vertical and horizontal layout modes
+  - Includes edge case testing (scrolling to end, rapid scrolling)
+  - Shows proper configuration usage and error handling patterns
+
+### Platform Support
+- Enhanced cross-platform virtual list performance for all supported platforms:
+  - ✅ **Linux**: Improved GTK backend virtual list rendering
+  - ✅ **macOS**: Enhanced Cocoa virtual list performance
+  - ✅ **Windows MSVC/MinGW**: Optimized Windows virtual list behavior
+  - Consistent virtual list behavior and performance across all platforms
+
+### API Changes
+- Added configurable parameters in `VirtualListInternalParams`
+- Enhanced virtual list configuration options for performance tuning
+- All changes are backward compatible - no breaking changes to existing API
+- New configuration parameters use sensible defaults for existing code
+
+### Migration Notes
+- **Existing Virtual Lists**: All existing virtual list implementations will automatically benefit from bug fixes and performance improvements
+- **Configuration**: New configuration parameters use optimal defaults; no changes required for existing code
+- **Performance**: Users may notice improved responsiveness and eliminated visual artifacts in virtual list scrolling
+
 ## 0.8.7
 
 ### New Features
