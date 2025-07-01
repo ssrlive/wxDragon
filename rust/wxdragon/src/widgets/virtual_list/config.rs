@@ -37,7 +37,10 @@ pub(crate) struct VirtualListInternalParams {
     // Interaction (auto-calculated or from config)
     /// Actual keyboard scroll amount (adaptive or from config)
     pub keyboard_scroll_amount: i32,
-    // scrollbar_max_position removed - not used in actual implementation
+    /// Safety padding for end-of-list positioning (prevents last item clipping)
+    pub safety_padding: i32,
+    /// Tolerance in pixels for measurement stability detection
+    pub measurement_tolerance: i32,
 }
 
 impl Default for VirtualListInternalParams {
@@ -59,6 +62,8 @@ impl Default for VirtualListInternalParams {
 
             // Interaction
             keyboard_scroll_amount: 300,
+            safety_padding: 20, // Pixels of padding to ensure last item visibility
+            measurement_tolerance: 5, // Pixel tolerance for measurement stability
         }
     }
 }
