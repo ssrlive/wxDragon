@@ -13,8 +13,12 @@ pub(crate) struct VirtualListInternalParams {
     // Layout & Sizing (auto-calculated)
     /// Estimated height for unmeasured items (calculated from measurements)
     pub estimated_item_height: i32,
-    /// Temporary height used during panel measurement
+    /// Estimated width for unmeasured items in horizontal layout (calculated from measurements)
+    pub estimated_item_width: i32,
+    /// Temporary height used during panel measurement for vertical layout
     pub temporary_panel_height: i32,
+    /// Temporary width used during panel measurement for horizontal layout
+    pub temporary_panel_width: i32,
     /// Actual scrollbar size (from config or system default)
     pub scrollbar_size: i32,
 
@@ -41,8 +45,10 @@ impl Default for VirtualListInternalParams {
         Self {
             // Layout & Sizing
             estimated_item_height: 80,
+            estimated_item_width: 200,
             temporary_panel_height: 100,
-            scrollbar_size: 16, // System default
+            temporary_panel_width: 1000, // Give plenty of width for natural text flow
+            scrollbar_size: 16,          // System default
 
             // Performance Tuning
             buffer_size: 2,

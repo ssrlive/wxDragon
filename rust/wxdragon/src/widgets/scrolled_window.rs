@@ -167,7 +167,7 @@ impl crate::xrc::XrcSupport for ScrolledWindow {
     }
 }
 
-// Manual widget casting support for ScrolledWindow - composition structure needs custom handling  
+// Manual widget casting support for ScrolledWindow - composition structure needs custom handling
 impl crate::window::FromWindowWithClassName for ScrolledWindow {
     fn class_name() -> &'static str {
         "wxScrolledWindow"

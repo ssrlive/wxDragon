@@ -229,7 +229,7 @@ impl crate::xrc::XrcSupport for SplitterWindow {
     }
 }
 
-// Manual widget casting support for SplitterWindow - tuple struct needs custom handling  
+// Manual widget casting support for SplitterWindow - tuple struct needs custom handling
 impl crate::window::FromWindowWithClassName for SplitterWindow {
     fn class_name() -> &'static str {
         "wxSplitterWindow"

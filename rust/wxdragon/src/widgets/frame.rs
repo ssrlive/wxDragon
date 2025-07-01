@@ -387,7 +387,7 @@ impl crate::xrc::XrcSupport for Frame {
     }
 }
 
-// Manual widget casting support for Frame - complex structure needs custom handling  
+// Manual widget casting support for Frame - complex structure needs custom handling
 impl crate::window::FromWindowWithClassName for Frame {
     fn class_name() -> &'static str {
         "wxFrame"

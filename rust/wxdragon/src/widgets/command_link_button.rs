@@ -91,7 +91,7 @@ impl crate::xrc::XrcSupport for CommandLinkButton {
     }
 }
 
-// Manual widget casting support for CommandLinkButton - composition structure needs custom handling  
+// Manual widget casting support for CommandLinkButton - composition structure needs custom handling
 impl crate::window::FromWindowWithClassName for CommandLinkButton {
     fn class_name() -> &'static str {
         "wxCommandLinkButton"

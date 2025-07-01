@@ -100,16 +100,24 @@ fn main() {
 
     // --- 3. Add wxWidgets Include Paths to Bindgen ---
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-    
+
     // Check for official Windows 7 targets first
     let target_triple = env::var("TARGET").unwrap_or_default();
     let artifact_name = match target_triple.as_str() {
-        "i686-win7-windows-msvc" => format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}"),
-        "x86_64-win7-windows-msvc" => format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}"),
+        "i686-win7-windows-msvc" => {
+            format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}")
+        }
+        "x86_64-win7-windows-msvc" => {
+            format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}")
+        }
         _ => {
             // Fall back to standard target detection
             let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-            match (target_os.as_str(), target_arch.as_str(), target_env.as_str()) {
+            match (
+                target_os.as_str(),
+                target_arch.as_str(),
+                target_env.as_str(),
+            ) {
                 ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
                 ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
                 ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
@@ -223,12 +231,16 @@ fn download_prebuilt_libraries(
     target_env: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-    
+
     // Check for official Windows 7 targets first
     let target_triple = env::var("TARGET").unwrap_or_default();
     let artifact_name = match target_triple.as_str() {
-        "i686-win7-windows-msvc" => format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}"),
-        "x86_64-win7-windows-msvc" => format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}"),
+        "i686-win7-windows-msvc" => {
+            format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}")
+        }
+        "x86_64-win7-windows-msvc" => {
+            format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}")
+        }
         _ => {
             // Fall back to standard target detection
             let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
@@ -352,8 +364,12 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
                 ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
                 ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
                 ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
-                ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
-                ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
+                ("windows", "x86_64", "msvc") => {
+                    format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}")
+                }
+                ("windows", "x86_64", "gnu") => {
+                    format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}")
+                }
                 ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
                     format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
                 }
@@ -371,7 +387,7 @@ fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
     let actual_lib_dir = if target_os == "windows" {
         // Get target architecture for directory naming
         let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-        
+
         // For 32-bit Windows packages, check if they use generic "vc_lib" instead of "vc_x86_lib"
         let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
             "x86"
