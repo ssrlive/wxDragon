@@ -1,5 +1,98 @@
 # Changelog
 
+## 0.8.9
+
+### New Features
+- **TaskBarIcon Widget**: Added comprehensive system tray/taskbar icon widget with full cross-platform support
+  - **Platform-Aware Implementation**: Intelligent platform detection for optimal user experience
+    - **Windows**: Shows in system tray (notification area) with full event support
+    - **macOS**: Shows in dock or menu bar (CustomStatusItem) with native click behavior
+    - **Linux**: Shows in system tray with GTK backend integration (varies by desktop environment)
+  - **Icon Type Management**: Flexible icon type configuration with `TaskBarIconType` enum
+    - `Default`: Platform-appropriate default behavior (CustomStatusItem on macOS, Dock elsewhere)
+    - `Dock`: Traditional dock icon placement (typically macOS dock)
+    - `CustomStatusItem`: Menu bar/system tray placement (macOS menu bar, Windows system tray)
+  - **Automatic Popup Menus**: Native popup menu functionality using wxWidgets' `CreatePopupMenu()` override
+    - `set_popup_menu()` and `get_popup_menu()` methods for menu management
+    - Automatic menu display when taskbar icon is clicked (platform-specific behavior)
+    - Menu creates copies for wxWidgets ownership while preserving original template
+  - **Event Handling System**: Comprehensive event system with platform-specific conditional compilation
+    - Menu events handled directly by TaskBarIcon via `on_menu()` method (not routed to parent frame)
+    - Cross-platform basic events: left click, double-click (Windows/Linux only)
+    - Windows-specific events: mouse movement, right-click, balloon tooltips with proper conditional compilation
+    - Platform events gracefully degrade on unsupported platforms (return `wxEVT_NULL`)
+  - **Builder Pattern Integration**: Full wxDragon builder pattern with fluent API
+    - `with_icon_type()`, `with_icon()`, `with_icon_bundle()`, `with_tooltip()` configuration methods
+    - Immediate icon setting during construction for streamlined initialization
+
+### Enhancements  
+- **Cross-Platform FFI Layer**: Enhanced C++ binding layer with robust platform detection
+  - **TaskBarIcon C++ Class**: Custom `wxdTaskBarIcon` class extending `wxTaskBarIcon` with automatic popup menu support
+  - **Platform-Specific Icon Type Mapping**: Intelligent default icon type selection based on platform capabilities
+  - **Event Type Safety**: Enhanced event mapping with individual constant checking to prevent compilation errors
+  - **Memory Management**: Proper menu copying and ownership handling for wxWidgets integration
+- **Menu System Integration**: Enhanced Menu widget with TaskBarIcon-specific functionality
+  - Added `from_ptr()` method to Menu for FFI pointer conversion support
+  - Seamless integration between TaskBarIcon popup menus and existing menu event handling
+- **Build System Robustness**: Improved cross-platform compilation with conditional event support
+  - **Windows Cross-Compilation**: Fixed TaskBarIcon event constants availability checking
+  - **Conditional Compilation**: Platform-specific event mapping with graceful fallback for unavailable events
+  - **FFI Constant Generation**: Enhanced constant generation across all platforms (GTK, MSW, OSX)
+
+### Platform Support
+- **Enhanced Cross-Platform Compatibility**: Full TaskBarIcon support across all wxDragon target platforms
+  - ✅ **Windows (MSVC/MinGW)**: Complete system tray support with balloon tooltips and full event system
+  - ✅ **macOS**: Native menu bar integration with CustomStatusItem support and automatic popup menus  
+  - ✅ **Linux (GTK)**: System tray integration with desktop environment compatibility
+  - ✅ **Cross-Compilation**: Fixed Windows cross-compilation from macOS with proper event constant handling
+
+### Bug Fixes
+- **Windows Cross-Compilation**: Fixed critical compilation errors when building for Windows targets
+  - Resolved `wxEVT_TASKBAR_*` undefined symbol errors by adding proper conditional compilation guards
+  - Enhanced event mapping to check individual event constants rather than assuming platform availability
+  - Fixed event type mapping to gracefully handle missing event constants with `wxEVT_NULL` fallback
+- **FFI Constant Mapping**: Corrected TaskBarIcon type constant values across all platforms
+  - Fixed incorrect FFI constant values that were causing icon type mismapping
+  - Ensured consistent constant values: `WXD_TBI_DEFAULT_TYPE: 0`, `WXD_TBI_DOCK: 1`, `WXD_TBI_CUSTOM_STATUSITEM: 2`
+  - Validated constant mapping across all platform-specific constant files (GTK, MSW, OSX)
+
+### Examples
+- **taskbar_demo**: New comprehensive example demonstrating complete TaskBarIcon functionality
+  - Full popup menu creation with multiple menu items (Open, Settings, About, Exit)
+  - Automatic popup menu display when clicking the taskbar icon
+  - Menu event handling with status updates and application control
+  - Icon creation using ArtProvider with fallback bitmap support
+  - Cross-platform icon visibility verification and error handling
+  - Demonstrates proper TaskBarIcon lifecycle management and cleanup
+
+### Technical Enhancements
+- **C++ Implementation**: Advanced TaskBarIcon C++ wrapper with virtual method override
+  - Custom `wxdTaskBarIcon` class extending `wxTaskBarIcon` with `CreatePopupMenu()` override
+  - Automatic menu copying system preserving item properties (enabled state, checkable status)
+  - Platform-aware icon type selection with conditional compilation support
+- **Event Architecture**: Sophisticated event handling system with platform-specific feature detection
+  - Conditional compilation guards for platform-specific TaskBarIcon events  
+  - Event type safety with individual constant availability checking
+  - Graceful degradation for unsupported events returning `wxEVT_NULL`
+- **Memory Safety**: Enhanced memory management patterns for TaskBarIcon lifecycle
+  - Special Drop implementation preserving system tray icon visibility
+  - Proper menu template management without affecting original menu references
+  - Safe FFI pointer handling with comprehensive null pointer checks
+
+### API Changes
+- Added new `TaskBarIcon` widget with complete builder pattern support
+- Added `TaskBarIconType` enum for platform-aware icon type configuration
+- Enhanced `Menu` widget with `from_ptr()` method for TaskBarIcon integration
+- Added TaskBarIcon-specific event handling methods with platform conditional compilation
+- All new APIs follow wxDragon's established patterns for memory safety and cross-platform compatibility
+- No breaking changes - all additions are backward compatible
+
+### Migration Notes
+- **TaskBarIcon Usage**: New TaskBarIcon widget provides modern system tray integration
+- **Cross-Platform Behavior**: TaskBarIcon automatically adapts to platform conventions (menu bar on macOS, system tray on Windows/Linux)
+- **Event Handling**: TaskBarIcon menu events are handled by the icon itself, not parent windows
+- **Build Compatibility**: Enhanced build system ensures successful compilation across all supported platforms
+
 ## 0.8.8
 
 ### New Features
