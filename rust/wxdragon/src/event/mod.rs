@@ -11,6 +11,7 @@ pub mod button_events;
 pub mod event_data;
 pub mod macros;
 pub mod scroll_events;
+pub mod taskbar_events;
 pub mod text_events;
 pub mod tree_events;
 pub mod window_events;
@@ -32,6 +33,10 @@ pub use tree_events::{TreeEvent, TreeEventData, TreeEvents};
 
 // Re-export scroll events for easier access
 pub use scroll_events::{ScrollEvent, ScrollEventData, ScrollEvents};
+
+// Re-export taskbar events for easier access
+#[cfg(any(target_os = "windows", target_os = "linux"))]
+pub use taskbar_events::{TaskBarIconEvent, TaskBarIconEventData};
 
 // Re-export the stable C enum for use in the safe wrapper
 pub use ffi::WXDEventTypeCEnum;
@@ -467,6 +472,37 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACING);
     pub const RICHTEXT_STYLESHEET_REPLACED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED);
+
+    // TaskBarIcon Event Types - platform-specific support
+
+    // Common events supported on Windows and Linux
+    pub const TASKBAR_LEFT_DOWN: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_LEFT_DOWN);
+    pub const TASKBAR_LEFT_DCLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_LEFT_DCLICK);
+
+    // Windows-only events
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_MOVE: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_MOVE);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_LEFT_UP: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_LEFT_UP);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_RIGHT_DOWN: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_RIGHT_DOWN);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_RIGHT_UP: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_RIGHT_UP);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_RIGHT_DCLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_RIGHT_DCLICK);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_BALLOON_TIMEOUT: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_BALLOON_TIMEOUT);
+    #[cfg(target_os = "windows")]
+    pub const TASKBAR_BALLOON_CLICK: EventType =
+        EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_TASKBAR_BALLOON_CLICK);
 
     /// Get the underlying stable C enum value.
     pub(crate) fn as_c_enum(&self) -> ffi::WXDEventTypeCEnum {

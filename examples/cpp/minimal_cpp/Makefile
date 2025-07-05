@@ -6,7 +6,7 @@ SHELL=/bin/bash # Explicitly set shell for $(shell ...) compatibility
 # Updated to use CMake with prebuilt wxWidgets libraries, similar to const_extractor
 
 BUILD_DIR = build
-TARGET_EXEC = xrc_test
+TARGET_EXEC = taskbar_test
 APP_BUNDLE_NAME = $(TARGET_EXEC).app
 
 .PHONY: all clean configure build bundle run
@@ -16,18 +16,18 @@ all: build
 
 # Configure the build with CMake
 configure:
-	@echo "Configuring XRC test with CMake..."
+	@echo "Configuring TaskBarIcon test with CMake..."
 	@mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR) && cmake ..
 
 # Build the project
 build: configure
-	@echo "Building XRC test..."
+	@echo "Building TaskBarIcon test..."
 	cd $(BUILD_DIR) && $(MAKE)
 	@if [ -f $(BUILD_DIR)/$(TARGET_EXEC) ]; then \
-		echo "XRC test built successfully!"; \
+		echo "TaskBarIcon test built successfully!"; \
 	elif [ -d $(BUILD_DIR)/$(APP_BUNDLE_NAME) ]; then \
-		echo "XRC test app bundle built successfully!"; \
+		echo "TaskBarIcon test app bundle built successfully!"; \
 	else \
 		echo "Build failed - executable not found"; \
 		exit 1; \
@@ -46,7 +46,6 @@ bundle: build
 		mkdir -p $(APP_BUNDLE_NAME)/Contents/Resources; \
 		cp $(BUILD_DIR)/$(TARGET_EXEC) $(APP_BUNDLE_NAME)/Contents/MacOS/; \
 		cp Info.plist $(APP_BUNDLE_NAME)/Contents/; \
-		cp test_panel.xrc $(APP_BUNDLE_NAME)/Contents/Resources/; \
 		echo "Bundle created: $(APP_BUNDLE_NAME)"; \
 	else \
 		echo "No executable found to bundle"; \
@@ -55,7 +54,7 @@ bundle: build
 
 # Run the application
 run: build
-	@echo "Running XRC test..."
+	@echo "Running TaskBarIcon test..."
 	@if [ -d $(BUILD_DIR)/$(APP_BUNDLE_NAME) ]; then \
 		open $(BUILD_DIR)/$(APP_BUNDLE_NAME); \
 	elif [ -f $(BUILD_DIR)/$(TARGET_EXEC) ]; then \

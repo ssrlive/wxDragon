@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(xrc_test)
+project(taskbar_test)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -91,27 +91,21 @@ message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 # Find required libraries
 find_library(WX_BASE_LIB wx_baseu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 find_library(WX_CORE_LIB wx_osx_cocoau_core-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_XRC_LIB wx_osx_cocoau_xrc-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_XML_LIB wx_baseu_xml-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_HTML_LIB wx_osx_cocoau_html-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 
 # Check if libraries were found
-if(NOT WX_BASE_LIB OR NOT WX_CORE_LIB OR NOT WX_XRC_LIB OR NOT WX_XML_LIB OR NOT WX_HTML_LIB)
+if(NOT WX_BASE_LIB OR NOT WX_CORE_LIB)
     message(FATAL_ERROR "Could not find required wxWidgets libraries")
 endif()
 
 message(STATUS "Found wxWidgets libraries:")
 message(STATUS "  Base: ${WX_BASE_LIB}")
 message(STATUS "  Core: ${WX_CORE_LIB}")
-message(STATUS "  XRC: ${WX_XRC_LIB}")
-message(STATUS "  XML: ${WX_XML_LIB}")
-message(STATUS "  HTML: ${WX_HTML_LIB}")
 
 # Create the executable
-add_executable(xrc_test main.cpp)
+add_executable(taskbar_test main.cpp)
 
 # Set include directories using the same pattern as const_extractor
-target_include_directories(xrc_test PRIVATE ${WX_INCLUDE_PATHS})
+target_include_directories(taskbar_test PRIVATE ${WX_INCLUDE_PATHS})
 
 # Find additional wxWidgets libraries (following build.rs pattern)
 find_library(WX_JPEG_LIB wxjpeg-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
@@ -119,13 +113,10 @@ find_library(WX_PNG_LIB wxpng-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 find_library(WX_TIFF_LIB wxtiff-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 find_library(WX_REGEX_LIB wxregexu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 
-# Link libraries (following the same order as const_extractor, but adding XRC and XML)
-target_link_libraries(xrc_test
-    ${WX_XRC_LIB}
-    ${WX_HTML_LIB}
+# Link libraries (core libraries only for TaskBarIcon functionality)
+target_link_libraries(taskbar_test
     ${WX_CORE_LIB}
     ${WX_BASE_LIB}
-    ${WX_XML_LIB}
     ${WX_JPEG_LIB}
     ${WX_PNG_LIB}
     ${WX_TIFF_LIB}
@@ -151,24 +142,12 @@ target_link_libraries(xrc_test
     "-framework System"
 )
 
-# Copy XRC file to build directory
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_panel.xrc"
-    "${CMAKE_CURRENT_BINARY_DIR}/test_panel.xrc"
-    COPYONLY
-)
-
 # On macOS, create an app bundle
 if(APPLE)
-    set_target_properties(xrc_test PROPERTIES
+    set_target_properties(taskbar_test PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
     )
-    
-    # Copy XRC file to bundle resources
-    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/test_panel.xrc" 
-        PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(xrc_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/test_panel.xrc")
 endif()
 
-message(STATUS "xrc_test configured successfully") 
+message(STATUS "taskbar_test configured successfully") 

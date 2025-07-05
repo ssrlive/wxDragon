@@ -781,6 +781,67 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED: return wxEVT_RICHTEXT_STYLESHEET_REPLACED;
         #endif
         
+        // TaskBarIcon events - platform-specific support
+        #if wxUSE_TASKBARICON
+        // Basic mouse events - available on Windows and Linux (constants defined but may not fire on macOS)
+        case WXD_EVENT_TYPE_TASKBAR_LEFT_DOWN: 
+            #ifdef wxEVT_TASKBAR_LEFT_DOWN
+            return wxEVT_TASKBAR_LEFT_DOWN;
+            #else
+            return wxEVT_NULL; // Fallback for platforms without this event
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_LEFT_DCLICK: 
+            #ifdef wxEVT_TASKBAR_LEFT_DCLICK
+            return wxEVT_TASKBAR_LEFT_DCLICK;
+            #else
+            return wxEVT_NULL; // Fallback for platforms without this event
+            #endif
+        
+        // Windows-only events - check each constant individually
+        case WXD_EVENT_TYPE_TASKBAR_MOVE: 
+            #ifdef wxEVT_TASKBAR_MOVE
+            return wxEVT_TASKBAR_MOVE;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_LEFT_UP: 
+            #ifdef wxEVT_TASKBAR_LEFT_UP
+            return wxEVT_TASKBAR_LEFT_UP;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_RIGHT_DOWN: 
+            #ifdef wxEVT_TASKBAR_RIGHT_DOWN
+            return wxEVT_TASKBAR_RIGHT_DOWN;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_RIGHT_UP: 
+            #ifdef wxEVT_TASKBAR_RIGHT_UP
+            return wxEVT_TASKBAR_RIGHT_UP;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_RIGHT_DCLICK: 
+            #ifdef wxEVT_TASKBAR_RIGHT_DCLICK
+            return wxEVT_TASKBAR_RIGHT_DCLICK;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_BALLOON_TIMEOUT: 
+            #ifdef wxEVT_TASKBAR_BALLOON_TIMEOUT
+            return wxEVT_TASKBAR_BALLOON_TIMEOUT;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        case WXD_EVENT_TYPE_TASKBAR_BALLOON_CLICK: 
+            #ifdef wxEVT_TASKBAR_BALLOON_CLICK
+            return wxEVT_TASKBAR_BALLOON_CLICK;
+            #else
+            return wxEVT_NULL; // Event not available on this platform
+            #endif
+        #endif
+        
         default: return wxEVT_NULL;
     }
 }

@@ -60,6 +60,7 @@ pub mod staticbox;
 pub mod statusbar;
 #[cfg(feature = "stc")]
 pub mod styledtextctrl;
+pub mod taskbar_icon;
 pub mod textctrl;
 pub mod time_picker_ctrl;
 pub mod togglebutton;
@@ -155,6 +156,7 @@ pub use styledtextctrl::{
     StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
     WhiteSpaceView, WrapMode,
 };
+pub use taskbar_icon::{TaskBarIcon, TaskBarIconBuilder, TaskBarIconStyle, TaskBarIconType};
 pub use textctrl::{TextCtrl, TextCtrlBuilder};
 pub use togglebutton::{ToggleButton, ToggleButtonBuilder};
 pub use toolbar::ToolBar;

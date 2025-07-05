@@ -46,6 +46,13 @@ impl Menu {
         MenuItem::from_xrc_name(parent_window, item_name)
     }
 
+    /// Creates a Menu wrapper from a raw pointer.
+    /// # Safety
+    /// The pointer must be a valid wxMenu pointer.
+    pub(crate) unsafe fn from_ptr(ptr: *mut ffi::wxd_Menu_t) -> Self {
+        Self { ptr }
+    }
+
     /// Special XRC loading method for menus.
     /// This looks up the menu by name and creates a Menu wrapper.
     #[cfg(feature = "xrc")]

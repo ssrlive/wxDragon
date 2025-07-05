@@ -186,6 +186,9 @@ pub use crate::widgets::styledtextctrl::{
     StyledTextCtrlBuilder, StyledTextCtrlEvent, StyledTextCtrlEventData, StyledTextCtrlStyle,
     WhiteSpaceView, WrapMode,
 };
+pub use crate::widgets::taskbar_icon::{
+    TaskBarIcon, TaskBarIconBuilder, TaskBarIconStyle, TaskBarIconType,
+};
 pub use crate::widgets::textctrl::{TextCtrl, TextCtrlBuilder, TextCtrlStyle};
 pub use crate::widgets::time_picker_ctrl::{
     TimePickerCtrl, TimePickerCtrlBuilder, TimePickerCtrlStyle,

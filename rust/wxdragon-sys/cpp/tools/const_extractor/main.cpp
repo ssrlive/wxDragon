@@ -54,6 +54,7 @@
 #include <wx/editlbox.h>
 #include <wx/mediactrl.h>
 #include <wx/dataview.h> // ADDED: Needed for wxDataView styles and constants
+#include <wx/taskbar.h> // ADDED: Needed for TaskBarIcon constants
 
 // A simple application class that initializes wxWidgets
 class ConstExtractorApp : public wxApp {
@@ -689,6 +690,11 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxWS_EX_PROCESS_UI_UPDATES", wxWS_EX_PROCESS_UI_UPDATES});
 
     // wxDataViewCtrl styles
+
+    // TaskBarIcon types
+    constants_to_extract.push_back({"wxTBI_DEFAULT_TYPE", wxTBI_DEFAULT_TYPE});
+    constants_to_extract.push_back({"wxTBI_DOCK", wxTBI_DOCK});
+    constants_to_extract.push_back({"wxTBI_CUSTOM_STATUSITEM", wxTBI_CUSTOM_STATUSITEM});
 
     // Output the constants in the Rust pub const format
     for (const auto& pair : constants_to_extract) {
