@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.10
+
+### Fix
+
+Fix linux build error reported via issue `#12` 
+
 ## 0.8.9
 
 ### New Features
