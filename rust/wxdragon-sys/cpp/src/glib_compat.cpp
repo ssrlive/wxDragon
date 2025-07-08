@@ -1,28 +1,29 @@
-#include <glib.h>
-
-// Compatibility function for g_string_free_and_steal
-// This function is available in GLib 2.76+, but the prebuilt wxWidgets 
-// libraries expect it to be available. We provide a fallback implementation.
+// Self-contained GLib compatibility for g_string_free_and_steal
+// This avoids needing glib.h headers during compilation
+// We define the minimal structures and function prototypes needed
 
 extern "C" {
 
-// Check if g_string_free_and_steal is already available
-// We'll only define it if it's not available in the current GLib version
-#if !GLIB_CHECK_VERSION(2, 76, 0)
+// Minimal GString structure definition (matches GLib's internal structure)
+typedef struct {
+    char* str;
+    unsigned long len;
+    unsigned long allocated_len;
+} GString;
+
+// Declare g_string_free as an external function (will be provided by system GLib)
+extern char* g_string_free(GString* string, int free_segment);
+
+// Provide g_string_free_and_steal implementation
+// This function is available in GLib 2.76+, but older systems may not have it
 char* g_string_free_and_steal(GString* string) {
     if (string == nullptr) {
         return nullptr;
     }
     
-    // Extract the character data before freeing the GString structure
-    char* data = string->str;
-    
-    // Free the GString structure but keep the character data
-    // This mimics the behavior of g_string_free with free_segment=FALSE
-    g_string_free(string, FALSE);
-    
-    return data;
+    // This is equivalent to g_string_free(string, FALSE)
+    // which frees the GString structure but returns the character data
+    return g_string_free(string, 0);
 }
-#endif
 
 } // extern "C" 
