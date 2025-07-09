@@ -145,10 +145,10 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wxd_utils.h
 )
 
-# Add glibc/GLib compatibility sources for Linux
+# Add Linux compatibility layer for older systems
 if(PLATFORM_NAME STREQUAL "linux")
-    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/glib_compat.cpp)
-    message(STATUS "Added GLib compatibility source for Linux")
+    list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/linux_compat.cpp)
+    message(STATUS "Added Linux compatibility layer (GLib + glibc compatibility)")
 endif()
 
 # Add conditional sources based on features

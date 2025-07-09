@@ -857,27 +857,6 @@ fn link_linux_libraries() {
     println!("cargo:rustc-link-lib=jpeg");
     println!("cargo:rustc-link-lib=expat");
     println!("cargo:rustc-link-lib=tiff");
-
-    // Add glibc compatibility flags to resolve __isoc23_ symbol issues
-    // These flags force the linker to use older symbol versions compatible with the prebuilt libraries
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_sscanf");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_sscanf=sscanf");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_swscanf");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_swscanf=swscanf");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_strtol");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_strtol=strtol");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_strtoll");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_strtoll=strtoll");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_strtoul");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_strtoul=strtoul");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_wcstol");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_wcstol=wcstol");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_wcstoul");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_wcstoul=wcstoul");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_wcstoll");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_wcstoll=wcstoll");
-    println!("cargo:rustc-link-arg=-Wl,--wrap=__isoc23_wcstoull");
-    println!("cargo:rustc-link-arg=-Wl,--defsym=__wrap___isoc23_wcstoull=wcstoull");
 }
 
 fn build_wxdragon_wrapper(
