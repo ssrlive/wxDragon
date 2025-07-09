@@ -561,7 +561,7 @@ macro_rules! custom_widget {
                 }
 
                 /// Creates a new builder for this widget type
-                pub fn builder(parent: &dyn $crate::window::WxWidget) -> [<$name Builder>] {
+                pub fn builder(parent: &dyn $crate::window::WxWidget) -> [<$name Builder>]<'_> {
                     [<$name Builder>]::new(parent)
                 }
             }

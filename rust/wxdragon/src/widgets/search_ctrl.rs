@@ -67,7 +67,7 @@ pub struct SearchCtrl {
 }
 
 impl SearchCtrl {
-    pub fn builder(parent: &dyn WxWidget) -> SearchCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SearchCtrlBuilder<'_> {
         SearchCtrlBuilder::new(parent)
     }
 

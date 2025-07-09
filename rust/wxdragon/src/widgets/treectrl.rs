@@ -271,7 +271,7 @@ pub struct TreeCtrl {
 /// - `wxd_TreeCtrl_GetChildrenCount`: Get the number of children of an item
 impl TreeCtrl {
     /// Creates a new TreeCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> TreeCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> TreeCtrlBuilder<'_> {
         TreeCtrlBuilder::new(parent)
     }
 

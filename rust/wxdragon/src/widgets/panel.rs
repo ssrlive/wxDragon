@@ -35,7 +35,7 @@ pub struct Panel {
 
 impl Panel {
     /// Creates a new builder for a Panel.
-    pub fn builder(parent: &dyn WxWidget) -> PanelBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> PanelBuilder<'_> {
         PanelBuilder::new(parent)
     }
 

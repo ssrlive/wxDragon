@@ -19,7 +19,7 @@ pub struct CheckBox {
 
 impl CheckBox {
     /// Creates a new `CheckBoxBuilder` for constructing a checkbox.
-    pub fn builder(parent: &dyn WxWidget) -> CheckBoxBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> CheckBoxBuilder<'_> {
         CheckBoxBuilder::new(parent)
     }
 

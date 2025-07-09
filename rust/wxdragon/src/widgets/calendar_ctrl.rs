@@ -34,7 +34,7 @@ pub struct CalendarCtrl {
 
 impl CalendarCtrl {
     /// Creates a new `CalendarCtrlBuilder` for constructing a calendar control.
-    pub fn builder(parent: &dyn WxWidget) -> CalendarCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> CalendarCtrlBuilder<'_> {
         CalendarCtrlBuilder::new(parent)
     }
 

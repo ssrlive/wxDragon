@@ -65,7 +65,7 @@ pub struct DatePickerCtrl {
 
 impl DatePickerCtrl {
     /// Creates a new DatePickerCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> DatePickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> DatePickerCtrlBuilder<'_> {
         DatePickerCtrlBuilder::new(parent)
     }
 

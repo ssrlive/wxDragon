@@ -22,7 +22,7 @@ pub struct BitmapComboBox {
 
 impl BitmapComboBox {
     /// Creates a new `BitmapComboBoxBuilder`.
-    pub fn builder(parent: &dyn WxWidget) -> BitmapComboBoxBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> BitmapComboBoxBuilder<'_> {
         BitmapComboBoxBuilder::new(parent)
     }
 

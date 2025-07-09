@@ -77,7 +77,7 @@ pub struct FileCtrl {
 }
 
 impl FileCtrl {
-    pub fn builder(parent: &dyn WxWidget) -> FileCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> FileCtrlBuilder<'_> {
         FileCtrlBuilder::new(parent)
     }
 

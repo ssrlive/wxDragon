@@ -112,7 +112,7 @@ impl SpinColumnConfig {
 
 impl DataViewCtrl {
     /// Creates a builder for configuring and constructing a DataViewCtrl.
-    pub fn builder(parent: &dyn WxWidget) -> DataViewCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> DataViewCtrlBuilder<'_> {
         DataViewCtrlBuilder::new(parent)
     }
 

@@ -34,7 +34,7 @@ pub struct Slider {
 
 impl Slider {
     /// Creates a new Slider builder.
-    pub fn builder(parent: &dyn WxWidget) -> SliderBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SliderBuilder<'_> {
         SliderBuilder::new(parent)
     }
 

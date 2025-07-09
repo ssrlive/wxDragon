@@ -138,7 +138,7 @@ impl EditableListBox {
     }
 
     /// Create a builder for configuring and creating an EditableListBox.
-    pub fn builder(parent: &dyn WxWidget) -> EditableListBoxBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> EditableListBoxBuilder<'_> {
         EditableListBoxBuilder::new(parent)
     }
 

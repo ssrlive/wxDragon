@@ -73,7 +73,7 @@ pub struct DirPickerCtrl {
 
 impl DirPickerCtrl {
     /// Creates a new DirPickerCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> DirPickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> DirPickerCtrlBuilder<'_> {
         DirPickerCtrlBuilder::new(parent)
     }
 

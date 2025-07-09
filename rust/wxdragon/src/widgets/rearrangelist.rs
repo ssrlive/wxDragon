@@ -74,7 +74,7 @@ pub struct RearrangeList {
 
 impl RearrangeList {
     /// Creates a new `RearrangeListBuilder` for constructing a rearrange list control.
-    pub fn builder(parent: &dyn WxWidget) -> RearrangeListBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> RearrangeListBuilder<'_> {
         RearrangeListBuilder::new(parent)
     }
 

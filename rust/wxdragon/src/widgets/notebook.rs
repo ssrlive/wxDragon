@@ -38,7 +38,7 @@ pub struct Notebook {
 
 impl Notebook {
     /// Creates a new Notebook builder.
-    pub fn builder(parent: &dyn WxWidget) -> NotebookBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> NotebookBuilder<'_> {
         NotebookBuilder::new(parent)
     }
 

@@ -95,7 +95,7 @@ widget_builder!(
 
 impl SplitterWindow {
     /// Creates a new SplitterWindow builder.
-    pub fn builder<W: WxWidget>(parent: &W) -> SplitterWindowBuilder {
+    pub fn builder<W: WxWidget>(parent: &W) -> SplitterWindowBuilder<'_> {
         SplitterWindowBuilder::new(parent)
     }
 

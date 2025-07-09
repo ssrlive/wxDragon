@@ -21,7 +21,7 @@ pub struct DataViewListCtrl {
 
 impl DataViewListCtrl {
     /// Creates a builder for configuring and constructing a DataViewListCtrl.
-    pub fn builder(parent: &dyn WxWidget) -> DataViewListCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> DataViewListCtrlBuilder<'_> {
         DataViewListCtrlBuilder::new(parent)
     }
 

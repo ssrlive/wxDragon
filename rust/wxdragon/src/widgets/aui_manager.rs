@@ -347,7 +347,7 @@ impl WxEvtHandler for AuiManager {
 
 impl AuiManager {
     /// Create a new AuiManager builder, which requires a parent window to build
-    pub fn builder(parent: &impl WxWidget) -> AuiManagerBuilder {
+    pub fn builder(parent: &impl WxWidget) -> AuiManagerBuilder<'_> {
         AuiManagerBuilder {
             parent_ptr: parent.handle_ptr(),
             _marker: PhantomData,

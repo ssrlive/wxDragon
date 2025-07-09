@@ -30,7 +30,7 @@ pub struct Gauge {
 
 impl Gauge {
     /// Creates a new `GaugeBuilder` for constructing a gauge.
-    pub fn builder(parent: &dyn WxWidget) -> GaugeBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> GaugeBuilder<'_> {
         GaugeBuilder::new(parent)
     }
 

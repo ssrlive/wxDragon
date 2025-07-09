@@ -30,7 +30,7 @@ pub struct RadioButton {
 
 impl RadioButton {
     /// Creates a new `RadioButtonBuilder`.
-    pub fn builder(parent: &dyn WxWidget) -> RadioButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> RadioButtonBuilder<'_> {
         RadioButtonBuilder::new(parent)
     }
 

@@ -33,7 +33,7 @@ pub struct Choice {
 
 impl Choice {
     /// Creates a new `ChoiceBuilder` for constructing a choice control.
-    pub fn builder(parent: &dyn WxWidget) -> ChoiceBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ChoiceBuilder<'_> {
         ChoiceBuilder::new(parent)
     }
 

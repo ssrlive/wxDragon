@@ -63,7 +63,7 @@ pub struct FontPickerCtrl {
 
 impl FontPickerCtrl {
     /// Creates a new FontPickerCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> FontPickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> FontPickerCtrlBuilder<'_> {
         FontPickerCtrlBuilder::new(parent)
     }
 
