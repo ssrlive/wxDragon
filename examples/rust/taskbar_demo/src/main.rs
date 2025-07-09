@@ -54,7 +54,6 @@ fn main() {
         taskbar.on_menu({
             let status = status.clone();
             let frame = frame.clone();
-            let taskbar = taskbar.clone();
             move |event| {
                 let menu_id = event.get_id();
                 match menu_id {
@@ -77,17 +76,9 @@ fn main() {
                         // Exit
                         println!("🚪 Exit clicked!");
                         status.set_label("Menu: Exit clicked - closing application...");
-                        
-                        // Clean up the TaskBarIcon first
-                        taskbar.remove_icon();
-                        
-                        // Close the frame  
+
+                        // Close the frame, which will trigger the on_close event
                         frame.close();
-                        
-                        // Force application exit to ensure consistent behavior
-                        // This is necessary because TaskBarIcon has special lifetime semantics
-                        // that can keep the application running on some platforms/events
-                        std::process::exit(0);
                     }
                     _ => {
                         println!("Unknown menu item clicked: {menu_id}");
@@ -125,5 +116,17 @@ fn main() {
         // Show the frame
         frame.show(true);
         frame.centre();
+
+        frame.on_close({
+            let taskbar = taskbar.clone();
+            let frame = frame.clone();
+            move |_| {
+                // Clean up the TaskBarIcon before closing
+                taskbar.remove_icon();
+                // Destroy the frame
+                frame.destroy();
+                println!("Application closed.");
+            }
+        });
     });
 }
