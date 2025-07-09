@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.11
+
+### Fix
+
+Try fix linux build error, provide compact util to dealing with different glib versions.
+
 ## 0.8.10
 
 ### Fix
