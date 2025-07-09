@@ -1,3 +1,6 @@
+/.vs
+/.vscode
+/.VSCodeCounter
 build
 rust/wxdragon-sys/target
 target
