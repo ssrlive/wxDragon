@@ -150,7 +150,7 @@ impl<'a, W: WxWidget> TextDropTargetBuilder<'a, W> {
 
 impl TextDropTarget {
     /// Creates a builder for a text drop target.
-    pub fn builder<W: WxWidget>(window: &W) -> TextDropTargetBuilder<W> {
+    pub fn builder<W: WxWidget>(window: &W) -> TextDropTargetBuilder<'_, W> {
         TextDropTargetBuilder::new(window)
     }
 }
@@ -291,7 +291,7 @@ impl<'a, W: WxWidget> FileDropTargetBuilder<'a, W> {
 
 impl FileDropTarget {
     /// Creates a builder for a file drop target.
-    pub fn builder<W: WxWidget>(window: &W) -> FileDropTargetBuilder<W> {
+    pub fn builder<W: WxWidget>(window: &W) -> FileDropTargetBuilder<'_, W> {
         FileDropTargetBuilder::new(window)
     }
 }

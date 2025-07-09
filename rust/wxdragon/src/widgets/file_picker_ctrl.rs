@@ -60,7 +60,7 @@ pub struct FilePickerCtrl {
 
 impl FilePickerCtrl {
     /// Creates a new FilePickerCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> FilePickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> FilePickerCtrlBuilder<'_> {
         FilePickerCtrlBuilder::new(parent)
     }
 

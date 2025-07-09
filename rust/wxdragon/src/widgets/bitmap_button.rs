@@ -59,7 +59,7 @@ struct BitmapButtonConfig {
 
 impl BitmapButton {
     /// Creates a new BitmapButton builder.
-    pub fn builder(parent: &dyn WxWidget) -> BitmapButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> BitmapButtonBuilder<'_> {
         BitmapButtonBuilder::new(parent)
     }
 

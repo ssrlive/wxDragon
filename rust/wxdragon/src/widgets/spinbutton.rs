@@ -70,7 +70,7 @@ pub struct SpinButton {
 
 impl SpinButton {
     /// Creates a new SpinButton builder.
-    pub fn builder(parent: &dyn WxWidget) -> SpinButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SpinButtonBuilder<'_> {
         SpinButtonBuilder::new(parent)
     }
 

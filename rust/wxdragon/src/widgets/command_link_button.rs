@@ -58,7 +58,7 @@ widget_builder!(
 
 impl CommandLinkButton {
     /// Creates a new `CommandLinkButtonBuilder` for constructing a command link button.
-    pub fn builder(parent: &dyn WxWidget) -> CommandLinkButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> CommandLinkButtonBuilder<'_> {
         CommandLinkButtonBuilder::new(parent)
     }
 

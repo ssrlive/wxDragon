@@ -43,7 +43,7 @@ pub struct ListBox {
 
 impl ListBox {
     /// Creates a new `ListBoxBuilder`.
-    pub fn builder(parent: &dyn WxWidget) -> ListBoxBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ListBoxBuilder<'_> {
         ListBoxBuilder::new(parent)
     }
 

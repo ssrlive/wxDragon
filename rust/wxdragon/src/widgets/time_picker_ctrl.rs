@@ -59,7 +59,7 @@ pub struct TimePickerCtrl {
 
 impl TimePickerCtrl {
     /// Creates a new TimePickerCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> TimePickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> TimePickerCtrlBuilder<'_> {
         TimePickerCtrlBuilder::new(parent)
     }
 

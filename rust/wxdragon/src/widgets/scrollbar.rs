@@ -32,7 +32,7 @@ pub struct ScrollBar {
 
 impl ScrollBar {
     /// Creates a new ScrollBar builder.
-    pub fn builder(parent: &dyn WxWidget) -> ScrollBarBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ScrollBarBuilder<'_> {
         ScrollBarBuilder::new(parent)
     }
 

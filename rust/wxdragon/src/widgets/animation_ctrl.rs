@@ -26,7 +26,7 @@ pub struct AnimationCtrl {
 
 impl AnimationCtrl {
     /// Creates a new `AnimationCtrlBuilder` for constructing an animation control.
-    pub fn builder(parent: &dyn WxWidget) -> AnimationCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> AnimationCtrlBuilder<'_> {
         AnimationCtrlBuilder::new(parent)
     }
 

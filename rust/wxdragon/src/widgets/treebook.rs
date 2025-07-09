@@ -97,7 +97,7 @@ pub struct Treebook {
 
 impl Treebook {
     /// Creates a new Treebook builder.
-    pub fn builder(parent: &dyn WxWidget) -> TreebookBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> TreebookBuilder<'_> {
         TreebookBuilder::new(parent)
     }
 

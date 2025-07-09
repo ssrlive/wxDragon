@@ -259,7 +259,7 @@ pub struct ListCtrl {
 
 impl ListCtrl {
     /// Creates a new ListCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> ListCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ListCtrlBuilder<'_> {
         ListCtrlBuilder::new(parent)
     }
 

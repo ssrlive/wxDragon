@@ -84,7 +84,7 @@ pub struct TextCtrl {
 
 impl TextCtrl {
     /// Creates a new TextCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> TextCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> TextCtrlBuilder<'_> {
         TextCtrlBuilder::new(parent)
     }
 

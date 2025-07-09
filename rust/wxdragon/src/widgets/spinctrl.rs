@@ -37,7 +37,7 @@ pub struct SpinCtrl {
 
 impl SpinCtrl {
     /// Creates a new SpinCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> SpinCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SpinCtrlBuilder<'_> {
         SpinCtrlBuilder::new(parent)
     }
 

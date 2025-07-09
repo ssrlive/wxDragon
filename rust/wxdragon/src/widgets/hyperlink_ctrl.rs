@@ -76,7 +76,7 @@ pub struct HyperlinkCtrl {
 
 impl HyperlinkCtrl {
     /// Creates a new HyperlinkCtrlBuilder.
-    pub fn builder(parent: &dyn WxWidget) -> HyperlinkCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> HyperlinkCtrlBuilder<'_> {
         HyperlinkCtrlBuilder::new(parent)
     }
 

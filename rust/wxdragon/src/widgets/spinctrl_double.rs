@@ -60,7 +60,7 @@ pub struct SpinCtrlDouble {
 }
 
 impl SpinCtrlDouble {
-    pub fn builder(parent: &dyn WxWidget) -> SpinCtrlDoubleBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> SpinCtrlDoubleBuilder<'_> {
         SpinCtrlDoubleBuilder::new(parent)
     }
 

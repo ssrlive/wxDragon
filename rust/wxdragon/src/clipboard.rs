@@ -195,7 +195,7 @@ impl Clipboard {
     }
 
     /// Create a ClipboardLocker to safely manage clipboard access
-    pub fn locker(&self) -> Option<ClipboardLocker> {
+    pub fn locker(&self) -> Option<ClipboardLocker<'_>> {
         ClipboardLocker::new(self)
     }
 }

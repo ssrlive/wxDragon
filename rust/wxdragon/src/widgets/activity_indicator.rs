@@ -26,7 +26,7 @@ pub struct ActivityIndicator {
 
 impl ActivityIndicator {
     /// Creates a new `ActivityIndicatorBuilder` for constructing an activity indicator.
-    pub fn builder(parent: &dyn WxWidget) -> ActivityIndicatorBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ActivityIndicatorBuilder<'_> {
         ActivityIndicatorBuilder::new(parent)
     }
 

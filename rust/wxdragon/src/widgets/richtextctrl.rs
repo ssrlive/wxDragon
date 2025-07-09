@@ -132,7 +132,7 @@ pub struct RichTextCtrl {
 
 impl RichTextCtrl {
     /// Creates a new RichTextCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> RichTextCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> RichTextCtrlBuilder<'_> {
         RichTextCtrlBuilder::new(parent)
     }
 

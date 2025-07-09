@@ -37,7 +37,7 @@ pub struct Button {
 
 impl Button {
     /// Creates a new `ButtonBuilder` for constructing a button.
-    pub fn builder(parent: &dyn WxWidget) -> ButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ButtonBuilder<'_> {
         ButtonBuilder::new(parent)
     }
 

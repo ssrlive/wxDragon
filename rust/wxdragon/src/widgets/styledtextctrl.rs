@@ -388,7 +388,7 @@ pub struct StyledTextCtrl {
 
 impl StyledTextCtrl {
     /// Creates a new StyledTextCtrl builder.
-    pub fn builder(parent: &dyn WxWidget) -> StyledTextCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> StyledTextCtrlBuilder<'_> {
         StyledTextCtrlBuilder::new(parent)
     }
 

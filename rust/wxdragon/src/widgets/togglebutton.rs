@@ -38,7 +38,7 @@ pub struct ToggleButton {
 
 impl ToggleButton {
     /// Creates a new ToggleButton builder.
-    pub fn builder(parent: &dyn WxWidget) -> ToggleButtonBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ToggleButtonBuilder<'_> {
         ToggleButtonBuilder::new(parent)
     }
 

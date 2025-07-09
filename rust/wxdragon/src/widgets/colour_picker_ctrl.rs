@@ -63,7 +63,7 @@ pub struct ColourPickerCtrl {
 
 impl ColourPickerCtrl {
     /// Creates a new `ColourPickerCtrlBuilder` for constructing a colour picker control.
-    pub fn builder(parent: &dyn WxWidget) -> ColourPickerCtrlBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ColourPickerCtrlBuilder<'_> {
         ColourPickerCtrlBuilder::new(parent)
     }
 

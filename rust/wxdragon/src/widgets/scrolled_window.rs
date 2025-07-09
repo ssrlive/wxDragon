@@ -42,7 +42,7 @@ pub struct ScrolledWindow {
 
 impl ScrolledWindow {
     /// Creates a new builder for a ScrolledWindow.
-    pub fn builder(parent: &dyn WxWidget) -> ScrolledWindowBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> ScrolledWindowBuilder<'_> {
         ScrolledWindowBuilder::new(parent)
     }
 

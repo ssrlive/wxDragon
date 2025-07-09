@@ -31,7 +31,7 @@ pub struct CollapsiblePane {
 
 impl CollapsiblePane {
     /// Creates a new builder for a CollapsiblePane.
-    pub fn builder(parent: &dyn WxWidget) -> CollapsiblePaneBuilder {
+    pub fn builder(parent: &dyn WxWidget) -> CollapsiblePaneBuilder<'_> {
         CollapsiblePaneBuilder::new(parent)
     }
 
