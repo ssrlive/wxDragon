@@ -6,6 +6,15 @@
 #include <cwchar>
 #include <cstdarg>
 
+// Check glibc version to determine if we need compatibility functions
+// The __isoc23_ functions are available in glibc 2.38+
+// We only provide compatibility if we're on an older system
+#ifdef __GLIBC__
+#define GLIBC_VERSION (__GLIBC__ * 100 + __GLIBC_MINOR__)
+#else
+#define GLIBC_VERSION 0
+#endif
+
 extern "C" {
 
 // ============================================================================
@@ -37,6 +46,10 @@ char* g_string_free_and_steal(GString* string) {
 // ============================================================================
 // glibc Compatibility (GNU C Library)
 // ============================================================================
+
+// Only provide compatibility functions if we're on glibc < 2.38
+// The __isoc23_ symbols are available in glibc 2.38+
+#if GLIBC_VERSION > 0 && GLIBC_VERSION < 238
 
 // The __isoc23_ symbols are used in newer glibc versions but may not be available on older systems
 // We provide compatibility implementations that call the standard versions
@@ -117,5 +130,7 @@ float __isoc23_wcstof(const wchar_t* nptr, wchar_t** endptr) {
 long double __isoc23_wcstold(const wchar_t* nptr, wchar_t** endptr) {
     return wcstold(nptr, endptr);
 }
+
+#endif // GLIBC_VERSION < 238
 
 } // extern "C" 
