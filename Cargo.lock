@@ -1677,7 +1677,7 @@ dependencies = [
 
 [[package]]
 name = "window_features_test"
-version = "0.8.11"
+version = "0.8.12"
 dependencies = [
  "wxdragon",
 ]
@@ -1937,7 +1937,7 @@ checksum = "ea2f10b9bb0928dfb1b42b65e1f9e36f7f54dbdf08457afefb38afcdec4fa2bb"
 
 [[package]]
 name = "wxdragon"
-version = "0.8.11"
+version = "0.8.12"
 dependencies = [
  "bitflags 2.9.1",
  "lazy_static",
@@ -1948,7 +1948,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-macros"
-version = "0.8.11"
+version = "0.8.12"
 dependencies = [
  "proc-macro2",
  "quick-xml",
@@ -1958,7 +1958,7 @@ dependencies = [
 
 [[package]]
 name = "wxdragon-sys"
-version = "0.8.11"
+version = "0.8.12"
 dependencies = [
  "bindgen",
  "flate2",
