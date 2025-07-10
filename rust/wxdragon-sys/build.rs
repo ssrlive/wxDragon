@@ -103,42 +103,7 @@ fn main() {
 
     // Check for official Windows 7 targets first
     let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = match target_triple.as_str() {
-        "i686-win7-windows-msvc" => {
-            format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}")
-        }
-        "x86_64-win7-windows-msvc" => {
-            format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}")
-        }
-        _ => {
-            // Fall back to standard target detection
-            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-            match (
-                target_os.as_str(),
-                target_arch.as_str(),
-                target_env.as_str(),
-            ) {
-                ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
-                ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
-                ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
-                ("windows", "x86_64", "msvc") => {
-                    format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
-                }
-                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-                    format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
-                }
-                ("windows", "x86_64", "gnu") => {
-                    format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
-                }
-                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-                    format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
-                }
-                _ => {
-                    panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}");
-                }
-            }
-        }
-    };
+    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
 
     let wx_lib_dir = out_dir.join(&artifact_name);
 
@@ -217,58 +182,24 @@ fn main() {
     println!("info: Successfully generated FFI bindings");
 
     // --- 4. Build wxDragon Wrapper ---
-    build_wxdragon_wrapper(&out_dir, &target_os, &target_env)
+    build_wxdragon_wrapper(wx_version, &out_dir, &target_os, &target_env)
         .expect("Failed to build wxDragon wrapper library");
 
     // --- 5. Setup Linking ---
-    setup_linking(&target_os, &target_env, &out_dir);
+    setup_linking(wx_version, &target_os, &target_env, &out_dir);
 }
 
 fn download_prebuilt_libraries(
     wx_version: &str,
     out_dir: &Path,
-    target_os: &str,
-    target_env: &str,
+    _target_os: &str,
+    _target_env: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
     // Check for official Windows 7 targets first
     let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = match target_triple.as_str() {
-        "i686-win7-windows-msvc" => {
-            format!("wxwidgets-{wx_version}-i686-win7-windows-msvc-{profile}")
-        }
-        "x86_64-win7-windows-msvc" => {
-            format!("wxwidgets-{wx_version}-x86_64-win7-windows-msvc-{profile}")
-        }
-        _ => {
-            // Fall back to standard target detection
-            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-            match (target_os, target_arch.as_str(), target_env) {
-                ("linux", "x86_64", _) => format!("wxwidgets-{wx_version}-linux-x64-{profile}"),
-                ("macos", "x86_64", _) => format!("wxwidgets-{wx_version}-macos-x64-{profile}"),
-                ("macos", "aarch64", _) => format!("wxwidgets-{wx_version}-macos-arm64-{profile}"),
-                ("windows", "x86_64", "msvc") => {
-                    format!("wxwidgets-{wx_version}-windows-msvc-x64-{profile}")
-                }
-                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-                    format!("wxwidgets-{wx_version}-windows-msvc-x86-{profile}")
-                }
-                ("windows", "x86_64", "gnu") => {
-                    format!("wxwidgets-{wx_version}-windows-gnu-x64-{profile}")
-                }
-                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-                    format!("wxwidgets-{wx_version}-windows-gnu-x86-{profile}")
-                }
-                _ => {
-                    return Err(format!(
-                        "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
-                    )
-                    .into())
-                }
-            }
-        }
-    };
+    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
 
     let download_url = format!(
         "https://github.com/AllenDang/wxDragon/releases/download/wxwidgets-{wx_version}/{artifact_name}.tar.gz"
@@ -349,37 +280,12 @@ fn download_prebuilt_libraries(
     Ok(())
 }
 
-fn setup_linking(target_os: &str, target_env: &str, out_dir: &Path) {
+fn setup_linking(wx_version: &str, target_os: &str, target_env: &str, out_dir: &Path) {
     let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
 
     // Check for official Windows 7 targets first (same logic as download function)
     let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = match target_triple.as_str() {
-        "i686-win7-windows-msvc" => format!("wxwidgets-3.3.0-i686-win7-windows-msvc-{profile}"),
-        "x86_64-win7-windows-msvc" => format!("wxwidgets-3.3.0-x86_64-win7-windows-msvc-{profile}"),
-        _ => {
-            // Fall back to standard target detection
-            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-            match (target_os, target_arch.as_str(), target_env) {
-                ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
-                ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
-                ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
-                ("windows", "x86_64", "msvc") => {
-                    format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}")
-                }
-                ("windows", "x86_64", "gnu") => {
-                    format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}")
-                }
-                ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-                    format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
-                }
-                ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-                    format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
-                }
-                _ => panic!("Unsupported target platform: {target_os}-{target_arch}-{target_env}"),
-            }
-        }
-    };
+    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
 
     let lib_dir = out_dir.join(&artifact_name);
 
@@ -860,6 +766,7 @@ fn link_linux_libraries() {
 }
 
 fn build_wxdragon_wrapper(
+    wx_version: &str,
     out_dir: &Path,
     target_os: &str,
     target_env: &str,
@@ -877,25 +784,8 @@ fn build_wxdragon_wrapper(
     println!("info: Building wxDragon wrapper library in {build_type} mode");
 
     // Get the pre-built wxWidgets library directory (same naming as download_prebuilt_libraries)
-    let artifact_name = match (target_os, target_arch.as_str(), target_env) {
-        ("linux", "x86_64", _) => format!("wxwidgets-3.3.0-linux-x64-{profile}"),
-        ("macos", "x86_64", _) => format!("wxwidgets-3.3.0-macos-x64-{profile}"),
-        ("macos", "aarch64", _) => format!("wxwidgets-3.3.0-macos-arm64-{profile}"),
-        ("windows", "x86_64", "msvc") => format!("wxwidgets-3.3.0-windows-msvc-x64-{profile}"),
-        ("windows", "i686", "msvc") | ("windows", "x86", "msvc") => {
-            format!("wxwidgets-3.3.0-windows-msvc-x86-{profile}")
-        }
-        ("windows", "x86_64", "gnu") => format!("wxwidgets-3.3.0-windows-gnu-x64-{profile}"),
-        ("windows", "i686", "gnu") | ("windows", "x86", "gnu") => {
-            format!("wxwidgets-3.3.0-windows-gnu-x86-{profile}")
-        }
-        _ => {
-            return Err(format!(
-                "Unsupported target platform: {target_os}-{target_arch}-{target_env}"
-            )
-            .into())
-        }
-    };
+    let target_triple = env::var("TARGET").unwrap_or_default();
+    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
 
     let wx_lib_dir = out_dir.join(artifact_name);
     let wrapper_build_dir = out_dir.join("wxdragon_wrapper_build");
