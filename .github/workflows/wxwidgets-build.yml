@@ -28,54 +28,54 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            target: linux-x64
+            target: x86_64-unknown-linux-gnu
             build_type: Release
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
           - os: ubuntu-latest
-            target: linux-x64
+            target: x86_64-unknown-linux-gnu
             build_type: Debug
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y libgtk-3-dev libpng-dev libjpeg-dev libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libexpat1-dev libtiff-dev build-essential cmake
           - os: macos-13
-            target: macos-x64
+            target: x86_64-apple-darwin
             build_type: Release
             setup_script: |
               brew install cmake
           - os: macos-13
-            target: macos-x64
+            target: x86_64-apple-darwin
             build_type: Debug
             setup_script: |
               brew install cmake
           - os: macos-latest
-            target: macos-arm64
+            target: aarch64-apple-darwin
             build_type: Release
             setup_script: |
               brew install cmake
           - os: macos-latest
-            target: macos-arm64
+            target: aarch64-apple-darwin
             build_type: Debug
             setup_script: |
               brew install cmake
           - os: windows-latest
-            target: windows-msvc-x64
+            target: x86_64-pc-windows-msvc
             build_type: Release
             setup_script: |
               choco install ninja
           - os: windows-latest
-            target: windows-msvc-x64
+            target: x86_64-pc-windows-msvc
             build_type: Debug
             setup_script: |
               choco install ninja
           - os: windows-latest
-            target: windows-msvc-x86
+            target: i686-pc-windows-msvc
             build_type: Release
             setup_script: |
               choco install ninja
           - os: windows-latest
-            target: windows-msvc-x86
+            target: i686-pc-windows-msvc
             build_type: Debug
             setup_script: |
               choco install ninja
@@ -100,11 +100,11 @@ jobs:
             setup_script: |
               choco install ninja
           - os: windows-latest
-            target: windows-gnu-x64
+            target: x86_64-pc-windows-gnu
             build_type: Release
             setup_script: ""
           - os: windows-latest
-            target: windows-gnu-x64
+            target: x86_64-pc-windows-gnu
             build_type: Debug
             setup_script: ""
     
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup MinGW64 (Windows GNU only)
-        if: matrix.target == 'windows-gnu-x64'
+        if: matrix.target == 'x86_64-pc-windows-gnu'
         run: |
           # Install CMake first
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
@@ -151,21 +151,21 @@ jobs:
           "$MINGW_DIR/bin/gcc.exe" --version
 
       - name: Setup MSVC (Windows MSVC only)
-        if: startsWith(matrix.target, 'windows-msvc-') || endsWith(matrix.target, '-win7-windows-msvc')
+        if: endsWith(matrix.target, '-windows-msvc')
         uses: microsoft/setup-msbuild@v2
         
       - name: Configure MSVC Environment (Windows MSVC only)
-        if: startsWith(matrix.target, 'windows-msvc-') || endsWith(matrix.target, '-win7-windows-msvc')
+        if: endsWith(matrix.target, '-windows-msvc')
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: ${{ (matrix.target == 'windows-msvc-x64' || matrix.target == 'x86_64-win7-windows-msvc') && 'x64' || 'x86' }}
+          arch: ${{ (matrix.target == 'x86_64-pc-windows-msvc' || matrix.target == 'x86_64-win7-windows-msvc') && 'x64' || 'x86' }}
 
       - name: Install platform dependencies (Non-Windows)
-        if: matrix.setup_script != '' && matrix.target != 'windows-gnu-x64'
+        if: matrix.setup_script != '' && matrix.target != 'x86_64-pc-windows-gnu'
         run: ${{ matrix.setup_script }}
         
       - name: Install platform dependencies (Windows GNU)
-        if: matrix.setup_script != '' && matrix.target == 'windows-gnu-x64'
+        if: matrix.setup_script != '' && matrix.target == 'x86_64-pc-windows-gnu'
         run: ${{ matrix.setup_script }}
 
       - name: Check if release already exists
@@ -190,7 +190,7 @@ jobs:
         shell: bash
 
       - name: Download wxWidgets source (Non-Windows)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'x86_64-pc-windows-gnu'
         run: |
           WX_VERSION="${{ inputs.wx_version }}"
           WX_TARBALL="wxWidgets-${WX_VERSION}.tar.bz2"
@@ -205,7 +205,7 @@ jobs:
           echo "WX_SOURCE_DIR=wxWidgets-${WX_VERSION}" >> $GITHUB_ENV
           
       - name: Download wxWidgets source (Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'x86_64-pc-windows-gnu'
         run: |
           WX_VERSION="${{ inputs.wx_version }}"
           WX_TARBALL="wxWidgets-${WX_VERSION}.tar.bz2"
@@ -220,7 +220,7 @@ jobs:
           echo "WX_SOURCE_DIR=wxWidgets-${WX_VERSION}" >> $GITHUB_ENV
 
       - name: Configure wxWidgets build (Non-Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'x86_64-pc-windows-gnu'
         run: |
           mkdir -p build
           cd build
@@ -249,21 +249,21 @@ jobs:
           
           # Platform-specific configuration
           case "${{ matrix.target }}" in
-            "macos-x64")
+            "x86_64-apple-darwin")
               CMAKE_ARGS+=(
                 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
                 -DCMAKE_OSX_ARCHITECTURES=x86_64
                 -DwxBUILD_TOOLKIT=osx_cocoa
               )
               ;;
-            "macos-arm64")
+            "aarch64-apple-darwin")
               CMAKE_ARGS+=(
                 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
                 -DCMAKE_OSX_ARCHITECTURES=arm64
                 -DwxBUILD_TOOLKIT=osx_cocoa
               )
               ;;
-            "windows-msvc-x64")
+            "x86_64-pc-windows-msvc")
               CMAKE_ARGS+=(
                 -G "Visual Studio 17 2022"
                 -A x64
@@ -276,7 +276,7 @@ jobs:
                 -D__WXMSW__=1
               )
               ;;
-            "windows-msvc-x86")
+            "i686-pc-windows-msvc")
               CMAKE_ARGS+=(
                 -G "Visual Studio 17 2022"
                 -A Win32
@@ -315,7 +315,7 @@ jobs:
                 -D__WXMSW__=1
               )
               ;;
-            "linux-x64")
+            "x86_64-unknown-linux-gnu")
               CMAKE_ARGS+=(
                 -DwxBUILD_TOOLKIT=gtk3
               )
@@ -326,7 +326,7 @@ jobs:
           cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
           
       - name: Configure wxWidgets build (Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'x86_64-pc-windows-gnu'
         run: |
           # Verify tools are available
           echo "Checking build tools..."
@@ -372,7 +372,7 @@ jobs:
           cmake "${CMAKE_ARGS[@]}" "../${WX_SOURCE_DIR}"
 
       - name: Build wxWidgets (Non-Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'x86_64-pc-windows-gnu'
         run: |
           cd build
           
@@ -381,7 +381,7 @@ jobs:
           echo "Building with ${NPROC} parallel jobs"
           
           # For Windows MSVC, we need to specify the config explicitly
-          if [[ "${{ matrix.target }}" == "windows-msvc-"* ]] || [[ "${{ matrix.target }}" == *"-win7-windows-msvc" ]]; then
+          if [[ "${{ matrix.target }}" == *"-windows-msvc" ]]; then
             echo "Building Windows MSVC with config: ${{ matrix.build_type }}"
             cmake --build . --config ${{ matrix.build_type }} --parallel ${NPROC}
           else
@@ -389,7 +389,7 @@ jobs:
           fi
           
       - name: Build wxWidgets (Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'x86_64-pc-windows-gnu'
         run: |
           cd build
           
@@ -400,14 +400,14 @@ jobs:
           cmake --build . --parallel ${NPROC}
 
       - name: Package libraries (Non-Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target != 'x86_64-pc-windows-gnu'
         run: |
           # Create packaging directory
           mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}"
           
           # Platform-specific library packaging
           case "${{ matrix.target }}" in
-            "windows-msvc-x64")
+            "x86_64-pc-windows-msvc")
               # Windows MSVC x64: organize libraries in vc_x64_lib subdirectory only
               if [ -d "build/lib/vc_x64_lib" ]; then
                 mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_x64_lib"
@@ -428,7 +428,7 @@ jobs:
                 find build/lib -maxdepth 1 -name "*.cmake" -exec cp {} "dist/${{ matrix.target }}-${{ matrix.build_type }}/" \; 2>/dev/null || true
               fi
               ;;
-            "windows-msvc-x86")
+            "i686-pc-windows-msvc")
               # Windows MSVC x86: organize libraries in vc_lib subdirectory (32-bit uses different naming)
               if [ -d "build/lib/vc_lib" ]; then
                 mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}/vc_lib"
@@ -513,7 +513,7 @@ jobs:
           fi
           
           # Special handling for Windows MSVC setup.h
-          if [[ "${{ matrix.target }}" == "windows-msvc-"* ]] || [[ "${{ matrix.target }}" == *"-win7-windows-msvc" ]]; then
+          if [[ "${{ matrix.target }}" == *"-windows-msvc" ]]; then
             echo "Creating MSVC-specific setup.h patch..."
             # Find the setup.h file
             SETUP_H_PATH=$(find "dist/${{ matrix.target }}-${{ matrix.build_type }}" -name "setup.h" | head -1)
@@ -577,7 +577,7 @@ jobs:
           cd ..
           
       - name: Package libraries (Windows GNU)
-        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'windows-gnu-x64'
+        if: steps.check_release.outputs.skip_build != 'true' && matrix.target == 'x86_64-pc-windows-gnu'
         run: |
           # Create packaging directory
           mkdir -p "dist/${{ matrix.target }}-${{ matrix.build_type }}"
