@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Auto-detect the prebuilt wxWidgets directory
 file(GLOB WXWIDGETS_LIBS_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/debug/build/wxdragon-sys-*/out/wxwidgets-*-aarch64-apple-darwin-debug"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/debug/build/wxdragon-sys-*/out/wxwidgets-*-debug"
 )
 
 if(NOT WXWIDGETS_LIBS_PATH)
