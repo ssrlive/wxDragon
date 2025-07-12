@@ -7,4 +7,4 @@ edition = "2021"
 # Empty workspace table to prevent this package from being part of the parent workspace
 
 [dependencies]
-wxdragon = { path = "../../../rust/wxdragon", features = ["xrc"] } 
+wxdragon = { path = "../../../rust/wxdragon", features = ["xrc"] }

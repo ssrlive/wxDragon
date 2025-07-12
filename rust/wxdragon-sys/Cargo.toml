@@ -13,16 +13,6 @@ categories = ["external-ffi-bindings", "gui", "development-tools::ffi"]
 build = "build.rs"
 links = "wxdragon" # Crucial: Signals to Cargo this crate builds/links libwxdragon
 
-[dependencies]
-# Sys crates typically have no runtime Rust dependencies
-
-[build-dependencies]
-pkg-config = "0.3"  # For finding libgtk and its dependencies (Linux only)
-bindgen = "0.69"    # For generating Rust bindings from C/C++ headers
-reqwest = { version = "0.11", features = ["blocking"] } # For downloading pre-built libraries
-tar = "0.4"         # For extracting .tar archives
-flate2 = "1.0"      # For decompressing .gz archives (used by pre-built libraries)
-
 [features]
 default = []
 aui = []
@@ -31,3 +21,13 @@ webview = []
 stc = []
 xrc = []
 richtext = []
+
+[dependencies]
+# Sys crates typically have no runtime Rust dependencies
+
+[build-dependencies]
+bindgen = "0.72"    # For generating Rust bindings from C/C++ headers
+flate2 = "1.0"      # For decompressing .gz archives (used by pre-built libraries)
+pkg-config = "0.3"  # For finding libgtk and its dependencies (Linux only)
+reqwest = { version = "0.12", features = ["blocking"] } # For downloading pre-built libraries
+tar = "0.4"         # For extracting .tar archives
