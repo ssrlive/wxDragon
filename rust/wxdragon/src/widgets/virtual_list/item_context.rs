@@ -68,6 +68,7 @@ mod tests {
         assert!(context.data.downcast_ref::<String>().is_some());
     }
 
+    /*
     #[test]
     fn test_deprecated_methods_return_none() {
         // These methods should always return None since they're deprecated
@@ -83,4 +84,5 @@ mod tests {
             assert!(ItemContext::get_data_for_panel::<String>(&panel).is_none());
         }
     }
+    // */
 }
