@@ -1,25 +1,25 @@
 [workspace]
 members = [
-    "rust/wxdragon-sys",
-    "rust/wxdragon",
-    "rust/wxdragon-macros",
-    "examples/rust/simple",
-    "examples/rust/simple_xrc_test",
-    "examples/rust/simple_stc_test",
-    "examples/rust/events_test",
-    "examples/rust/gallery",
+    "examples/rust/clipboard_test",
+    "examples/rust/custom_dataview_renderer",
+    "examples/rust/custom_widget",
     "examples/rust/dc_example",
     "examples/rust/dnd_advanced",
-    "examples/rust/clipboard_test",
-    "examples/rust/wrapsizer_test",
-    "examples/rust/gridsizer_test",
+    "examples/rust/events_test",
+    "examples/rust/gallery",
     "examples/rust/gridbagsizer_test",
-    "examples/rust/custom_widget",
-    "examples/rust/tokio_async_demo",
-    "examples/rust/custom_dataview_renderer",
-    "examples/rust/window_features_test",
-    "examples/rust/virtual_list_demo",
+    "examples/rust/gridsizer_test",
+    "examples/rust/simple",
+    "examples/rust/simple_stc_test",
+    "examples/rust/simple_xrc_test",
     "examples/rust/taskbar_demo",
+    "examples/rust/tokio_async_demo",
+    "examples/rust/virtual_list_demo",
+    "examples/rust/window_features_test",
+    "examples/rust/wrapsizer_test",
+    "rust/wxdragon",
+    "rust/wxdragon-macros",
+    "rust/wxdragon-sys",
     # "examples/rust/mediaplayer",
     # Add other examples if they are separate crates
 ]
@@ -27,16 +27,16 @@ members = [
 resolver = "2" # Keep resolver = "2"
 
 [workspace.package]
-authors = ["Allen Dang <allengnr@gmail.com>"] #
-version = "0.8.12" # This will be the default version for workspace members
+authors = ["Allen Dang <allengnr@gmail.com>"]
+version = "0.8.12"
 edition = "2021"
-license = "MIT OR Apache-2.0" # Or your chosen license (e.g., "MIT")
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/AllenDang/wxDragon"
 description = "Cross-platform GUI development with wxWidgets and Rust."
 keywords = ["gui", "wxwidgets", "ui", "cross-platform"]
 categories = ["gui", "external-ffi-bindings"]
-readme = "README.md" # Consider adding if you have a good workspace-level README
+readme = "README.md"
+
 # Common dependencies for wxdragon and examples could go here if needed,
 # but for now, wxdragon itself will be a primary dependency for examples.
-# wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this. 
-# wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this. 
+# wxdragon = { version = "0.1.0", path = "./rust/wxdragon" } # Examples will use this.
