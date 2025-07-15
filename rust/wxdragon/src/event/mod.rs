@@ -757,6 +757,28 @@ impl Event {
         }
         unsafe { ffi::wxd_IdleEvent_MoreRequested(self.0) }
     }
+
+    /// Checks if a close event can be vetoed.
+    /// This is typically used with close window events to determine
+    /// if the application can prevent the window from closing.
+    pub fn can_veto(&self) -> bool {
+        if self.0.is_null() {
+            return false;
+        }
+        unsafe { ffi::wxd_CloseEvent_CanVeto(self.0) }
+    }
+
+    /// Vetos a close event, preventing the window from closing.
+    /// This should only be called if `can_veto()` returns true.
+    /// When called, it prevents the window from being closed and
+    /// the event handler should provide feedback to the user about why
+    /// the close operation was cancelled.
+    pub fn veto(&self) {
+        if self.0.is_null() {
+            return;
+        }
+        unsafe { ffi::wxd_CloseEvent_Veto(self.0) }
+    }
 }
 
 // --- WxEvtHandler Trait (Updated for Simple Event Handling) ---

@@ -1073,3 +1073,22 @@ WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event) {
     
     return mouse_event->GetWheelDelta();
 }
+
+// Close event functions
+WXD_EXPORTED bool wxd_CloseEvent_CanVeto(wxd_Event_t* event) {
+    if (!event) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
+    if (!close_event) return false;
+    
+    return close_event->CanVeto();
+}
+
+WXD_EXPORTED void wxd_CloseEvent_Veto(wxd_Event_t* event) {
+    if (!event) return;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
+    if (!close_event) return;
+    
+    close_event->Veto();
+}
