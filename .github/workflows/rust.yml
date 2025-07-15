@@ -22,7 +22,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
+    - uses: dtolnay/rust-toolchain@stable
     - uses: actions/checkout@v4
+    - run: cargo fmt --check
+    - run: cargo clippy --all-targets -- -D warnings
     - name: Build
       run: cargo build
 

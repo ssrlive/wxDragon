@@ -5,4 +5,4 @@ authors = ["wxDragon Contributors"]
 edition = "2021"
 
 [dependencies]
-wxdragon = { path = "../../../rust/wxdragon" } 
+wxdragon = { path = "../../../rust/wxdragon" }

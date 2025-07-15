@@ -9,6 +9,24 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# If WXWIDGETS_LIB_DIR is not set or does not exist
+if(NOT DEFINED WXWIDGETS_LIB_DIR OR NOT EXISTS "${WXWIDGETS_LIB_DIR}")
+    message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+    # Auto-detect the prebuilt wxWidgets directory
+    message(STATUS "WXWIDGETS_LIB_DIR not set or does not exist, auto-detecting...")
+    file(GLOB WXWIDGETS_LIBS_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/debug/build/wxdragon-sys-*/out/wxwidgets-*-debug"
+    )
+    if(NOT WXWIDGETS_LIBS_PATH)
+        message(FATAL_ERROR "Could not find prebuilt wxWidgets directory. Please run 'cargo build' first to download prebuilt libraries.")
+    endif()
+    # Use the first match (there should only be one)
+    list(GET WXWIDGETS_LIBS_PATH 0 WXWIDGETS_LIB_DIR)
+    message(STATUS "Auto-detected wxWidgets at: ${WXWIDGETS_LIB_DIR}")
+else()
+    message(STATUS "Using provided WXWIDGETS_LIB_DIR: ${WXWIDGETS_LIB_DIR}")
+endif()
+
 # --- Option for wxWidgets Library Directory (passed from build.rs) ---
 option(WXWIDGETS_LIB_DIR "Path to the pre-built wxWidgets libraries" "")
 if(NOT WXWIDGETS_LIB_DIR OR NOT EXISTS "${WXWIDGETS_LIB_DIR}")
