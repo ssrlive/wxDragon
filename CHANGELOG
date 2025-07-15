@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.13
+
+### Features
+
+Add event.can_veto() and event.veto().
+
 ## 0.8.11
 
 ### Fix
