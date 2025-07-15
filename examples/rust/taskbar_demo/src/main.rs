@@ -117,38 +117,30 @@ fn main() {
         frame.show(true);
         frame.centre();
 
-        frame.on_close({
-            let frame = frame.clone();
-            move |evt| {
-                if let wxdragon::WindowEventData::General(event) = &evt {
-                    if event.can_veto() {
-                        use MessageDialogStyle::{Cancel, IconInformation, YesNo};
-                        let res = MessageDialog::builder(
-                            &frame,
-                            "Are you sure you want to close the application?",
-                            "Confirm Close",
-                        )
+        let frame_clone = frame.clone();
+        frame.on_close(move |evt| {
+            if let wxdragon::WindowEventData::General(event) = &evt {
+                if event.can_veto() {
+                    use MessageDialogStyle::{Cancel, IconInformation, YesNo};
+                    let msg = "Are you sure you want to close the application?";
+                    let res = MessageDialog::builder(&frame_clone, msg, "Confirm Close")
                         .with_style(YesNo | Cancel | IconInformation)
                         .build()
                         .show_modal();
-                        if res != wxdragon::ID_YES {
-                            println!("❌ Close operation vetoed by user.");
-                            event.veto();
-                            return;
-                        }
+                    if res != wxdragon::ID_YES {
+                        println!("❌ Close operation vetoed by user.");
+                        event.veto();
+                        return;
                     }
                 }
-                println!("Application frame closed.");
-                evt.skip(true); // similar to `frame.destroy();`
             }
+            println!("Application frame closed.");
+            evt.skip(true); // similar to `frame.destroy();`
         });
 
-        frame.on_destroy({
-            let taskbar = taskbar.clone();
-            move |_evt| {
-                taskbar.destroy(); // Clean up the TaskBarIcon
-                println!("Application on_destroy.");
-            }
+        frame.on_destroy(move |_evt| {
+            taskbar.destroy(); // Clean up the TaskBarIcon
+            println!("Application on_destroy.");
         });
     });
 }
