@@ -62,6 +62,13 @@ if(PLATFORM_NAME STREQUAL "macos")
             break()
         endif()
     endforeach()
+    set(WX_BASE_NAME "wx_baseu-3.3")
+    set(WX_CORE_NAME "wx_osx_cocoau_core-3.3")
+    set(WX_JPEG_NAME "wxjpeg-3.3")
+    set(WX_PNG_NAME "wxpng-3.3")
+    set(WX_TIFF_NAME "wxtiff-3.3")
+    set(WX_REGEX_NAME "wxregexu-3.3")
+    set(WX_EXPAT_NAME "expat")
 elseif(PLATFORM_NAME STREQUAL "windows")
     # For Windows builds, ensure setup.h is available at the expected location
     set(WX_MSW_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/msw/setup.h")
@@ -71,6 +78,15 @@ elseif(PLATFORM_NAME STREQUAL "windows")
         file(COPY "${WX_MSW_SETUP}" DESTINATION "${WXWIDGETS_LIB_DIR}/include/wx/")
         message(STATUS "Copied Windows setup.h from msw to wx directory")
     endif()
+    set(WX_BASE_NAME "wxbase33ud")
+    set(WX_CORE_NAME "wxmsw33ud_core")
+    set(WX_JPEG_NAME "wxjpegd")
+    set(WX_PNG_NAME "wxpngd")
+    set(WX_TIFF_NAME "wxtiffd")
+    set(WX_REGEX_NAME "wxregexud")
+    set(WX_EXPAT_NAME "wxexpatd")
+    
+    set(WXWIDGETS_LIB_DIR "${WXWIDGETS_LIB_DIR}/vc_x64_lib")
 elseif(PLATFORM_NAME STREQUAL "linux")
     # For Linux, check multiple possible locations for setup.h
     set(WX_PLATFORM_DIRS_TO_CHECK
@@ -84,13 +100,15 @@ elseif(PLATFORM_NAME STREQUAL "linux")
             break()
         endif()
     endforeach()
+    set(WX_BASE_NAME "wx_baseu-3.3")
+    set(WX_CORE_NAME "wx_gtk3u_core-3.3")
 endif()
 
 message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 
 # Find required libraries
-find_library(WX_BASE_LIB wx_baseu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_CORE_LIB wx_osx_cocoau_core-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_BASE_LIB ${WX_BASE_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_CORE_LIB ${WX_CORE_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 
 # Check if libraries were found
 if(NOT WX_BASE_LIB OR NOT WX_CORE_LIB)
@@ -101,28 +119,53 @@ message(STATUS "Found wxWidgets libraries:")
 message(STATUS "  Base: ${WX_BASE_LIB}")
 message(STATUS "  Core: ${WX_CORE_LIB}")
 
+set(taskbar_test_SOURCES taskbar.cpp)
+
+# Add Linux compatibility layer for older systems
+if(PLATFORM_NAME STREQUAL "linux")
+    list(APPEND taskbar_test_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../../../rust/wxdragon-sys/cpp/src/linux_compat.cpp)
+    message(STATUS "Added Linux compatibility layer (GLib + glibc compatibility)")
+endif()
+
 # Create the executable
-add_executable(taskbar_test main.cpp)
+add_executable(taskbar_test ${taskbar_test_SOURCES})
 
 # Set include directories using the same pattern as const_extractor
 target_include_directories(taskbar_test PRIVATE ${WX_INCLUDE_PATHS})
+target_link_libraries(taskbar_test ${WX_CORE_LIB} ${WX_BASE_LIB})
+
+# Linux only: Add glib-2.0 (for g_string_free etc.) and gtk+-3.0 (for gtk_widget_get_type etc.)
+if(PLATFORM_NAME STREQUAL "linux")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+    find_package(X11 REQUIRED)
+    target_include_directories(taskbar_test PRIVATE ${GLIB2_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
+    target_link_libraries(taskbar_test ${GLIB2_LIBRARIES} ${GTK3_LIBRARIES} ${X11_LIBRARIES} xkbcommon png)
+endif()
 
 # Find additional wxWidgets libraries (following build.rs pattern)
-find_library(WX_JPEG_LIB wxjpeg-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_PNG_LIB wxpng-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_TIFF_LIB wxtiff-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_REGEX_LIB wxregexu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_JPEG_LIB ${WX_JPEG_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_PNG_LIB ${WX_PNG_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_TIFF_LIB ${WX_TIFF_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_REGEX_LIB ${WX_REGEX_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_EXPAT_LIB ${WX_EXPAT_NAME} PATHS ${WXWIDGETS_LIB_DIR})
 
+message(STATUS "Found additional wxWidgets libraries:")
+message(STATUS "  JPEG: ${WX_JPEG_LIB}")
+message(STATUS "  PNG: ${WX_PNG_LIB}")
+message(STATUS "  TIFF: ${WX_TIFF_LIB}")
+message(STATUS "  REGEX: ${WX_REGEX_LIB}")
+
+if(APPLE)
 # Link libraries (core libraries only for TaskBarIcon functionality)
 target_link_libraries(taskbar_test
-    ${WX_CORE_LIB}
-    ${WX_BASE_LIB}
     ${WX_JPEG_LIB}
     ${WX_PNG_LIB}
     ${WX_TIFF_LIB}
     ${WX_REGEX_LIB}
     # System libraries
-    expat
+    ${WX_EXPAT_LIB}
     z
     iconv
     c++
@@ -141,6 +184,7 @@ target_link_libraries(taskbar_test
     "-framework OpenGL"
     "-framework System"
 )
+endif()
 
 # On macOS, create an app bundle
 if(APPLE)
@@ -150,4 +194,4 @@ if(APPLE)
     )
 endif()
 
-message(STATUS "taskbar_test configured successfully") 
+message(STATUS "taskbar_test configured successfully")

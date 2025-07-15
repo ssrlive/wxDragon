@@ -65,7 +65,7 @@ endif()
 
 # --- Feature Flags (from Rust build.rs) ---
 option(wxdUSE_AUI "Use AUI (Advanced User Interface)" ON)
-option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" ON)
+option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" OFF)
 option(wxdUSE_STC "Use Styled Text Control widget" ON)
 option(wxdUSE_XRC "Use XML Resource (XRC) support" ON)
 option(wxdUSE_WEBVIEW "Use the Webview widget" ON)

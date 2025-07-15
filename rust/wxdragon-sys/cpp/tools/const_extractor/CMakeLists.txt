@@ -62,6 +62,14 @@ if(PLATFORM_NAME STREQUAL "macos")
             break()
         endif()
     endforeach()
+    set(WX_BASE_NAME "wx_baseu-3.3")
+    set(WX_CORE_NAME "wx_osx_cocoau_core-3.3")
+    set(WX_ADV_NAME "wx_osx_cocoau_adv-3.3")
+    set(WX_JPEG_NAME "wxjpeg-3.3")
+    set(WX_PNG_NAME "wxpng-3.3")
+    set(WX_TIFF_NAME "wxtiff-3.3")
+    set(WX_REGEX_NAME "wxregexu-3.3")
+    set(WX_EXPAT_NAME "expat")
 elseif(PLATFORM_NAME STREQUAL "windows")
     # For Windows builds, ensure setup.h is available at the expected location
     set(WX_MSW_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/msw/setup.h")
@@ -71,6 +79,16 @@ elseif(PLATFORM_NAME STREQUAL "windows")
         file(COPY "${WX_MSW_SETUP}" DESTINATION "${WXWIDGETS_LIB_DIR}/include/wx/")
         message(STATUS "Copied Windows setup.h from msw to wx directory")
     endif()
+    set(WX_BASE_NAME "wxbase33ud")
+    set(WX_CORE_NAME "wxmsw33ud_core")
+    set(WX_ADV_NAME "wxmsw33ud_adv")
+    set(WX_JPEG_NAME "wxjpegd")
+    set(WX_PNG_NAME "wxpngd")
+    set(WX_TIFF_NAME "wxtiffd")
+    set(WX_REGEX_NAME "wxregexud")
+    set(WX_EXPAT_NAME "wxexpatd")
+    
+    set(WXWIDGETS_LIB_DIR "${WXWIDGETS_LIB_DIR}/vc_x64_lib")
 elseif(PLATFORM_NAME STREQUAL "linux")
     # For Linux, check multiple possible locations for setup.h
     set(WX_PLATFORM_DIRS_TO_CHECK
@@ -84,14 +102,22 @@ elseif(PLATFORM_NAME STREQUAL "linux")
             break()
         endif()
     endforeach()
+    set(WX_BASE_NAME "wx_baseu-3.3")
+    set(WX_CORE_NAME "wx_gtk3u_core-3.3")
+    set(WX_ADV_NAME "wx_gtk3u_adv-3.3")
+    set(WX_JPEG_NAME "wxjpeg-3.3")
+    set(WX_PNG_NAME "wxpng-3.3")
+    set(WX_TIFF_NAME "wxtiff-3.3")
+    set(WX_REGEX_NAME "wxregexu-3.3")
+    set(WX_EXPAT_NAME "expat")
 endif()
 
 message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 
 # Find required libraries
-find_library(WX_BASE_LIB wx_baseu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_CORE_LIB wx_osx_cocoau_core-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_ADV_LIB wx_osx_cocoau_adv-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_BASE_LIB ${WX_BASE_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_CORE_LIB ${WX_CORE_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_ADV_LIB ${WX_ADV_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
 
 # Check if libraries were found
 if(NOT WX_BASE_LIB OR NOT WX_CORE_LIB OR NOT WX_ADV_LIB)
@@ -110,10 +136,31 @@ add_executable(const_extractor main.cpp)
 target_include_directories(const_extractor PRIVATE ${WX_INCLUDE_PATHS})
 
 # Find additional wxWidgets libraries (following build.rs pattern)
-find_library(WX_JPEG_LIB wxjpeg-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_PNG_LIB wxpng-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_TIFF_LIB wxtiff-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
-find_library(WX_REGEX_LIB wxregexu-3.3 PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_JPEG_LIB ${WX_JPEG_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_PNG_LIB ${WX_PNG_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_TIFF_LIB ${WX_TIFF_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_REGEX_LIB ${WX_REGEX_NAME} PATHS ${WXWIDGETS_LIB_DIR} NO_DEFAULT_PATH)
+find_library(WX_EXPAT_LIB ${WX_EXPAT_NAME} PATHS ${WXWIDGETS_LIB_DIR})
+
+if(APPLE)
+   set(MACOS_LINK_FLAGS 
+    "-framework AudioToolbox "
+    "-framework CoreFoundation "
+    "-framework Security "
+    "-framework Carbon "
+    "-framework Cocoa "
+    "-framework IOKit "
+    "-framework QuartzCore "
+    "-framework AppKit "
+    "-framework CoreGraphics "
+    "-framework Foundation "
+    "-framework SystemConfiguration "
+    "-framework OpenGL "
+    "-framework System"
+   )
+else()
+   set(MACOS_LINK_FLAGS "")
+endif()
 
 # Link libraries (following the same order as build.rs)
 target_link_libraries(const_extractor
@@ -125,24 +172,11 @@ target_link_libraries(const_extractor
     ${WX_TIFF_LIB}
     ${WX_REGEX_LIB}
     # System libraries
-    expat
+    ${WX_EXPAT_LIB}
     z
     iconv
     c++
-    # macOS frameworks
-    "-framework AudioToolbox"
-    "-framework CoreFoundation"
-    "-framework Security"
-    "-framework Carbon"
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework QuartzCore"
-    "-framework AppKit"
-    "-framework CoreGraphics"
-    "-framework Foundation"
-    "-framework SystemConfiguration"
-    "-framework OpenGL"
-    "-framework System"
+    ${MACOS_LINK_FLAGS}
 )
 
-message(STATUS "const_extractor configured successfully") 
+message(STATUS "const_extractor configured successfully")
