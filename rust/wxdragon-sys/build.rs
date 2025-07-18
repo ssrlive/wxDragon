@@ -8,6 +8,11 @@ fn main() {
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target = env::var("TARGET").unwrap();
 
+    // Tell Cargo to rerun this build script if any files in following directories change
+    println!("cargo:rerun-if-changed=cpp/src");
+    println!("cargo:rerun-if-changed=cpp/include");
+    println!("cargo:rerun-if-changed=build.rs");
+
     // --- 1. Generate FFI Bindings ---
     println!("info: Generating FFI bindings...");
 
