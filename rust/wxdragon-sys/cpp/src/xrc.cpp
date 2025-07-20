@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wxdragon.h"
 #include <wx/xrc/xmlres.h>
 #include <wx/xml/xml.h>

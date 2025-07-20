@@ -1,4 +1,5 @@
-#include "wx/wx.h"
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/textdlg.h"
 #include "../include/wxdragon.h"
 #include "wxd_utils.h" // For string helpers if needed, and wxd_OnWindowDestroy

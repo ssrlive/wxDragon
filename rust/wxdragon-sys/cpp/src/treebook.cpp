@@ -1,6 +1,7 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include "wx/treebook.h"
-#include "wx/wx.h" // For wxWindow
 #include "wxd_utils.h" // Added for copy_wxstring_to_buffer
 
 extern "C" {

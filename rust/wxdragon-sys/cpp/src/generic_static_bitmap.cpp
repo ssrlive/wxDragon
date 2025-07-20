@@ -1,5 +1,6 @@
-#include "../include/wxdragon.h" // Main header
+#include <wx/wxprec.h>
 #include <wx/wx.h>
+#include "../include/wxdragon.h" // Main header
 #include <wx/generic/statbmpg.h> // For wxGenericStaticBitmap
 #include <wx/bitmap.h>  // For wxBitmap
 

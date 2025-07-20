@@ -1,6 +1,7 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include "wxd_utils.h" // For wxd_cpp_utils::to_wx
-#include <wx/wx.h>
 #include <wx/scrolbar.h> // Include wxScrollBar header
 
 

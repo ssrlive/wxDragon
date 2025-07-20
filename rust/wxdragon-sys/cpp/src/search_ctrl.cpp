@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/srchctrl.h"
 #include "../include/wxdragon.h"
 #include "wx/string.h" // Ensure wxString is available for FromUTF8

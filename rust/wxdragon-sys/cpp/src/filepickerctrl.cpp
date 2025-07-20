@@ -1,8 +1,8 @@
-/* This is a new file */
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h" // For wxd_FilePickerCtrl_t and API declarations
 #include "wxd_utils.h"                   // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK
 
-#include <wx/wx.h>
 #include <wx/filepicker.h> // For wxFilePickerCtrl
 #include <cstring>         // For strdup
 

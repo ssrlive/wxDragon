@@ -1,6 +1,7 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include "wxd_utils.h"
-#include <wx/wx.h>
 #include <wx/bmpcbox.h> // Include header for wxBitmapComboBox
 #include <wx/bitmap.h> // For wxBitmap
 #include <wx/arrstr.h> // For GetStrings

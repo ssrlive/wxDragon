@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include "../src/wxd_utils.h"
 #include <wx/dataview.h>
@@ -7,7 +9,6 @@
 #include <wx/datetime.h> // For wxDateTime
 #include <wx/variant.h>
 #include <cstring>
-#include <wx/wx.h>
 #include <wx/log.h>  // For wxLogDebug and wxLogError
 
 // Forward declarations

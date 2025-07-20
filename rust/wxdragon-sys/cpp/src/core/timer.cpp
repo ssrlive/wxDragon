@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../../include/wxdragon.h"
 #include "../../include/core/wxd_timer.h"
 #include <wx/timer.h>

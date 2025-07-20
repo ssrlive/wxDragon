@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/statusbr.h"
 #include "wx/window.h" // Base class
 #include "wx/string.h" // For wxString conversions

@@ -1,8 +1,9 @@
-/* This is a new file */
+#include <wx/wxprec.h>
+#include <wx/wx.h>
+
 #include "../include/wxdragon.h" // Main header for WXD_EXPORTED, types, and wxd_pickers.h
 #include "wxd_utils.h"          // For utility macros, if any are needed
 
-#include <wx/wx.h>
 #include <wx/fontpicker.h> // For wxFontPickerCtrl
 #include <wx/font.h>       // For wxFont
 

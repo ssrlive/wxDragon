@@ -1,3 +1,4 @@
+#include <wx/wxprec.h>
 #include <wx/wx.h>
 #include <wx/animate.h>
 #include <wx/mstream.h>

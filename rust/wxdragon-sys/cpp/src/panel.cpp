@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/panel.h"
 #include "wx/window.h" // Include parent class header if needed
 #include "wxdragon.h"

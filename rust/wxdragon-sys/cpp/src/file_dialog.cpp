@@ -1,4 +1,5 @@
-#include "wx/wx.h"
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/filedlg.h"
 #include "wx/arrstr.h"
 #include "../include/wxdragon.h"

@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wxdragon.h"
 #include <wx/calctrl.h>
 #include <wx/datetime.h> // For wxDateTime

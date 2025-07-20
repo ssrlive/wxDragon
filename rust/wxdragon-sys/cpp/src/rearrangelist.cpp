@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wx/rearrangectrl.h"
 #include "wx/window.h"
 #include "wx/string.h"
