@@ -9,30 +9,46 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# If WXWIDGETS_LIB_DIR is not set or does not exist
-if(NOT DEFINED WXWIDGETS_LIB_DIR OR NOT EXISTS "${WXWIDGETS_LIB_DIR}")
-    message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
-    # Auto-detect the prebuilt wxWidgets directory
-    message(STATUS "WXWIDGETS_LIB_DIR not set or does not exist, auto-detecting...")
-    file(GLOB WXWIDGETS_LIBS_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/debug/build/wxdragon-sys-*/out/wxwidgets-*-debug"
-    )
-    if(NOT WXWIDGETS_LIBS_PATH)
-        message(FATAL_ERROR "Could not find prebuilt wxWidgets directory. Please run 'cargo build' first to download prebuilt libraries.")
-    endif()
-    # Use the first match (there should only be one)
-    list(GET WXWIDGETS_LIBS_PATH 0 WXWIDGETS_LIB_DIR)
-    message(STATUS "Auto-detected wxWidgets at: ${WXWIDGETS_LIB_DIR}")
+# --- Feature Flags (from Rust build.rs) ---
+set(wxUSE_AUI ON CACHE BOOL "Use AUI (Advanced User Interface)")
+set(wxUSE_MEDIACTRL ON CACHE BOOL "Use Media Ctrl widgets")
+set(wxUSE_STC ON CACHE BOOL "Use Styled Text Control widget")
+set(wxUSE_XRC ON CACHE BOOL "Use XML Resource (XRC) support")
+set(wxUSE_WEBVIEW ON CACHE BOOL "Use the Webview widget")
+set(wxUSE_RICHTEXT ON CACHE BOOL "Use Rich Text Control widget")
+
+if(wxUSE_XRC)
+set(wxUSE_XML ON CACHE BOOL "Use XML support for XRC")
 else()
-    message(STATUS "Using provided WXWIDGETS_LIB_DIR: ${WXWIDGETS_LIB_DIR}")
+set(wxUSE_XML OFF CACHE BOOL "Use XML support for XRC")
 endif()
 
-# --- Option for wxWidgets Library Directory (passed from build.rs) ---
-option(WXWIDGETS_LIB_DIR "Path to the pre-built wxWidgets libraries" "")
-if(NOT WXWIDGETS_LIB_DIR OR NOT EXISTS "${WXWIDGETS_LIB_DIR}")
-    message(FATAL_ERROR "WXWIDGETS_LIB_DIR ('${WXWIDGETS_LIB_DIR}') is not set or does not exist. It should be passed from the Rust build script via -D.")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Auto-detect the wxWidgets source directory
+file(GLOB WXWIDGETS_SOURCE_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../wxWidgets-*")
+if(NOT WXWIDGETS_SOURCE_PATHS)
+    message(FATAL_ERROR "Could not find wxWidgets source code directory. Please run 'cargo build' first to download source code libraries.")
 endif()
-message(STATUS "Using pre-built wxWidgets libraries from: ${WXWIDGETS_LIB_DIR}")
+# Use the first match (there should only be one)
+list(GET WXWIDGETS_SOURCE_PATHS 0 WXWIDGETS_SOURCE_PATH)
+message(STATUS "Auto-detected wxWidgets at: ${WXWIDGETS_SOURCE_PATH}")
+
+# wxWidgets build directory
+set(WXWIDGETS_LIB_DIR ${CMAKE_BINARY_DIR}/wxwidgets_build)
+
+message(STATUS "Using wxWidgets binaries from: ${WXWIDGETS_LIB_DIR}")
+
+set(wxBUILD_SHARED OFF CACHE BOOL "Build wxWidgets as static libraries")
+set(wxBUILD_MONOLITHIC OFF CACHE BOOL "Build wxWidgets as monolithic library")
+set(wxBUILD_SAMPLES OFF CACHE BOOL "Do not build wxWidgets samples")
+set(wxBUILD_TESTS OFF CACHE BOOL "Do not build wxWidgets tests")
+set(wxBUILD_DEMOS OFF CACHE BOOL "Do not build wxWidgets demos")
+set(wxBUILD_BENCHMARKS OFF CACHE BOOL "Do not build wxWidgets benchmarks")
+
+set(wxUSE_EXCEPTIONS ON CACHE BOOL "Enable wxWidgets exceptions")
+
+add_subdirectory(${WXWIDGETS_SOURCE_PATH} ${WXWIDGETS_LIB_DIR})
 
 # --- Platform Detection ---
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -62,14 +78,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# --- Feature Flags (from Rust build.rs) ---
-option(wxdUSE_AUI "Use AUI (Advanced User Interface)" ON)
-option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" ON)
-option(wxdUSE_STC "Use Styled Text Control widget" ON)
-option(wxdUSE_XRC "Use XML Resource (XRC) support" ON)
-option(wxdUSE_WEBVIEW "Use the Webview widget" ON)
-option(wxdUSE_RICHTEXT "Use Rich Text Control widget" ON)
 
 # --- wxDragon Library Sources ---
 set(WXDRAGON_SOURCES
@@ -170,7 +178,7 @@ if(PLATFORM_NAME STREQUAL "linux")
 endif()
 
 # Add conditional sources based on features
-if (wxdUSE_AUI)
+if (wxUSE_AUI)
     list(APPEND WXDRAGON_SOURCES 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_manager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_child_frame.cpp
@@ -180,24 +188,24 @@ if (wxdUSE_AUI)
     )
 endif()
 
-if (wxdUSE_MEDIACTRL)
+if (wxUSE_MEDIACTRL)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/media_ctrl.cpp)
 endif()
 
-if (wxdUSE_STC)
+if (wxUSE_STC)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/styledtextctrl.cpp)
 endif()
 
-if (wxdUSE_XRC)
+if (wxUSE_XRC)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp)
 endif()
 
-if (wxdUSE_WEBVIEW)
+if (wxUSE_WEBVIEW)
     # Add webview wrapper when implemented
     # list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/webview.cpp)
 endif()
 
-if (wxdUSE_RICHTEXT)
+if (wxUSE_RICHTEXT)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/richtextctrl.cpp)
 endif()
 
@@ -211,101 +219,49 @@ target_include_directories(wxdragon PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# --- Find and Add wxWidgets Include Directories ---
-set(WX_INCLUDE_PATHS)
-
-# First, add main wxWidgets source headers (required for wx/wx.h, wx/arrstr.h, etc.)
-set(WX_MAIN_INCLUDE_DIR "${WXWIDGETS_LIB_DIR}/include")
-if(EXISTS "${WX_MAIN_INCLUDE_DIR}")
-    list(APPEND WX_INCLUDE_PATHS "${WX_MAIN_INCLUDE_DIR}")
-    message(STATUS "Found main wxWidgets headers: ${WX_MAIN_INCLUDE_DIR}")
-else()
-    message(FATAL_ERROR "Cannot find main wxWidgets include directory at ${WX_MAIN_INCLUDE_DIR}")
+# --- Set link libraries ---
+target_link_libraries(wxdragon PRIVATE wx::base)
+if(wxUSE_GUI)
+    target_link_libraries(wxdragon PRIVATE wx::core wx::adv)
 endif()
-
-# Second, add platform-specific generated headers (for setup.h, etc.)
-if(PLATFORM_NAME STREQUAL "macos")
-    # For macOS, check multiple possible locations for setup.h
-    set(WX_PLATFORM_DIRS_TO_CHECK
-        "${WXWIDGETS_LIB_DIR}/osx_cocoa-unicode-static-3.3"
-        "${WXWIDGETS_LIB_DIR}/wx/include/osx_cocoa-unicode-static-3.3"
-    )
-    foreach(dir IN LISTS WX_PLATFORM_DIRS_TO_CHECK)
-        if(EXISTS "${dir}")
-            list(APPEND WX_INCLUDE_PATHS "${dir}")
-            message(STATUS "Found macOS-specific headers: ${dir}")
-            break()
-        endif()
-    endforeach()
-elseif(PLATFORM_NAME STREQUAL "windows")
-    # For Windows builds, ensure setup.h is available at the expected location
-    # Copy from the working setup.h in include/wx/msw to include/wx if needed
-    set(WX_MSW_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/msw/setup.h")
-    set(WX_TARGET_SETUP "${WXWIDGETS_LIB_DIR}/include/wx/setup.h")
-    
-    if(EXISTS "${WX_MSW_SETUP}" AND NOT EXISTS "${WX_TARGET_SETUP}")
-        file(COPY "${WX_MSW_SETUP}" DESTINATION "${WXWIDGETS_LIB_DIR}/include/wx/")
-        message(STATUS "Copied Windows setup.h from msw to wx directory")
-    endif()
-    
-    if(EXISTS "${WX_TARGET_SETUP}")
-        message(STATUS "Windows setup.h available at: ${WX_TARGET_SETUP}")
-    else()
-        message(WARNING "Windows setup.h not found at expected location")
-    endif()
-elseif(PLATFORM_NAME STREQUAL "linux")
-    # For Linux, check multiple possible locations for setup.h
-    set(WX_PLATFORM_DIRS_TO_CHECK
-        "${WXWIDGETS_LIB_DIR}/gtk3-unicode-static-3.3"
-        "${WXWIDGETS_LIB_DIR}/wx/include/gtk3-unicode-static-3.3"
-    )
-    foreach(dir IN LISTS WX_PLATFORM_DIRS_TO_CHECK)
-        if(EXISTS "${dir}")
-            list(APPEND WX_INCLUDE_PATHS "${dir}")
-            message(STATUS "Found Linux-specific headers: ${dir}")
-            break()
-        endif()
-    endforeach()
+if(wxUSE_AUI)
+    target_link_libraries(wxdragon PRIVATE wx::aui)
 endif()
-
-message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
-target_include_directories(wxdragon PRIVATE ${WX_INCLUDE_PATHS})
-
-# --- Set Preprocessor Definitions Based on Features ---
-if (wxdUSE_AUI)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=0)
+if(wxUSE_OPENGL)
+    target_link_libraries(wxdragon PRIVATE wx::gl)
 endif()
-
-if (wxdUSE_MEDIACTRL)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=0)
+if(wxUSE_HTML)
+    target_link_libraries(wxdragon PRIVATE wx::html)
 endif()
-
-if (wxdUSE_WEBVIEW)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=0)
+if(wxUSE_MEDIACTRL)
+    target_link_libraries(wxdragon PRIVATE wx::media)
 endif()
-
-if (wxdUSE_STC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=0)
+if(wxUSE_SOCKETS)
+    target_link_libraries(wxdragon PRIVATE wx::net)
 endif()
-
-if (wxdUSE_XRC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=0)
+if(wxUSE_PROPGRID)
+    target_link_libraries(wxdragon PRIVATE wx::propgrid)
 endif()
-
-if (wxdUSE_RICHTEXT)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=0)
+if(wxUSE_DEBUGREPORT)
+    target_link_libraries(wxdragon PRIVATE wx::qa)
+endif()
+if(wxUSE_RIBBON)
+    target_link_libraries(wxdragon PRIVATE wx::ribbon)
+endif()
+if(wxUSE_RICHTEXT)
+    target_link_libraries(wxdragon PRIVATE wx::richtext)
+endif()
+if(wxUSE_STC)
+    target_link_libraries(wxdragon PRIVATE wx::stc)
+endif()
+if(wxUSE_WEBVIEW)
+    target_link_libraries(wxdragon PRIVATE wx::webview)
+endif()
+if(wxUSE_XML)
+    target_link_libraries(wxdragon PRIVATE wx::xml)
+endif()
+if(wxUSE_XRC)
+    target_link_libraries(wxdragon PRIVATE wx::xrc)
 endif()
 
 # --- Add Library Search Directory ---
@@ -313,4 +269,3 @@ target_link_directories(wxdragon PRIVATE ${WXWIDGETS_LIB_DIR})
 
 message(STATUS "wxDragon wrapper library configured successfully for ${PLATFORM_NAME}")
 message(STATUS "CMake configuration for libwxdragon finished.")
- 

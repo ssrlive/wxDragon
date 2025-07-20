@@ -1,85 +1,70 @@
-use std::env;
-use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() {
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
-    let target = env::var("TARGET").unwrap();
+    println!("Building wxdragon-sys...");
+
+    let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_env = std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    let target = std::env::var("TARGET").unwrap();
+
+    let wxwidgets_version = "3.3.0";
+    let wxwidgets_dir = format!("wxWidgets-{wxwidgets_version}");
+
+    if !std::path::Path::new(&wxwidgets_dir).exists() {
+        let local_wxwidgets_zip = format!("wxWidgets-{wxwidgets_version}.zip");
+        if !std::path::Path::new(&local_wxwidgets_zip).exists() {
+            download_wxwidgets_source(wxwidgets_version, &local_wxwidgets_zip).unwrap();
+        }
+        extract_wxwidgets_source(&local_wxwidgets_zip, &wxwidgets_dir).unwrap();
+    } else {
+        println!("wxWidgets source directory {wxwidgets_dir} already exists, skipping download and extraction.");
+    }
 
     // --- 1. Generate FFI Bindings ---
     println!("info: Generating FFI bindings...");
 
     let mut bindings_builder = bindgen::Builder::default()
         .header("cpp/include/wxdragon.h")
+        .clang_arg(format!("-I{wxwidgets_dir}/include"))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
-
-    // Platform-specific bindgen configuration
-    if target_os == "macos" {
-        bindings_builder = bindings_builder
-            .clang_arg("-D__WXOSX_COCOA__")
-            .clang_arg("-D__WXMAC__")
-            .clang_arg("-D__WXOSX__")
-            .clang_arg("-D_FILE_OFFSET_BITS=64")
-            .clang_arg("-DNDEBUG");
-    } else if target_os == "windows" {
-        bindings_builder = bindings_builder
-            .clang_arg("-D__WXMSW__")
-            .clang_arg("-D_FILE_OFFSET_BITS=64")
-            .clang_arg("-DwxUSE_UNICODE=1")
-            .clang_arg("-DNDEBUG")
-            .clang_arg("-D__WXD_BINDGEN__=1"); // Tell our headers this is bindgen
-
-        // Add MSVC-specific configuration for bindgen
-        if target_env == "msvc" {
-            bindings_builder = bindings_builder
-                .clang_arg("-D_WIN32")
-                .clang_arg("-D_WINDOWS")
-                .clang_arg("-DWIN32");
-        }
-    } else if target_os == "linux" {
-        bindings_builder = bindings_builder
-            .clang_arg("-D__WXGTK__")
-            .clang_arg("-D_FILE_OFFSET_BITS=64")
-            .clang_arg("-DNDEBUG");
-    }
 
     // Add feature flags for conditional compilation
     if cfg!(feature = "aui") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_AUI=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_AUI=0");
     }
 
     if cfg!(feature = "media-ctrl") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_MEDIACTRL=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_MEDIACTRL=0");
     }
 
     if cfg!(feature = "webview") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_WEBVIEW=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_WEBVIEW=0");
     }
 
     if cfg!(feature = "stc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_STC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_STC=0");
     }
 
     if cfg!(feature = "xrc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=0");
     }
 
     bindings_builder = bindings_builder.clang_arg(format!("--target={target}"));
 
     // Skip library setup for docs.rs and rust-analyzer
-    if env::var("DOCS_RS").is_ok() || env::var("RUST_ANALYZER") == Ok("true".to_string()) {
+    use std::env::var;
+    if var("DOCS_RS").is_ok() || std::env::var("RUST_ANALYZER") == Ok("true".to_string()) {
         let bindings = bindings_builder
             .generate()
             .expect("Unable to generate bindings");
@@ -90,85 +75,6 @@ fn main() {
 
         println!("info: Successfully generated FFI bindings");
         return;
-    }
-
-    // --- 2. Download and Setup Pre-built Libraries ---
-    let wx_version = "3.3.0";
-
-    download_prebuilt_libraries(wx_version, &out_dir, &target_os, &target_env)
-        .expect("Failed to download pre-built wxWidgets libraries");
-
-    // --- 3. Add wxWidgets Include Paths to Bindgen ---
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-
-    // Check for official Windows 7 targets first
-    let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
-
-    let wx_lib_dir = out_dir.join(&artifact_name);
-
-    // Add main wxWidgets headers
-    let wx_main_include = wx_lib_dir.join("include");
-    if wx_main_include.exists() {
-        bindings_builder = bindings_builder.clang_arg(format!("-I{}", wx_main_include.display()));
-        println!(
-            "info: Added wxWidgets main include path: {}",
-            wx_main_include.display()
-        );
-    }
-
-    // Add platform-specific headers
-    if target_os == "windows" {
-        // For Windows builds, copy the working setup.h from include/wx/msw/setup.h to include/wx/setup.h
-        // This allows wx/platform.h to find wx/setup.h via relative include
-        let msw_setup = wx_lib_dir
-            .join("include")
-            .join("wx")
-            .join("msw")
-            .join("setup.h");
-        let target_setup = wx_lib_dir.join("include").join("wx").join("setup.h");
-
-        if msw_setup.exists() && !target_setup.exists() {
-            if let Err(e) = std::fs::copy(&msw_setup, &target_setup) {
-                println!("cargo:warning=Failed to copy setup.h: {e}");
-            } else {
-                println!("info: Copied Windows setup.h from msw to wx directory");
-            }
-        }
-    } else if target_os == "macos" {
-        // For macOS, look for the platform-specific paths
-        let osx_setup_dirs = vec![wx_lib_dir
-            .join("lib")
-            .join("wx")
-            .join("include")
-            .join("osx_cocoa-unicode-static-3.3")];
-        for setup_dir in osx_setup_dirs {
-            if setup_dir.exists() {
-                bindings_builder = bindings_builder.clang_arg(format!("-I{}", setup_dir.display()));
-                println!(
-                    "info: Added macOS setup include path: {}",
-                    setup_dir.display()
-                );
-                break;
-            }
-        }
-    } else if target_os == "linux" {
-        // For Linux, look for GTK-specific paths
-        let gtk_setup_dirs = vec![wx_lib_dir
-            .join("lib")
-            .join("wx")
-            .join("include")
-            .join("gtk3-unicode-static-3.3")];
-        for setup_dir in gtk_setup_dirs {
-            if setup_dir.exists() {
-                bindings_builder = bindings_builder.clang_arg(format!("-I{}", setup_dir.display()));
-                println!(
-                    "info: Added Linux GTK setup include path: {}",
-                    setup_dir.display()
-                );
-                break;
-            }
-        }
     }
 
     let bindings = bindings_builder
@@ -182,379 +88,196 @@ fn main() {
     println!("info: Successfully generated FFI bindings");
 
     // --- 4. Build wxDragon Wrapper ---
-    build_wxdragon_wrapper(wx_version, &out_dir, &target_os, &target_env)
+    let wxwidgets_dir = PathBuf::from(wxwidgets_dir);
+    build_wxdragon_wrapper(wxwidgets_version, &wxwidgets_dir, &target_os, &target_env)
         .expect("Failed to build wxDragon wrapper library");
 
     // --- 5. Setup Linking ---
-    setup_linking(wx_version, &target_os, &target_env, &out_dir);
+    // setup_linking(wx_version, &target_os, &target_env, &out_dir);
 }
 
-fn download_prebuilt_libraries(
-    wx_version: &str,
-    out_dir: &Path,
-    _target_os: &str,
-    _target_env: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-
-    // Check for official Windows 7 targets first
-    let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
-
-    let download_url = format!(
-        "https://github.com/AllenDang/wxDragon/releases/download/wxwidgets-{wx_version}/{artifact_name}.tar.gz"
+fn download_wxwidgets_source(version: &str, output: &str) -> std::io::Result<()> {
+    let url = format!(
+        "https://github.com/wxWidgets/wxWidgets/releases/download/v{version}/wxWidgets-{version}.zip",
     );
 
-    let tarball_dest_path = out_dir.join(format!("{artifact_name}.tar.gz"));
-    let extracted_path = out_dir.join(&artifact_name);
-
-    // Skip download if already extracted
-    if extracted_path.exists() {
-        println!("info: Using cached pre-built libraries at {extracted_path:?}");
-        return Ok(());
-    }
-
-    println!("info: Downloading pre-built libraries from: {download_url}");
-
-    // Download the pre-built libraries
-    let client = reqwest::blocking::Client::builder()
-        .timeout(std::time::Duration::from_secs(300))
-        .build()
-        .expect("Failed to build reqwest client");
-
-    let resp = client
-        .get(&download_url)
-        .send()
-        .map_err(|e| format!("Failed to download {download_url}: {e}"))?;
-
-    if !resp.status().is_success() {
-        return Err(format!(
-            "Failed to download {}: HTTP {}",
-            download_url,
-            resp.status()
-        )
-        .into());
-    }
-
-    // Save the tarball
-    let mut out_file = File::create(&tarball_dest_path)
-        .map_err(|e| format!("Failed to create destination file {tarball_dest_path:?}: {e}"))?;
-    let content = resp
-        .bytes()
-        .map_err(|e| format!("Failed to read response content: {e}"))?;
-    std::io::copy(&mut content.as_ref(), &mut out_file)
-        .map_err(|e| format!("Failed to write downloaded content: {e}"))?;
-
-    println!("info: Downloaded pre-built libraries to {tarball_dest_path:?}");
-
-    // Extract the tarball
-    let tarball_file = File::open(&tarball_dest_path)
-        .map_err(|e| format!("Failed to open tarball {tarball_dest_path:?}: {e}"))?;
-    let gz_decoder = flate2::read::GzDecoder::new(tarball_file);
-    let mut archive = tar::Archive::new(gz_decoder);
-
-    archive
-        .unpack(out_dir)
-        .map_err(|e| format!("Failed to extract {artifact_name} to {out_dir:?}: {e}"))?;
-
-    if !extracted_path.exists() {
-        return Err(format!(
-            "Extraction did not result in expected directory: {extracted_path:?}. Check tarball structure."
-        )
-        .into());
-    }
-
-    println!("info: Successfully extracted pre-built libraries to {extracted_path:?}");
-
-    // Debug: List what was actually extracted
-    if let Ok(entries) = std::fs::read_dir(&extracted_path) {
-        let mut files: Vec<String> = Vec::new();
-        for entry in entries.flatten() {
-            let file_name = entry.file_name().to_string_lossy().to_string();
-            files.push(file_name);
+    // if the zip file does not exist, download it
+    if !std::path::Path::new(&output).exists() {
+        println!("Downloading {url}...");
+        let client = reqwest::blocking::Client::builder()
+            .timeout(std::time::Duration::from_secs(300))
+            .build()
+            .map_err(|e| std::io::Error::other(format!("HTTP client creation failed: {e}")))?;
+        let response = client
+            .get(&url)
+            .send()
+            .map_err(|e| std::io::Error::other(format!("HTTP request failed: {e}")))?;
+        if !response.status().is_success() {
+            return Err(std::io::Error::other(format!(
+                "Failed to download file: HTTP status {}",
+                response.status()
+            )));
         }
-        files.sort();
-        println!("info: Extracted files: {files:?}");
+        let mut file = std::fs::File::create(output)
+            .map_err(|e| std::io::Error::other(format!("Failed to create output file: {e}")))?;
+        let content = response
+            .bytes()
+            .map_err(|e| std::io::Error::other(format!("Failed to read response bytes: {e}")))?;
+        std::io::copy(&mut content.as_ref(), &mut file)
+            .map_err(|e| std::io::Error::other(format!("Failed to write to output file: {e}")))?;
+        println!("Downloaded {output} successfully.");
+    } else {
+        println!("File {output} already exists, skipping download.");
     }
-
     Ok(())
 }
 
-fn setup_linking(wx_version: &str, target_os: &str, target_env: &str, out_dir: &Path) {
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
+fn extract_wxwidgets_source(zip_path: &str, output_dir: &str) -> std::io::Result<()> {
+    if std::path::Path::new(output_dir).exists() {
+        println!("Output directory {output_dir} already exists, skipping extraction.");
+        return Ok(());
+    }
 
-    // Check for official Windows 7 targets first (same logic as download function)
-    let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
+    if !std::path::Path::new(zip_path).exists() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Zip file {zip_path} does not exist."),
+        ));
+    }
 
-    let lib_dir = out_dir.join(&artifact_name);
+    let file = std::fs::File::open(zip_path)
+        .map_err(|e| std::io::Error::other(format!("Failed to open zip file: {e}")))?;
+    let mut archive = zip::ZipArchive::new(file)
+        .map_err(|e| std::io::Error::other(format!("Failed to read zip archive: {e}")))?;
 
-    // For Windows, libraries are in platform-specific subdirectories
-    let actual_lib_dir = if target_os == "windows" {
-        // Get target architecture for directory naming
-        let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+    for i in 0..archive.len() {
+        let mut file = archive
+            .by_index(i)
+            .map_err(|e| std::io::Error::other(format!("Failed to access file in zip: {e}")))?;
+        let outpath = match file.enclosed_name() {
+            Some(path) => std::path::PathBuf::from(output_dir).join(path),
+            None => continue,
+        };
 
-        // For 32-bit Windows packages, check if they use generic "vc_lib" instead of "vc_x86_lib"
-        let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
-            "x86"
+        if file.name().ends_with('/') {
+            // Directory
+            std::fs::create_dir_all(&outpath)
+                .map_err(|e| std::io::Error::other(format!("Failed to create directory: {e}")))?;
         } else {
-            "x64"
-        };
-        let generic_lib_dir = match target_env {
-            "gnu" => lib_dir.join("gcc_lib"),
-            "msvc" => lib_dir.join("vc_lib"),
-            _ => lib_dir.clone(),
-        };
-        let arch_specific_lib_dir = match target_env {
-            "gnu" => lib_dir.join(format!("gcc_{arch_suffix}_lib")),
-            "msvc" => lib_dir.join(format!("vc_{arch_suffix}_lib")),
-            _ => lib_dir.clone(),
-        };
-
-        // Try arch-specific first, then fall back to generic
-        if arch_specific_lib_dir.exists() {
-            arch_specific_lib_dir
-        } else if generic_lib_dir.exists() {
-            println!(
-                "info: Using generic library directory: {}",
-                generic_lib_dir.display()
-            );
-            generic_lib_dir
-        } else {
-            lib_dir
+            // File
+            if let Some(parent) = outpath.parent() {
+                std::fs::create_dir_all(parent).map_err(|e| {
+                    std::io::Error::other(format!("Failed to create parent directory: {e}"))
+                })?;
+            }
+            let mut outfile = std::fs::File::create(&outpath)
+                .map_err(|e| std::io::Error::other(format!("Failed to create output file: {e}")))?;
+            std::io::copy(&mut file, &mut outfile).map_err(|e| {
+                std::io::Error::other(format!("Failed to write to output file: {e}"))
+            })?;
         }
-    } else {
-        lib_dir
-    };
+    }
+    println!("Extracted wxWidgets source to {output_dir}");
+    Ok(())
+}
 
-    // Add library search path
-    println!(
-        "cargo:rustc-link-search=native={}",
-        actual_lib_dir.display()
+fn build_wxdragon_wrapper(
+    _wx_version: &str,
+    wxwidgets_source_path: &PathBuf,
+    target_os: &str,
+    target_env: &str,
+) -> std::io::Result<()> {
+    // --- 3. Configure and Build libwxdragon (and wxWidgets) using CMake ---
+    let libwxdragon_cmake_source_dir = PathBuf::from("cpp");
+
+    let mut cmake_config = cmake::Config::new(libwxdragon_cmake_source_dir);
+    cmake_config.define("WXWIDGETS_SOURCE_PATH", wxwidgets_source_path);
+
+    // Disable WebP support since we'll use the image crate for image decoding
+    cmake_config.define("wxUSE_LIBWEBP", "OFF");
+
+    cmake_config.define(
+        "wxUSE_AUI",
+        if cfg!(feature = "aui") { "ON" } else { "OFF" },
     );
 
-    // Debug: Show what libraries are actually available in the directory
-    if actual_lib_dir.exists() {
-        println!(
-            "info: Library directory exists: {}",
-            actual_lib_dir.display()
-        );
-        if let Ok(entries) = std::fs::read_dir(&actual_lib_dir) {
-            let mut lib_files: Vec<String> = Vec::new();
-            for entry in entries.flatten() {
-                let file_name = entry.file_name().to_string_lossy().to_string();
-                if file_name.ends_with(".a") || file_name.ends_with(".lib") {
-                    lib_files.push(file_name);
-                }
-            }
-            lib_files.sort();
-            println!("info: Available library files: {lib_files:?}");
-        }
-    } else {
-        println!(
-            "cargo:warning=Library directory does not exist: {}",
-            actual_lib_dir.display()
-        );
-    }
+    cmake_config.define(
+        "wxUSE_MEDIACTRL",
+        if cfg!(feature = "media-ctrl") {
+            "ON"
+        } else {
+            "OFF"
+        },
+    );
 
-    // Link wxdragon wrapper library (will be built separately or included in pre-built package)
-    println!("cargo:rustc-link-lib=static=wxdragon");
+    cmake_config.define(
+        "wxUSE_WEBVIEW",
+        if cfg!(feature = "webview") {
+            "ON"
+        } else {
+            "OFF"
+        },
+    );
 
-    // Platform-specific library linking
-    match target_os {
-        "macos" => link_macos_libraries(),
-        "windows" => link_windows_libraries(target_env),
-        "linux" => link_linux_libraries(),
-        _ => panic!("Unsupported target OS: {target_os}"),
-    }
+    cmake_config.define(
+        "wxUSE_STC",
+        if cfg!(feature = "stc") { "ON" } else { "OFF" },
+    );
 
-    if target_os == "windows" && target_env == "gnu" {
-        println!("cargo:rustc-link-arg=-v");
-    }
-}
+    cmake_config.define(
+        "wxUSE_XRC",
+        if cfg!(feature = "xrc") { "ON" } else { "OFF" },
+    );
 
-fn link_macos_libraries() {
-    // Core wxWidgets libraries for macOS
-    println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.3");
-    println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
-    println!("cargo:rustc-link-lib=static=wx_osx_cocoau_adv-3.3");
-    println!("cargo:rustc-link-lib=static=wx_osx_cocoau_gl-3.3");
-    println!("cargo:rustc-link-lib=static=wx_osx_cocoau_propgrid-3.3");
+    // wxUSE_RICHTEXT
+    cmake_config.define(
+        "wxUSE_RICHTEXT",
+        if cfg!(feature = "richtext") {
+            "ON"
+        } else {
+            "OFF"
+        },
+    );
 
-    // Conditional feature libraries
-    if cfg!(feature = "aui") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_aui-3.3");
-    }
-    if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_media-3.3");
-    }
-    if cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.3");
-    }
-    if cfg!(feature = "richtext") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_richtext-3.3");
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
-    }
-    if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
-    }
-    if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.3");
-    }
-    if cfg!(feature = "xrc") {
-        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.3");
-    }
-
-    // Third-party libraries
-    println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
-    println!("cargo:rustc-link-lib=static=wxpng-3.3");
-    println!("cargo:rustc-link-lib=static=wxtiff-3.3");
-    println!("cargo:rustc-link-lib=static=wxregexu-3.3");
-
-    // System libraries
-    println!("cargo:rustc-link-lib=expat");
-    println!("cargo:rustc-link-lib=z");
-    println!("cargo:rustc-link-lib=iconv");
-    println!("cargo:rustc-link-lib=c++");
-
-    // STC-specific libraries
-    if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
-        println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
-    }
-
-    // macOS frameworks
-    println!("cargo:rustc-link-lib=framework=AudioToolbox");
-    println!("cargo:rustc-link-lib=framework=CoreFoundation");
-    println!("cargo:rustc-link-lib=framework=Security");
-    println!("cargo:rustc-link-lib=framework=Carbon");
-    println!("cargo:rustc-link-lib=framework=Cocoa");
-    println!("cargo:rustc-link-lib=framework=IOKit");
-    println!("cargo:rustc-link-lib=framework=QuartzCore");
-    println!("cargo:rustc-link-lib=framework=AppKit");
-    println!("cargo:rustc-link-lib=framework=CoreGraphics");
-    println!("cargo:rustc-link-lib=framework=Foundation");
-    println!("cargo:rustc-link-lib=framework=SystemConfiguration");
-
-    // Conditional frameworks for macOS
-    if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=framework=AVFoundation");
-        println!("cargo:rustc-link-lib=framework=AVKit");
-        println!("cargo:rustc-link-lib=framework=CoreMedia");
-    }
-
-    // Fix for ___isPlatformVersionAtLeast undefined symbol on macOS arm64
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-    if target_arch == "aarch64" {
-        // Use xcrun to find the toolchain path
-        if let Ok(output) = std::process::Command::new("xcrun")
-            .args(["--find", "clang"])
-            .output()
-        {
-            if output.status.success() {
-                let clang_path_str = String::from_utf8_lossy(&output.stdout);
-                let clang_path = clang_path_str.trim();
-
-                // Construct the clang runtime library path from the clang path
-                // /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-                // -> /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang
-                if let Some(clang_dir) = std::path::Path::new(clang_path).parent() {
-                    if let Some(usr_dir) = clang_dir.parent() {
-                        let clang_rt_path = usr_dir.join("lib").join("clang");
-
-                        // Try to find the clang runtime library
-                        if let Ok(entries) = std::fs::read_dir(&clang_rt_path) {
-                            for entry in entries.flatten() {
-                                if entry.file_type().is_ok_and(|ft| ft.is_dir()) {
-                                    let version_dir = entry.path();
-                                    let lib_dir = version_dir.join("lib").join("darwin");
-                                    let clang_rt_lib = lib_dir.join("libclang_rt.osx.a");
-
-                                    if clang_rt_lib.exists() {
-                                        println!(
-                                            "cargo:rustc-link-search=native={}",
-                                            lib_dir.display()
-                                        );
-                                        println!("cargo:rustc-link-lib=static=clang_rt.osx");
-                                        println!(
-                                            "info: Added clang runtime library for macOS arm64: {}",
-                                            clang_rt_lib.display()
-                                        );
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    let mut is_debug = std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string()) == "debug";
+    if target_os == "windows" {
+        is_debug = false;
+        if target_env == "gnu" {
+            // Potentially set MinGW toolchain for CMake if not automatically detected
+        } else {
+            cmake_config.generator("Ninja");
         }
     }
-}
 
-fn link_windows_libraries(target_env: &str) {
-    // Check if this is cross-compilation from macOS to Windows GNU
-    let is_macos_to_windows_gnu = cfg!(target_os = "macos") && target_env == "gnu";
+    // Set CMake build type based on Rust profile
+    cmake_config.define(
+        "CMAKE_BUILD_TYPE",
+        if is_debug { "Debug" } else { "Release" },
+    );
 
-    // Determine if we need debug suffix based on build profile
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-    // Note: Some prebuilt packages (especially 32-bit) might not have debug variants
-    // We'll try with debug suffix first, then without if linking fails
-    let debug_suffix = if profile == "debug" { "d" } else { "" };
+    let dst = cmake_config.build();
+    let build_dir = dst.join("build");
+    let lib_search_path = build_dir.join("lib").display().to_string();
+    let wxwidgets_build_dir = build_dir.join("wxwidgets_build");
 
-    println!("info: Windows library linking - Profile: {profile}, Debug suffix: '{debug_suffix}'");
-    println!("info: Target env: {target_env}, Cross-compilation: {is_macos_to_windows_gnu}");
+    println!("info: CMake build completed. Build directory: {build_dir:?}");
+    println!("info: libwxdragon should be in: {lib_search_path:?}");
+    println!("info: wxWidgets build subdirectory: {wxwidgets_build_dir:?}");
 
-    // For Windows GNU (both native and cross-compilation), use the actual library names from pre-built packages
-    // Core wxWidgets libraries
-    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_core");
-    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_adv");
-    println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_gl");
-    println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_propgrid");
+    // --- 4. Linker Instructions ---
+    println!("cargo:rustc-link-search=native={lib_search_path}");
 
-    // Conditional feature libraries
-    if cfg!(feature = "aui") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_aui");
-    }
-    if cfg!(feature = "richtext") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_richtext");
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_html");
-        println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}_xml");
-    }
-    if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_media");
-    }
-    if cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_webview");
-    }
-    if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_html");
-        println!("cargo:rustc-link-lib=static=wxbase33u{debug_suffix}_xml");
-    }
-    if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_stc");
-        println!("cargo:rustc-link-lib=static=wxscintilla{debug_suffix}");
-        println!("cargo:rustc-link-lib=static=wxlexilla{debug_suffix}");
-    }
-    if cfg!(feature = "xrc") {
-        println!("cargo:rustc-link-lib=static=wxmsw33u{debug_suffix}_xrc");
-    }
+    let v = wxwidgets_build_dir.join("lib").display().to_string();
+    println!("cargo:rustc-link-search=native={v}");
 
-    // Third-party libraries (using the actual names from pre-built packages)
-    println!("cargo:rustc-link-lib=static=wxtiff{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxjpeg{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxpng{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxregexu{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxzlib{debug_suffix}");
-    println!("cargo:rustc-link-lib=static=wxexpat{debug_suffix}");
-
-    // Runtime libraries
-    if target_env == "gnu" {
-        if is_macos_to_windows_gnu {
-            println!("info: Using static linking for cross-compilation from macOS to Windows GNU");
+    // For Windows, wxWidgets libs might be in a subdirectory like gcc_x64_lib for MinGW
+    if target_os == "windows" {
+        if target_env == "gnu" {
+            let v = wxwidgets_build_dir
+                .join("lib/gcc_x64_lib")
+                .display()
+                .to_string();
+            println!("cargo:rustc-link-search=native={v}");
 
             // --- Dynamically find MinGW GCC library paths ---
             let gcc_path = "x86_64-w64-mingw32-gcc"; // Assume it's in PATH
@@ -562,70 +285,180 @@ fn link_windows_libraries(target_env: &str) {
             // Find the path containing libgcc.a
             let output_libgcc = std::process::Command::new(gcc_path)
                 .arg("-print-libgcc-file-name")
-                .output();
+                .output()
+                .expect("Failed to execute x86_64-w64-mingw32-gcc -print-libgcc-file-name");
 
-            if let Ok(output) = output_libgcc {
-                if output.status.success() {
-                    let libgcc_path_str =
-                        String::from_utf8_lossy(&output.stdout).trim().to_string();
-                    if !libgcc_path_str.is_empty() {
-                        let libgcc_path = std::path::Path::new(&libgcc_path_str);
-                        if let Some(libgcc_dir) = libgcc_path.parent() {
-                            println!("cargo:rustc-link-search=native={}", libgcc_dir.display());
-                            println!(
-                                "info: Added GCC library search path (from libgcc): {}",
-                                libgcc_dir.display()
-                            );
+            if output_libgcc.status.success() {
+                let libgcc_path_str = String::from_utf8_lossy(&output_libgcc.stdout)
+                    .trim()
+                    .to_string();
+                if !libgcc_path_str.is_empty() {
+                    let libgcc_path = std::path::Path::new(&libgcc_path_str);
+                    if let Some(libgcc_dir) = libgcc_path.parent() {
+                        println!("cargo:rustc-link-search=native={}", libgcc_dir.display());
+                        println!(
+                            "info: Added GCC library search path (from libgcc): {}",
+                            libgcc_dir.display()
+                        );
 
-                            // Attempt to find the path containing libstdc++.a (often one level up, in `../<target>/lib`)
-                            if let Some(gcc_dir) = libgcc_dir.parent() {
-                                // e.g., .../gcc/x86_64-w64-mingw32/15.1.0 -> .../gcc/x86_64-w64-mingw32
-                                if let Some(toolchain_lib_dir) = gcc_dir.parent() {
-                                    // e.g., .../gcc/x86_64-w64-mingw32 -> .../gcc
-                                    if let Some(base_lib_dir) = toolchain_lib_dir.parent() {
-                                        // e.g., .../gcc -> .../lib
-                                        // Construct the expected path for libstdc++.a based on structure
-                                        let libstdcpp_dir = base_lib_dir
-                                            .parent()
-                                            .unwrap()
-                                            .join("x86_64-w64-mingw32/lib"); // ../../x86_64-w64-mingw32/lib
-                                        if libstdcpp_dir.exists() && libstdcpp_dir != libgcc_dir {
-                                            println!(
-                                                "cargo:rustc-link-search=native={}",
-                                                libstdcpp_dir.display()
-                                            );
-                                            println!(
-                                                "info: Added GCC library search path (for libstdc++): {}",
-                                                libstdcpp_dir.display()
-                                            );
-                                        } else {
-                                            println!("info: Could not find or verify expected libstdc++ path relative to libgcc path: {}", libstdcpp_dir.display());
-                                        }
+                        // Attempt to find the path containing libstdc++.a (often one level up, in `../<target>/lib`)
+                        if let Some(gcc_dir) = libgcc_dir.parent() {
+                            // e.g., .../gcc/x86_64-w64-mingw32/15.1.0 -> .../gcc/x86_64-w64-mingw32
+                            if let Some(toolchain_lib_dir) = gcc_dir.parent() {
+                                // e.g., .../gcc/x86_64-w64-mingw32 -> .../gcc
+                                if let Some(base_lib_dir) = toolchain_lib_dir.parent() {
+                                    // e.g., .../gcc -> .../lib
+                                    // Construct the expected path for libstdc++.a based on `find` result structure
+                                    let libstdcpp_dir = base_lib_dir
+                                        .parent()
+                                        .unwrap()
+                                        .join("x86_64-w64-mingw32/lib"); // ../../x86_64-w64-mingw32/lib
+                                    let v = libstdcpp_dir.display();
+                                    if libstdcpp_dir.exists() && libstdcpp_dir != libgcc_dir {
+                                        println!("cargo:rustc-link-search=native={v}");
+                                        println!(
+                                            "info: Add GCC lib search path(for libstdc++):{v}"
+                                        );
+                                    } else {
+                                        println!("info: Could not find or verify expected libstdc++ path relative to libgcc path: {v}");
                                     }
                                 }
                             }
-                        } else {
-                            println!(
-                                "cargo:warning=Could not get parent directory from libgcc path: {libgcc_path_str}"
-                            );
                         }
                     } else {
-                        println!(
-                            "cargo:warning=Command -print-libgcc-file-name returned empty output."
-                        );
+                        println!("cargo:warning=Could not get parent directory from libgcc path: {libgcc_path_str}");
                     }
                 } else {
-                    let stderr = String::from_utf8_lossy(&output.stderr);
                     println!(
-                        "cargo:warning=Failed to run '{gcc_path} -print-libgcc-file-name': {stderr}"
+                        "cargo:warning=Command -print-libgcc-file-name returned empty output."
                     );
-                    println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
                 }
             } else {
-                println!("cargo:warning=Could not execute x86_64-w64-mingw32-gcc. Static linking for stdc++/gcc might fail.");
+                let stderr = String::from_utf8_lossy(&output_libgcc.stderr);
+                println!(
+                    "cargo:warning=Failed to run '{gcc_path} -print-libgcc-file-name': {stderr}"
+                );
+                println!("cargo:warning=Static linking for stdc++/gcc might fail. Falling back to hoping they are in default paths.");
             }
             // --- End dynamic path finding ---
+        } else {
+            println!(
+                "cargo:rustc-link-search=native={}",
+                wxwidgets_build_dir.join("lib/vc_x64_lib").display()
+            );
+        }
+    }
 
+    println!("cargo:rustc-link-lib=static=wxdragon");
+
+    if target_os == "macos" {
+        // macOS linking flags (assuming release build for wxWidgets library names here)
+        // If macOS also has d suffix for debug, this section would need similar conditional logic
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_core-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_adv-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_gl-3.3");
+        println!("cargo:rustc-link-lib=static=wx_osx_cocoau_propgrid-3.3");
+
+        // Conditional features for macOS
+        if cfg!(feature = "aui") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_aui-3.3");
+        }
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_media-3.3");
+        }
+        if cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_webview-3.3");
+        }
+        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_html-3.3");
+        }
+        if cfg!(feature = "stc") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_stc-3.3");
+        }
+        if cfg!(feature = "xrc") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.3");
+            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+        }
+
+        println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
+        println!("cargo:rustc-link-lib=static=wxpng-3.3");
+        println!("cargo:rustc-link-lib=static=wxtiff-3.3");
+        println!("cargo:rustc-link-lib=static=wxregexu-3.3");
+        println!("cargo:rustc-link-lib=expat");
+        println!("cargo:rustc-link-lib=z");
+        println!("cargo:rustc-link-lib=iconv");
+        println!("cargo:rustc-link-lib=c++");
+
+        // Conditional STC support libraries for macOS
+        if cfg!(feature = "stc") {
+            println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+            println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
+        }
+
+        println!("cargo:rustc-link-lib=framework=AudioToolbox");
+        println!("cargo:rustc-link-lib=framework=CoreFoundation");
+        println!("cargo:rustc-link-lib=framework=Security");
+        println!("cargo:rustc-link-lib=framework=Carbon");
+        println!("cargo:rustc-link-lib=framework=Cocoa");
+        println!("cargo:rustc-link-lib=framework=IOKit");
+        println!("cargo:rustc-link-lib=framework=QuartzCore");
+        println!("cargo:rustc-link-lib=framework=AppKit");
+        println!("cargo:rustc-link-lib=framework=CoreGraphics");
+        println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=SystemConfiguration");
+
+        // Conditional frameworks for macOS
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=framework=AVFoundation");
+            println!("cargo:rustc-link-lib=framework=AVKit");
+            println!("cargo:rustc-link-lib=framework=CoreMedia");
+        }
+    } else if target_os == "windows" {
+        // Detect cross-compilation from macOS to Windows
+        let host_os = std::env::consts::OS;
+        let is_macos_to_windows_gnu =
+            host_os == "macos" && target_os == "windows" && target_env == "gnu";
+
+        if is_macos_to_windows_gnu {
+            // Cross-compilation from macOS: libraries have -Windows suffix
+            println!("cargo:rustc-link-lib=static=wx_mswu_core-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_adv-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_baseu-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_gl-3.3-Windows");
+            println!("cargo:rustc-link-lib=static=wx_mswu_propgrid-3.3-Windows");
+
+            // Conditional features for cross-compilation
+            if cfg!(feature = "aui") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_aui-3.3-Windows");
+            }
+            if cfg!(feature = "media-ctrl") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_media-3.3-Windows");
+            }
+            if cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_webview-3.3-Windows");
+            }
+            if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_html-3.3-Windows");
+            }
+            if cfg!(feature = "stc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_stc-3.3-Windows");
+                println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+                println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
+            }
+            if cfg!(feature = "xrc") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3-Windows");
+                println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3-Windows");
+            }
+
+            println!("cargo:rustc-link-lib=static=wxpng-3.3");
+            println!("cargo:rustc-link-lib=static=wxtiff-3.3");
+            println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
+            println!("cargo:rustc-link-lib=static=wxregexu-3.3");
+            println!("cargo:rustc-link-lib=static=wxzlib-3.3");
+            println!("cargo:rustc-link-lib=static=wxexpat-3.3");
+
+            println!("info: Using static linking for cross-compilation from macOS to Windows GNU");
             // Static linking for cross-compilation to avoid runtime dependencies
             println!("cargo:rustc-link-lib=static=stdc++");
             println!("cargo:rustc-link-lib=static=gcc");
@@ -634,651 +467,151 @@ fn link_windows_libraries(target_env: &str) {
             // Add linker arguments for fully static C++ runtime
             println!("cargo:rustc-link-arg=-static-libgcc");
             println!("cargo:rustc-link-arg=-static-libstdc++");
-
-            // Use UCRT instead of MSVCRT for cross-compilation (modern MinGW standard)
-            // This is critical for compatibility with GCC 15.1.0 and recent MinGW distributions
-            println!("cargo:rustc-link-lib=ucrt");
-            println!("info: Using UCRT runtime for cross-compilation compatibility");
         } else {
-            // Native Windows GNU builds
-            // Check if we're in MSYS2 environment which uses UCRT
-            let in_msys2 = env::var("MSYSTEM").is_ok()
-                || env::var("MSYS2_PATH_TYPE").is_ok()
-                || env::var("MINGW_PREFIX").is_ok();
+            if is_debug {
+                // Native Windows (both MSVC and GNU): debug libraries
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_adv");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_core");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_gl");
+                println!("cargo:rustc-link-lib=static=wxmsw33ud_propgrid");
 
-            if in_msys2 {
-                // MSYS2/MinGW64 static libraries for fully static build (dependency-free executable)
-                // Use rustc-link-arg for static C++ runtime instead of static lib linking
-                println!("cargo:rustc-link-arg=-static-libgcc");
-                println!("cargo:rustc-link-arg=-static-libstdc++");
-
-                // Add MSYS2 MinGW64 lib path to linker search path
-                if let Ok(msys2_root) = std::env::var("MSYSTEM_PREFIX") {
-                    println!("cargo:rustc-link-search=native={msys2_root}/lib");
+                // Conditional features for Windows debug
+                if cfg!(feature = "aui") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_aui");
+                }
+                if cfg!(feature = "media-ctrl") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_media");
+                }
+                if cfg!(feature = "webview") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_webview");
+                }
+                if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_html");
+                }
+                if cfg!(feature = "stc") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_stc");
+                    println!("cargo:rustc-link-lib=static=wxscintillad");
+                    println!("cargo:rustc-link-lib=static=wxlexillad");
+                }
+                if cfg!(feature = "xrc") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_xrc");
+                    println!("cargo:rustc-link-lib=static=wxbase33ud_xml");
                 }
 
-                // Standard libraries needed for MSYS2
-                println!("cargo:rustc-link-lib=stdc++");
-                println!("cargo:rustc-link-lib=gcc");
-                println!("cargo:rustc-link-lib=mingw32");
-                println!("cargo:rustc-link-lib=ucrt");
-                println!("cargo:rustc-link-lib=winpthread");
-                println!("info: Using MSYS2/MinGW64 static C++ runtime via rustc-link-arg and explicit lib path");
+                println!("cargo:rustc-link-lib=static=wxbase33ud");
+                println!("cargo:rustc-link-lib=static=wxpngd");
+                println!("cargo:rustc-link-lib=static=wxtiffd");
+                println!("cargo:rustc-link-lib=static=wxjpegd");
+                println!("cargo:rustc-link-lib=static=wxregexud");
+                println!("cargo:rustc-link-lib=static=wxzlibd");
+                println!("cargo:rustc-link-lib=static=wxexpatd");
             } else {
-                // Non-MSYS2 MinGW builds (dynamic linking)
+                // Native Windows (both MSVC and GNU): use same library names
+                println!("cargo:rustc-link-lib=static=wxmsw33u_adv");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_core");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_gl");
+                println!("cargo:rustc-link-lib=static=wxmsw33u_propgrid");
+
+                // Conditional features for native Windows
+                if cfg!(feature = "aui") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_aui");
+                }
+                if cfg!(feature = "media-ctrl") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_media");
+                }
+                if cfg!(feature = "webview") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_webview");
+                }
+                if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_html");
+                }
+                if cfg!(feature = "stc") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_stc");
+                    println!("cargo:rustc-link-lib=static=wxscintilla");
+                    println!("cargo:rustc-link-lib=static=wxlexilla");
+                }
+                if cfg!(feature = "xrc") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_xrc");
+                    println!("cargo:rustc-link-lib=static=wxbase33u_xml");
+                }
+
+                println!("cargo:rustc-link-lib=static=wxbase33u");
+                println!("cargo:rustc-link-lib=static=wxtiff");
+                println!("cargo:rustc-link-lib=static=wxjpeg");
+                println!("cargo:rustc-link-lib=static=wxpng");
+                println!("cargo:rustc-link-lib=static=wxregexu");
+                println!("cargo:rustc-link-lib=static=wxzlib");
+                println!("cargo:rustc-link-lib=static=wxexpat");
+            }
+
+            if target_env == "gnu" {
                 println!("cargo:rustc-link-lib=stdc++");
-                println!("cargo:rustc-link-lib=gcc");
-                println!("cargo:rustc-link-lib=mingw32");
-                println!("cargo:rustc-link-lib=msvcrt");
-            }
-        }
-    } else {
-        // MSVC builds - use appropriate runtime based on build profile
-        let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-        if profile == "debug" {
-            // Link debug runtime libraries for debug builds
-            println!("cargo:rustc-link-lib=msvcrtd");
-            println!("info: Using debug MSVC runtime (msvcrtd) for debug build");
-        } else {
-            // Link release runtime libraries for release builds
-            println!("cargo:rustc-link-lib=msvcrt");
-            println!("info: Using release MSVC runtime (msvcrt) for release build");
-        }
-    }
-
-    // Windows system libraries
-    println!("cargo:rustc-link-lib=kernel32");
-    println!("cargo:rustc-link-lib=user32");
-    println!("cargo:rustc-link-lib=gdi32");
-    println!("cargo:rustc-link-lib=gdiplus");
-    println!("cargo:rustc-link-lib=msimg32");
-    println!("cargo:rustc-link-lib=comdlg32");
-    println!("cargo:rustc-link-lib=winspool");
-    println!("cargo:rustc-link-lib=winmm");
-    println!("cargo:rustc-link-lib=shell32");
-    println!("cargo:rustc-link-lib=shlwapi");
-    println!("cargo:rustc-link-lib=comctl32");
-    println!("cargo:rustc-link-lib=ole32");
-    println!("cargo:rustc-link-lib=oleaut32");
-    println!("cargo:rustc-link-lib=uuid");
-    println!("cargo:rustc-link-lib=rpcrt4");
-    println!("cargo:rustc-link-lib=advapi32");
-    println!("cargo:rustc-link-lib=version");
-    println!("cargo:rustc-link-lib=ws2_32");
-    println!("cargo:rustc-link-lib=wininet");
-    println!("cargo:rustc-link-lib=oleacc");
-    println!("cargo:rustc-link-lib=uxtheme");
-    println!("cargo:rustc-link-lib=imm32");
-}
-
-fn link_linux_libraries() {
-    // Core wxWidgets libraries for Linux
-    println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.3");
-    println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
-    println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.3");
-    println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.3");
-    println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.3");
-
-    // Conditional feature libraries
-    if cfg!(feature = "aui") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.3");
-    }
-    if cfg!(feature = "richtext") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_richtext-3.3");
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
-    }
-    if cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.3");
-    }
-    if cfg!(feature = "xrc") || cfg!(feature = "webview") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
-    }
-    if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
-    }
-    if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
-        println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
-        println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
-    }
-    if cfg!(feature = "xrc") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.3");
-        println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
-    }
-
-    // System libraries
-    println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=xkbcommon");
-
-    // GTK and system libraries via pkg-config
-    let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
-    for l in lib.libs {
-        println!("cargo:rustc-link-lib={l}");
-    }
-
-    println!("cargo:rustc-link-lib=X11");
-    println!("cargo:rustc-link-lib=png");
-    println!("cargo:rustc-link-lib=jpeg");
-    println!("cargo:rustc-link-lib=expat");
-    println!("cargo:rustc-link-lib=tiff");
-}
-
-fn build_wxdragon_wrapper(
-    wx_version: &str,
-    out_dir: &Path,
-    target_os: &str,
-    target_env: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-
-    // Build wrapper library in the same mode as Cargo profile to match runtime libraries
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "release".to_string());
-    let build_type = if profile == "debug" {
-        "Debug"
-    } else {
-        "Release"
-    };
-
-    println!("info: Building wxDragon wrapper library in {build_type} mode");
-
-    // Get the pre-built wxWidgets library directory (same naming as download_prebuilt_libraries)
-    let target_triple = env::var("TARGET").unwrap_or_default();
-    let artifact_name = format!("wxwidgets-{wx_version}-{target_triple}-{profile}");
-
-    let wx_lib_dir = out_dir.join(artifact_name);
-    let wrapper_build_dir = out_dir.join("wxdragon_wrapper_build");
-
-    // Skip build if already built (handle different generator outputs)
-    let output_lib = if target_env == "msvc" {
-        // Visual Studio generator puts libraries in config subdirectories
-        wrapper_build_dir.join(build_type).join("wxdragon.lib")
-    } else {
-        // Unix Makefiles generator puts libraries in lib/
-        wrapper_build_dir.join("lib").join("libwxdragon.a")
-    };
-
-    if output_lib.exists() {
-        println!("info: Using cached wxDragon wrapper library at {output_lib:?}");
-
-        // Check for the built library in multiple possible locations
-        let possible_lib_paths = if target_env == "msvc" {
-            // Windows MSVC uses .lib files
-            vec![
-                wrapper_build_dir.join(format!("{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("lib/{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("x64/{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
-                wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
-                wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
-                wrapper_build_dir.join("wxdragon.lib"),
-                wrapper_build_dir.join("lib/wxdragon.lib"),
-                wrapper_build_dir.join("x64/wxdragon.lib"),
-                wrapper_build_dir.join(format!("Win32/{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("lib/Win32/{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("out/{build_type}/wxdragon.lib")),
-                wrapper_build_dir.join(format!("bin/{build_type}/wxdragon.lib")),
-            ]
-        } else {
-            // Unix-like systems (Linux, macOS, Windows GNU) use .a files
-            vec![
-                wrapper_build_dir.join("lib/libwxdragon.a"),
-                wrapper_build_dir.join("libwxdragon.a"),
-                wrapper_build_dir.join(format!("lib/{build_type}/libwxdragon.a")),
-                wrapper_build_dir.join(format!("{build_type}/libwxdragon.a")),
-                wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
-                wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
-            ]
-        };
-
-        let mut library_path = None;
-        for path in &possible_lib_paths {
-            if path.exists() {
-                library_path = Some(path.clone());
-                println!("info: Found library at: {}", path.display());
-                break;
             }
         }
 
-        let library_path = match library_path {
-            Some(path) => path,
-            None => {
-                // List all files in build directory for debugging
-                fn list_directory_recursive(dir: &Path, prefix: &str) -> String {
-                    let mut result = String::new();
-                    if let Ok(entries) = std::fs::read_dir(dir) {
-                        for entry in entries.flatten() {
-                            let path = entry.path();
-                            result.push_str(&format!("{}  \"{}\"\n", prefix, path.display()));
-                            if path.is_dir() {
-                                result.push_str(&list_directory_recursive(
-                                    &path,
-                                    &format!("{prefix}  "),
-                                ));
-                            }
-                        }
-                    }
-                    result
-                }
-
-                let build_contents = list_directory_recursive(&wrapper_build_dir, "");
-
-                println!("Searched for library in these locations:");
-                for path in &possible_lib_paths {
-                    println!("  - {}", path.display());
-                }
-
-                return Err(format!(
-                    "wxDragon wrapper library was not built successfully.\nExpected library file not found. Build directory contents:\n{}\nSearched locations:\n{}",
-                    build_contents,
-                    possible_lib_paths.iter().map(|p| format!("  - {}", p.display())).collect::<Vec<_>>().join("\n")
-                ).into());
-            }
-        };
-
-        let dest = if target_env == "msvc" {
-            wx_lib_dir.join("wxdragon.lib")
-        } else {
-            wx_lib_dir.join("libwxdragon.a")
-        };
-
-        // Ensure destination directory exists
-        if let Some(parent) = dest.parent() {
-            std::fs::create_dir_all(parent)?;
+        // System libraries (same for debug and release)
+        println!("cargo:rustc-link-lib=kernel32");
+        println!("cargo:rustc-link-lib=user32");
+        println!("cargo:rustc-link-lib=gdi32");
+        println!("cargo:rustc-link-lib=gdiplus"); // Add GDI+ library for graphics support
+        println!("cargo:rustc-link-lib=msimg32"); // Add for AlphaBlend and GradientFill functions
+        println!("cargo:rustc-link-lib=comdlg32");
+        println!("cargo:rustc-link-lib=winspool");
+        println!("cargo:rustc-link-lib=winmm");
+        println!("cargo:rustc-link-lib=shell32");
+        println!("cargo:rustc-link-lib=shlwapi");
+        println!("cargo:rustc-link-lib=comctl32");
+        println!("cargo:rustc-link-lib=ole32");
+        println!("cargo:rustc-link-lib=oleaut32");
+        println!("cargo:rustc-link-lib=uuid");
+        println!("cargo:rustc-link-lib=rpcrt4");
+        println!("cargo:rustc-link-lib=advapi32");
+        println!("cargo:rustc-link-lib=version");
+        println!("cargo:rustc-link-lib=ws2_32");
+        println!("cargo:rustc-link-lib=wininet");
+        println!("cargo:rustc-link-lib=oleacc");
+        println!("cargo:rustc-link-lib=uxtheme");
+        println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
+    } else {
+        println!("cargo:rustc-link-lib=xkbcommon");
+        let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
+        for _lib in lib.libs {
+            println!("cargo:rustc-link-lib={_lib}");
         }
+        println!("cargo:rustc-link-lib=X11");
+        println!("cargo:rustc-link-lib=png");
+        println!("cargo:rustc-link-lib=jpeg");
+        println!("cargo:rustc-link-lib=expat");
+        println!("cargo:rustc-link-lib=tiff");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_adv-3.3");
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_core-3.3");
+        println!("cargo:rustc-link-lib=static=wx_baseu-3.3");
+        println!("cargo:rustc-link-lib=stdc++");
 
-        std::fs::copy(&library_path, &dest)?;
-        println!("info: Successfully built wxDragon wrapper library at {library_path:?}");
-
-        return Ok(());
-    }
-
-    println!("info: Building wxDragon wrapper library...");
-
-    // Create build directory
-    std::fs::create_dir_all(&wrapper_build_dir)?;
-
-    // Get absolute path to the cpp source directory
-    let cpp_source_dir = env::var("CARGO_MANIFEST_DIR")
-        .map(|manifest_dir| Path::new(&manifest_dir).join("cpp"))
-        .unwrap_or_else(|_| Path::new("rust/wxdragon-sys/cpp").to_path_buf());
-
-    // Prepare CMake command - use dynamic cmake detection
-    let cmake_executable =
-        if cfg!(target_os = "macos") && std::path::Path::new("/opt/homebrew/bin/cmake").exists() {
-            "/opt/homebrew/bin/cmake"
-        } else {
-            "cmake" // Use cmake from PATH on other systems
-        };
-    let mut cmake_cmd = std::process::Command::new(cmake_executable);
-
-    cmake_cmd
-        .current_dir(&wrapper_build_dir)
-        .arg(&cpp_source_dir) // Use absolute path to cpp source directory
-        .arg(format!("-DCMAKE_BUILD_TYPE={build_type}"))
-        .arg(format!("-DWXWIDGETS_LIB_DIR={}", wx_lib_dir.display()));
-
-    // Pass Cargo feature flags to CMake
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_AUI={}",
-        if cfg!(feature = "aui") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_MEDIACTRL={}",
-        if cfg!(feature = "media-ctrl") {
-            "ON"
-        } else {
-            "OFF"
+        if cfg!(feature = "aui") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_aui-3.3");
         }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_WEBVIEW={}",
         if cfg!(feature = "webview") {
-            "ON"
-        } else {
-            "OFF"
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_webview-3.3");
         }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_STC={}",
-        if cfg!(feature = "stc") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_XRC={}",
-        if cfg!(feature = "xrc") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_RICHTEXT={}",
-        if cfg!(feature = "richtext") {
-            "ON"
-        } else {
-            "OFF"
+        if cfg!(feature = "xrc") || cfg!(feature = "webview") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_html-3.3");
         }
-    ));
-
-    // Platform-specific CMake configuration
-    // Detect host platform for cross-compilation scenarios
-    let host_os = if cfg!(target_os = "windows") {
-        "windows"
-    } else if cfg!(target_os = "macos") {
-        "macos"
-    } else {
-        "linux"
-    };
-
-    // Explicitly set target system for cross-compilation
-    if target_os != host_os {
-        match target_os {
-            "windows" => {
-                cmake_cmd.arg("-DCMAKE_SYSTEM_NAME=Windows");
-                // Set target architecture
-                if target_arch == "x86_64" {
-                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
-                } else if target_arch == "i686" || target_arch == "x86" {
-                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
-                }
-
-                // For cross-compilation from Unix to Windows GNU, we need to set up MinGW toolchain
-                if target_env == "gnu" && host_os != "windows" {
-                    // Try to find MinGW-w64 cross compiler
-                    // For i686, the compiler is usually i686-w64-mingw32-g++
-                    let cross_compiler = format!("{target_arch}-w64-mingw32-g++");
-
-                    // Check if the cross compiler exists
-                    if std::process::Command::new("which")
-                        .arg(&cross_compiler)
-                        .output()
-                        .map(|o| o.status.success())
-                        .unwrap_or(false)
-                    {
-                        cmake_cmd.arg(format!("-DCMAKE_CXX_COMPILER={cross_compiler}"));
-                        cmake_cmd.arg(format!("-DCMAKE_C_COMPILER={target_arch}-w64-mingw32-gcc"));
-                        println!("info: Using MinGW-w64 cross compiler: {cross_compiler}");
-                    } else {
-                        println!("cargo:warning=MinGW-w64 cross compiler not found. Cross-compilation to Windows GNU may fail.");
-                        println!("cargo:warning=Consider installing mingw-w64 with: brew install mingw-w64");
-                    }
-                }
-            }
-            "linux" => {
-                cmake_cmd.arg("-DCMAKE_SYSTEM_NAME=Linux");
-                if target_arch == "x86_64" {
-                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86_64");
-                } else if target_arch == "i686" || target_arch == "x86" {
-                    cmake_cmd.arg("-DCMAKE_SYSTEM_PROCESSOR=x86");
-                }
-            }
-            _ => {}
+        if cfg!(feature = "media-ctrl") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
+        }
+        if cfg!(feature = "stc") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
+            println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+            println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
+        }
+        if cfg!(feature = "xrc") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.3");
+            println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
         }
     }
-
-    match target_os {
-        "windows" => {
-            if target_env == "msvc" {
-                // Use Visual Studio generator for better MSVC compatibility
-                cmake_cmd.arg("-G").arg("Visual Studio 17 2022");
-                // Set architecture for Visual Studio generator
-                let vs_arch = if target_arch == "i686" || target_arch == "x86" {
-                    "Win32"
-                } else {
-                    "x64"
-                };
-                cmake_cmd.arg("-A").arg(vs_arch);
-            } else {
-                // GNU/MinGW64 - choose generator based on environment
-                if host_os == "windows" {
-                    // Check if we're in MSYS2 environment (like GitHub Actions)
-                    // MSYS2 usually sets these environment variables
-                    let in_msys2 = env::var("MSYSTEM").is_ok()
-                        || env::var("MSYS2_PATH_TYPE").is_ok()
-                        || env::var("MINGW_PREFIX").is_ok();
-
-                    if in_msys2 {
-                        // In MSYS2, use Unix Makefiles for better compatibility
-                        cmake_cmd.arg("-G").arg("Unix Makefiles");
-
-                        // Let CMake find compilers naturally in MSYS2 environment
-                        // Don't explicitly set compiler paths as MSYS2 handles this correctly
-                        println!(
-                            "info: Detected MSYS2 environment, using Unix Makefiles generator"
-                        );
-
-                        // Add static linking flags for full static build (dependency-free executable)
-                        cmake_cmd.arg("-DCMAKE_CXX_FLAGS=-static-libgcc -static-libstdc++");
-                        cmake_cmd.arg("-DCMAKE_EXE_LINKER_FLAGS=-static-libgcc -static-libstdc++");
-                        cmake_cmd
-                            .arg("-DCMAKE_SHARED_LINKER_FLAGS=-static-libgcc -static-libstdc++");
-                        println!("info: Added MSYS2/MinGW64 static C++ runtime flags for dependency-free build");
-                    } else {
-                        // Native Windows MinGW (not MSYS2)
-                        cmake_cmd.arg("-G").arg("MSYS Makefiles");
-                    }
-                } else {
-                    // Cross-compiling from Unix-like system (macOS/Linux)
-                    cmake_cmd.arg("-G").arg("Unix Makefiles");
-                }
-            }
-        }
-        "macos" => {
-            cmake_cmd.arg("-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13");
-            if target_arch == "aarch64" {
-                cmake_cmd.arg("-DCMAKE_OSX_ARCHITECTURES=arm64");
-            } else {
-                cmake_cmd.arg("-DCMAKE_OSX_ARCHITECTURES=x86_64");
-            }
-        }
-        _ => {} // Linux uses default
-    }
-
-    // Configure
-    let output = cmake_cmd.output()?;
-    if !output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(
-            format!("CMake configure failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}").into(),
-        );
-    }
-
-    // Build
-    let mut build_cmd = std::process::Command::new(cmake_executable);
-    build_cmd
-        .current_dir(&wrapper_build_dir)
-        .arg("--build")
-        .arg(".")
-        .arg("--config")
-        .arg(build_type)
-        .arg("--target")
-        .arg("wxdragon")
-        .arg("--verbose");
-
-    println!("info: Running CMake build command: {build_cmd:?}");
-    let output = build_cmd.output()?;
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-
-    // Always print build output for debugging, even on success
-    println!("CMake build stdout:\n{stdout}");
-    if !stderr.is_empty() {
-        println!("CMake build stderr:\n{stderr}");
-    }
-
-    if !output.status.success() {
-        // If cmake --build fails and we're on Windows MSVC, try MSBuild directly as a fallback
-        if target_env == "msvc" {
-            println!("info: CMake build failed, trying MSBuild directly...");
-
-            let mut msbuild_cmd = std::process::Command::new("msbuild");
-            let msbuild_platform = if target_arch == "i686" || target_arch == "x86" {
-                "Win32"
-            } else {
-                "x64"
-            };
-            msbuild_cmd
-                .current_dir(&wrapper_build_dir)
-                .arg("wxdragon.vcxproj")
-                .arg(format!("/p:Configuration={build_type}"))
-                .arg(format!("/p:Platform={msbuild_platform}"))
-                .arg("/verbosity:detailed");
-
-            println!("info: Running MSBuild command: {msbuild_cmd:?}");
-            let msbuild_output = msbuild_cmd.output()?;
-
-            let msbuild_stdout = String::from_utf8_lossy(&msbuild_output.stdout);
-            let msbuild_stderr = String::from_utf8_lossy(&msbuild_output.stderr);
-
-            println!("MSBuild stdout:\n{msbuild_stdout}");
-            if !msbuild_stderr.is_empty() {
-                println!("MSBuild stderr:\n{msbuild_stderr}");
-            }
-
-            if !msbuild_output.status.success() {
-                return Err(format!(
-                    "Both CMake build and MSBuild failed:\nCMake STDOUT:\n{stdout}\nCMake STDERR:\n{stderr}\nMSBuild STDOUT:\n{msbuild_stdout}\nMSBuild STDERR:\n{msbuild_stderr}"
-                )
-                .into());
-            }
-        } else {
-            return Err(
-                format!("CMake build failed:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}").into(),
-            );
-        }
-    } else {
-        // Even if CMake reported success, check if it actually built anything
-        // Look for compilation success indicators in the output
-        let expected_lib_indicator = if target_env == "msvc" {
-            "wxdragon.lib"
-        } else {
-            "libwxdragon.a"
-        };
-        let build_successful = stdout.contains("Build succeeded")
-            || stdout.contains("succeeded")
-            || stdout.contains(expected_lib_indicator)
-            || stdout.contains("Building CXX object")
-            || stdout.contains("Linking CXX static library");
-
-        if !build_successful {
-            println!("warn: CMake reported success but no compilation indicators found. Output may indicate a silent failure.");
-        }
-    }
-
-    // Check for the built library in multiple possible locations (platform-specific)
-    let possible_lib_paths = if target_env == "msvc" {
-        // Windows MSVC uses .lib files
-        vec![
-            wrapper_build_dir.join(format!("{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("lib/{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("x64/{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join(format!("lib/{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join(format!("x64/{}/wxdragon.lib", build_type.to_lowercase())),
-            wrapper_build_dir.join("wxdragon.lib"),
-            wrapper_build_dir.join("lib/wxdragon.lib"),
-            wrapper_build_dir.join("x64/wxdragon.lib"),
-            wrapper_build_dir.join(format!("Win32/{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("lib/Win32/{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("out/{build_type}/wxdragon.lib")),
-            wrapper_build_dir.join(format!("bin/{build_type}/wxdragon.lib")),
-        ]
-    } else {
-        // Unix-like systems (Linux, macOS, Windows GNU) use .a files
-        vec![
-            wrapper_build_dir.join("lib/libwxdragon.a"),
-            wrapper_build_dir.join("libwxdragon.a"),
-            wrapper_build_dir.join(format!("lib/{build_type}/libwxdragon.a")),
-            wrapper_build_dir.join(format!("{build_type}/libwxdragon.a")),
-            wrapper_build_dir.join(format!("lib/{}/libwxdragon.a", build_type.to_lowercase())),
-            wrapper_build_dir.join(format!("{}/libwxdragon.a", build_type.to_lowercase())),
-        ]
-    };
-
-    let mut library_path = None;
-    for path in &possible_lib_paths {
-        if path.exists() {
-            library_path = Some(path.clone());
-            println!("info: Found library at: {}", path.display());
-            break;
-        }
-    }
-
-    let library_path = match library_path {
-        Some(path) => path,
-        None => {
-            // List all files in build directory for debugging
-            fn list_directory_recursive(dir: &Path, prefix: &str) -> String {
-                let mut result = String::new();
-                if let Ok(entries) = std::fs::read_dir(dir) {
-                    for entry in entries.flatten() {
-                        let path = entry.path();
-                        result.push_str(&format!("{}  \"{}\"\n", prefix, path.display()));
-                        if path.is_dir() {
-                            result
-                                .push_str(&list_directory_recursive(&path, &format!("{prefix}  ")));
-                        }
-                    }
-                }
-                result
-            }
-
-            let build_contents = list_directory_recursive(&wrapper_build_dir, "");
-
-            println!("Searched for library in these locations:");
-            for path in &possible_lib_paths {
-                println!("  - {}", path.display());
-            }
-
-            return Err(format!(
-                "wxDragon wrapper library was not built successfully.\nExpected library file not found. Build directory contents:\n{}\nSearched locations:\n{}",
-                build_contents,
-                possible_lib_paths.iter().map(|p| format!("  - {}", p.display())).collect::<Vec<_>>().join("\n")
-            ).into());
-        }
-    };
-
-    let dest = if target_os == "windows" {
-        // For Windows, copy to the platform-specific subdirectory where the linker expects it
-        let arch_suffix = if target_arch == "i686" || target_arch == "x86" {
-            "x86"
-        } else {
-            "x64"
-        };
-        // Check for both arch-specific and generic library directories
-        let arch_specific_lib_dir = match target_env {
-            "msvc" => wx_lib_dir.join(format!("vc_{arch_suffix}_lib")),
-            "gnu" => wx_lib_dir.join(format!("gcc_{arch_suffix}_lib")),
-            _ => wx_lib_dir.clone(),
-        };
-        let generic_lib_dir = match target_env {
-            "msvc" => wx_lib_dir.join("vc_lib"),
-            "gnu" => wx_lib_dir.join("gcc_lib"),
-            _ => wx_lib_dir.clone(),
-        };
-
-        let platform_lib_dir = if arch_specific_lib_dir.exists() {
-            arch_specific_lib_dir
-        } else {
-            generic_lib_dir
-        };
-
-        if target_env == "msvc" {
-            platform_lib_dir.join("wxdragon.lib")
-        } else {
-            platform_lib_dir.join("libwxdragon.a")
-        }
-    } else {
-        // For non-Windows platforms, use the root directory
-        wx_lib_dir.join("libwxdragon.a")
-    };
-
-    // Ensure destination directory exists
-    if let Some(parent) = dest.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-
-    std::fs::copy(&library_path, &dest)?;
-    println!("info: Successfully built wxDragon wrapper library at {library_path:?}");
 
     Ok(())
 }

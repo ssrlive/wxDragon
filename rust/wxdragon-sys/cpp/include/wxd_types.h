@@ -177,7 +177,7 @@ typedef enum {
     WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG = 86,
     
     // Media events - only available when media-ctrl feature is enabled
-    #if WXD_USE_MEDIACTRL
+    #if wxUSE_MEDIACTRL
     WXD_EVENT_TYPE_MEDIA_LOADED = 87,
     WXD_EVENT_TYPE_MEDIA_STOP = 88,
     WXD_EVENT_TYPE_MEDIA_FINISHED = 89,
@@ -230,7 +230,7 @@ typedef enum {
     WXD_EVENT_TYPE_KILL_FOCUS = 130, // Window kill focus event
 
     // AUI Manager event types
-    #if WXD_USE_AUI
+    #if wxUSE_AUI
     WXD_EVENT_TYPE_AUI_PANE_BUTTON = 135, // wxEVT_AUI_PANE_BUTTON
     WXD_EVENT_TYPE_AUI_PANE_CLOSE = 136, // wxEVT_AUI_PANE_CLOSE
     WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE = 137, // wxEVT_AUI_PANE_MAXIMIZE
@@ -269,7 +269,7 @@ typedef enum {
     WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED = 264, // wxEVT_RICHTEXT_STYLESHEET_REPLACED
 
     // StyledTextCtrl events - only available when stc feature is enabled
-    #if WXD_USE_STC
+    #if wxUSE_STC
     WXD_EVENT_TYPE_STC_CHANGE = 300,                    // wxEVT_STC_CHANGE
     WXD_EVENT_TYPE_STC_STYLENEEDED = 301,               // wxEVT_STC_STYLENEEDED
     WXD_EVENT_TYPE_STC_CHARADDED = 302,                 // wxEVT_STC_CHARADDED

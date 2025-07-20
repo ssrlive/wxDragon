@@ -2,7 +2,7 @@
 #include <wx/wx.h>
 
 // Only compile when XRC is enabled
-#if WXD_USE_XRC
+#if wxUSE_XRC
 
 #include <wx/xrc/xmlres.h>
 #include <wx/xrc/xh_stbmp.h>  // Include for XRC_MAKE_INSTANCE macro
@@ -123,7 +123,7 @@ WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlRe
     res->AddHandler(new WxdPlatformAwareStaticBitmapHandler());
 }
 
-#else // WXD_USE_XRC
+#else // wxUSE_XRC
 
 // Stub implementation when XRC is not enabled
 WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlResource_t* resource) {
@@ -131,4 +131,4 @@ WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlRe
     (void)resource; // Suppress unused parameter warning
 }
 
-#endif // WXD_USE_XRC 
+#endif // wxUSE_XRC 
