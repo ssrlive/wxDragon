@@ -9,7 +9,12 @@ fn main() {
     let target = std::env::var("TARGET").unwrap();
 
     let wxwidgets_version = "3.3.0";
-    let wxwidgets_dir = format!("wxWidgets-{wxwidgets_version}");
+    let wxwidgets_dir = std::env::current_dir()
+        .expect("Failed to get current dir")
+        .join(format!("wxWidgets-{wxwidgets_version}"))
+        .to_str()
+        .expect("Failed to convert wxWidgets directory path to string")
+        .to_string();
 
     if !std::path::Path::new(&wxwidgets_dir).exists() {
         let local_wxwidgets_zip = format!("wxWidgets-{wxwidgets_version}.zip");
@@ -58,6 +63,12 @@ fn main() {
         bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=1");
     } else {
         bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=0");
+    }
+
+    if cfg!(feature = "richtext") {
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_RICHTEXT=1");
+    } else {
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_RICHTEXT=0");
     }
 
     bindings_builder = bindings_builder.clang_arg(format!("--target={target}"));
@@ -132,9 +143,13 @@ fn download_wxwidgets_source(version: &str, output: &str) -> std::io::Result<()>
     Ok(())
 }
 
-fn extract_wxwidgets_source(zip_path: &str, output_dir: &str) -> std::io::Result<()> {
-    if std::path::Path::new(output_dir).exists() {
-        println!("Output directory {output_dir} already exists, skipping extraction.");
+fn extract_wxwidgets_source<P: AsRef<std::path::Path>>(
+    zip_path: &str,
+    output_dir: P,
+) -> std::io::Result<()> {
+    let output_dir_str = output_dir.as_ref().to_str().unwrap();
+    if output_dir.as_ref().exists() {
+        println!("Output directory {output_dir_str} already exists, skipping extraction.");
         return Ok(());
     }
 
@@ -155,7 +170,7 @@ fn extract_wxwidgets_source(zip_path: &str, output_dir: &str) -> std::io::Result
             .by_index(i)
             .map_err(|e| std::io::Error::other(format!("Failed to access file in zip: {e}")))?;
         let outpath = match file.enclosed_name() {
-            Some(path) => std::path::PathBuf::from(output_dir).join(path),
+            Some(path) => output_dir.as_ref().join(path),
             None => continue,
         };
 
@@ -177,7 +192,7 @@ fn extract_wxwidgets_source(zip_path: &str, output_dir: &str) -> std::io::Result
             })?;
         }
     }
-    println!("Extracted wxWidgets source to {output_dir}");
+    println!("Extracted wxWidgets source to {output_dir_str}");
     Ok(())
 }
 
@@ -380,6 +395,9 @@ fn build_wxdragon_wrapper(
             println!("cargo:rustc-link-lib=static=wx_osx_cocoau_xrc-3.3");
             println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
         }
+        if cfg!(feature = "richtext") {
+            println!("cargo:rustc-link-lib=static=wx_osx_cocoau_richtext-3.3");
+        }
 
         println!("cargo:rustc-link-lib=static=wxjpeg-3.3");
         println!("cargo:rustc-link-lib=static=wxpng-3.3");
@@ -450,6 +468,9 @@ fn build_wxdragon_wrapper(
                 println!("cargo:rustc-link-lib=static=wx_mswu_xrc-3.3-Windows");
                 println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3-Windows");
             }
+            if cfg!(feature = "richtext") {
+                println!("cargo:rustc-link-lib=static=wx_mswu_richtext-3.3-Windows");
+            }
 
             println!("cargo:rustc-link-lib=static=wxpng-3.3");
             println!("cargo:rustc-link-lib=static=wxtiff-3.3");
@@ -497,6 +518,9 @@ fn build_wxdragon_wrapper(
                     println!("cargo:rustc-link-lib=static=wxmsw33ud_xrc");
                     println!("cargo:rustc-link-lib=static=wxbase33ud_xml");
                 }
+                if cfg!(feature = "richtext") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33ud_richtext");
+                }
 
                 println!("cargo:rustc-link-lib=static=wxbase33ud");
                 println!("cargo:rustc-link-lib=static=wxpngd");
@@ -533,6 +557,9 @@ fn build_wxdragon_wrapper(
                 if cfg!(feature = "xrc") {
                     println!("cargo:rustc-link-lib=static=wxmsw33u_xrc");
                     println!("cargo:rustc-link-lib=static=wxbase33u_xml");
+                }
+                if cfg!(feature = "richtext") {
+                    println!("cargo:rustc-link-lib=static=wxmsw33u_richtext");
                 }
 
                 println!("cargo:rustc-link-lib=static=wxbase33u");
@@ -573,6 +600,7 @@ fn build_wxdragon_wrapper(
         println!("cargo:rustc-link-lib=uxtheme");
         println!("cargo:rustc-link-lib=imm32"); // Add IME library for Scintilla support
     } else {
+        // For Linux and other Unix-like systems
         println!("cargo:rustc-link-lib=xkbcommon");
         let lib = pkg_config::Config::new().probe("gtk+-3.0").unwrap();
         for _lib in lib.libs {
@@ -610,6 +638,9 @@ fn build_wxdragon_wrapper(
         if cfg!(feature = "xrc") {
             println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.3");
             println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+        }
+        if cfg!(feature = "richtext") {
+            println!("cargo:rustc-link-lib=static=wx_gtk3u_richtext-3.3");
         }
     }
 
