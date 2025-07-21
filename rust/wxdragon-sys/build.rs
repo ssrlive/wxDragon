@@ -258,7 +258,7 @@ fn build_wxdragon_wrapper(
     let dst = cmake_config.build();
     let build_dir = dst.join("build");
     let lib_search_path = build_dir.join("lib").display().to_string();
-    let wxwidgets_build_dir = build_dir.join("wxwidgets_build");
+    let wxwidgets_build_dir = wxwidgets_source_path.join("wxwidgets_build");
 
     println!("info: CMake build completed. Build directory: {build_dir:?}");
     println!("info: libwxdragon should be in: {lib_search_path:?}");

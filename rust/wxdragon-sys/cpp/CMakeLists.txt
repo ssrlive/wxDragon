@@ -35,7 +35,7 @@ list(GET WXWIDGETS_SOURCE_PATHS 0 WXWIDGETS_SOURCE_PATH)
 message(STATUS "Auto-detected wxWidgets at: ${WXWIDGETS_SOURCE_PATH}")
 
 # wxWidgets build directory
-set(WXWIDGETS_LIB_DIR ${CMAKE_BINARY_DIR}/wxwidgets_build)
+set(WXWIDGETS_LIB_DIR ${WXWIDGETS_SOURCE_PATH}/wxwidgets_build)
 
 message(STATUS "Using wxWidgets binaries from: ${WXWIDGETS_LIB_DIR}")
 
