@@ -8,6 +8,8 @@ fn main() {
     let target_env = std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target = std::env::var("TARGET").unwrap();
 
+    println!("info: Target OS: {target_os}, Target Env: {target_env}, Target: {target}");
+
     let wxwidgets_version = "3.3.0";
     let wxwidgets_dir = std::env::current_dir()
         .expect("Failed to get current dir")
@@ -100,7 +102,7 @@ fn main() {
 
     // --- 4. Build wxDragon Wrapper ---
     let wxwidgets_dir = PathBuf::from(wxwidgets_dir);
-    build_wxdragon_wrapper(wxwidgets_version, &wxwidgets_dir, &target_os, &target_env)
+    build_wxdragon_wrapper(&target, &wxwidgets_dir, &target_os, &target_env)
         .expect("Failed to build wxDragon wrapper library");
 
     // --- 5. Setup Linking ---
@@ -197,7 +199,7 @@ fn extract_wxwidgets_source<P: AsRef<std::path::Path>>(
 }
 
 fn build_wxdragon_wrapper(
-    _wx_version: &str,
+    target: &str,
     wxwidgets_source_path: &PathBuf,
     target_os: &str,
     target_env: &str,
@@ -261,6 +263,13 @@ fn build_wxdragon_wrapper(
             // Potentially set MinGW toolchain for CMake if not automatically detected
         } else {
             cmake_config.generator("Ninja");
+        }
+
+        if target == "i686-pc-windows-msvc" {
+            cmake_config
+                .generator("Visual Studio 17 2022")
+                .define("CMAKE_GENERATOR_PLATFORM", "Win32")
+                .cxxflag("/EHsc");
         }
     }
 
@@ -357,9 +366,14 @@ fn build_wxdragon_wrapper(
             }
             // --- End dynamic path finding ---
         } else {
+            let lib_dir = if target == "i686-pc-windows-msvc" {
+                "lib/vc_lib"
+            } else {
+                "lib/vc_x64_lib"
+            };
             println!(
                 "cargo:rustc-link-search=native={}",
-                wxwidgets_build_dir.join("lib/vc_x64_lib").display()
+                wxwidgets_build_dir.join(lib_dir).display()
             );
         }
     }
