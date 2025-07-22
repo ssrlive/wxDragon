@@ -447,8 +447,8 @@ fn link_macos_libraries() {
     }
 
     // Fix for ___isPlatformVersionAtLeast undefined symbol on macOS arm64
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
-    if target_arch == "aarch64" {
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    if target_os == "macos" {
         // Use xcrun to find the toolchain path
         if let Ok(output) = std::process::Command::new("xcrun")
             .args(["--find", "clang"])
