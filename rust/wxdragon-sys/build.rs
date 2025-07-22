@@ -3,10 +3,11 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 
 fn main() {
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let bindings_out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target = env::var("TARGET").unwrap();
+    let out_dir = env::current_dir().unwrap().join("../../target");
 
     // --- 1. Generate FFI Bindings ---
     println!("info: Generating FFI bindings...");
@@ -85,7 +86,7 @@ fn main() {
             .expect("Unable to generate bindings");
 
         bindings
-            .write_to_file(out_dir.join("bindings.rs"))
+            .write_to_file(bindings_out_dir.join("bindings.rs"))
             .expect("Couldn't write bindings!");
 
         println!("info: Successfully generated FFI bindings");
@@ -176,7 +177,7 @@ fn main() {
         .expect("Unable to generate bindings");
 
     bindings
-        .write_to_file(out_dir.join("bindings.rs"))
+        .write_to_file(bindings_out_dir.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
     println!("info: Successfully generated FFI bindings");

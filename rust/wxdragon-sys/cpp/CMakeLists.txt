@@ -15,7 +15,7 @@ if(NOT DEFINED WXWIDGETS_LIB_DIR OR NOT EXISTS "${WXWIDGETS_LIB_DIR}")
     # Auto-detect the prebuilt wxWidgets directory
     message(STATUS "WXWIDGETS_LIB_DIR not set or does not exist, auto-detecting...")
     file(GLOB WXWIDGETS_LIBS_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/debug/build/wxdragon-sys-*/out/wxwidgets-*-debug"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/wxwidgets-*"
     )
     if(NOT WXWIDGETS_LIBS_PATH)
         message(FATAL_ERROR "Could not find prebuilt wxWidgets directory. Please run 'cargo build' first to download prebuilt libraries.")
