@@ -1,8 +1,9 @@
-#include "../include/wxdragon.h"
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+
+#include "../include/wxdragon.h"
 
 #if wxUSE_TASKBARICON
 

@@ -1,5 +1,6 @@
-#include "../include/wxdragon.h"
+#include <wx/wxprec.h>
 #include <wx/wx.h>
+#include "../include/wxdragon.h"
 #include <wx/toolbar.h>
 #include <wx/bmpbndl.h>
 

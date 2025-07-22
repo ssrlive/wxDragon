@@ -1,6 +1,7 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include "wxd_utils.h"
-#include <wx/wx.h>
 #include <wx/stattext.h> // Include wxStaticText header
 #include <string> // For std::string conversion
 

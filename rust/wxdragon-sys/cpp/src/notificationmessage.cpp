@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include <wx/notifmsg.h> // Required for wxNotificationMessage
 

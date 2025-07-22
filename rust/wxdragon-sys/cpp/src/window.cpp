@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h" // Needed for WXD_EXPORTED, wxd_* types, WXD_ID_ANY
 #include <wx/window.h> // Needed for wxWindow
 #include <wx/sizer.h>  // Needed for wxSizer

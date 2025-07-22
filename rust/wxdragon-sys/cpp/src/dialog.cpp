@@ -1,5 +1,6 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wxdragon.h"
-#include "wx/wx.h"
 #include "wx/dialog.h"
 
 extern "C" {

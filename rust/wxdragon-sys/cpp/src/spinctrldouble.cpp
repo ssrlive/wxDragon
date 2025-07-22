@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include <wx/spinctrl.h> // For wxSpinCtrlDouble, wxSP_ARROW_KEYS, wxSP_WRAP
 #include <wx/string.h>   // For wxString

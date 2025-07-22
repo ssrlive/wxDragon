@@ -1,5 +1,6 @@
-#include "../include/wxdragon.h"
+#include <wx/wxprec.h>
 #include <wx/wx.h>
+#include "../include/wxdragon.h"
 #include <wx/spinctrl.h>
 
 // Helper to convert wxd_Point to wxPoint (assuming it exists in another .cpp or is standard)

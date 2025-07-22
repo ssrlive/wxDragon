@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h" // Main header for wxDragon C API
 #include <wx/aui/auibar.h>      // For wxAuiToolBar
 #include <wx/window.h>         // For wxWindow
