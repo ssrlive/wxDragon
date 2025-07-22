@@ -4,6 +4,14 @@ project(wxDragon LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# --- Feature Flags (from Rust build.rs) ---
+set(wxdUSE_AUI ON CACHE BOOL "Use AUI (Advanced User Interface)")
+set(wxdUSE_MEDIACTRL ON CACHE BOOL "Use Media Ctrl widgets")
+set(wxdUSE_STC ON CACHE BOOL "Use Styled Text Control widget")
+set(wxdUSE_XRC ON CACHE BOOL "Use XML Resource (XRC) support")
+set(wxdUSE_WEBVIEW ON CACHE BOOL "Use the Webview widget")
+set(wxdUSE_RICHTEXT ON CACHE BOOL "Use Rich Text Control widget")
+
 # --- Output Directories ---
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -62,14 +70,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# --- Feature Flags (from Rust build.rs) ---
-option(wxdUSE_AUI "Use AUI (Advanced User Interface)" ON)
-option(wxdUSE_MEDIACTRL "Use Media Ctrl widgets" ON)
-option(wxdUSE_STC "Use Styled Text Control widget" ON)
-option(wxdUSE_XRC "Use XML Resource (XRC) support" ON)
-option(wxdUSE_WEBVIEW "Use the Webview widget" ON)
-option(wxdUSE_RICHTEXT "Use Rich Text Control widget" ON)
 
 # --- wxDragon Library Sources ---
 set(WXDRAGON_SOURCES
