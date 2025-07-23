@@ -1252,3 +1252,24 @@ WXD_EXPORTED bool wxd_Event_IsVetoed(wxd_Event_t* event) {
     
     return IsEventVetoed(*wx_event);
 }
+
+WXD_EXPORTED void wxd_Event_SetCanVeto(wxd_Event_t* event, bool can_veto) {
+    if (!event) return;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    
+    // Try wxCloseEvent first
+    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
+    if (close_event) {
+        close_event->SetCanVeto(can_veto);
+        return;
+    }
+    
+    // Try wxNotifyEvent - note that wxNotifyEvent doesn't have SetCanVeto
+    // but it's always vetable, so we don't need to do anything for it
+    wxNotifyEvent* notify_event = wxDynamicCast(wx_event, wxNotifyEvent);
+    if (notify_event) {
+        // wxNotifyEvent doesn't have SetCanVeto method, it's always vetable
+        // No action needed for wxNotifyEvent-derived events
+        return;
+    }
+}

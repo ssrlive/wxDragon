@@ -112,6 +112,7 @@ WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event);
 WXD_EXPORTED bool wxd_Event_CanVeto(wxd_Event_t* event);
 WXD_EXPORTED void wxd_Event_Veto(wxd_Event_t* event);
 WXD_EXPORTED bool wxd_Event_IsVetoed(wxd_Event_t* event);
+WXD_EXPORTED void wxd_Event_SetCanVeto(wxd_Event_t* event, bool can_veto);
 
 #ifdef __cplusplus
 }

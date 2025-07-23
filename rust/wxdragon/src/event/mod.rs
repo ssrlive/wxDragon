@@ -791,6 +791,18 @@ impl Event {
         }
         unsafe { ffi::wxd_Event_IsVetoed(self.0) }
     }
+
+    /// Sets whether an event can be vetoed.
+    /// This method only applies to events that support veto functionality.
+    /// For wxCloseEvent: controls whether the close event can be cancelled
+    /// For other vetable events: this method exists for API completeness but may not have effect
+    /// as most other vetable events (derived from wxNotifyEvent) are always vetable
+    pub fn set_can_veto(&self, can_veto: bool) {
+        if self.0.is_null() {
+            return;
+        }
+        unsafe { ffi::wxd_Event_SetCanVeto(self.0, can_veto) }
+    }
 }
 
 // --- WxEvtHandler Trait (Updated for Simple Event Handling) ---
