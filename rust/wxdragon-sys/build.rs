@@ -100,7 +100,7 @@ fn main() {
     }
 
     // --- 2. Download and Setup Pre-built Libraries ---
-    let wx_version = "3.3.0";
+    let wx_version = "3.3.1";
 
     download_prebuilt_libraries(wx_version, &out_dir, &target_os, &target_env)
         .expect("Failed to download pre-built wxWidgets libraries");
