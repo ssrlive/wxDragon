@@ -1,7 +1,6 @@
 use wxdragon::prelude::*;
 use wxdragon::scrollable::WxScrollable;
 
-#[allow(dead_code)]
 pub struct RichTextTabControls {
     pub panel: Panel,
     pub rich_text_ctrl: RichTextCtrl,
@@ -9,6 +8,7 @@ pub struct RichTextTabControls {
     pub italic_btn: Button,
     pub underline_btn: Button,
     pub font_size_spin: SpinCtrl,
+    #[allow(dead_code)]
     pub font_size_label: StaticText,
     pub clear_btn: Button,
     pub save_btn: Button,

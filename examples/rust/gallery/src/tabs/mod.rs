@@ -35,5 +35,4 @@ pub mod dataview_virtual_tab;
 pub mod dataview_tree_tab;
 
 /// RichText tab demonstrates rich text editing functionality.
-#[cfg(feature = "richtext")]
 pub mod richtext_tab;
