@@ -245,10 +245,10 @@ impl Frame {
     }
 
     /// Closes the frame.
-    pub fn close(&self) {
+    pub fn close(&self, force: bool) {
         unsafe {
             // false = don't force close, allow events like EVT_CLOSE_WINDOW
-            ffi::wxd_Frame_Close(self.window.as_ptr() as *mut ffi::wxd_Frame_t, false);
+            ffi::wxd_Frame_Close(self.window.as_ptr() as *mut ffi::wxd_Frame_t, force);
         }
     }
 

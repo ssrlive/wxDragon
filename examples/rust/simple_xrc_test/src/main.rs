@@ -151,7 +151,7 @@ fn main() {
         let menu_exit_clone = menu_exit.clone();
         menu_exit_clone.on_click(move |_event| {
             println!("Exit menu item clicked!");
-            frame_clone_for_exit.close();
+            frame_clone_for_exit.close(true);
         });
 
         let statusbar_for_about = statusbar.clone();

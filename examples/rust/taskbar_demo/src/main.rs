@@ -78,7 +78,7 @@ fn main() {
                         status.set_label("Menu: Exit clicked - closing application...");
 
                         // Close the frame, which will trigger the on_close event
-                        frame.close();
+                        frame.close(true);
                     }
                     _ => {
                         println!("Unknown menu item clicked: {menu_id}");

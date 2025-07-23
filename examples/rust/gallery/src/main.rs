@@ -252,7 +252,7 @@ fn main() {
         frame.on_menu(move |event| match event.get_id() {
             id if id == ID_EXIT => {
                 println!("Menu/Toolbar: Exit clicked!");
-                frame_clone_for_menu.close();
+                frame_clone_for_menu.close(true);
             }
             id if id == ID_ABOUT => {
                 println!("Menu: About clicked!");
