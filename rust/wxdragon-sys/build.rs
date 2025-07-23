@@ -48,33 +48,39 @@ fn main() {
 
     // Add feature flags for conditional compilation
     if cfg!(feature = "aui") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_AUI=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_AUI=0");
     }
 
     if cfg!(feature = "media-ctrl") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_MEDIACTRL=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_MEDIACTRL=0");
     }
 
     if cfg!(feature = "webview") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_WEBVIEW=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_WEBVIEW=0");
     }
 
     if cfg!(feature = "stc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_STC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_STC=0");
     }
 
     if cfg!(feature = "xrc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_XRC=0");
+    }
+
+    if cfg!(feature = "richtext") {
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_RICHTEXT=1");
+    } else {
+        bindings_builder = bindings_builder.clang_arg("-DwxUSE_RICHTEXT=0");
     }
 
     bindings_builder = bindings_builder.clang_arg(format!("--target={target}"));
@@ -752,7 +758,8 @@ fn link_linux_libraries() {
         println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
     }
     if cfg!(feature = "media-ctrl") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
+        // file wx_gtk3u_media-3.3 is not available in the pre-built package, so we skip it
+        // println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
     }
     if cfg!(feature = "stc") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
@@ -937,11 +944,11 @@ fn build_wxdragon_wrapper(
 
     // Pass Cargo feature flags to CMake
     cmake_cmd.arg(format!(
-        "-DwxdUSE_AUI={}",
+        "-DwxUSE_AUI={}",
         if cfg!(feature = "aui") { "ON" } else { "OFF" }
     ));
     cmake_cmd.arg(format!(
-        "-DwxdUSE_MEDIACTRL={}",
+        "-DwxUSE_MEDIACTRL={}",
         if cfg!(feature = "media-ctrl") {
             "ON"
         } else {
@@ -949,7 +956,7 @@ fn build_wxdragon_wrapper(
         }
     ));
     cmake_cmd.arg(format!(
-        "-DwxdUSE_WEBVIEW={}",
+        "-DwxUSE_WEBVIEW={}",
         if cfg!(feature = "webview") {
             "ON"
         } else {
@@ -957,15 +964,15 @@ fn build_wxdragon_wrapper(
         }
     ));
     cmake_cmd.arg(format!(
-        "-DwxdUSE_STC={}",
+        "-DwxUSE_STC={}",
         if cfg!(feature = "stc") { "ON" } else { "OFF" }
     ));
     cmake_cmd.arg(format!(
-        "-DwxdUSE_XRC={}",
+        "-DwxUSE_XRC={}",
         if cfg!(feature = "xrc") { "ON" } else { "OFF" }
     ));
     cmake_cmd.arg(format!(
-        "-DwxdUSE_RICHTEXT={}",
+        "-DwxUSE_RICHTEXT={}",
         if cfg!(feature = "richtext") {
             "ON"
         } else {

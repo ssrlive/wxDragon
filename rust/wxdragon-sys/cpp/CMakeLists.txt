@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Feature Flags (from Rust build.rs) ---
-set(wxdUSE_AUI ON CACHE BOOL "Use AUI (Advanced User Interface)")
-set(wxdUSE_MEDIACTRL ON CACHE BOOL "Use Media Ctrl widgets")
-set(wxdUSE_STC ON CACHE BOOL "Use Styled Text Control widget")
-set(wxdUSE_XRC ON CACHE BOOL "Use XML Resource (XRC) support")
-set(wxdUSE_WEBVIEW ON CACHE BOOL "Use the Webview widget")
-set(wxdUSE_RICHTEXT ON CACHE BOOL "Use Rich Text Control widget")
+set(wxUSE_AUI ON CACHE BOOL "Use AUI (Advanced User Interface)")
+set(wxUSE_MEDIACTRL ON CACHE BOOL "Use Media Ctrl widgets")
+set(wxUSE_STC ON CACHE BOOL "Use Styled Text Control widget")
+set(wxUSE_XRC ON CACHE BOOL "Use XML Resource (XRC) support")
+set(wxUSE_WEBVIEW ON CACHE BOOL "Use the Webview widget")
+set(wxUSE_RICHTEXT ON CACHE BOOL "Use Rich Text Control widget")
 
 # --- Output Directories ---
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -170,7 +170,7 @@ if(PLATFORM_NAME STREQUAL "linux")
 endif()
 
 # Add conditional sources based on features
-if (wxdUSE_AUI)
+if (wxUSE_AUI)
     list(APPEND WXDRAGON_SOURCES 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_manager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/aui_mdi_child_frame.cpp
@@ -180,24 +180,24 @@ if (wxdUSE_AUI)
     )
 endif()
 
-if (wxdUSE_MEDIACTRL)
+if (wxUSE_MEDIACTRL)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/media_ctrl.cpp)
 endif()
 
-if (wxdUSE_STC)
+if (wxUSE_STC)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/styledtextctrl.cpp)
 endif()
 
-if (wxdUSE_XRC)
+if (wxUSE_XRC)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/xrc.cpp)
 endif()
 
-if (wxdUSE_WEBVIEW)
+if (wxUSE_WEBVIEW)
     # Add webview wrapper when implemented
     # list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/webview.cpp)
 endif()
 
-if (wxdUSE_RICHTEXT)
+if (wxUSE_RICHTEXT)
     list(APPEND WXDRAGON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/richtextctrl.cpp)
 endif()
 
@@ -271,46 +271,8 @@ endif()
 message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 target_include_directories(wxdragon PRIVATE ${WX_INCLUDE_PATHS})
 
-# --- Set Preprocessor Definitions Based on Features ---
-if (wxdUSE_AUI)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=0)
-endif()
-
-if (wxdUSE_MEDIACTRL)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=0)
-endif()
-
-if (wxdUSE_WEBVIEW)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=0)
-endif()
-
-if (wxdUSE_STC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=0)
-endif()
-
-if (wxdUSE_XRC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=0)
-endif()
-
-if (wxdUSE_RICHTEXT)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=0)
-endif()
-
 # --- Add Library Search Directory ---
 target_link_directories(wxdragon PRIVATE ${WXWIDGETS_LIB_DIR})
 
 message(STATUS "wxDragon wrapper library configured successfully for ${PLATFORM_NAME}")
 message(STATUS "CMake configuration for libwxdragon finished.")
- 

@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["aui", "richtext"]
+default = ["aui", "richtext", "media-ctrl"]
 aui = ["wxdragon/aui"]
 richtext = ["wxdragon/richtext"]
+media-ctrl = ["wxdragon/media-ctrl"]
 
 [dependencies]
 image = { version = "0.25.1", default-features = false, features = [
