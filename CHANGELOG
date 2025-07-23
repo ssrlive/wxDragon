@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.15
+
+### Features
+
+- Add Event::set_can_veto
+
 ## 0.8.14
 
 ### Features
