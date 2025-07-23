@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.8.15
+## 0.8.16
 
 ### Features
 
 - Add Event::set_can_veto
+- Add Frame::close(force:bool)
 
 ## 0.8.14
 
