@@ -108,9 +108,10 @@ WXD_EXPORTED int wxd_IdleEvent_GetMode();
 WXD_EXPORTED int wxd_MouseEvent_GetWheelRotation(wxd_Event_t* event);
 WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event);
 
-// Close event functions
-WXD_EXPORTED bool wxd_CloseEvent_CanVeto(wxd_Event_t* event);
-WXD_EXPORTED void wxd_CloseEvent_Veto(wxd_Event_t* event);
+// General veto support for all event types (replaces old close event specific functions)
+WXD_EXPORTED bool wxd_Event_CanVeto(wxd_Event_t* event);
+WXD_EXPORTED void wxd_Event_Veto(wxd_Event_t* event);
+WXD_EXPORTED bool wxd_Event_IsVetoed(wxd_Event_t* event);
 
 #ifdef __cplusplus
 }

@@ -70,6 +70,84 @@ struct RustClosureInfo {
 class WxdEventHandler;
 static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val);
 
+// Check if an event type typically supports veto (derived from wxNotifyEvent or wxCloseEvent)
+static bool IsVetableEventType(wxEventType eventType) {
+    // Close events
+    if (eventType == wxEVT_CLOSE_WINDOW || 
+        eventType == wxEVT_END_SESSION || 
+        eventType == wxEVT_QUERY_END_SESSION) {
+        return true;
+    }
+    
+    // Tree control events (many are wxNotifyEvent derived)
+    if (eventType == wxEVT_TREE_BEGIN_LABEL_EDIT ||
+        eventType == wxEVT_TREE_END_LABEL_EDIT ||
+        eventType == wxEVT_TREE_SEL_CHANGING ||
+        eventType == wxEVT_TREE_ITEM_COLLAPSING ||
+        eventType == wxEVT_TREE_ITEM_EXPANDING ||
+        eventType == wxEVT_TREE_BEGIN_DRAG ||
+        eventType == wxEVT_TREE_BEGIN_RDRAG ||
+        eventType == wxEVT_TREE_END_DRAG) {
+        return true;
+    }
+    
+    // List control events
+    if (eventType == wxEVT_LIST_BEGIN_LABEL_EDIT ||
+        eventType == wxEVT_LIST_END_LABEL_EDIT ||
+        eventType == wxEVT_LIST_DELETE_ITEM ||
+        eventType == wxEVT_LIST_BEGIN_DRAG ||
+        eventType == wxEVT_LIST_BEGIN_RDRAG) {
+        return true;
+    }
+    
+    // Notebook/book events (only *_CHANGING events are vetable)
+    if (eventType == wxEVT_NOTEBOOK_PAGE_CHANGING ||
+        eventType == wxEVT_TREEBOOK_PAGE_CHANGING) {
+        return true;
+    }
+    
+    // DataView events  
+    if (eventType == wxEVT_DATAVIEW_ITEM_EDITING_STARTED ||
+        eventType == wxEVT_DATAVIEW_ITEM_COLLAPSING ||
+        eventType == wxEVT_DATAVIEW_ITEM_EXPANDING) {
+        return true;
+    }
+    
+    // Splitter events (only *_CHANGING events are vetable)
+    if (eventType == wxEVT_SPLITTER_SASH_POS_CHANGING) {
+        return true;
+    }
+    
+    // AUI events
+    #if WXD_USE_AUI
+    if (eventType == wxEVT_AUI_PANE_CLOSE) {
+        return true;
+    }
+    #endif
+    
+    return false;
+}
+
+// General function to check if any wxWidgets event was vetoed
+static bool IsEventVetoed(wxEvent& event) {
+    // Try wxCloseEvent first (handles close events)
+    wxCloseEvent* closeEvent = wxDynamicCast(&event, wxCloseEvent);
+    if (closeEvent) {
+        return closeEvent->GetVeto();
+    }
+    
+    // Try wxNotifyEvent (handles most other vetable events)
+    wxNotifyEvent* notifyEvent = wxDynamicCast(&event, wxNotifyEvent);
+    if (notifyEvent) {
+        return !notifyEvent->IsAllowed(); // IsAllowed() returns false if vetoed
+    }
+    
+    // For other event types that might support veto, add specific checks here
+    // Note: Most vetable events derive from wxNotifyEvent or wxCloseEvent
+    
+    return false; // Event doesn't support veto or wasn't vetoed
+}
+
 // ClientData class to hold our handler pointer and ensure deletion
 class WxdHandlerClientData : public wxClientData {
 public:
@@ -96,6 +174,9 @@ public:
 
     // The new dispatch method that handles multiple closures per event
     void DispatchEvent(wxEvent& event);
+    
+    // Special dispatch method for close events with correct signature
+    void DispatchCloseEvent(wxCloseEvent& event);
 };
 
 // Define WxdHandlerClientData destructor (no change needed here, it still just deletes the handler)
@@ -187,7 +268,24 @@ void WxdEventHandler::DispatchEvent(wxEvent& event) {
     if (event_consumed) {
         event.Skip(false);
     } else {
-        event.Skip(true);
+        // General handling for all vetable events
+        if (IsEventVetoed(event)) {
+            // Event was vetoed, don't allow it to continue to default handlers
+            event.Skip(false);
+        } else {
+            event.Skip(true);
+        }
+    }
+}
+
+// Special dispatch method for close events
+void WxdEventHandler::DispatchCloseEvent(wxCloseEvent& event) {
+    // Call the general DispatchEvent method
+    DispatchEvent(event);
+    
+    // After processing, if the event was vetoed, we're done
+    if (event.GetVeto()) {
+        return;
     }
 }
 
@@ -341,8 +439,25 @@ extern "C" void wxd_EvtHandler_Bind(
     
     // Check if we need to bind DispatchEvent to wxWidgets
     if (!customHandler->wx_bindings_made[map_key]) {
-        // Bind DispatchEvent method to wxWidgets for this event type
-        wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, wxID_ANY, wxID_ANY);
+        // For vetable events, use Connect() with higher priority to intercept before default handlers
+        if (IsVetableEventType(wx_event_type_to_bind)) {
+            if (wx_event_type_to_bind == wxEVT_CLOSE_WINDOW) {
+                // Close events need special handler signature
+                wx_handler->Connect(wx_event_type_to_bind, 
+                                  wxCloseEventHandler(WxdEventHandler::DispatchCloseEvent), 
+                                  nullptr, 
+                                  customHandler);
+            } else {
+                // Other vetable events can use general handler
+                wx_handler->Connect(wx_event_type_to_bind, 
+                                  wxEventHandler(WxdEventHandler::DispatchEvent), 
+                                  nullptr, 
+                                  customHandler);
+            }
+        } else {
+            // Non-vetable events can use regular Bind()
+            wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, wxID_ANY, wxID_ANY);
+        }
         customHandler->wx_bindings_made[map_key] = true;
     }
     
@@ -398,8 +513,25 @@ extern "C" void wxd_EvtHandler_BindWithId(
     
     // Check if we need to bind DispatchEvent to wxWidgets
     if (!customHandler->wx_bindings_made[map_key]) {
-        // Bind DispatchEvent method to wxWidgets for this event type and specific ID
-        wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, id, id);
+        // For vetable events, use Connect() with higher priority to intercept before default handlers
+        if (IsVetableEventType(wx_event_type_to_bind)) {
+            if (wx_event_type_to_bind == wxEVT_CLOSE_WINDOW) {
+                // Close events need special handler signature
+                wx_handler->Connect(wx_event_type_to_bind, 
+                                  wxCloseEventHandler(WxdEventHandler::DispatchCloseEvent), 
+                                  nullptr, 
+                                  customHandler);
+            } else {
+                // Other vetable events can use general handler
+                wx_handler->Connect(wx_event_type_to_bind, 
+                                  wxEventHandler(WxdEventHandler::DispatchEvent), 
+                                  nullptr, 
+                                  customHandler);
+            }
+        } else {
+            // Non-vetable events can use regular Bind() with specific ID
+            wx_handler->Bind(wx_event_type_to_bind, &WxdEventHandler::DispatchEvent, customHandler, id, id);
+        }
         customHandler->wx_bindings_made[map_key] = true;
     }
     
@@ -1075,21 +1207,48 @@ WXD_EXPORTED int wxd_MouseEvent_GetWheelDelta(wxd_Event_t* event) {
     return mouse_event->GetWheelDelta();
 }
 
-// Close event functions
-WXD_EXPORTED bool wxd_CloseEvent_CanVeto(wxd_Event_t* event) {
+// General veto support for all event types (replaces old close event specific functions)
+WXD_EXPORTED bool wxd_Event_CanVeto(wxd_Event_t* event) {
     if (!event) return false;
     wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
-    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
-    if (!close_event) return false;
     
-    return close_event->CanVeto();
+    // Try wxCloseEvent first
+    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
+    if (close_event) {
+        return close_event->CanVeto();
+    }
+    
+    // Try wxNotifyEvent (most other vetable events derive from this)
+    wxNotifyEvent* notify_event = wxDynamicCast(wx_event, wxNotifyEvent);
+    if (notify_event) {
+        return true; // wxNotifyEvent always supports veto
+    }
+    
+    return false; // Event doesn't support veto
 }
 
-WXD_EXPORTED void wxd_CloseEvent_Veto(wxd_Event_t* event) {
+WXD_EXPORTED void wxd_Event_Veto(wxd_Event_t* event) {
     if (!event) return;
     wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
-    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
-    if (!close_event) return;
     
-    close_event->Veto();
+    // Try wxCloseEvent first
+    wxCloseEvent* close_event = wxDynamicCast(wx_event, wxCloseEvent);
+    if (close_event) {
+        close_event->Veto();
+        return;
+    }
+    
+    // Try wxNotifyEvent
+    wxNotifyEvent* notify_event = wxDynamicCast(wx_event, wxNotifyEvent);
+    if (notify_event) {
+        notify_event->Veto();
+        return;
+    }
+}
+
+WXD_EXPORTED bool wxd_Event_IsVetoed(wxd_Event_t* event) {
+    if (!event) return false;
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    
+    return IsEventVetoed(*wx_event);
 }

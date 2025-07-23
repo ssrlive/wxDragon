@@ -120,26 +120,24 @@ fn main() {
         frame.on_close({
             let frame = frame.clone();
             move |evt| {
-                if let wxdragon::WindowEventData::General(event) = &evt {
-                    if event.can_veto() {
-                        use MessageDialogStyle::{Cancel, IconInformation, YesNo};
-                        let res = MessageDialog::builder(
-                            &frame,
-                            "Are you sure you want to close the application?",
-                            "Confirm Close",
-                        )
-                        .with_style(YesNo | Cancel | IconInformation)
-                        .build()
-                        .show_modal();
-                        if res != wxdragon::ID_YES {
-                            println!("❌ Close operation vetoed by user.");
+                use MessageDialogStyle::{Cancel, IconInformation, YesNo};
+                let res = MessageDialog::builder(
+                    &frame,
+                    "Are you sure you want to close the application?",
+                    "Confirm Close",
+                )
+                .with_style(YesNo | Cancel | IconInformation)
+                .build()
+                .show_modal();
+
+                if res != wxdragon::ID_YES {
+                    // User cancelled (clicked No or Cancel), prevent the close
+                    if let wxdragon::WindowEventData::General(event) = &evt {
+                        if event.can_veto() {
                             event.veto();
-                            return;
                         }
                     }
                 }
-                println!("Application frame closed.");
-                evt.skip(true); // similar to `frame.destroy();`
             }
         });
 

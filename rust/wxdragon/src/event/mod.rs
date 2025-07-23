@@ -758,26 +758,38 @@ impl Event {
         unsafe { ffi::wxd_IdleEvent_MoreRequested(self.0) }
     }
 
-    /// Checks if a close event can be vetoed.
-    /// This is typically used with close window events to determine
-    /// if the application can prevent the window from closing.
+    /// Checks if an event can be vetoed.
+    /// This works with all vetable events (close events, tree events, list events, etc.)
+    /// to determine if the application can prevent the event's default action.
+    /// Note: This method now uses the general veto system and works with all vetable events.
     pub fn can_veto(&self) -> bool {
         if self.0.is_null() {
             return false;
         }
-        unsafe { ffi::wxd_CloseEvent_CanVeto(self.0) }
+        unsafe { ffi::wxd_Event_CanVeto(self.0) }
     }
 
-    /// Vetos a close event, preventing the window from closing.
+    /// Vetos an event, preventing its default action.
     /// This should only be called if `can_veto()` returns true.
-    /// When called, it prevents the window from being closed and
-    /// the event handler should provide feedback to the user about why
-    /// the close operation was cancelled.
+    /// Works with all vetable events (close events, tree events, list events, etc.).
+    /// When called on a close event, it prevents the window from being closed.
+    /// When called on other events, it prevents their respective default actions.
+    /// The event handler should provide feedback to the user about why the action was cancelled.
+    /// Note: This method now uses the general veto system and works with all vetable events.
     pub fn veto(&self) {
         if self.0.is_null() {
             return;
         }
-        unsafe { ffi::wxd_CloseEvent_Veto(self.0) }
+        unsafe { ffi::wxd_Event_Veto(self.0) }
+    }
+
+    /// General method to check if any event was vetoed.
+    /// Works with all vetable events (wxCloseEvent, wxNotifyEvent derivatives, etc.)
+    pub fn is_vetoed(&self) -> bool {
+        if self.0.is_null() {
+            return false;
+        }
+        unsafe { ffi::wxd_Event_IsVetoed(self.0) }
     }
 }
 
