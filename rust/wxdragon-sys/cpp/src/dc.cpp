@@ -1,5 +1,6 @@
-#include "../include/wxdragon.h"
+#include <wx/wxprec.h>
 #include <wx/wx.h>
+#include "../include/wxdragon.h"
 #include <wx/dcmemory.h>
 #include <wx/dcscreen.h>
 #include <wx/dcbuffer.h>

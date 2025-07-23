@@ -1,5 +1,6 @@
-#include "wxdragon.h"
+#include <wx/wxprec.h>
 #include <wx/wx.h>
+#include "wxdragon.h"
 #include <wx/notebook.h>
 
 // Implementation for wxd_Notebook_Create

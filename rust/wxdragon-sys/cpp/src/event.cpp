@@ -1,6 +1,7 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "../include/wxdragon.h"
 // #include "../include/events/wxd_event_api.h" // No longer needed, wxd_Event_t defined in wxd_types.h (via wxdragon.h)
-#include <wx/wx.h>
 #include <unordered_map>
 #include <vector>  // For std::vector used in closureMap
 #include <memory> // For std::unique_ptr if we want safer memory management

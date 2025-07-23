@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include "wxdragon.h"
 #include "wxd_utils.h" // For colour conversion helpers
 #include <wx/hyperlink.h>

@@ -1,3 +1,5 @@
+#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include <wx/dnd.h>
 #include <wx/dataobj.h>
 #include <wx/window.h>
