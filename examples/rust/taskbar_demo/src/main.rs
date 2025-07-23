@@ -78,7 +78,7 @@ fn main() {
                         status.set_label("Menu: Exit clicked - closing application...");
 
                         // Close the frame, which will trigger the on_close event
-                        frame.close();
+                        frame.close(true);
                     }
                     _ => {
                         println!("Unknown menu item clicked: {menu_id}");
@@ -117,12 +117,14 @@ fn main() {
         frame.show(true);
         frame.centre();
 
-        frame.on_close({
-            let frame = frame.clone();
-            move |evt| {
+        let frame_clone = frame.clone();
+        frame.on_close(move |evt| {
+            if let wxdragon::WindowEventData::General(event) = &evt
+                && event.can_veto()
+            {
                 use MessageDialogStyle::{Cancel, IconInformation, YesNo};
                 let res = MessageDialog::builder(
-                    &frame,
+                    &frame_clone,
                     "Are you sure you want to close the application?",
                     "Confirm Close",
                 )
@@ -132,21 +134,14 @@ fn main() {
 
                 if res != wxdragon::ID_YES {
                     // User cancelled (clicked No or Cancel), prevent the close
-                    if let wxdragon::WindowEventData::General(event) = &evt {
-                        if event.can_veto() {
-                            event.veto();
-                        }
-                    }
+                    event.veto();
                 }
             }
         });
 
-        frame.on_destroy({
-            let taskbar = taskbar.clone();
-            move |_evt| {
-                taskbar.destroy(); // Clean up the TaskBarIcon
-                println!("Application on_destroy.");
-            }
+        frame.on_destroy(move |_evt| {
+            taskbar.destroy(); // Clean up the TaskBarIcon
+            println!("Application on_destroy.");
         });
     });
 }
