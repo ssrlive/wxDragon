@@ -4,8 +4,6 @@
 #include <wx/uri.h>
 #include "../include/wxdragon.h"
 
-#if wxUSE_MEDIACTRL
-
 extern "C" {
 
 WXD_EXPORTED wxd_MediaCtrl_t* wxd_MediaCtrl_Create(
@@ -143,5 +141,3 @@ WXD_EXPORTED bool wxd_MediaCtrl_ShowPlayerControls(wxd_MediaCtrl_t* self, int fl
 }
 
 } // extern "C" 
-
-#endif // wxUSE_MEDIACTRL
