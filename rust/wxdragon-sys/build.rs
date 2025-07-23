@@ -7,7 +7,7 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target = env::var("TARGET").unwrap();
-    let out_dir = env::current_dir().unwrap().join("../../target");
+    let out_dir = extract_matching_parent_dir(&bindings_out_dir, "target").unwrap();
 
     // --- 1. Generate FFI Bindings ---
     println!("info: Generating FFI bindings...");
@@ -194,6 +194,21 @@ fn main() {
 
     // --- 5. Setup Linking ---
     setup_linking(wx_version, &target_os, &target_env, &out_dir);
+}
+
+pub fn extract_matching_parent_dir<P: AsRef<std::path::Path>>(
+    path: P,
+    match_name: &str,
+) -> std::io::Result<std::path::PathBuf> {
+    let mut sub_path = path.as_ref();
+    while let Some(parent) = sub_path.parent() {
+        if parent.ends_with(match_name) {
+            return Ok(parent.to_path_buf());
+        }
+        sub_path = parent;
+    }
+    let info = format!("No parent directory matching '{match_name}' found");
+    Err(std::io::Error::new(std::io::ErrorKind::NotFound, info))
 }
 
 fn download_prebuilt_libraries(
