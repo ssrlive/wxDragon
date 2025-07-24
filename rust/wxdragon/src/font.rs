@@ -8,14 +8,13 @@ use wxdragon_sys as ffi;
 #[repr(i32)]
 pub enum FontFamily {
     #[default]
-    Default = 0,
-    Decorative = 1,
-    Roman = 2,
-    Script = 3,
-    Swiss = 4,
-    Modern = 5,
-    Teletype = 6,
-    // Unknown = 7, // wxFONTFAMILY_UNKNOWN usually maps to MAX or is separate
+    Default = ffi::WXD_FONTFAMILY_DEFAULT as i32,
+    Decorative = ffi::WXD_FONTFAMILY_DECORATIVE as i32,
+    Roman = ffi::WXD_FONTFAMILY_ROMAN as i32,
+    Script = ffi::WXD_FONTFAMILY_SCRIPT as i32,
+    Swiss = ffi::WXD_FONTFAMILY_SWISS as i32,
+    Modern = ffi::WXD_FONTFAMILY_MODERN as i32,
+    Teletype = ffi::WXD_FONTFAMILY_TELETYPE as i32,
 }
 
 impl FontFamily {
@@ -29,9 +28,9 @@ impl FontFamily {
 #[repr(i32)]
 pub enum FontStyle {
     #[default]
-    Normal = 0,
-    Italic = 1,
-    Slant = 2,
+    Normal = ffi::WXD_FONTSTYLE_NORMAL as i32,
+    Italic = ffi::WXD_FONTSTYLE_ITALIC as i32,
+    Slant = ffi::WXD_FONTSTYLE_SLANT as i32,
 }
 
 impl FontStyle {
@@ -44,16 +43,16 @@ impl FontStyle {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 #[repr(i32)]
 pub enum FontWeight {
-    Thin = 100,
-    ExtraLight = 200,
-    Light = 300,
+    Thin = ffi::WXD_FONTWEIGHT_THIN as i32,
+    ExtraLight = ffi::WXD_FONTWEIGHT_EXTRALIGHT as i32,
+    Light = ffi::WXD_FONTWEIGHT_LIGHT as i32,
     #[default]
-    Normal = 400,
-    Medium = 500,
-    SemiBold = 600,
-    Bold = 700,
-    ExtraBold = 800,
-    Heavy = 900,
+    Normal = ffi::WXD_FONTWEIGHT_NORMAL as i32,
+    Medium = ffi::WXD_FONTWEIGHT_MEDIUM as i32,
+    SemiBold = ffi::WXD_FONTWEIGHT_SEMIBOLD as i32,
+    Bold = ffi::WXD_FONTWEIGHT_BOLD as i32,
+    ExtraBold = ffi::WXD_FONTWEIGHT_EXTRABOLD as i32,
+    Heavy = ffi::WXD_FONTWEIGHT_HEAVY as i32,
 }
 
 impl FontWeight {

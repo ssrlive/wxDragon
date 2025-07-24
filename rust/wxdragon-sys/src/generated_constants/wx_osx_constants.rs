@@ -500,3 +500,28 @@ pub const WXD_WS_EX_PROCESS_UI_UPDATES: i64 = 32;
 pub const WXD_TBI_DEFAULT_TYPE: i64 = 0;
 pub const WXD_TBI_DOCK: i64 = 1;
 pub const WXD_TBI_CUSTOM_STATUSITEM: i64 = 2;
+
+// Font family constants
+pub const WXD_FONTFAMILY_DEFAULT: i64 = 70;
+pub const WXD_FONTFAMILY_DECORATIVE: i64 = 71;
+pub const WXD_FONTFAMILY_ROMAN: i64 = 72;
+pub const WXD_FONTFAMILY_SCRIPT: i64 = 73;
+pub const WXD_FONTFAMILY_SWISS: i64 = 74;
+pub const WXD_FONTFAMILY_MODERN: i64 = 75;
+pub const WXD_FONTFAMILY_TELETYPE: i64 = 76;
+
+// Font style constants
+pub const WXD_FONTSTYLE_NORMAL: i64 = 90;
+pub const WXD_FONTSTYLE_ITALIC: i64 = 93;
+pub const WXD_FONTSTYLE_SLANT: i64 = 94;
+
+// Font weight constants
+pub const WXD_FONTWEIGHT_THIN: i64 = 100;
+pub const WXD_FONTWEIGHT_EXTRALIGHT: i64 = 200;
+pub const WXD_FONTWEIGHT_LIGHT: i64 = 300;
+pub const WXD_FONTWEIGHT_NORMAL: i64 = 400;
+pub const WXD_FONTWEIGHT_MEDIUM: i64 = 500;
+pub const WXD_FONTWEIGHT_SEMIBOLD: i64 = 600;
+pub const WXD_FONTWEIGHT_BOLD: i64 = 700;
+pub const WXD_FONTWEIGHT_EXTRABOLD: i64 = 800;
+pub const WXD_FONTWEIGHT_HEAVY: i64 = 900;

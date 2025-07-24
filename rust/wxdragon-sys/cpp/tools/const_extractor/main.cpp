@@ -696,6 +696,31 @@ int main(int argc, char **argv) {
     constants_to_extract.push_back({"wxTBI_DOCK", wxTBI_DOCK});
     constants_to_extract.push_back({"wxTBI_CUSTOM_STATUSITEM", wxTBI_CUSTOM_STATUSITEM});
 
+    // Font family constants
+    constants_to_extract.push_back({"wxFONTFAMILY_DEFAULT", wxFONTFAMILY_DEFAULT});
+    constants_to_extract.push_back({"wxFONTFAMILY_DECORATIVE", wxFONTFAMILY_DECORATIVE});
+    constants_to_extract.push_back({"wxFONTFAMILY_ROMAN", wxFONTFAMILY_ROMAN});
+    constants_to_extract.push_back({"wxFONTFAMILY_SCRIPT", wxFONTFAMILY_SCRIPT});
+    constants_to_extract.push_back({"wxFONTFAMILY_SWISS", wxFONTFAMILY_SWISS});
+    constants_to_extract.push_back({"wxFONTFAMILY_MODERN", wxFONTFAMILY_MODERN});
+    constants_to_extract.push_back({"wxFONTFAMILY_TELETYPE", wxFONTFAMILY_TELETYPE});
+
+    // Font style constants  
+    constants_to_extract.push_back({"wxFONTSTYLE_NORMAL", wxFONTSTYLE_NORMAL});
+    constants_to_extract.push_back({"wxFONTSTYLE_ITALIC", wxFONTSTYLE_ITALIC});
+    constants_to_extract.push_back({"wxFONTSTYLE_SLANT", wxFONTSTYLE_SLANT});
+
+    // Font weight constants
+    constants_to_extract.push_back({"wxFONTWEIGHT_THIN", wxFONTWEIGHT_THIN});
+    constants_to_extract.push_back({"wxFONTWEIGHT_EXTRALIGHT", wxFONTWEIGHT_EXTRALIGHT});
+    constants_to_extract.push_back({"wxFONTWEIGHT_LIGHT", wxFONTWEIGHT_LIGHT});
+    constants_to_extract.push_back({"wxFONTWEIGHT_NORMAL", wxFONTWEIGHT_NORMAL});
+    constants_to_extract.push_back({"wxFONTWEIGHT_MEDIUM", wxFONTWEIGHT_MEDIUM});
+    constants_to_extract.push_back({"wxFONTWEIGHT_SEMIBOLD", wxFONTWEIGHT_SEMIBOLD});
+    constants_to_extract.push_back({"wxFONTWEIGHT_BOLD", wxFONTWEIGHT_BOLD});
+    constants_to_extract.push_back({"wxFONTWEIGHT_EXTRABOLD", wxFONTWEIGHT_EXTRABOLD});
+    constants_to_extract.push_back({"wxFONTWEIGHT_HEAVY", wxFONTWEIGHT_HEAVY});
+
     // Output the constants in the Rust pub const format
     for (const auto& pair : constants_to_extract) {
         std::string original_name = pair.first;
