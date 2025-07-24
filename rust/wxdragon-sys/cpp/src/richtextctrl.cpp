@@ -399,4 +399,4 @@ WXD_EXPORTED bool wxd_RichTextCtrl_SetBackgroundColorSelection(wxd_RichTextCtrl_
     return ctrl->SetStyle(wxRichTextRange(from, to), attr);
 }
 
-} 
+} // extern "C"
