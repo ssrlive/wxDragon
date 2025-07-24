@@ -442,34 +442,49 @@ impl EventType {
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_STC_AUTOCOMP_CHAR_DELETED);
 
     // RichText events
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_LEFT_CLICK: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_LEFT_CLICK);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_RIGHT_CLICK: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_RIGHT_CLICK);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_MIDDLE_CLICK: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_MIDDLE_CLICK);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_LEFT_DCLICK: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_LEFT_DCLICK);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_RETURN: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_RETURN);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_CHARACTER: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CHARACTER);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_DELETE: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_DELETE);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_CONTENT_INSERTED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CONTENT_INSERTED);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_CONTENT_DELETED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_CONTENT_DELETED);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_STYLE_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLE_CHANGED);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_SELECTION_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_SELECTION_CHANGED);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_STYLESHEET_CHANGING: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGING);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_STYLESHEET_CHANGED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_CHANGED);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_STYLESHEET_REPLACING: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACING);
+    #[cfg(feature = "richtext")]
     pub const RICHTEXT_STYLESHEET_REPLACED: EventType =
         EventType(ffi::WXDEventTypeCEnum_WXD_EVENT_TYPE_RICHTEXT_STYLESHEET_REPLACED);
 
