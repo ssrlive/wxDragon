@@ -272,12 +272,42 @@ message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 target_include_directories(wxdragon PRIVATE ${WX_INCLUDE_PATHS})
 
 # --- Set Preprocessor Definitions Based on Features ---
-target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=${wxdUSE_AUI})
-target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=${wxdUSE_MEDIACTRL})
-target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=${wxdUSE_WEBVIEW})
-target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=${wxdUSE_STC})
-target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=${wxdUSE_XRC})
-target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=${wxdUSE_RICHTEXT})
+# Convert CMake boolean values to C preprocessor 1/0 values
+if(wxdUSE_AUI)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=0)
+endif()
+
+if(wxdUSE_MEDIACTRL)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=0)
+endif()
+
+if(wxdUSE_WEBVIEW)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=0)
+endif()
+
+if(wxdUSE_STC)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=0)
+endif()
+
+if(wxdUSE_XRC)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=0)
+endif()
+
+if(wxdUSE_RICHTEXT)
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=1)
+else()
+    target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=0)
+endif()
 
 # --- Add Library Search Directory ---
 target_link_directories(wxdragon PRIVATE ${WXWIDGETS_LIB_DIR})
