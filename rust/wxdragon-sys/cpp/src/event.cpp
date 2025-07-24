@@ -39,7 +39,7 @@
 #include <wx/utils.h>
 #include <wx/rearrangectrl.h> // ADDED: For wxEVT_REARRANGE_LIST
 #include <wx/collpane.h> // ADDED: For wxEVT_COLLAPSIBLEPANE_CHANGED
-#if wxdUSE_RICHTEXT
+#if WXD_USE_RICHTEXT
 #include <wx/richtext/richtextctrl.h> // ADDED: For richtext events
 #endif
 
@@ -119,7 +119,7 @@ static bool IsVetableEventType(wxEventType eventType) {
     }
     
     // AUI events
-    #if wxdUSE_AUI
+    #if WXD_USE_AUI
     if (eventType == wxEVT_AUI_PANE_CLOSE) {
         return true;
     }
@@ -801,7 +801,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_LIST_COL_BEGIN_DRAG: return wxEVT_LIST_COL_BEGIN_DRAG;
         
         // Media events
-        #if wxdUSE_MEDIACTRL
+        #if WXD_USE_MEDIACTRL
         case WXD_EVENT_TYPE_MEDIA_LOADED: return wxEVT_MEDIA_LOADED;
         case WXD_EVENT_TYPE_MEDIA_STOP: return wxEVT_MEDIA_STOP;
         case WXD_EVENT_TYPE_MEDIA_FINISHED: return wxEVT_MEDIA_FINISHED;
@@ -852,7 +852,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_ANY: return wxEVT_ANY;
         
         // AUI Manager event types
-        #if wxdUSE_AUI
+        #if WXD_USE_AUI
         case WXD_EVENT_TYPE_AUI_PANE_BUTTON: return wxEVT_AUI_PANE_BUTTON;
         case WXD_EVENT_TYPE_AUI_PANE_CLOSE: return wxEVT_AUI_PANE_CLOSE;
         case WXD_EVENT_TYPE_AUI_PANE_MAXIMIZE: return wxEVT_AUI_PANE_MAXIMIZE;
@@ -868,7 +868,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         case WXD_EVENT_TYPE_COLLAPSIBLEPANE_CHANGED: return wxEVT_COLLAPSIBLEPANE_CHANGED;
         
         // StyledTextCtrl events - only available when stc feature is enabled
-        #if wxdUSE_STC
+        #if WXD_USE_STC
         case WXD_EVENT_TYPE_STC_CHANGE: return wxEVT_STC_CHANGE;
         case WXD_EVENT_TYPE_STC_STYLENEEDED: return wxEVT_STC_STYLENEEDED;
         case WXD_EVENT_TYPE_STC_CHARADDED: return wxEVT_STC_CHARADDED;
@@ -900,7 +900,7 @@ static wxEventType get_wx_event_type_for_c_enum(WXDEventTypeCEnum c_enum_val) {
         #endif
         
         // RichText events - only available when richtext feature is enabled
-        #if wxdUSE_RICHTEXT
+        #if WXD_USE_RICHTEXT
         case WXD_EVENT_TYPE_RICHTEXT_CHARACTER: return wxEVT_RICHTEXT_CHARACTER;
         case WXD_EVENT_TYPE_RICHTEXT_DELETE: return wxEVT_RICHTEXT_DELETE;
         case WXD_EVENT_TYPE_RICHTEXT_RETURN: return wxEVT_RICHTEXT_RETURN;
