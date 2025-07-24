@@ -272,45 +272,15 @@ message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 target_include_directories(wxdragon PRIVATE ${WX_INCLUDE_PATHS})
 
 # --- Set Preprocessor Definitions Based on Features ---
-if (wxdUSE_AUI)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_AUI=0)
-endif()
-
-if (wxdUSE_MEDIACTRL)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_MEDIACTRL=0)
-endif()
-
-if (wxdUSE_WEBVIEW)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_WEBVIEW=0)
-endif()
-
-if (wxdUSE_STC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_STC=0)
-endif()
-
-if (wxdUSE_XRC)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_XRC=0)
-endif()
-
-if (wxdUSE_RICHTEXT)
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE WXD_USE_RICHTEXT=0)
-endif()
+target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=${wxdUSE_AUI})
+target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=${wxdUSE_MEDIACTRL})
+target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=${wxdUSE_WEBVIEW})
+target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=${wxdUSE_STC})
+target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=${wxdUSE_XRC})
+target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=${wxdUSE_RICHTEXT})
 
 # --- Add Library Search Directory ---
 target_link_directories(wxdragon PRIVATE ${WXWIDGETS_LIB_DIR})
 
 message(STATUS "wxDragon wrapper library configured successfully for ${PLATFORM_NAME}")
 message(STATUS "CMake configuration for libwxdragon finished.")
- 
