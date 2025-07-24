@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.18
+
+### Fix
+
+- Incorrect font constants mapping issue
+
 ## 0.8.17
 
 ### Fix
