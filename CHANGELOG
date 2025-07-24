@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.17
+
+### Fix
+
+- Abnormal high CPU usage reported by issue #30
+
 ## 0.8.16
 
 ### Features
