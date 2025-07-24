@@ -11,7 +11,7 @@ static wxd_OnInitCallback g_OnInitCallback = nullptr;
 static void* g_OnInitUserData = nullptr;
 
 // Function to process Rust callbacks, implemented in Rust
-extern "C" void process_rust_callbacks();
+extern "C" int process_rust_callbacks();
 
 // --- Internal C++ App Class --- 
 
@@ -61,11 +61,13 @@ bool WxdApp::OnInit() {
 // Process callbacks on idle
 void WxdApp::OnIdle(wxIdleEvent& event) {
     // Process any pending Rust callbacks
-    process_rust_callbacks();
+    int callbacks_processed = process_rust_callbacks();
     
-    // Request more idle events if there are more callbacks
-    // This ensures the event loop keeps processing our callbacks
-    event.RequestMore();
+    // Only request more idle events if there were callbacks to process
+    // This prevents unnecessary CPU usage when the app is idle
+    if (callbacks_processed > 0) {
+        event.RequestMore();
+    }
 }
 
 // --- C API Implementation --- 

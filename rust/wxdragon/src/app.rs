@@ -43,14 +43,16 @@ where
 ///
 /// This function is called automatically by the event loop.
 /// You do not need to call this function manually.
-pub fn process_main_thread_queue() {
+///
+/// Returns true if any callbacks were processed, false if the queue was empty.
+pub fn process_main_thread_queue() -> bool {
     let mut callbacks = Vec::new();
 
     // Move callbacks from the queue to our local vector to minimize lock time
     {
         let mut queue = MAIN_THREAD_QUEUE.lock().unwrap();
         if queue.is_empty() {
-            return;
+            return false;
         }
 
         // Move up to 10 callbacks at a time to prevent UI freezes
@@ -68,12 +70,19 @@ pub fn process_main_thread_queue() {
     for callback in callbacks {
         callback();
     }
+
+    true // We processed some callbacks
 }
 
 // This function is called from C++ to process pending callbacks
+// Returns 1 if callbacks were processed, 0 if not
 #[no_mangle]
-pub extern "C" fn process_rust_callbacks() {
-    process_main_thread_queue();
+pub extern "C" fn process_rust_callbacks() -> i32 {
+    if process_main_thread_queue() {
+        1 // Callbacks were processed
+    } else {
+        0 // No callbacks processed
+    }
 }
 
 // Function to manually trigger callback processing (useful for tests)
