@@ -48,33 +48,39 @@ fn main() {
 
     // Add feature flags for conditional compilation
     if cfg!(feature = "aui") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_AUI=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_AUI=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_AUI=0");
     }
 
     if cfg!(feature = "media-ctrl") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_MEDIACTRL=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_MEDIACTRL=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_MEDIACTRL=0");
     }
 
     if cfg!(feature = "webview") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_WEBVIEW=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_WEBVIEW=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_WEBVIEW=0");
     }
 
     if cfg!(feature = "stc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_STC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_STC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_STC=0");
     }
 
     if cfg!(feature = "xrc") {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=1");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_XRC=1");
     } else {
-        bindings_builder = bindings_builder.clang_arg("-DWXD_USE_XRC=0");
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_XRC=0");
+    }
+
+    if cfg!(feature = "richtext") {
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_RICHTEXT=1");
+    } else {
+        bindings_builder = bindings_builder.clang_arg("-DwxdUSE_RICHTEXT=0");
     }
 
     bindings_builder = bindings_builder.clang_arg(format!("--target={target}"));

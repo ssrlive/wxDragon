@@ -30,7 +30,7 @@ extern "C" {
 #include "core/wxd_app.h"
 #include "core/wxd_window_base.h"
 #include "core/wxd_cursor.h"
-#if WXD_USE_XRC
+#if wxdUSE_XRC
 #include "core/wxd_xrc.h"
 #endif
 #include "events/wxd_event_api.h"
@@ -40,7 +40,9 @@ extern "C" {
 #include "widgets/wxd_button.h"
 #include "widgets/wxd_statictext.h"
 #include "widgets/wxd_textctrl.h"
+#if wxdUSE_RICHTEXT
 #include "widgets/wxd_richtextctrl.h"
+#endif
 #include "widgets/wxd_styledtextctrl.h"
 #include "widgets/wxd_checkbox.h"
 #include "widgets/wxd_radiobutton.h"
