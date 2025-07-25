@@ -4,6 +4,15 @@ project(wxDragon LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# --- Helper Function: Convert CMake boolean values to C preprocessor 1/0 values
+function(bool_to_int input_var output_var)
+    if(${input_var})
+        set(${output_var} 1 PARENT_SCOPE)
+    else()
+        set(${output_var} 0 PARENT_SCOPE)
+    endif()
+endfunction()
+
 # --- Feature Flags (from Rust build.rs) ---
 set(wxdUSE_AUI ON CACHE BOOL "Use AUI (Advanced User Interface)")
 set(wxdUSE_MEDIACTRL ON CACHE BOOL "Use Media Ctrl widgets")
@@ -272,42 +281,21 @@ message(STATUS "Using wxWidgets include directories: ${WX_INCLUDE_PATHS}")
 target_include_directories(wxdragon PRIVATE ${WX_INCLUDE_PATHS})
 
 # --- Set Preprocessor Definitions Based on Features ---
-# Convert CMake boolean values to C preprocessor 1/0 values
-if(wxdUSE_AUI)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_AUI=0)
-endif()
+bool_to_int(wxdUSE_AUI aui_value)
+bool_to_int(wxdUSE_MEDIACTRL mediactrl_value)
+bool_to_int(wxdUSE_WEBVIEW webview_value)
+bool_to_int(wxdUSE_STC stc_value)
+bool_to_int(wxdUSE_XRC xrc_value)
+bool_to_int(wxdUSE_RICHTEXT richtext_value)
 
-if(wxdUSE_MEDIACTRL)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_MEDIACTRL=0)
-endif()
-
-if(wxdUSE_WEBVIEW)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_WEBVIEW=0)
-endif()
-
-if(wxdUSE_STC)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_STC=0)
-endif()
-
-if(wxdUSE_XRC)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_XRC=0)
-endif()
-
-if(wxdUSE_RICHTEXT)
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=1)
-else()
-    target_compile_definitions(wxdragon PRIVATE wxdUSE_RICHTEXT=0)
-endif()
+target_compile_definitions(wxdragon PRIVATE 
+    wxdUSE_AUI=${aui_value}
+    wxdUSE_MEDIACTRL=${mediactrl_value}
+    wxdUSE_WEBVIEW=${webview_value}
+    wxdUSE_STC=${stc_value}
+    wxdUSE_XRC=${xrc_value}
+    wxdUSE_RICHTEXT=${richtext_value}
+)
 
 # --- Add Library Search Directory ---
 target_link_directories(wxdragon PRIVATE ${WXWIDGETS_LIB_DIR})
