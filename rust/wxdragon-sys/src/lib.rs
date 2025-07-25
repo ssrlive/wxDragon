@@ -47,6 +47,7 @@ type WindowUserData = (); // Replace with actual user data type later if needed
 /// from `Box::into_raw(Box::new(RefCell::new(data)))` and that it hasn't been
 /// dropped or invalidated since.
 #[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn drop_rust_refcell_box(user_data_ptr: *mut c_void) {
     if !user_data_ptr.is_null() {
         // Reconstitute the Box and let it drop, freeing the memory
@@ -57,5 +58,23 @@ pub extern "C" fn drop_rust_refcell_box(user_data_ptr: *mut c_void) {
     } else {
         // Optional: Log a warning or handle null pointer case if necessary
         // eprintln!("Warning: drop_rust_refcell_box called with null pointer.");
+    }
+}
+
+/// Function to properly free a string that was allocated by Rust using CString::into_raw().
+/// This must be called instead of C's free() for strings allocated by Rust.
+/// # Safety
+/// The caller (C++) must ensure `str_ptr` is a valid pointer obtained from
+/// `CString::into_raw()` and that it hasn't been freed already.
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn wxd_Variant_Free_Rust_String(str_ptr: *mut std::os::raw::c_char) {
+    if !str_ptr.is_null() {
+        // Reconstitute the CString and let it drop, properly freeing the memory
+        // that was allocated by Rust's allocator
+        unsafe {
+            let _cstring = std::ffi::CString::from_raw(str_ptr);
+            // Drop happens automatically when `_cstring` goes out of scope here.
+        }
     }
 }

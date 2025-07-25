@@ -370,7 +370,7 @@ public:
                 case WXD_VARIANT_TYPE_STRING:
                     if (var_data.data.string_val) {
                         value = wxString::FromUTF8(var_data.data.string_val);
-                        free(var_data.data.string_val);
+                        wxd_Variant_Free_Rust_String(var_data.data.string_val);
                     } else {
                         value = wxString();
                     }
@@ -436,7 +436,7 @@ public:
                     case WXD_VARIANT_TYPE_STRING:
                         if (var_data.data.string_val) {
                             value = wxString::FromUTF8(var_data.data.string_val);
-                            free(var_data.data.string_val);
+                            wxd_Variant_Free_Rust_String(var_data.data.string_val);
                         } else {
                             value = wxString();
                         }
@@ -892,9 +892,9 @@ WXD_EXPORTED bool wxd_DataViewListModel_SetValue(wxd_DataViewModel_t* self,
 WXD_EXPORTED void wxd_Variant_Free(wxd_Variant_t* variant) {
     if (!variant) return;
     
-    // Free any string data
+    // Free any string data using the proper Rust deallocation function
     if (variant->type == WXD_VARIANT_TYPE_STRING && variant->data.string_val) {
-        free(variant->data.string_val);
+        wxd_Variant_Free_Rust_String(variant->data.string_val);
         variant->data.string_val = NULL;
     }
     

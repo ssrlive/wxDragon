@@ -3,6 +3,7 @@
 use crate::widgets::dataview::variant::Variant;
 use std::any::Any;
 use std::ffi::{CStr, CString};
+use std::os::raw::c_void;
 use wxdragon_sys as ffi;
 
 // Type aliases to reduce complexity
@@ -841,6 +842,25 @@ pub unsafe fn from_raw_variant(raw: *const ffi::wxd_Variant_t) -> Variant {
         _ => {
             // Default for unknown/unsupported types
             Variant::String(String::new())
+        }
+    }
+}
+
+/// Function called by C++ to properly drop CustomModelCallbacks that were allocated with Box::into_raw().
+/// This must be used instead of C's free() for Box-allocated callback data.
+///
+/// # Safety
+/// The caller (C++) must ensure `ptr` is a valid pointer obtained from
+/// `Box::into_raw()` for a `CustomModelCallbacks` and that it hasn't been freed already.
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn wxd_Drop_Rust_CustomModelCallbacks(ptr: *mut c_void) {
+    if !ptr.is_null() {
+        // Reconstitute the Box and let it drop, properly freeing the memory
+        // and running any destructors for the contained data
+        unsafe {
+            let _callback_box = Box::from_raw(ptr as *mut CustomModelCallbacks);
+            // Drop happens automatically when `_callback_box` goes out of scope here.
         }
     }
 }

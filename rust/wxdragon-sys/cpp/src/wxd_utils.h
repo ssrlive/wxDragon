@@ -19,6 +19,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Free a string that was allocated by Rust (from CString::into_raw())
+// This function is implemented in Rust and must be used instead of free() for Rust-allocated strings
+void wxd_Variant_Free_Rust_String(char* str);
+
 // Converts a wxString to a C-style string (char*) that must be freed by the caller (Rust) using wxd_free_string.
 // Returns nullptr if the input wxString is empty or on allocation failure.
 // Note: wxString argument implies this must be callable from C++ context that has the wxString.

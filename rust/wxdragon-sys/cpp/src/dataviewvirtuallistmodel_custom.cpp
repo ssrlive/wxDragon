@@ -35,8 +35,13 @@ public:
         g_model_registry[this] = this;
     }
     
-    // Destructor to clean up registry
+    // Destructor to clean up registry and callback data
     ~WxdCustomDataViewVirtualListModel() {
+        // Clean up the Rust-allocated callback data
+        if (m_userdata) {
+            drop_rust_virtual_list_model_callbacks(m_userdata);
+            m_userdata = nullptr;
+        }
         g_model_registry.erase(this);
     }
 
@@ -63,7 +68,7 @@ public:
             case 8: 
                 if (rust_variant_data.type == WXD_VARIANT_TYPE_STRING && rust_variant_data.data.string_val) {
                     variant = wxVariant(wxString::FromUTF8(rust_variant_data.data.string_val));
-                    free(rust_variant_data.data.string_val);
+                    wxd_Variant_Free_Rust_String(rust_variant_data.data.string_val);
                     rust_variant_data.data.string_val = nullptr;
                 } else {
                     variant = wxString::Format("Row %d, Col %d", row, col);
@@ -184,7 +189,7 @@ public:
             default:
                 if (rust_variant_data.type == WXD_VARIANT_TYPE_STRING && rust_variant_data.data.string_val) {
                     variant = wxVariant(wxString::FromUTF8(rust_variant_data.data.string_val));
-                    free(rust_variant_data.data.string_val);
+                    wxd_Variant_Free_Rust_String(rust_variant_data.data.string_val);
                     rust_variant_data.data.string_val = nullptr;
                 } else if (rust_variant_data.type != WXD_VARIANT_TYPE_INVALID) {
                      variant = wxString::Format("Default for col %d", col);
@@ -351,10 +356,14 @@ void wxd_DataViewVirtualListModel_ReleaseCallbacks(wxd_DataViewModel_t* model) {
     }
 }
 
+// Forward declaration for Rust function that properly handles Box::from_raw()
+extern "C" void wxd_Drop_Rust_CustomModelCallbacks(void* ptr);
+
 // Function to drop Rust callback data (used by Rust's Drop implementation)
 void drop_rust_virtual_list_model_callbacks(void* ptr) {
     if (ptr) {
-        free(ptr);
+        // Call the Rust function that properly handles Box::from_raw()
+        wxd_Drop_Rust_CustomModelCallbacks(ptr);
     }
 }
 
