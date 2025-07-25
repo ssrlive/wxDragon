@@ -9,6 +9,11 @@ fn main() {
     let target = env::var("TARGET").unwrap();
     let out_dir = extract_matching_parent_dir(&bindings_out_dir, "target").unwrap();
 
+    // Tell Cargo to rerun this build script if any files in following directories change
+    println!("cargo:rerun-if-changed=cpp/src");
+    println!("cargo:rerun-if-changed=cpp/include");
+    println!("cargo:rerun-if-changed=build.rs");
+
     // --- 1. Generate FFI Bindings ---
     println!("info: Generating FFI bindings...");
 
@@ -249,11 +254,12 @@ fn download_prebuilt_libraries(
     }
 
     // Save the tarball
-    let mut out_file = File::create(&tarball_dest_path)
-        .map_err(|e| format!("Failed to create destination file {tarball_dest_path:?}: {e}"))?;
     let content = resp
         .bytes()
         .map_err(|e| format!("Failed to read response content: {e}"))?;
+    // create the destination file after downloading successfully to avoid creating an empty file
+    let mut out_file = File::create(&tarball_dest_path)
+        .map_err(|e| format!("Failed to create destination file {tarball_dest_path:?}: {e}"))?;
     std::io::copy(&mut content.as_ref(), &mut out_file)
         .map_err(|e| format!("Failed to write downloaded content: {e}"))?;
 
@@ -932,42 +938,31 @@ fn build_wxdragon_wrapper(
         .arg(format!("-DWXWIDGETS_LIB_DIR={}", wx_lib_dir.display()));
 
     // Pass Cargo feature flags to CMake
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_AUI={}",
-        if cfg!(feature = "aui") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_MEDIACTRL={}",
-        if cfg!(feature = "media-ctrl") {
-            "ON"
-        } else {
-            "OFF"
-        }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_WEBVIEW={}",
-        if cfg!(feature = "webview") {
-            "ON"
-        } else {
-            "OFF"
-        }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_STC={}",
-        if cfg!(feature = "stc") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_XRC={}",
-        if cfg!(feature = "xrc") { "ON" } else { "OFF" }
-    ));
-    cmake_cmd.arg(format!(
-        "-DwxdUSE_RICHTEXT={}",
-        if cfg!(feature = "richtext") {
-            "ON"
-        } else {
-            "OFF"
-        }
-    ));
+    cmake_cmd
+        .arg(format!(
+            "-DwxdUSE_AUI={}",
+            if cfg!(feature = "aui") { 1 } else { 0 }
+        ))
+        .arg(format!(
+            "-DwxdUSE_MEDIACTRL={}",
+            if cfg!(feature = "media-ctrl") { 1 } else { 0 }
+        ))
+        .arg(format!(
+            "-DwxdUSE_WEBVIEW={}",
+            if cfg!(feature = "webview") { 1 } else { 0 }
+        ))
+        .arg(format!(
+            "-DwxdUSE_STC={}",
+            if cfg!(feature = "stc") { 1 } else { 0 }
+        ))
+        .arg(format!(
+            "-DwxdUSE_XRC={}",
+            if cfg!(feature = "xrc") { 1 } else { 0 }
+        ))
+        .arg(format!(
+            "-DwxdUSE_RICHTEXT={}",
+            if cfg!(feature = "richtext") { 1 } else { 0 }
+        ));
 
     // Platform-specific CMake configuration
     // Detect host platform for cross-compilation scenarios
