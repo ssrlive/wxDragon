@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include "../include/wxdragon.h"
 #include <wx/notifmsg.h> // Required for wxNotificationMessage
+#include <wx/generic/notifmsg.h> // Required for wxGenericNotificationMessage
 
 // --- wxNotificationMessage ---
 
@@ -10,7 +11,15 @@ WXD_EXPORTED wxd_NotificationMessage_t* wxd_NotificationMessage_Create(const cha
     wxString wxMessage = WXD_STR_TO_WX_STRING_UTF8_NULL_OK(message);
     wxWindow* wxParent = parent ? reinterpret_cast<wxWindow*>(parent) : nullptr;
     
+#ifdef __WXMSW__
+    // Use generic notifications on Windows to avoid taskbar icon issues
+    // that cause app hanging and persistent icons
+    wxGenericNotificationMessage* instance = new wxGenericNotificationMessage(wxTitle, wxMessage, wxParent, flags);
+#else
+    // Use native notifications on other platforms
     wxNotificationMessage* instance = new wxNotificationMessage(wxTitle, wxMessage, wxParent, flags);
+#endif
+    
     return reinterpret_cast<wxd_NotificationMessage_t*>(instance);
 }
 
