@@ -16,7 +16,7 @@ embed-manifest = "1.4"
 
 [package.metadata.bundle]
 # Install cargo-bundle: cargo install cargo-bundle
-# macOS Usage: cargo bundle --bin gallery --format osx --target x86_64-apple-darwin
+# macOS Usage: cargo bundle --package gallery --format osx --target x86_64-apple-darwin
 name = "gallery"
 identifier = "com.github.AllenDang.wxDragon.gallery"
 icon = ["asset/simple.png"]
