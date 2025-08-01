@@ -1,6 +1,7 @@
 /.vs
 /.vscode
 /.VSCodeCounter
+/CMakeFiles
 build
 rust/wxdragon-sys/target
 target
