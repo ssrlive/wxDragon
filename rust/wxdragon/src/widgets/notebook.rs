@@ -220,6 +220,14 @@ impl Notebook {
             }
         }
     }
+
+    /// Removes the page at the given index.
+    /// Returns `true` if the page was removed successfully.
+    pub fn remove_page(&self, index: usize) -> bool {
+        unsafe {
+            ffi::wxd_Notebook_RemovePage(self.window.as_ptr() as *mut ffi::wxd_Notebook_t, index)
+        }
+    }
 }
 
 // Apply common trait implementations for Notebook
