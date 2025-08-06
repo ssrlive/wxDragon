@@ -127,6 +127,27 @@ impl ListBox {
         }
     }
 
+    /// Selects an item by its string value.
+    /// If the string is not found, no selection is made.
+    pub fn set_string_selection(&self, item: &str, select: bool) {
+        // Create a CString, handling null bytes gracefully
+        let c_item = match CString::new(item) {
+            Ok(s) => s,
+            Err(_) => {
+                // If text contains null bytes, create a copy without them
+                let filtered: String = item.chars().filter(|&c| c != '\0').collect();
+                CString::new(filtered).unwrap_or_else(|_| CString::new("").unwrap())
+            }
+        };
+        unsafe {
+            ffi::wxd_ListBox_SetStringSelection(
+                self.window.as_ptr() as *mut RawListBox,
+                c_item.as_ptr(),
+                select,
+            );
+        }
+    }
+
     /// Gets the string at the specified index.
     /// Returns `None` if the index is out of bounds.
     pub fn get_string(&self, index: u32) -> Option<String> {

@@ -61,6 +61,13 @@ WXD_EXPORTED void wxd_ListBox_SetSelection(wxd_ListBox_t* listbox, int index, bo
     }
 }
 
+WXD_EXPORTED void wxd_ListBox_SetStringSelection(wxd_ListBox_t* listbox, const char* item, bool select) {
+    wxListBox* lb = (wxListBox*)listbox;
+    if (lb && item) {
+        lb->SetStringSelection(wxString::FromUTF8(item), select);
+    }
+}
+
 WXD_EXPORTED int wxd_ListBox_GetString(wxd_ListBox_t* listbox, int index, char* buffer, int buffer_len) {
     if (!listbox || !buffer || buffer_len <= 0) return -1;
     wxListBox* lb = (wxListBox*)listbox;
