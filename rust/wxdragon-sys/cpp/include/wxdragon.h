@@ -110,6 +110,9 @@ extern "C" {
 // Timer
 #include "core/wxd_timer.h"
 
+// Application progress indicator
+#include "core/wxd_appprogress.h"
+
 // Other categories
 #include "sizers/wxd_sizers.h"
 #include "dialogs/wxd_dialogs.h"

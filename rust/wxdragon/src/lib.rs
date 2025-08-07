@@ -26,6 +26,7 @@ pub mod prelude;
 pub mod scrollable;
 pub mod sizers;
 pub mod timer;
+pub mod appprogress;
 pub mod types;
 pub mod utils;
 pub mod widgets;
