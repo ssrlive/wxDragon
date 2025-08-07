@@ -9,6 +9,7 @@ use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
+use crate::Menu;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
@@ -199,6 +200,17 @@ impl ListBox {
         assert!(!ptr.is_null());
         ListBox {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+
+    /// Pops up a menu at the specified position.
+    /// If `pos` is `None`, the menu is popped up at the current cursor position.
+    /// # Returns
+    /// `true` if the menu was popped up successfully, `false` otherwise.
+    pub fn popup_menu(&self, menu: &Menu, pos: Option<Point>) -> bool {
+        let pos = pos.unwrap_or_else(|| Point::new(-1, -1));
+        unsafe {
+            ffi::wxd_ListBox_PopupMenu(self.window.as_ptr() as *mut RawListBox, menu.as_ptr(), pos.into())
         }
     }
 }

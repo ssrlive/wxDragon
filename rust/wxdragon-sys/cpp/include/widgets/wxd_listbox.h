@@ -13,5 +13,6 @@ WXD_EXPORTED void wxd_ListBox_SetSelection(wxd_ListBox_t* listbox, int index, bo
 WXD_EXPORTED void wxd_ListBox_SetStringSelection(wxd_ListBox_t* listbox, const char* item, bool select);
 WXD_EXPORTED int wxd_ListBox_GetString(wxd_ListBox_t* listbox, int index, char* buffer, int buffer_len);
 WXD_EXPORTED unsigned int wxd_ListBox_GetCount(wxd_ListBox_t* listbox);
+WXD_EXPORTED bool wxd_ListBox_PopupMenu(wxd_ListBox_t* listbox, wxd_Menu_t* menu, wxd_Point pos);
 
 #endif // WXD_LISTBOX_H 

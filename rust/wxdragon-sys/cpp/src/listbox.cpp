@@ -8,6 +8,12 @@
 #include "../include/wxdragon.h"
 #include "wxd_utils.h"
 
+// Helper to convert wxd_Point to wxPoint
+static inline wxPoint wxd_to_wx_point_sb(const wxd_Point& p) {
+    if (p.x == -1 && p.y == -1) return wxDefaultPosition;
+    return wxPoint(p.x, p.y);
+}
+
 extern "C" {
 
 WXD_EXPORTED wxd_ListBox_t* wxd_ListBox_Create(
@@ -81,6 +87,13 @@ WXD_EXPORTED unsigned int wxd_ListBox_GetCount(wxd_ListBox_t* listbox) {
     wxListBox* lb = (wxListBox*)listbox;
     if (!lb) return 0;
     return lb->GetCount();
+}
+
+WXD_EXPORTED bool wxd_ListBox_PopupMenu(wxd_ListBox_t* listbox, wxd_Menu_t* menu, wxd_Point pos) {
+    wxListBox* lb = (wxListBox*)listbox;
+    if (!lb || !menu) return 0;
+    wxMenu* wx_menu = reinterpret_cast<wxMenu*>(menu);
+    return lb->PopupMenu(wx_menu, wxd_to_wx_point_sb(pos));
 }
 
 } // extern "C" 
