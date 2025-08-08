@@ -89,6 +89,13 @@ WXD_EXPORTED unsigned int wxd_ListBox_GetCount(wxd_ListBox_t* listbox) {
     return lb->GetCount();
 }
 
+WXD_EXPORTED void wxd_ListBox_Delete(wxd_ListBox_t* listbox, int index) {
+    wxListBox* lb = (wxListBox*)listbox;
+    if (lb) {
+        lb->Delete(index);
+    }
+}
+
 WXD_EXPORTED bool wxd_ListBox_PopupMenu(wxd_ListBox_t* listbox, wxd_Menu_t* menu, wxd_Point pos) {
     wxListBox* lb = (wxListBox*)listbox;
     if (!lb || !menu) return 0;

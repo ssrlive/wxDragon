@@ -193,6 +193,13 @@ impl ListBox {
         unsafe { ffi::wxd_ListBox_GetCount(self.window.as_ptr() as *mut RawListBox) }
     }
 
+    /// Deletes the item at the specified index.
+    pub fn delete(&self, index: u32) {
+        unsafe {
+            ffi::wxd_ListBox_Delete(self.window.as_ptr() as *mut RawListBox, index as i32);
+        }
+    }
+
     /// Creates a ListBox from a raw pointer.
     /// # Safety
     /// The pointer must be a valid `wxd_ListBox_t`.
@@ -210,7 +217,11 @@ impl ListBox {
     pub fn popup_menu(&self, menu: &Menu, pos: Option<Point>) -> bool {
         let pos = pos.unwrap_or_else(|| Point::new(-1, -1));
         unsafe {
-            ffi::wxd_ListBox_PopupMenu(self.window.as_ptr() as *mut RawListBox, menu.as_ptr(), pos.into())
+            ffi::wxd_ListBox_PopupMenu(
+                self.window.as_ptr() as *mut RawListBox,
+                menu.as_ptr(),
+                pos.into(),
+            )
         }
     }
 }
