@@ -11,6 +11,7 @@ WXD_EXPORTED int wxd_Notebook_SetSelection(wxd_Notebook_t* self, int page);
 
 WXD_EXPORTED size_t wxd_Notebook_GetPageCount(wxd_Notebook_t* self);
 WXD_EXPORTED wxd_Window_t* wxd_Notebook_GetPage(wxd_Notebook_t* self, size_t n);
+WXD_EXPORTED bool wxd_Notebook_RemovePage(wxd_Notebook_t* self, size_t n);
 
 // Event data accessors (if specific to Notebook events beyond general wxEvent)
 // Example: if wxNotebookEvent has specific data not in wxBookCtrlEvent

@@ -9,6 +9,7 @@ use crate::implement_widget_traits_with_target;
 use crate::widget_builder;
 use crate::widget_style_enum;
 use crate::window::{Window, WxWidget};
+use crate::Menu;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use wxdragon_sys as ffi;
@@ -127,6 +128,27 @@ impl ListBox {
         }
     }
 
+    /// Selects an item by its string value.
+    /// If the string is not found, no selection is made.
+    pub fn set_string_selection(&self, item: &str, select: bool) {
+        // Create a CString, handling null bytes gracefully
+        let c_item = match CString::new(item) {
+            Ok(s) => s,
+            Err(_) => {
+                // If text contains null bytes, create a copy without them
+                let filtered: String = item.chars().filter(|&c| c != '\0').collect();
+                CString::new(filtered).unwrap_or_else(|_| CString::new("").unwrap())
+            }
+        };
+        unsafe {
+            ffi::wxd_ListBox_SetStringSelection(
+                self.window.as_ptr() as *mut RawListBox,
+                c_item.as_ptr(),
+                select,
+            );
+        }
+    }
+
     /// Gets the string at the specified index.
     /// Returns `None` if the index is out of bounds.
     pub fn get_string(&self, index: u32) -> Option<String> {
@@ -171,6 +193,13 @@ impl ListBox {
         unsafe { ffi::wxd_ListBox_GetCount(self.window.as_ptr() as *mut RawListBox) }
     }
 
+    /// Deletes the item at the specified index.
+    pub fn delete(&self, index: u32) {
+        unsafe {
+            ffi::wxd_ListBox_Delete(self.window.as_ptr() as *mut RawListBox, index as i32);
+        }
+    }
+
     /// Creates a ListBox from a raw pointer.
     /// # Safety
     /// The pointer must be a valid `wxd_ListBox_t`.
@@ -178,6 +207,21 @@ impl ListBox {
         assert!(!ptr.is_null());
         ListBox {
             window: Window::from_ptr(ptr as *mut ffi::wxd_Window_t),
+        }
+    }
+
+    /// Pops up a menu at the specified position.
+    /// If `pos` is `None`, the menu is popped up at the current cursor position.
+    /// # Returns
+    /// `true` if the menu was popped up successfully, `false` otherwise.
+    pub fn popup_menu(&self, menu: &Menu, pos: Option<Point>) -> bool {
+        let pos = pos.unwrap_or_else(|| Point::new(-1, -1));
+        unsafe {
+            ffi::wxd_ListBox_PopupMenu(
+                self.window.as_ptr() as *mut RawListBox,
+                menu.as_ptr(),
+                pos.into(),
+            )
         }
     }
 }

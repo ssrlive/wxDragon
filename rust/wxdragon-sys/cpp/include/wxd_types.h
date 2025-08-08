@@ -587,6 +587,9 @@ typedef int wxd_Id;
 // StyledTextCtrl type
 typedef struct wxd_StyledTextCtrl_t wxd_StyledTextCtrl_t;
 
+// AppProgressIndicator type
+typedef struct wxd_AppProgressIndicator_t wxd_AppProgressIndicator_t;
+
 // --- Appearance Support (wxWidgets 3.3.0+) ---
 
 // Appearance modes for dark mode support

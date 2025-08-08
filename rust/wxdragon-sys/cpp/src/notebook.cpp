@@ -163,4 +163,10 @@ WXD_EXPORTED wxd_Window_t* wxd_Notebook_GetPage(wxd_Notebook_t* self, size_t n) 
     if (!notebook) return nullptr;
     wxWindow* page = notebook->GetPage(n);
     return reinterpret_cast<wxd_Window_t*>(page);
-} 
+}
+
+WXD_EXPORTED bool wxd_Notebook_RemovePage(wxd_Notebook_t* self, size_t n) {
+    wxNotebook* notebook = reinterpret_cast<wxNotebook*>(self);
+    if (!notebook) return wxNOT_FOUND;
+    return notebook->RemovePage(n);
+}

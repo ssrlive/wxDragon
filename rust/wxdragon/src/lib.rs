@@ -5,6 +5,7 @@ pub use wxdragon_sys as ffi;
 pub mod macros;
 pub mod app;
 pub mod appearance;
+pub mod appprogress;
 pub mod art_provider;
 pub mod bitmap;
 pub mod bitmap_bundle;

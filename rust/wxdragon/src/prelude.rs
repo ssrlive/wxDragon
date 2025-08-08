@@ -248,6 +248,7 @@ pub use crate::dc::{
 
 // --- Application & Misc ---
 // pub use crate::app::App; // Commented out as per previous error, App is in main or app module
+pub use crate::appprogress::AppProgressIndicator;
 pub use crate::timer::Timer; // Added Timer
 
 // --- Constants for specific widgets that might be commonly used ---

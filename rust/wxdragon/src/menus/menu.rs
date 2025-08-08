@@ -6,6 +6,7 @@ use crate::menus::menuitem::{ItemKind, MenuItem};
 use crate::window::Window;
 #[cfg(feature = "xrc")]
 use crate::xrc::XmlResource;
+use crate::{CommandEventData, Event, EventType};
 use std::ffi::CString;
 use std::marker::PhantomData;
 use wxdragon_sys as ffi;
@@ -229,3 +230,44 @@ impl crate::window::WxWidget for Menu {
         -1 // Menus don't typically have IDs
     }
 }
+
+// --- Menu specific event enum ---
+/// Events specific to Menu controls
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MenuEvent {
+    /// Fired when an item is selected
+    Selected,
+}
+
+/// Event data for Menu events
+#[derive(Debug)]
+pub struct MenuEventData {
+    pub event: CommandEventData,
+}
+
+impl MenuEventData {
+    pub fn new(event: Event) -> Self {
+        Self {
+            event: CommandEventData::new(event),
+        }
+    }
+
+    /// Get the widget ID that generated the event
+    pub fn get_id(&self) -> i32 {
+        self.event.get_id()
+    }
+}
+
+impl crate::event::WxEvtHandler for Menu {
+    unsafe fn get_event_handler_ptr(&self) -> *mut wxdragon_sys::wxd_EvtHandler_t {
+        self.as_ptr() as *mut ffi::wxd_EvtHandler_t
+    }
+}
+
+// At the bottom of the file, use the local macro
+crate::implement_widget_local_event_handlers!(
+    Menu,
+    MenuEvent,
+    MenuEventData,
+    Selected => selected, EventType::MENU
+);
