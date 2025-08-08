@@ -41,9 +41,7 @@ impl AppProgressIndicator {
             std::ptr::null_mut()
         };
         let ptr = unsafe { ffi::wxd_AppProgressIndicator_Create(parent_ptr) };
-        Self {
-            ptr,
-        }
+        Self { ptr }
     }
 
     // Check if the application progress display is available.
