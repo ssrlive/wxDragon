@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.21
+
+- Wrap wxSimpleBook with xrc support
+
 ## 0.8.20
 
 - Add more functions to various widgets
