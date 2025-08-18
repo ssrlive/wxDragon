@@ -350,6 +350,7 @@ typedef struct wxd_Slider_t wxd_Slider_t;
 typedef struct wxd_SpinCtrl_t wxd_SpinCtrl_t;
 typedef struct wxd_SpinButton_t wxd_SpinButton_t;
 typedef struct wxd_Notebook_t wxd_Notebook_t;
+typedef struct wxd_SimpleBook_t wxd_SimpleBook_t;
 typedef struct wxd_SplitterWindow_t wxd_SplitterWindow_t;
 typedef struct wxd_CollapsiblePane_t wxd_CollapsiblePane_t;
 typedef struct wxd_Bitmap_t wxd_Bitmap_t;

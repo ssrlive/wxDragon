@@ -86,6 +86,7 @@ extern "C" {
 #include "widgets/wxd_scrolledwindow.h"
 #include "widgets/wxd_treebook.h"
 #include "widgets/wxd_notebook.h"
+#include "widgets/wxd_simplebook.h"
 
 // Window and UI elements
 #include "widgets/wxd_frame.h"

@@ -1385,6 +1385,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "simplebook_test"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+ "wxdragon-macros",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"

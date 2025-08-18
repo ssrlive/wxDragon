@@ -28,12 +28,18 @@
 #include <wx/notifmsg.h> // For wxNotificationMessage events
 #include <wx/dnd.h> // ADDED: For drag and drop events (wxEVT_BEGIN_DRAG, wxEVT_DROP_TEXT, etc.)
 #include <wx/timectrl.h> // ADDED: For wxTimePickerCtrl and wxEVT_TIME_CHANGED
+#if wxdUSE_MEDIACTRL
 #include <wx/mediactrl.h> // ADDED: For MediaCtrl events
+#endif
 #include <wx/dataview.h> // ADDED: For DataView events
 #include <wx/grid.h>
+#if wxdUSE_STC
 #include <wx/stc/stc.h> // ADDED: For StyledTextCtrl events
+#endif
 #include "../src/wxd_utils.h" // For WXD_STR_TO_WX_STRING_UTF8_NULL_OK, etc.
+#if wxdUSE_AUI
 #include <wx/aui/framemanager.h> // ADDED: For wxEVT_AUI_* constants
+#endif
 #include <wx/dynarray.h>     // For wxEVT_REARRANGE_LIST
 #include <wx/log.h>
 #include <wx/utils.h>

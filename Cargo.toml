@@ -10,6 +10,7 @@ members = [
     "examples/rust/gridbagsizer_test",
     "examples/rust/gridsizer_test",
     "examples/rust/simple",
+    "examples/rust/simplebook_test",
     "examples/rust/simple_stc_test",
     "examples/rust/simple_xrc_test",
     "examples/rust/taskbar_demo",

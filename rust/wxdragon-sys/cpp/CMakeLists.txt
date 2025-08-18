@@ -137,6 +137,7 @@ set(WXDRAGON_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/message_dialog.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/multi_choice_dialog.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/notebook.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/simplebook.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/notificationmessage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/panel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/progressdialog.cpp

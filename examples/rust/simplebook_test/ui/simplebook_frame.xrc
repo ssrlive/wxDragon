@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<resource xmlns="http://www.wxwidgets.org/wxxrc" version="2.5.3.0">
+  <object class="wxFrame" name="main_frame">
+    <size>600,400</size>
+    <style>wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL</style>
+    <title>SimpleBook XRC Demo</title>
+    <centered>1</centered>
+
+    <!-- StatusBar -->
+    <object class="wxStatusBar" name="main_statusbar">
+      <fields>1</fields>
+      <widths>-1</widths>
+    </object>
+    
+    <object class="wxPanel" name="main_panel">
+      <style>wxTAB_TRAVERSAL</style>
+      <object class="wxBoxSizer">
+        <orient>wxVERTICAL</orient>
+        
+        <!-- SimpleBook Widget -->
+        <object class="sizeritem">
+          <flag>wxEXPAND | wxALL</flag>
+          <border>5</border>
+          <option>1</option>
+          <object class="wxSimplebook" name="demo_simplebook">
+            <object class="simplebookpage">
+              <label>Welcome</label>
+              <selected>1</selected>
+              <object class="wxPanel" name="page1_panel">
+                <style>wxTAB_TRAVERSAL</style>
+                <object class="wxBoxSizer">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALL | wxEXPAND</flag>
+                    <border>20</border>
+                    <option>1</option>
+                    <object class="wxStaticText" name="page1_label">
+                      <label>Welcome to SimpleBook XRC Demo!
+
+This is page 1 loaded from XRC.
+SimpleBook is a book control without visible tabs.
+Navigation is controlled programmatically.</label>
+                      <wrap>-1</wrap>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+            
+            <object class="simplebookpage">
+              <label>Interactive Controls</label>
+              <selected>0</selected>
+              <object class="wxPanel" name="page2_panel">
+                <style>wxTAB_TRAVERSAL</style>
+                <object class="wxBoxSizer">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>20</border>
+                    <option>0</option>
+                    <object class="wxStaticText" name="page2_title">
+                      <label>Interactive Controls Page</label>
+                      <wrap>-1</wrap>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>20</border>
+                    <option>0</option>
+                    <object class="wxCheckBox" name="demo_checkbox">
+                      <label>Sample checkbox from XRC</label>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>20</border>
+                    <option>0</option>
+                    <object class="wxTextCtrl" name="demo_textctrl">
+                      <value>Sample text control</value>
+                      <style>wxTE_PROCESS_ENTER</style>
+                    </object>
+                  </object>
+                  <object class="sizeritem">
+                    <flag>wxALL</flag>
+                    <border>20</border>
+                    <option>0</option>
+                    <object class="wxButton" name="demo_button">
+                      <label>Sample Button</label>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+            
+            <object class="simplebookpage">
+              <label>Final Page</label>
+              <selected>0</selected>
+              <object class="wxPanel" name="page3_panel">
+                <style>wxTAB_TRAVERSAL</style>
+                <object class="wxBoxSizer">
+                  <orient>wxVERTICAL</orient>
+                  <object class="sizeritem">
+                    <flag>wxALL | wxEXPAND</flag>
+                    <border>20</border>
+                    <option>1</option>
+                    <object class="wxStaticText" name="page3_label">
+                      <label>Final Page
+
+This demonstrates how SimpleBook can be used with XRC to create clean, tab-less interfaces.
+
+Perfect for:
+• Wizard-like interfaces
+• Settings dialogs
+• Step-by-step workflows
+• Any UI where you want programmatic navigation</label>
+                      <wrap>-1</wrap>
+                    </object>
+                  </object>
+                </object>
+              </object>
+            </object>
+          </object>
+        </object>
+        
+        <!-- Navigation Buttons -->
+        <object class="sizeritem">
+          <flag>wxEXPAND | wxALL</flag>
+          <border>5</border>
+          <option>0</option>
+          <object class="wxPanel" name="nav_panel">
+            <style>wxTAB_TRAVERSAL</style>
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxButton" name="prev_button">
+                  <label>Previous</label>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxButton" name="next_button">
+                  <label>Next</label>
+                </object>
+              </object>
+              <object class="sizeritem">
+                <flag>wxALL</flag>
+                <border>5</border>
+                <option>0</option>
+                <object class="wxButton" name="info_button">
+                  <label>Page Info</label>
+                </object>
+              </object>
+            </object>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+</resource>

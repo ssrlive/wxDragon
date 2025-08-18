@@ -48,6 +48,7 @@ pub mod richtextctrl;
 pub mod scrollbar;
 pub mod scrolled_window;
 pub mod search_ctrl;
+pub mod simplebook;
 pub mod slider;
 pub mod spinbutton;
 pub mod spinctrl;
@@ -140,6 +141,7 @@ pub use richtextctrl::{
 pub use scrollbar::{ScrollBar, ScrollBarBuilder, ScrollBarStyle};
 pub use scrolled_window::{ScrolledWindow, ScrolledWindowBuilder};
 pub use search_ctrl::{SearchCtrl, SearchCtrlBuilder};
+pub use simplebook::{SimpleBook, SimpleBookBuilder};
 pub use slider::{Slider, SliderBuilder};
 pub use spinbutton::{SpinButton, SpinButtonBuilder};
 pub use spinctrl::{SpinCtrl, SpinCtrlBuilder};
