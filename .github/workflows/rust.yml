@@ -25,7 +25,7 @@ jobs:
     - name: Build and test examples with features
       run: |
         echo "Building examples to test actual symbol usage..."
-        cd examples/rust/simple_xrc_test && cargo build --features="xrc"
+        cd examples/rust/simple_xrc_test && cargo build
     - name: Test feature examples
       run: |
         echo "Testing XRC example..."
