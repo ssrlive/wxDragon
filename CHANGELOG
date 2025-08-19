@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.22
+
+- Fix "stc,xrc,aui" features build on windows and linux, add github CI to verify the cross-platform feature-enabled build
+
 ## 0.8.21
 
 - Wrap wxSimpleBook with xrc support
