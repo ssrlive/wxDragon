@@ -720,10 +720,15 @@ fn link_linux_libraries() {
     println!("cargo:rustc-link-lib=static=wx_gtk3u_gl-3.3");
     println!("cargo:rustc-link-lib=static=wx_gtk3u_propgrid-3.3");
 
-    // Link XRC early to ensure symbols are available for wxdragon wrapper
+    // Link XRC and STC early to ensure symbols are available for wxdragon wrapper
     if cfg!(feature = "xrc") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_xrc-3.3");
         println!("cargo:rustc-link-lib=static=wx_baseu_xml-3.3");
+    }
+    if cfg!(feature = "stc") {
+        println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
+        println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
+        println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
     }
 
     // Conditional feature libraries
@@ -748,12 +753,7 @@ fn link_linux_libraries() {
     if cfg!(feature = "media-ctrl") {
         println!("cargo:rustc-link-lib=static=wx_gtk3u_media-3.3");
     }
-    if cfg!(feature = "stc") {
-        println!("cargo:rustc-link-lib=static=wx_gtk3u_stc-3.3");
-        println!("cargo:rustc-link-lib=static=wxscintilla-3.3");
-        println!("cargo:rustc-link-lib=static=wxlexilla-3.3");
-    }
-    // XRC libraries already linked above for better symbol resolution
+    // STC and XRC libraries already linked above for better symbol resolution
 
     // System libraries
     println!("cargo:rustc-link-lib=stdc++");
