@@ -29,9 +29,9 @@ jobs:
     - name: Test feature examples
       run: |
         echo "Testing XRC example..."
-        cd examples/rust/simple_xrc_test && cargo build
+        cd examples/rust/simple_xrc_test && cargo clean && cargo build
         echo "Testing STC example..."  
-        cd ../simple_stc_test && cargo build
+        cd ../simple_stc_test && cargo clean && cargo build
 
   build-macos:
     runs-on: macos-latest
@@ -51,31 +51,24 @@ jobs:
     - name: Test feature examples
       run: |
         echo "Testing XRC example..."
-        cd examples/rust/simple_xrc_test && cargo build
+        cd examples/rust/simple_xrc_test && cargo clean && cargo build
 
   build-windows-msvc:
     runs-on: windows-latest
+    env:
+      LIBCLANG_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin'
     steps:
     - uses: actions/checkout@v4
     - name: Build default features
-      shell: cmd
-      run: |
-        SET LIBCLANG_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin
-        cargo build
+      run: cargo build
     - name: Clean before feature test
       run: cargo clean
     - name: Test all features
-      shell: cmd
-      run: |
-        SET LIBCLANG_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin
-        cargo build --package=wxdragon-sys --features="aui,xrc,richtext,stc"
+      run: cargo build --package=wxdragon-sys --features="aui,xrc,richtext,stc"
     - name: Clean before example builds
       run: cargo clean
     - name: Test feature examples
-      shell: cmd
-      run: |
-        SET LIBCLANG_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\Llvm\x64\bin
-        cd examples\rust\simple_xrc_test && cargo build
+      run: cd examples\rust\simple_xrc_test && cargo clean && cargo build
 
   build-i686-pc-windows-msvc:
     runs-on: windows-latest
