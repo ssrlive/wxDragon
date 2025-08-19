@@ -50,7 +50,7 @@ fn embed_wx_resources(wx_version: &str, target: &str) {
     let profile = std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
     let wxwidgets_pattern = format!("wxwidgets-{wx_version}-{target}-{profile}");
     let wxwidgets_dir = target_dir.join(&wxwidgets_pattern);
-    let wx_rc_path = wxwidgets_dir.join("include/wx/msw/wx.rc");
+    let wx_rc_path = wxwidgets_dir.join("include").join("wx").join("msw").join("wx.rc");
 
     // Retry logic: Check if wx.rc exists, retry up to 10 times with a 5-second delay
     let mut retry_count = 0;
