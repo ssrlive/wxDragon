@@ -40,6 +40,9 @@ WXD_EXPORTED int wxd_XmlResource_GetXRCID(const char* name);
 // Find a child window by XRC name
 WXD_EXPORTED wxd_Window_t* wxd_Window_FindWindowByXRCName(wxd_Window_t* parent, const char* xrc_name);
 
+// Initialize platform-aware StaticBitmap handler for XRC files
+WXD_EXPORTED void wxd_XmlResource_InitPlatformAwareStaticBitmapHandler(wxd_XmlResource_t* resource);
+
 #ifdef __cplusplus
 }
 #endif
