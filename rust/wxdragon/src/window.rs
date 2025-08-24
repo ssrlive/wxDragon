@@ -1369,10 +1369,6 @@ pub trait WxWidget {
         return handle_ptr;
     }
 
-    // pub unsafe fn get_handle(&self) -> *mut std::ffi::c_void {
-    //     ffi::wxd_Window_GetHandle(self)
-    // }
-
 }
 
 /// Trait for widgets that can be cast from a Window using class name matching
