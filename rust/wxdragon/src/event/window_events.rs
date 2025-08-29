@@ -200,7 +200,6 @@ impl KeyboardEvent {
     pub fn get_unicode_key(&self) -> Option<i32> {
         self.event.get_unicode_key()
     }
-
 }
 
 /// Window size events

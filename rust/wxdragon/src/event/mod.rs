@@ -751,7 +751,6 @@ impl Event {
         }
     }
 
-
     /// Gets the integer value associated with a command event.
     pub fn get_int(&self) -> Option<i32> {
         if self.0.is_null() {

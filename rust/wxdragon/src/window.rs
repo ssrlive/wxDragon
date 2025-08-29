@@ -1358,7 +1358,7 @@ pub trait WxWidget {
     /// # Safety
     /// The returned pointer should not be used to modify the window and may
     /// only be valid for the lifetime of this `Window` instance.
-    /// 
+    ///
     fn get_handle(&self) -> *mut std::ffi::c_void {
         let handle = self.handle_ptr();
         if handle.is_null() {
@@ -1368,7 +1368,6 @@ pub trait WxWidget {
         let handle_ptr = unsafe { ffi::wxd_Window_GetHandle(handle) };
         return handle_ptr;
     }
-
 }
 
 /// Trait for widgets that can be cast from a Window using class name matching
