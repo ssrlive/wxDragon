@@ -1364,9 +1364,7 @@ pub trait WxWidget {
         if handle.is_null() {
             return std::ptr::null_mut();
         }
-
-        let handle_ptr = unsafe { ffi::wxd_Window_GetHandle(handle) };
-        return handle_ptr;
+        unsafe { ffi::wxd_Window_GetHandle(handle) }
     }
 }
 

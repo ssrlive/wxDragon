@@ -190,7 +190,7 @@ impl Frame {
 
     /// Return internal window
     pub fn get_window(&self) -> Window {
-        return self.window;
+        self.window
     }
 
     /// Sets the frame's title.
