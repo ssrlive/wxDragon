@@ -554,6 +554,32 @@ WXD_EXPORTED wxd_Window_t* wxd_Window_GetCapture() {
     return reinterpret_cast<wxd_Window_t*>(captured_window);
 }
 
+// --- Painting The Window ---
+WXD_EXPORTED void wxd_Window_Freeze(wxd_Window_t* window)
+{
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Freeze();
+    }
+}
+
+WXD_EXPORTED void wxd_Window_Thaw(wxd_Window_t* window)
+{
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        wx_window->Thaw();
+    }
+}
+
+WXD_EXPORTED bool wxd_Window_IsFrozen(wxd_Window_t* window)
+{
+    wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
+    if (wx_window) {
+        return wx_window->IsFrozen();
+    }
+    return false;
+}
+
 // --- Text Measurement Functions ---
 WXD_EXPORTED wxd_Size wxd_Window_GetTextExtent(wxd_Window_t* window, const char* text) {
     wxWindow* wx_window = reinterpret_cast<wxWindow*>(window);
@@ -703,20 +729,19 @@ WXD_EXPORTED bool wxd_Window_IsPositionVisible(wxd_Window_t* window, int64_t pos
 
     // For TextCtrl, we need to estimate visibility
     if (wxTextCtrl* text_ctrl = wxDynamicCast(wx_window, wxTextCtrl)) {
-        // Get the first and last visible positions (approximate)
-        long x, y;
-        text_ctrl->PositionToXY(static_cast<long>(position), &x, &y);
-        
         // Check if the position is within the visible area
         wxSize client_size = text_ctrl->GetClientSize();
-        wxFont font = text_ctrl->GetFont();
+        int scroll_pos = text_ctrl->GetScrollPos(wxVERTICAL);
         int char_height = text_ctrl->GetCharHeight();
         int lines_visible = client_size.y / char_height;
         
         // This is a rough approximation - for exact visibility checking,
         // more sophisticated logic would be needed
-        long first_visible = text_ctrl->XYToPosition(0, 0);
-        long last_visible = text_ctrl->XYToPosition(0, lines_visible);
+        long first_visible = text_ctrl->XYToPosition(0, scroll_pos);
+        long last_visible = text_ctrl->XYToPosition(0, scroll_pos + lines_visible);
+        if (last_visible < 0) {
+            last_visible = text_ctrl->GetLastPosition();
+        }
         
         return position >= first_visible && position <= last_visible;
     }
