@@ -1349,6 +1349,23 @@ pub trait WxWidget {
 
     // Other common methods (SetSize, GetSize, etc.) can be added here
     // if corresponding wxd_Window_* functions are added to the C API.
+
+    /// Gets the native handle of the window (platform-specific).
+    ///
+    /// # Returns
+    /// A raw pointer to the native window, or null if not available
+    ///
+    /// # Safety
+    /// The returned pointer should not be used to modify the window and may
+    /// only be valid for the lifetime of this `Window` instance.
+    ///
+    fn get_handle(&self) -> *mut std::ffi::c_void {
+        let handle = self.handle_ptr();
+        if handle.is_null() {
+            return std::ptr::null_mut();
+        }
+        unsafe { ffi::wxd_Window_GetHandle(handle) }
+    }
 }
 
 /// Trait for widgets that can be cast from a Window using class name matching
