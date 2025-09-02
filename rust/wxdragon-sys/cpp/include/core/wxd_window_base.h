@@ -93,6 +93,11 @@ WXD_EXPORTED void wxd_Window_ReleaseMouse(wxd_Window_t* window);
 WXD_EXPORTED bool wxd_Window_HasCapture(wxd_Window_t* window);
 WXD_EXPORTED wxd_Window_t* wxd_Window_GetCapture(); // Static function
 
+// --- Painting The Window ---
+WXD_EXPORTED void wxd_Window_Freeze(wxd_Window_t* window);
+WXD_EXPORTED void wxd_Window_Thaw(wxd_Window_t* window);
+WXD_EXPORTED bool wxd_Window_IsFrozen(wxd_Window_t* window);
+
 // --- Text Measurement Functions ---
 WXD_EXPORTED wxd_Size wxd_Window_GetTextExtent(wxd_Window_t* window, const char* text);
 WXD_EXPORTED void wxd_Window_GetFullTextExtent(wxd_Window_t* window, const char* text, wxd_Size* size, int* descent, int* external_leading, wxd_Font_t* font);

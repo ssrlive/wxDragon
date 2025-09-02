@@ -1088,6 +1088,34 @@ pub trait WxWidget {
         }
     }
 
+    // --- Painting The Window ---
+
+    /// Freeze the window: don't redraw it until it is thawed
+    fn freeze(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Freeze(handle) }
+        }
+    }
+
+    /// Thaw the window: redraw it after it had been frozen
+    fn thaw(&self) {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_Thaw(handle) }
+        }
+    }
+
+    /// Return true if window had been frozen and not unthawed yet
+    fn is_frozen(&self) -> bool {
+        let handle = self.handle_ptr();
+        if !handle.is_null() {
+            unsafe { ffi::wxd_Window_IsFrozen(handle) }
+        } else {
+            false
+        }
+    }
+
     // --- Text Measurement ---
 
     /// Gets the dimensions of the string as it would be drawn on the window with the currently selected font.
