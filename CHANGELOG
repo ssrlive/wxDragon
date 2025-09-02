@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.23
 
 ### New Features
 - **WxWidget Freeze/Thaw Support**: Added freeze() and thaw() methods to WxWidget trait for improved performance during bulk updates
