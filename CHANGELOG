@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+### New Features
+- **WxWidget Freeze/Thaw Support**: Added freeze() and thaw() methods to WxWidget trait for improved performance during bulk updates
+  - Prevents flicker and improves responsiveness when making multiple UI changes
+  - Automatically suspends window redraws until thaw() is called
+  - Useful for bulk operations like populating large lists or complex layout changes
+
+### Enhancements
+- **Frame Widget Enhancement**: Added access to internal window in Frame widget
+  - Enables advanced window manipulation and integration with platform-specific APIs
+  - Provides access to underlying wxWindow for specialized operations
+- **Keyboard Event Support**: Added GetUnicodeKey() method to keyboard events
+  - Better Unicode character handling in key events
+  - Improved international keyboard support
+- **Window API Extensions**: Added wxWindow::GetHandle() method for native window handle access
+  - Enables integration with platform-specific windowing systems
+  - Provides access to HWND on Windows, NSWindow on macOS, GtkWidget on Linux
+
+### Bug Fixes
+- **TextCtrl Position Visibility**: Fixed wxd_Window_IsPositionVisible() implementation for TextCtrl
+  - Corrected position visibility checking for text controls
+  - Improved text control scrolling and positioning behavior
+- **Code Quality**: Resolved cargo clippy warnings and formatting issues
+  - Improved code consistency and maintainability
+  - Enhanced build process reliability
+
+### Contributors
+- @Merisy-Thing - Freeze/Thaw functionality
+- @lologor - Window handle API and Frame enhancements
+
 ## 0.8.22
 
 - Fix "stc,xrc,aui" features build on windows and linux, add github CI to verify the cross-platform feature-enabled build
