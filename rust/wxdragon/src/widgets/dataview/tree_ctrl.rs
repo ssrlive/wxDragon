@@ -118,6 +118,13 @@ impl DataViewTreeCtrl {
         }
     }
 
+    /// Remove all columns
+    pub fn clear_columns(&self) -> bool {
+        unsafe {
+            ffi::wxd_DataViewCtrl_ClearColumns(self.handle_ptr())
+        }
+    }
+
     /// Gets the column that currently displays the expander buttons.
     pub fn get_expander_column(&self) -> Option<DataViewColumn> {
         unsafe {
