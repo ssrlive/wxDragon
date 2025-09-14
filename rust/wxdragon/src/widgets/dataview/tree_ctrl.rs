@@ -325,9 +325,10 @@ impl DataViewTreeCtrl {
             if c_str.is_null() {
                 String::new()
             } else {
-                let rust_string = CString::from_raw(c_str as *mut i8)
-                    .into_string()
-                    .unwrap_or_default();
+                // Use CStr::from_ptr to borrow the string, then convert to owned String
+                let c_str_borrowed = std::ffi::CStr::from_ptr(c_str);
+                let rust_string = c_str_borrowed.to_string_lossy().into_owned();
+                // Now free the C string using the proper FFI function
                 ffi::wxd_free_string(c_str as *mut i8);
                 rust_string
             }
@@ -428,6 +429,53 @@ impl DataViewTreeCtrl {
                 Some(ImageList::from_ptr_unowned(raw_ptr)) // Use unowned constructor
             }
         }
+    }
+
+    // --- Selection Methods ---
+    /// Gets the currently selected item.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing the selected item, or `None` if no item is selected.
+    pub fn get_selection(&self) -> Option<DataViewItem> {
+        // For DataViewTreeCtrl, use GetSelections and take the first item
+        // This works around issues with GetSelection on tree controls
+        let selections = self.get_selections();
+        selections.into_iter().next()
+    }
+
+    /// Gets all selected items.
+    ///
+    /// # Returns
+    ///
+    /// A vector of selected items.
+    pub fn get_selections(&self) -> Vec<DataViewItem> {
+        // Use the inherited method through deref - this is more efficient than reimplementing
+        let count = unsafe { ffi::wxd_DataViewCtrl_GetSelectedItemsCount(self.handle_ptr()) };
+        if count == 0 {
+            return Vec::new();
+        }
+
+        let mut items = Vec::with_capacity(count as usize);
+        let mut items_raw = Vec::with_capacity(count as usize);
+        items_raw.resize(
+            count as usize,
+            ffi::wxd_DataViewItem_t {
+                id: std::ptr::null_mut(),
+            },
+        );
+
+        unsafe {
+            ffi::wxd_DataViewCtrl_GetSelections(self.handle_ptr(), items_raw.as_mut_ptr(), count);
+
+            for raw_item in items_raw {
+                if !raw_item.id.is_null() {
+                    items.push(DataViewItem::from_raw(raw_item));
+                }
+            }
+        }
+
+        items
     }
 
     // TODO: Add event binding. This would re-introduce EventType, WxEvtHandler, and potentially CommandEvent.

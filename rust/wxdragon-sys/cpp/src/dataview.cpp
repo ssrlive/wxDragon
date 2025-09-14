@@ -959,17 +959,39 @@ WXD_EXPORTED uint32_t wxd_DataViewCtrl_GetSelectedItemsCount(wxd_Window_t* self)
     return ctrl->GetSelectedItemsCount();
 }
 
+WXD_EXPORTED wxd_DataViewItem_t wxd_DataViewCtrl_GetSelection(wxd_Window_t* self) {
+    wxd_DataViewItem_t result = {nullptr};
+    wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
+    if (!ctrl) return result;
+
+    wxDataViewItem item = ctrl->GetSelection();
+
+    // Use the same pattern as FromWxDVI in dataviewtreectrl.cpp
+    if (!item.IsOk()) {
+        return result; // Return a wxd_DataViewItem_t with a null id
+    }
+    wxDataViewItem* heap_item = new wxDataViewItem(item);
+    result.id = reinterpret_cast<void*>(heap_item);
+    return result;
+}
+
 WXD_EXPORTED void wxd_DataViewCtrl_GetSelections(wxd_Window_t* self, wxd_DataViewItem_t* items, uint32_t max_count) {
     wxDataViewCtrl* ctrl = reinterpret_cast<wxDataViewCtrl*>(self);
     if (!ctrl || !items || max_count == 0) return;
 
     wxDataViewItemArray selections;
     ctrl->GetSelections(selections);
-    
+
     uint32_t count = std::min(max_count, static_cast<uint32_t>(selections.GetCount()));
-    
+
     for (uint32_t i = 0; i < count; i++) {
-        items[i].id = selections[i].GetID();
+        // Use the same pattern as FromWxDVI in dataviewtreectrl.cpp
+        if (!selections[i].IsOk()) {
+            items[i].id = nullptr;
+        } else {
+            wxDataViewItem* heap_item = new wxDataViewItem(selections[i]);
+            items[i].id = reinterpret_cast<void*>(heap_item);
+        }
     }
 }
 

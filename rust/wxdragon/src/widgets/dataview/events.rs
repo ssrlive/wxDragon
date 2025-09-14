@@ -89,10 +89,20 @@ impl DataViewEventData {
 
     /// Get the item that was affected by this event (for tree views)
     pub fn get_item(&self) -> Option<DataViewItem> {
-        self.get_row().map(|_| {
-            // FIXME: We need to add proper support for getting DataViewItem from events
-            DataViewItem::new_invalid()
-        })
+        if self.event.is_null() {
+            return None;
+        }
+
+        unsafe {
+            let item_data = ffi::wxd_DataViewEvent_GetItem(self.event.0);
+            if item_data.id.is_null() {
+                None
+            } else {
+                // The C++ function returns a wxd_DataViewItem_t by value
+                // The DataViewItem::from_raw will take ownership and handle cleanup via Drop trait
+                Some(DataViewItem::from_raw(item_data))
+            }
+        }
     }
 
     /// Get the column index involved in this event

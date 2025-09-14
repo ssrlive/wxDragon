@@ -64,6 +64,7 @@ WXD_EXPORTED void wxd_DataViewCtrl_Unselect(wxd_Window_t* self, wxd_DataViewItem
 WXD_EXPORTED void wxd_DataViewCtrl_SelectAll(wxd_Window_t* self);
 WXD_EXPORTED bool wxd_DataViewCtrl_IsSelected(wxd_Window_t* self, wxd_DataViewItem_t item);
 WXD_EXPORTED uint32_t wxd_DataViewCtrl_GetSelectedItemsCount(wxd_Window_t* self);
+WXD_EXPORTED wxd_DataViewItem_t wxd_DataViewCtrl_GetSelection(wxd_Window_t* self);
 WXD_EXPORTED void wxd_DataViewCtrl_GetSelections(wxd_Window_t* self, wxd_DataViewItem_t* items, uint32_t max_count);
 WXD_EXPORTED void wxd_DataViewCtrl_SetSelections(wxd_Window_t* self, const wxd_DataViewItem_t* items, uint32_t count);
 

@@ -647,6 +647,20 @@ impl DataViewCtrl {
         }
     }
 
+    /// Gets the currently selected item.
+    ///
+    /// # Returns
+    ///
+    /// An `Option` containing the selected item, or `None` if no item is selected.
+    pub fn get_selection(&self) -> Option<DataViewItem> {
+        let item_raw = unsafe { ffi::wxd_DataViewCtrl_GetSelection(self.window.handle_ptr()) };
+        if !item_raw.id.is_null() {
+            Some(unsafe { DataViewItem::from_raw(item_raw) })
+        } else {
+            None
+        }
+    }
+
     /// Sets the currently focused item.
     ///
     /// # Parameters

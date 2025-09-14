@@ -1179,6 +1179,27 @@ WXD_EXPORTED bool wxd_DataViewEvent_IsEditCancelled(wxd_Event_t* event)
     return dve->IsEditCancelled();
 }
 
+// Header: WXD_EXPORTED wxd_DataViewItem_t wxd_DataViewEvent_GetItem(wxd_Event_t* event);
+WXD_EXPORTED wxd_DataViewItem_t wxd_DataViewEvent_GetItem(wxd_Event_t* event)
+{
+    wxd_DataViewItem_t result = {nullptr};
+    if (!event) return result;
+
+    wxEvent* wx_event = reinterpret_cast<wxEvent*>(event);
+    wxDataViewEvent* dve = dynamic_cast<wxDataViewEvent*>(wx_event);
+    if (!dve) return result;
+
+    wxDataViewItem item = dve->GetItem();
+
+    // Use the same pattern as FromWxDVI in dataviewtreectrl.cpp
+    if (!item.IsOk()) {
+        return result; // Return a wxd_DataViewItem_t with a null id
+    }
+    wxDataViewItem* heap_item = new wxDataViewItem(item);
+    result.id = reinterpret_cast<void*>(heap_item);
+    return result;
+}
+
 // --- Idle Event Implementation ---
 
 WXD_EXPORTED void wxd_IdleEvent_RequestMore(wxd_Event_t* event, bool needMore) {

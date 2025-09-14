@@ -100,6 +100,42 @@ pub fn create_dataview_tree_tab(parent: &impl WxWidget) -> DataViewTreeTabContro
     dvc_tree.expand(&cat_b);
     dvc_tree.expand(&sub_cat_b1);
 
+    // Add event handlers to test the fixes
+    dvc_tree.on_selection_changed({
+        let dvc_tree_clone = dvc_tree.clone();
+        move |event| {
+            println!("=== Selection changed event fired! ===");
+
+            // Test get_item() from event - this should now work
+            if let Some(item) = event.get_item() {
+                println!("✓ Event item retrieved: {:?}", item);
+                let text = dvc_tree_clone.get_item_text(&item);
+                println!("✓ Event item text: '{}'", text);
+
+                // Now test get_selection() - this is what we're trying to fix
+                match dvc_tree_clone.get_selection() {
+                    Some(selected_item) => {
+                        println!("✓ Selection retrieved: {:?}", selected_item);
+                        let selected_text = dvc_tree_clone.get_item_text(&selected_item);
+                        println!("✓ Selected item text: '{}'", selected_text);
+
+                        // Check if they're the same by comparing their texts
+                        if text == selected_text {
+                            println!("✓ Event item and selection match!");
+                        } else {
+                            println!("✗ Event item and selection are different");
+                        }
+                    }
+                    None => {
+                        println!("✗ get_selection() returned None");
+                    }
+                }
+            } else {
+                println!("✗ No item in event");
+            }
+        }
+    });
+
     sizer.add(&dvc_tree, 1, SizerFlag::All | SizerFlag::Expand, 10);
     panel.set_sizer(sizer, true);
 
