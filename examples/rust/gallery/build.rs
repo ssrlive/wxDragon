@@ -46,9 +46,8 @@ fn embed_wx_resources(wx_version: &str, target: &str) {
         .find(|p| p.file_name().map(|n| n == "target").unwrap_or(false))
         .expect("Could not find target directory");
 
-    // Look for wxWidgets directory - try both debug and release profiles
-    let profile = std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
-    let wxwidgets_pattern = format!("wxwidgets-{wx_version}-{target}-{profile}");
+    // Look for wxWidgets directory
+    let wxwidgets_pattern = format!("wxwidgets-{wx_version}");
     let wxwidgets_dir = target_dir.join(&wxwidgets_pattern);
     let wx_rc_path = wxwidgets_dir
         .join("include")
@@ -80,11 +79,15 @@ fn embed_wx_resources(wx_version: &str, target: &str) {
         return;
     }
 
-    // Choose the appropriate resource compiler
-    let windres = if target.contains("gnu") {
-        "x86_64-w64-mingw32-windres" // For MinGW cross-compilation
-    } else {
-        "windres" // For native Windows or MSVC
+    let windres = match which::which("windres") {
+        Ok(path) => path,
+        Err(_) => match which::which("x86_64-w64-mingw32-windres") {
+            Ok(path) => path,
+            Err(_) => {
+                println!("cargo:warning=windres not found in PATH");
+                return;
+            }
+        },
     };
 
     // Compile the .rc file to .res
