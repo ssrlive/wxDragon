@@ -129,7 +129,7 @@ struct EnhancedCacheEntry {
 }
 
 /// PHASE 1.3: LRU-managed size cache with automatic eviction
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct SizeCache {
     /// Cache entries keyed by item index
     entries: HashMap<usize, EnhancedCacheEntry>,
@@ -445,6 +445,7 @@ struct BatchExecutionContext<'a> {
 }
 
 /// Internal state for the virtual list
+#[derive(Clone)]
 pub struct VirtualListState {
     // Configuration
     layout_mode: VirtualListLayoutMode,
@@ -1504,7 +1505,9 @@ custom_widget!(
                 );
             }
 
-            state.borrow_mut().update_visible_items(&panel_resize);
+            let mut cloned_state = state.borrow().clone();
+            cloned_state.update_visible_items(&panel_resize);
+            *state.borrow_mut() = cloned_state;
 
             // Update scrollbars after viewport size change
             update_scrollbars_resize();
@@ -1589,12 +1592,14 @@ custom_widget!(
                                     let last_item_index = total_items - 1;
 
                                     // Force measurement of the last item to get its actual size
-                                    let last_item_size = state.borrow_mut().measure_item_size(
+                                    let mut cloned_state = state.borrow().clone();
+                                    let last_item_size = cloned_state.measure_item_size(
                                         last_item_index,
                                         data_source.as_ref(),
                                         item_renderer.as_ref(),
                                         &panel_scroll_wheel,
                                     );
+                                    *state.borrow_mut() = cloned_state;
 
                                     // Calculate total content size up to and including the last item
                                     let mut total_height = 0;
@@ -1636,7 +1641,10 @@ custom_widget!(
                     let old_y = state.borrow().scroll_position.y;
                     if new_scroll_y != old_y {
                         state.borrow_mut().scroll_position.y = new_scroll_y;
-                        state.borrow_mut().update_visible_items(&panel_scroll_wheel);
+
+                        let mut cloned_state = state.borrow().clone();
+                        cloned_state.update_visible_items(&panel_scroll_wheel);
+                        *state.borrow_mut() = cloned_state;
 
                         // Use central scrollbar update function for consistent behavior
                         update_scrollbars_wheel();
@@ -1653,7 +1661,10 @@ custom_widget!(
                     let old_x = state.borrow().scroll_position.x;
                     if new_scroll_x != old_x {
                         state.borrow_mut().scroll_position.x = new_scroll_x;
-                        state.borrow_mut().update_visible_items(&panel_scroll_wheel);
+
+                        let mut cloned_state = state.borrow().clone();
+                        cloned_state.update_visible_items(&panel_scroll_wheel);
+                        *state.borrow_mut() = cloned_state;
 
                         // Use central scrollbar update function for consistent behavior
                         update_scrollbars_wheel();
@@ -1696,7 +1707,10 @@ custom_widget!(
                         let old_y = state.borrow().scroll_position.y;
                         if new_scroll_y != old_y {
                             state.borrow_mut().scroll_position.y = new_scroll_y;
-                            state.borrow_mut().update_visible_items(&panel_scroll);
+
+                            let mut cloned_state = state.borrow().clone();
+                            cloned_state.update_visible_items(&panel_scroll);
+                            *state.borrow_mut() = cloned_state;
 
                             // Use central scrollbar update function for consistent behavior
                             update_scrollbars_key();
@@ -1713,7 +1727,10 @@ custom_widget!(
                         let old_x = state.borrow().scroll_position.x;
                         if new_scroll_x != old_x {
                             state.borrow_mut().scroll_position.x = new_scroll_x;
-                            state.borrow_mut().update_visible_items(&panel_scroll);
+
+                            let mut cloned_state = state.borrow().clone();
+                            cloned_state.update_visible_items(&panel_scroll);
+                            *state.borrow_mut() = cloned_state;
 
                             // Use central scrollbar update function for consistent behavior
                             update_scrollbars_key();
@@ -1754,12 +1771,14 @@ custom_widget!(
                                 let last_item_index = total_items - 1;
 
                                 // Force measurement of the last item to get its actual size
-                                let last_item_size = state.borrow_mut().measure_item_size(
+                                let mut cloned_state = state.borrow().clone();
+                                let last_item_size = cloned_state.measure_item_size(
                                     last_item_index,
                                     data_source.as_ref(),
                                     item_renderer.as_ref(),
                                     &panel_vscroll,
                                 );
+                                *state.borrow_mut() = cloned_state;
 
                                 // Calculate total content size up to and including the last item
                                 let mut total_height = 0;
@@ -1787,7 +1806,9 @@ custom_widget!(
                                 // This ensures mouse wheel scrolling uses the same bounds as scrollbar dragging
                                 state.borrow_mut().total_content_size.height = padded_total_height;
 
-                                state.borrow_mut().update_visible_items(&panel_vscroll);
+                                let mut cloned_state = state.borrow().clone();
+                                cloned_state.update_visible_items(&panel_vscroll);
+                                *state.borrow_mut() = cloned_state;
                             }
                         }
                     } else {
@@ -1802,7 +1823,10 @@ custom_widget!(
                         let old_y = state.borrow().scroll_position.y;
                         if target_scroll_y != old_y {
                             state.borrow_mut().scroll_position.y = target_scroll_y;
-                            state.borrow_mut().update_visible_items(&panel_vscroll);
+
+                            let mut cloned_state = state.borrow().clone();
+                            cloned_state.update_visible_items(&panel_vscroll);
+                            *state.borrow_mut() = cloned_state;
                         }
                     }
 
@@ -1846,7 +1870,10 @@ custom_widget!(
                     let old_x = state.borrow().scroll_position.x;
                     if initial_scroll_x != old_x {
                         state.borrow_mut().scroll_position.x = initial_scroll_x;
-                        state.borrow_mut().update_visible_items(&panel_hscroll);
+
+                        let mut cloned_state = state.borrow().clone();
+                        cloned_state.update_visible_items(&panel_hscroll);
+                        *state.borrow_mut() = cloned_state;
 
                         // CRITICAL FIX: Force immediate content size recalculation with fresh measurements
                         // The issue was that update_visible_items measures items but cache update happens later
@@ -1939,7 +1966,9 @@ impl VirtualList {
     /// Manually trigger an initial update to ensure items become visible
     fn trigger_initial_update(&self) {
         // Force item creation without changing the viewport size (it's already set to content area)
-        self.config().state.borrow_mut().update_visible_items(self);
+        let mut cloned_state = self.config().state.borrow().clone();
+        cloned_state.update_visible_items(self);
+        *self.config().state.borrow_mut() = cloned_state;
 
         // Force a redraw
         self.refresh(false, None);
