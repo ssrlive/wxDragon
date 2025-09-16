@@ -399,6 +399,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "generic_dialog_test"
+version = "0.1.0"
+dependencies = [
+ "wxdragon",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
