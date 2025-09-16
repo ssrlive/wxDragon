@@ -1543,7 +1543,8 @@ custom_widget!(
 
             let state = state_scroll_wheel.clone();
 
-            match state.borrow().layout_mode {
+            let layout_mode = state.borrow().layout_mode;
+            match layout_mode {
                 VirtualListLayoutMode::Vertical => {
                     let max_scroll = (state.borrow().total_content_size.height - state.borrow().viewport_size.height).max(0);
                     let tentative_scroll_y = (state.borrow().scroll_position.y + scroll_amount)
@@ -1632,7 +1633,8 @@ custom_widget!(
                         tentative_scroll_y
                     };
 
-                    if new_scroll_y != state.borrow().scroll_position.y {
+                    let old_y = state.borrow().scroll_position.y;
+                    if new_scroll_y != old_y {
                         state.borrow_mut().scroll_position.y = new_scroll_y;
                         state.borrow_mut().update_visible_items(&panel_scroll_wheel);
 
@@ -1648,7 +1650,8 @@ custom_widget!(
                         .max(0)
                         .min(max_scroll);
 
-                    if new_scroll_x != state.borrow().scroll_position.x {
+                    let old_x = state.borrow().scroll_position.x;
+                    if new_scroll_x != old_x {
                         state.borrow_mut().scroll_position.x = new_scroll_x;
                         state.borrow_mut().update_visible_items(&panel_scroll_wheel);
 
@@ -1682,14 +1685,16 @@ custom_widget!(
             if let Some(delta) = scroll_delta {
                 let state = state_scroll.clone();
 
-                match state.borrow().layout_mode {
+                let layout_mode = state.borrow().layout_mode;
+                match layout_mode {
                     VirtualListLayoutMode::Vertical => {
                         let max_scroll = (state.borrow().total_content_size.height - state.borrow().viewport_size.height).max(0);
                         let new_scroll_y = (state.borrow().scroll_position.y + delta)
                             .max(0)
                             .min(max_scroll);
 
-                        if new_scroll_y != state.borrow().scroll_position.y {
+                        let old_y = state.borrow().scroll_position.y;
+                        if new_scroll_y != old_y {
                             state.borrow_mut().scroll_position.y = new_scroll_y;
                             state.borrow_mut().update_visible_items(&panel_scroll);
 
@@ -1705,7 +1710,8 @@ custom_widget!(
                             .max(0)
                             .min(max_scroll);
 
-                        if new_scroll_x != state.borrow().scroll_position.x {
+                        let old_x = state.borrow().scroll_position.x;
+                        if new_scroll_x != old_x {
                             state.borrow_mut().scroll_position.x = new_scroll_x;
                             state.borrow_mut().update_visible_items(&panel_scroll);
 
@@ -1793,7 +1799,8 @@ custom_widget!(
                             0
                         };
 
-                        if target_scroll_y != state.borrow().scroll_position.y {
+                        let old_y = state.borrow().scroll_position.y;
+                        if target_scroll_y != old_y {
                             state.borrow_mut().scroll_position.y = target_scroll_y;
                             state.borrow_mut().update_visible_items(&panel_vscroll);
                         }
@@ -1836,7 +1843,8 @@ custom_widget!(
                         0
                     };
 
-                    if initial_scroll_x != state.borrow().scroll_position.x {
+                    let old_x = state.borrow().scroll_position.x;
+                    if initial_scroll_x != old_x {
                         state.borrow_mut().scroll_position.x = initial_scroll_x;
                         state.borrow_mut().update_visible_items(&panel_hscroll);
 
@@ -1845,7 +1853,8 @@ custom_widget!(
                         let total_items =  state.borrow().data_source.as_ref().map(|data_source| data_source.get_item_count());
                         let estimated_item_size = state.borrow().internal_params.estimated_item_width;
                         if let Some(total_items) = total_items {
-                            state.borrow_mut().total_content_size = state.borrow().calculate_total_content_size_progressive(total_items, estimated_item_size);
+                            let new_content_size = state.borrow().calculate_total_content_size_progressive(total_items, estimated_item_size);
+                            state.borrow_mut().total_content_size = new_content_size;
                         }
                         // Now recalculate scroll position with the corrected content size
                         let new_max_scroll = (state.borrow().total_content_size.width - state.borrow().viewport_size.width).max(0);
@@ -2023,8 +2032,7 @@ impl VirtualList {
     /// Get the total content size
     pub fn get_total_content_size(&self) -> Size {
         // Return the cached total content size or a default
-        let state = self.config().state.borrow();
-        state.total_content_size
+        self.config().state.borrow().total_content_size
     }
 
     /// PHASE 3: Get item context for a panel with error handling (replaces global registry access)
